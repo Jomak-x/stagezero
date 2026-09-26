@@ -1,0 +1,2431 @@
+{
+  "scope": {
+    "telemetry": ".runtime/grounded-review/20260926-121449/telemetry-1790439430968415000.json",
+    "telemetry_sha256": "53dd242c2071b9b7ce8681913e81ee632d96e6547e2a239f73243e157bc3b6f4",
+    "saved_clip_frames": 1028,
+    "source_fps": 20,
+    "motion_seconds": 51.4,
+    "video_duration_ms": 63751,
+    "native_positions_rotations_modified": false,
+    "mesh_vertices": 33550,
+    "mesh_faces": 56210,
+    "rig_mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+    "source_scene": {
+      "path": "review/scene-scale/market-generated.json",
+      "sha256": "35d841555e0c8fb822af77a5da288b24d963ac5d901afc71763be952023d6e8d",
+      "generation_metadata_path": "review/scene-scale/market/metadata.json",
+      "generation_metadata_sha256": "76370ab0014959c23cb91891949e878a8ee484b6ee80a5feeeae8c8c348aa185",
+      "asset_model": "gpt-5-6-sol",
+      "generated_assets": 8,
+      "layout": "captured deterministic market-set composition with model-generated props"
+    },
+    "limitations": [
+      "Per-source-frame meshes measured at20Hz; no continuous-time triangle collision test.",
+      "Whole deformed character AABB against measured generated prop AABBs is conservative; positive separation proves no mesh overlap at those sampled frames.",
+      "Source feet and fixed sole vertices give inferred contact, not forces or foot locking.",
+      "Telemetry marks continuation boundaries after drawing; it does not trace every video frame.",
+      "Semantic statistics are descriptive and require visual judgment; no aggregate quality passed label."
+    ],
+    "source_code_sha256": {
+      "grounded_character.py": "9cad85e830f486e2ef03dc64ffc92562f307652126b782fd754bddf98fbfea1f",
+      "grounded_scene.py": "eb764a43df13d1c1dc8c713ae35522e74ed45eeb236539341c9e6bc7fbbb4e75",
+      "grounded_web/main.js": "0d862d0d8300a124e2ad8081ff9d0730d398d96dc51cc5a8c6c40b3bd4316c2a",
+      "experiments/grounded_quality.py": "3184e72796c2640ace329768e682bb92b30f18ee92bd37059363826bb95c98bf"
+    },
+    "initial_clip": "grounded_assets/clips/core_martial_combo_8s.npz",
+    "fitted_correction": "Human17 canonical pelvis offset plus fixed floor translation +0.018591325618985285m; preserve_feet=True adds causal vertical boot clearance with fixed-length leg IK, unchanged pelvis/ankleXZ/airborne poses. preserve_wrists=False for this solo capture. This is a disclosed retarget correction, not a new native model output.",
+    "original_48_second_audit_unchanged": "review/grounded-motion/live-solo-audit.json"
+  },
+  "seams": [
+    {
+      "frame": 60,
+      "time_seconds": 3.0,
+      "result_clip_id": "aa9d9c5dfabb",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-bd0c15c9c3604bd6.npz",
+      "sha256": "2bffb1057424d5ae7a584ff98ac07d22a343d397827b37b6affb0d378a210435",
+      "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+      "recorded_seed": 1702,
+      "recorded_request_id": "grounded-bd0c15c9c3604bd6",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.1481201946735382,
+      "native_root_step_m": 0.01536885742098093,
+      "native_rotation_step_max_degrees": 29.088531494140625,
+      "fitted_joint_step_max_m": 0.15849899359014258,
+      "skinned_vertex_step_max_m": 0.17922690644897105,
+      "skinned_vertex_step_p95_m": 0.14860445969753658,
+      "native_nearby_step_max_m": 0.35328805446624756,
+      "native_velocity_change_at_boundary_max_m_s": 1.3656573295593262
+    },
+    {
+      "frame": 140,
+      "time_seconds": 7.0,
+      "result_clip_id": "63f5f2a17569",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-806cf900e2bf4215.npz",
+      "sha256": "d8a4f5e54f3024d680a9506721a79ae9b676a8114b9ca08215b5a8204a91b464",
+      "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+      "recorded_seed": 1703,
+      "recorded_request_id": "grounded-806cf900e2bf4215",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.16583113372325897,
+      "native_root_step_m": 0.03327050805091858,
+      "native_rotation_step_max_degrees": 17.467435836791992,
+      "fitted_joint_step_max_m": 0.1606789869435252,
+      "skinned_vertex_step_max_m": 0.17340742702724957,
+      "skinned_vertex_step_p95_m": 0.15900241919700855,
+      "native_nearby_step_max_m": 0.32543739676475525,
+      "native_velocity_change_at_boundary_max_m_s": 1.1482980251312256
+    },
+    {
+      "frame": 220,
+      "time_seconds": 11.0,
+      "result_clip_id": "0e647999a6c5",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-fd084d6109414127.npz",
+      "sha256": "ca48b8e14e72e14e973c9906442f9d1d4f5474710f3c516b974250689b3190a8",
+      "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+      "recorded_seed": 1704,
+      "recorded_request_id": "grounded-fd084d6109414127",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.1929892748594284,
+      "native_root_step_m": 0.04509323090314865,
+      "native_rotation_step_max_degrees": 24.671295166015625,
+      "fitted_joint_step_max_m": 0.18847092976558008,
+      "skinned_vertex_step_max_m": 0.1968831884294082,
+      "skinned_vertex_step_p95_m": 0.18056556047170086,
+      "native_nearby_step_max_m": 0.4300040006637573,
+      "native_velocity_change_at_boundary_max_m_s": 1.1679195165634155
+    },
+    {
+      "frame": 300,
+      "time_seconds": 15.0,
+      "result_clip_id": "8b6433b8a1fa",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-b7a21c7b0d3f4d84.npz",
+      "sha256": "51cd41980892bc3a12c8e41e96db9d2b4a93e9a3987f889e4112edd790de0b0c",
+      "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+      "recorded_seed": 1705,
+      "recorded_request_id": "grounded-b7a21c7b0d3f4d84",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.17554619908332825,
+      "native_root_step_m": 0.041202522814273834,
+      "native_rotation_step_max_degrees": 24.659379959106445,
+      "fitted_joint_step_max_m": 0.18678731617495606,
+      "skinned_vertex_step_max_m": 0.19251031314828573,
+      "skinned_vertex_step_p95_m": 0.1453369216868575,
+      "native_nearby_step_max_m": 0.4244553744792938,
+      "native_velocity_change_at_boundary_max_m_s": 1.2359049320220947
+    },
+    {
+      "frame": 380,
+      "time_seconds": 19.0,
+      "result_clip_id": "0696b2baae63",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-5bc403a128dd4c6d.npz",
+      "sha256": "806fbf1b77e5114308923b3ed06d6ddcfe8ad925fea1a9071250dbbb17973620",
+      "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+      "recorded_seed": 1706,
+      "recorded_request_id": "grounded-5bc403a128dd4c6d",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.20207171142101288,
+      "native_root_step_m": 0.04668601602315903,
+      "native_rotation_step_max_degrees": 20.6695499420166,
+      "fitted_joint_step_max_m": 0.19626350342451723,
+      "skinned_vertex_step_max_m": 0.20386431312938733,
+      "skinned_vertex_step_p95_m": 0.18693068034019283,
+      "native_nearby_step_max_m": 0.44631463289260864,
+      "native_velocity_change_at_boundary_max_m_s": 1.1827447414398193
+    },
+    {
+      "frame": 424,
+      "time_seconds": 21.2,
+      "result_clip_id": "543f3441ebb3",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-75e8da46ff074034.npz",
+      "sha256": "9a9b535e58e25adbbfe6cceed3c74c383f049a45ded423b030d30b3f1d83f88e",
+      "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+      "recorded_seed": 1707,
+      "recorded_request_id": "grounded-75e8da46ff074034",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.05099518969655037,
+      "native_root_step_m": 0.00689307413995266,
+      "native_rotation_step_max_degrees": 5.30548095703125,
+      "fitted_joint_step_max_m": 0.04424793883975914,
+      "skinned_vertex_step_max_m": 0.050801566287713526,
+      "skinned_vertex_step_p95_m": 0.039763429125854316,
+      "native_nearby_step_max_m": 0.11334399878978729,
+      "native_velocity_change_at_boundary_max_m_s": 0.3878965973854065
+    },
+    {
+      "frame": 504,
+      "time_seconds": 25.2,
+      "result_clip_id": "75d85975ef0a",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-a75ae402da9a4743.npz",
+      "sha256": "5f318943d9a20dbf9183f48dcb2004fb3b25ed8df1badc05091f6b66f70c9e3f",
+      "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+      "recorded_seed": 1708,
+      "recorded_request_id": "grounded-a75ae402da9a4743",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.018203256651759148,
+      "native_root_step_m": 0.00405882066115737,
+      "native_rotation_step_max_degrees": 3.5732500553131104,
+      "fitted_joint_step_max_m": 0.018375932640367455,
+      "skinned_vertex_step_max_m": 0.02019552629622897,
+      "skinned_vertex_step_p95_m": 0.015803731196752158,
+      "native_nearby_step_max_m": 0.06119772046804428,
+      "native_velocity_change_at_boundary_max_m_s": 0.29531049728393555
+    },
+    {
+      "frame": 584,
+      "time_seconds": 29.2,
+      "result_clip_id": "992463fc3fa2",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-30f6e8a713f9414e.npz",
+      "sha256": "03869cb55c370fdaf30b5ae5049d8dd38a29c90806d14d6a8e8869cc33de985c",
+      "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+      "recorded_seed": 1709,
+      "recorded_request_id": "grounded-30f6e8a713f9414e",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.019081667065620422,
+      "native_root_step_m": 0.004708895459771156,
+      "native_rotation_step_max_degrees": 2.3015475273132324,
+      "fitted_joint_step_max_m": 0.016507752881140973,
+      "skinned_vertex_step_max_m": 0.022222308977764067,
+      "skinned_vertex_step_p95_m": 0.018917327468737113,
+      "native_nearby_step_max_m": 0.03572933375835419,
+      "native_velocity_change_at_boundary_max_m_s": 0.1541014164686203
+    },
+    {
+      "frame": 664,
+      "time_seconds": 33.2,
+      "result_clip_id": "d6ea237f5a05",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-45cfb32e1bbe44d5.npz",
+      "sha256": "43b137df67a865d778ce6baf8f1dff18c977a0aa6d4b13375ba8a38a8714e6dd",
+      "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+      "recorded_seed": 1710,
+      "recorded_request_id": "grounded-45cfb32e1bbe44d5",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.008366091176867485,
+      "native_root_step_m": 0.00694234250113368,
+      "native_rotation_step_max_degrees": 1.813157081604004,
+      "fitted_joint_step_max_m": 0.008632360108036988,
+      "skinned_vertex_step_max_m": 0.01038867932659602,
+      "skinned_vertex_step_p95_m": 0.008461925886204591,
+      "native_nearby_step_max_m": 0.03066912665963173,
+      "native_velocity_change_at_boundary_max_m_s": 0.1640859693288803
+    },
+    {
+      "frame": 744,
+      "time_seconds": 37.2,
+      "result_clip_id": "03a7e5d915ef",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-ce6cb14edd0e4169.npz",
+      "sha256": "c31637c24dc85b714aaef771655db7df65259b2b784e8aa149543fabe8ed7527",
+      "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+      "recorded_seed": 1711,
+      "recorded_request_id": "grounded-ce6cb14edd0e4169",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.018678059801459312,
+      "native_root_step_m": 0.005726151168346405,
+      "native_rotation_step_max_degrees": 2.7740345001220703,
+      "fitted_joint_step_max_m": 0.01681839115376035,
+      "skinned_vertex_step_max_m": 0.022284448646987334,
+      "skinned_vertex_step_p95_m": 0.01902281168318903,
+      "native_nearby_step_max_m": 0.07610917836427689,
+      "native_velocity_change_at_boundary_max_m_s": 0.20732426643371582
+    },
+    {
+      "frame": 788,
+      "time_seconds": 39.4,
+      "result_clip_id": "d0f46ff6c427",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-3fee41dadd3b4ddd.npz",
+      "sha256": "cdcb3bfedab6c2acbe3ba4f770b882bbf171ecce3cf578a1a3812819ad3d4c84",
+      "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+      "recorded_seed": 1712,
+      "recorded_request_id": "grounded-3fee41dadd3b4ddd",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.008719935081899166,
+      "native_root_step_m": 0.0010638309177011251,
+      "native_rotation_step_max_degrees": 1.0553615093231201,
+      "fitted_joint_step_max_m": 0.00785293328106008,
+      "skinned_vertex_step_max_m": 0.008289355663982348,
+      "skinned_vertex_step_p95_m": 0.007827933351686836,
+      "native_nearby_step_max_m": 0.008719935081899166,
+      "native_velocity_change_at_boundary_max_m_s": 0.17840811610221863
+    },
+    {
+      "frame": 868,
+      "time_seconds": 43.4,
+      "result_clip_id": "c4e63e9a7bc0",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-c293c357cbaa4dc0.npz",
+      "sha256": "4bab24315518cb3109608e920af5faf1f01788561ee6d4b8c0d2e1349b6da035",
+      "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+      "recorded_seed": 1713,
+      "recorded_request_id": "grounded-c293c357cbaa4dc0",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.0018237930489704013,
+      "native_root_step_m": 0.0006074450793676078,
+      "native_rotation_step_max_degrees": 0.5475120544433594,
+      "fitted_joint_step_max_m": 0.0017274317766100328,
+      "skinned_vertex_step_max_m": 0.001862555759135854,
+      "skinned_vertex_step_p95_m": 0.0013368374104462794,
+      "native_nearby_step_max_m": 0.004137861542403698,
+      "native_velocity_change_at_boundary_max_m_s": 0.04838334769010544
+    },
+    {
+      "frame": 948,
+      "time_seconds": 47.4,
+      "result_clip_id": "42d9d6588351",
+      "file": ".runtime/grounded-review/20260926-121449/grounded-1d4550a6f6ba4e5f.npz",
+      "sha256": "e57993bc7e2d0c19627b3216cce4ef38252f9abba215d2972c97944f6e4e2698",
+      "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+      "recorded_seed": 1714,
+      "recorded_request_id": "grounded-1d4550a6f6ba4e5f",
+      "retarget_options": {
+        "preserve_feet": true
+      },
+      "metadata_frames_match": true,
+      "parent_sha_matches": true,
+      "prefix_positions_bit_identical": true,
+      "prefix_rotations_bit_identical": true,
+      "prefix_features_bit_identical": true,
+      "fitted_prefix_positions_bit_identical": true,
+      "fitted_prefix_rotations_bit_identical": true,
+      "fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "parent_fixed_floor_offsets_m": [
+        0.018591325618985285
+      ],
+      "native_joint_step_max_m": 0.0030291166622191668,
+      "native_root_step_m": 0.0017529837787151337,
+      "native_rotation_step_max_degrees": 0.5821547508239746,
+      "fitted_joint_step_max_m": 0.0033315764767973956,
+      "skinned_vertex_step_max_m": 0.003869402900844936,
+      "skinned_vertex_step_p95_m": 0.002895548072478191,
+      "native_nearby_step_max_m": 0.01182983722537756,
+      "native_velocity_change_at_boundary_max_m_s": 0.03708008676767349
+    }
+  ],
+  "native": {
+    "schema": "core27",
+    "frames": 1028,
+    "actors_count": 1,
+    "fps": 20.0,
+    "sample_duration_seconds": 51.4,
+    "time_between_first_and_last_frame_seconds": 51.35,
+    "actors": [
+      {
+        "actor": 0,
+        "root_height_m": {
+          "samples": 1028,
+          "min": 0.6892638206481934,
+          "median": 0.8791658282279968,
+          "mean": 0.8673707714108642,
+          "p95": 0.912491324543953,
+          "max": 0.9916515350341797
+        },
+        "root_path_length_m": 9.746074619392964,
+        "root_net_displacement_m": 0.32859366455072825,
+        "root_speed_m_s": {
+          "samples": 1027,
+          "min": 0.0008634199826727509,
+          "median": 0.08997473494322161,
+          "mean": 0.18979697408749682,
+          "p95": 0.7346075813289991,
+          "max": 1.1900539325783395
+        },
+        "joint_step_m": {
+          "samples": 27729,
+          "min": 3.0072023769498754e-06,
+          "median": 0.005848479961558641,
+          "mean": 0.019450678037920395,
+          "p95": 0.08107378645581514,
+          "max": 0.4463146197620882
+        },
+        "feet": {
+          "right": {
+            "joint_index": 22,
+            "height_above_declared_floor_m": {
+              "samples": 1028,
+              "min": -0.00942741870880126,
+              "median": 0.007876197099685678,
+              "mean": 0.00931211178172888,
+              "p95": 0.02319085359573365,
+              "max": 0.053968498706817636
+            },
+            "below_floor_frames": 0,
+            "floor_proximity_frames": 1028,
+            "inferred_contact_intervals": 1006,
+            "inferred_contact_seconds": 50.3,
+            "horizontal_speed_during_inferred_contact_m_s": {
+              "samples": 1006,
+              "min": 0.00017721434227085795,
+              "median": 0.02319185375862113,
+              "mean": 0.06988503594751018,
+              "p95": 0.2031516882767556,
+              "max": 2.4182958614069068
+            },
+            "all_horizontal_speed_m_s": {
+              "samples": 1027,
+              "min": 0.00017721434227085795,
+              "median": 0.024311799237553257,
+              "mean": 0.08347777414779248,
+              "p95": 0.2761146212454802,
+              "max": 2.4182958614069068
+            },
+            "episodes": [
+              {
+                "first_frame": 0,
+                "last_frame": 48,
+                "duration_seconds": 2.4,
+                "path_drift_m": 0.19028707824002605,
+                "net_drift_m": 0.02920475648195807
+              },
+              {
+                "first_frame": 49,
+                "last_frame": 50,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.034504073053419855,
+                "net_drift_m": 0.034504073053419855
+              },
+              {
+                "first_frame": 52,
+                "last_frame": 119,
+                "duration_seconds": 3.35,
+                "path_drift_m": 0.2283735660385926,
+                "net_drift_m": 0.1014581574407699
+              },
+              {
+                "first_frame": 121,
+                "last_frame": 145,
+                "duration_seconds": 1.2,
+                "path_drift_m": 0.13725598571824432,
+                "net_drift_m": 0.04749239683697179
+              },
+              {
+                "first_frame": 146,
+                "last_frame": 148,
+                "duration_seconds": 0.1,
+                "path_drift_m": 0.17865905389924264,
+                "net_drift_m": 0.177686727833291
+              },
+              {
+                "first_frame": 150,
+                "last_frame": 222,
+                "duration_seconds": 3.6,
+                "path_drift_m": 0.38546576378145336,
+                "net_drift_m": 0.244818556270135
+              },
+              {
+                "first_frame": 224,
+                "last_frame": 351,
+                "duration_seconds": 6.35,
+                "path_drift_m": 0.5086716734588902,
+                "net_drift_m": 0.1051028173358893
+              },
+              {
+                "first_frame": 352,
+                "last_frame": 371,
+                "duration_seconds": 0.95,
+                "path_drift_m": 0.18081706898696442,
+                "net_drift_m": 0.14419071882011875
+              },
+              {
+                "first_frame": 372,
+                "last_frame": 479,
+                "duration_seconds": 5.35,
+                "path_drift_m": 0.3166975324614744,
+                "net_drift_m": 0.07554015849827182
+              },
+              {
+                "first_frame": 481,
+                "last_frame": 482,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.08521275744598211,
+                "net_drift_m": 0.08521275744598211
+              },
+              {
+                "first_frame": 485,
+                "last_frame": 486,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.0035256992507239067,
+                "net_drift_m": 0.0035256992507239067
+              },
+              {
+                "first_frame": 487,
+                "last_frame": 488,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.04475641021759312,
+                "net_drift_m": 0.04475641021759312
+              },
+              {
+                "first_frame": 489,
+                "last_frame": 561,
+                "duration_seconds": 3.6,
+                "path_drift_m": 0.17440984547881067,
+                "net_drift_m": 0.06888413235824849
+              },
+              {
+                "first_frame": 562,
+                "last_frame": 564,
+                "duration_seconds": 0.1,
+                "path_drift_m": 0.20705649427834355,
+                "net_drift_m": 0.20681985045356027
+              },
+              {
+                "first_frame": 565,
+                "last_frame": 1027,
+                "duration_seconds": 23.1,
+                "path_drift_m": 0.8395243058500006,
+                "net_drift_m": 0.35677849588910393
+              }
+            ]
+          },
+          "left": {
+            "joint_index": 26,
+            "height_above_declared_floor_m": {
+              "samples": 1028,
+              "min": 3.049373626717866e-06,
+              "median": 0.010166207551956186,
+              "mean": 0.051747205423241925,
+              "p95": 0.26046983063220963,
+              "max": 1.3760920858383179
+            },
+            "below_floor_frames": 0,
+            "floor_proximity_frames": 952,
+            "inferred_contact_intervals": 926,
+            "inferred_contact_seconds": 46.3,
+            "horizontal_speed_during_inferred_contact_m_s": {
+              "samples": 926,
+              "min": 5.8697147395075756e-05,
+              "median": 0.016858060026087168,
+              "mean": 0.04353846910818708,
+              "p95": 0.1531778952226755,
+              "max": 0.8019244631288757
+            },
+            "all_horizontal_speed_m_s": {
+              "samples": 1027,
+              "min": 5.8697147395075756e-05,
+              "median": 0.021561158357103413,
+              "mean": 0.36271594665758583,
+              "p95": 3.3208448154416503,
+              "max": 7.504376428972801
+            },
+            "episodes": [
+              {
+                "first_frame": 0,
+                "last_frame": 27,
+                "duration_seconds": 1.35,
+                "path_drift_m": 0.10753645874294476,
+                "net_drift_m": 0.041121609685056085
+              },
+              {
+                "first_frame": 46,
+                "last_frame": 123,
+                "duration_seconds": 3.85,
+                "path_drift_m": 0.33816107571737225,
+                "net_drift_m": 0.14555871230239695
+              },
+              {
+                "first_frame": 142,
+                "last_frame": 158,
+                "duration_seconds": 0.8,
+                "path_drift_m": 0.07767465471623344,
+                "net_drift_m": 0.04442942402411576
+              },
+              {
+                "first_frame": 159,
+                "last_frame": 160,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.017066071787152973,
+                "net_drift_m": 0.017066071787152973
+              },
+              {
+                "first_frame": 161,
+                "last_frame": 186,
+                "duration_seconds": 1.25,
+                "path_drift_m": 0.08172569574596178,
+                "net_drift_m": 0.055463967651663636
+              },
+              {
+                "first_frame": 187,
+                "last_frame": 188,
+                "duration_seconds": 0.05,
+                "path_drift_m": 0.04009622315644378,
+                "net_drift_m": 0.04009622315644378
+              },
+              {
+                "first_frame": 190,
+                "last_frame": 203,
+                "duration_seconds": 0.65,
+                "path_drift_m": 0.02845427434601921,
+                "net_drift_m": 0.011381058588116472
+              },
+              {
+                "first_frame": 221,
+                "last_frame": 281,
+                "duration_seconds": 3.0,
+                "path_drift_m": 0.183772690783659,
+                "net_drift_m": 0.08930971462864301
+              },
+              {
+                "first_frame": 299,
+                "last_frame": 312,
+                "duration_seconds": 0.65,
+                "path_drift_m": 0.040571653578429394,
+                "net_drift_m": 0.021930284350197886
+              },
+              {
+                "first_frame": 313,
+                "last_frame": 319,
+                "duration_seconds": 0.3,
+                "path_drift_m": 0.06547872589797096,
+                "net_drift_m": 0.05795646575193363
+              },
+              {
+                "first_frame": 320,
+                "last_frame": 363,
+                "duration_seconds": 2.15,
+                "path_drift_m": 0.06992519355332884,
+                "net_drift_m": 0.001111533759382631
+              },
+              {
+                "first_frame": 382,
+                "last_frame": 395,
+                "duration_seconds": 0.65,
+                "path_drift_m": 0.052350202310586354,
+                "net_drift_m": 0.011895685402489468
+              },
+              {
+                "first_frame": 396,
+                "last_frame": 1027,
+                "duration_seconds": 31.55,
+                "path_drift_m": 0.9130181993729589,
+                "net_drift_m": 0.2585751703044191
+              }
+            ]
+          }
+        },
+        "articulation": {
+          "internal_joint_angles": {
+            "right_elbow": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 40.89342581312778,
+                "median": 88.05131623689496,
+                "mean": 92.97930445825227,
+                "p95": 154.11633820301435,
+                "max": 159.50109581258155
+              },
+              "range_degrees": 118.60766999945378,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.002151534855840964,
+                "median": 11.28959055293933,
+                "mean": 52.31882956927532,
+                "p95": 242.66180782088992,
+                "max": 988.7767633960366
+              },
+              "degenerate_frames": 0
+            },
+            "left_elbow": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 36.69032370862727,
+                "median": 57.26823740067637,
+                "mean": 71.43473522775126,
+                "p95": 149.15762662389142,
+                "max": 156.89168834216295
+              },
+              "range_degrees": 120.20136463353569,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.009770883895896532,
+                "median": 11.134036703641641,
+                "mean": 48.56791681634182,
+                "p95": 225.16710914436254,
+                "max": 988.6888221327843
+              },
+              "degenerate_frames": 0
+            },
+            "right_knee": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 106.6557652572063,
+                "median": 142.66886227762603,
+                "mean": 141.1682810084003,
+                "p95": 163.3305079835609,
+                "max": 165.39618173711068
+              },
+              "range_degrees": 58.74041647990438,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.02690086781512946,
+                "median": 11.643938572667594,
+                "mean": 25.917683890872272,
+                "p95": 98.52178029721958,
+                "max": 285.01844106098304
+              },
+              "degenerate_frames": 0
+            },
+            "left_knee": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 58.570480895746584,
+                "median": 142.33752505627547,
+                "mean": 136.96461996726504,
+                "p95": 161.14596716488956,
+                "max": 176.11201158039924
+              },
+              "range_degrees": 117.54153068465266,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.013749494552826036,
+                "median": 11.491309997344956,
+                "mean": 54.22290244100613,
+                "p95": 308.56245234075766,
+                "max": 884.9964073536423
+              },
+              "degenerate_frames": 0
+            },
+            "spine": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 124.18072165599366,
+                "median": 145.62214842398183,
+                "mean": 143.40000438672993,
+                "p95": 152.5057356367351,
+                "max": 152.8749085614666
+              },
+              "range_degrees": 28.694186905472947,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.006146593341327389,
+                "median": 4.853443428356172,
+                "mean": 12.0842094578089,
+                "p95": 44.93385093307744,
+                "max": 123.4927450197199
+              },
+              "degenerate_frames": 0
+            },
+            "right_hip": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 96.98938145364197,
+                "median": 158.24048741372553,
+                "mean": 153.862600208405,
+                "p95": 178.0929145533817,
+                "max": 179.60481655487175
+              },
+              "range_degrees": 82.61543510122978,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.001779244408339764,
+                "median": 15.006586844791059,
+                "mean": 33.454606827328945,
+                "p95": 115.54798845956383,
+                "max": 201.00531953227318
+              },
+              "degenerate_frames": 0
+            },
+            "left_hip": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 95.17303631191616,
+                "median": 165.8735311997835,
+                "mean": 156.85704179932392,
+                "p95": 175.53590899847887,
+                "max": 179.61794662919723
+              },
+              "range_degrees": 84.44491031728107,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.0013678294328656193,
+                "median": 13.727676561058502,
+                "mean": 41.14052819529611,
+                "p95": 158.0575163498364,
+                "max": 460.24329413973334
+              },
+              "degenerate_frames": 0
+            },
+            "right_shoulder": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 68.80868296417646,
+                "median": 102.86075189408236,
+                "mean": 98.87064232317009,
+                "p95": 119.31731395269094,
+                "max": 153.45938046565672
+              },
+              "range_degrees": 84.65069750148027,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.0016208180360877122,
+                "median": 10.675184449949029,
+                "mean": 35.94832059142701,
+                "p95": 151.67381071927807,
+                "max": 511.75817228894743
+              },
+              "degenerate_frames": 0
+            },
+            "left_shoulder": {
+              "angle_degrees": {
+                "samples": 1028,
+                "min": 64.78574989617738,
+                "median": 89.39879022087499,
+                "mean": 89.28893535406492,
+                "p95": 118.50939926664381,
+                "max": 154.04820042927517
+              },
+              "range_degrees": 89.26245053309779,
+              "angular_speed_degrees_s": {
+                "samples": 1027,
+                "min": 0.0076834097600908535,
+                "median": 7.9778991990392,
+                "mean": 36.61960584291195,
+                "p95": 163.0099291849346,
+                "max": 472.9613626755017
+              },
+              "degenerate_frames": 0
+            }
+          },
+          "bone_length_temporal_range_m": {
+            "samples": 26,
+            "min": 7.295119450190235e-08,
+            "median": 3.34159871426265e-07,
+            "mean": 3.330025804276557e-07,
+            "p95": 5.814297058676088e-07,
+            "max": 6.475899070323976e-07
+          },
+          "bone_length_coefficient_of_variation": {
+            "samples": 26,
+            "min": 1.0543035800349387e-07,
+            "median": 2.631769038792151e-07,
+            "mean": 3.2310866752542075e-07,
+            "p95": 6.228138701967362e-07,
+            "max": 7.529510805849149e-07
+          },
+          "root_relative_joint_speed_m_s": {
+            "samples": 27729,
+            "min": 0.0,
+            "median": 0.09621696993335517,
+            "mean": 0.3656061095658431,
+            "p95": 1.6260826019664267,
+            "max": 8.88879929357866
+          },
+          "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+        }
+      }
+    ],
+    "pairs": [],
+    "assumptions": {
+      "floor_height_m": -0.010000000000000009,
+      "floor_is_declared_not_estimated": true,
+      "contact_height_m": 0.08,
+      "contact_vertical_speed_m_s": 0.15,
+      "contact_lower_height_m": -0.02,
+      "horizontal_speed_used_to_infer_contact": false,
+      "capsules": [
+        {
+          "name": "torso",
+          "joints": [
+            0,
+            4
+          ],
+          "radius_m": 0.15
+        },
+        {
+          "name": "upper_torso",
+          "joints": [
+            4,
+            5
+          ],
+          "radius_m": 0.12
+        },
+        {
+          "name": "head",
+          "joints": [
+            6,
+            6
+          ],
+          "radius_m": 0.11
+        },
+        {
+          "name": "right_upper_arm",
+          "joints": [
+            8,
+            9
+          ],
+          "radius_m": 0.065
+        },
+        {
+          "name": "right_forearm",
+          "joints": [
+            9,
+            10
+          ],
+          "radius_m": 0.045
+        },
+        {
+          "name": "left_upper_arm",
+          "joints": [
+            14,
+            15
+          ],
+          "radius_m": 0.065
+        },
+        {
+          "name": "left_forearm",
+          "joints": [
+            15,
+            16
+          ],
+          "radius_m": 0.045
+        },
+        {
+          "name": "right_thigh",
+          "joints": [
+            19,
+            20
+          ],
+          "radius_m": 0.095
+        },
+        {
+          "name": "right_calf",
+          "joints": [
+            20,
+            21
+          ],
+          "radius_m": 0.065
+        },
+        {
+          "name": "left_thigh",
+          "joints": [
+            23,
+            24
+          ],
+          "radius_m": 0.095
+        },
+        {
+          "name": "left_calf",
+          "joints": [
+            24,
+            25
+          ],
+          "radius_m": 0.065
+        }
+      ],
+      "input_corrections": "none",
+      "limitations": [
+        "Toe/wrist centres do not locate soles, palms, or forces.",
+        "Articulation magnitude is not naturalness or semantic accuracy.",
+        "Capsules cannot certify actual mesh penetration or intentional contact.",
+        "Visual review is required; no aggregate quality pass is emitted."
+      ]
+    }
+  },
+  "skinned_feet": {
+    "feet": {
+      "left": {
+        "sole_vertices_sampled": 128,
+        "sole_height_above_floor_m": {
+          "samples": 131584,
+          "min": 1.8157055720058324e-12,
+          "median": 0.0176972222008578,
+          "mean": 0.06143846138364045,
+          "p95": 0.3648942985606653,
+          "max": 1.2461129283301342
+        },
+        "lowest_sole_vertex_each_frame_m": {
+          "samples": 1028,
+          "min": 1.8157055720058324e-12,
+          "median": 0.00796414326267748,
+          "mean": 0.03910413182161759,
+          "p95": 0.22428878075770847,
+          "max": 0.9404470063713841
+        },
+        "frames_with_sole_below_minus_1cm": 0,
+        "frames_all_sampled_sole_above_5cm": 74,
+        "inferred_contact_vertex_intervals": 90622,
+        "contact_vertex_horizontal_speed_m_s": {
+          "samples": 90622,
+          "min": 2.8622153017357365e-05,
+          "median": 0.018999087720277537,
+          "mean": 0.04536990695793266,
+          "p95": 0.18402241749525786,
+          "max": 1.2323865906401987
+        },
+        "all_sole_vertex_horizontal_speed_m_s": {
+          "samples": 131456,
+          "min": 2.8622153017357365e-05,
+          "median": 0.03431250142191872,
+          "mean": 0.3371780237414023,
+          "p95": 2.9659822833017566,
+          "max": 6.239141659044925
+        }
+      },
+      "right": {
+        "sole_vertices_sampled": 128,
+        "sole_height_above_floor_m": {
+          "samples": 131584,
+          "min": 9.999999999964898e-06,
+          "median": 0.01955785577089638,
+          "mean": 0.02286341204999219,
+          "p95": 0.05030607849007606,
+          "max": 0.2070336648817002
+        },
+        "lowest_sole_vertex_each_frame_m": {
+          "samples": 1028,
+          "min": 9.999999999964898e-06,
+          "median": 0.010095439241378276,
+          "mean": 0.010960413831757396,
+          "p95": 0.023498098342165347,
+          "max": 0.04782267148963857
+        },
+        "frames_with_sole_below_minus_1cm": 0,
+        "frames_all_sampled_sole_above_5cm": 0,
+        "inferred_contact_vertex_intervals": 85314,
+        "contact_vertex_horizontal_speed_m_s": {
+          "samples": 85314,
+          "min": 5.260748861841164e-05,
+          "median": 0.015181626591294956,
+          "mean": 0.048784128323016145,
+          "p95": 0.20223790230804484,
+          "max": 1.2342239926893352
+        },
+        "all_sole_vertex_horizontal_speed_m_s": {
+          "samples": 131456,
+          "min": 5.260748861841164e-05,
+          "median": 0.033544929578449706,
+          "mean": 0.10011712751502451,
+          "p95": 0.3729424946454003,
+          "max": 2.083520376406205
+        }
+      }
+    },
+    "frames_both_soles_above_5cm": 0,
+    "fitted_pose_input": "provided fitted transforms",
+    "fps": 20.0,
+    "floor_height_m": -0.010000000000000009,
+    "contact_height_m": 0.025,
+    "contact_vertical_speed_m_s": 0.15,
+    "rig_provenance": {
+      "character_source": "existing generated textured GLB",
+      "mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+      "source_name": "original-human-v2.glb",
+      "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+      "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+      "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK",
+      "root_height_offset_m": -0.14691282523348326,
+      "limitations": [
+        "Approximate fitted rig, not an artist-authored production rig.",
+        "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+        "Different limb proportions change contact locations; no contact or floor IK is applied.",
+        "Texture and anatomical defects in the generated GLB remain visible."
+      ]
+    },
+    "interpretation": "Exact current LBS sole samples with approximate fitted rig; no foot locking, root correction, or mesh quality pass."
+  },
+  "scene_clearance": {
+    "method": "Every actual CPU-LBS character mesh frame enclosing AABB against all source-mesh-derived nonground prop AABBs",
+    "sampled_frames": 1028,
+    "minimum_aabb_separation_m": 2.075745117181433,
+    "closest_frame": 372,
+    "closest_prop": {
+      "id": "set-14",
+      "name": "Ornate Twin Lantern Street Lamp",
+      "asset": "a-3f7b37bc44747835",
+      "min": [
+        -3.95,
+        -5.0484810554252135e-08,
+        1.75
+      ],
+      "max": [
+        -3.45,
+        3.1000000504848106,
+        2.25
+      ]
+    },
+    "frames_with_any_aabb_overlap": 0,
+    "character_mesh_bounds_entire_clip": {
+      "min": [
+        -1.7032564061950306,
+        -0.009999999998184303,
+        -0.619390625554193
+      ],
+      "max": [
+        0.46361336171456485,
+        1.668975688580762,
+        1.0758838190431335
+      ]
+    },
+    "floor_bounds": {
+      "id": "set-0",
+      "name": "Paving",
+      "asset": "set-ground",
+      "min": [
+        -13.0,
+        -0.13,
+        -21.0
+      ],
+      "max": [
+        13.0,
+        -0.010000000000000009,
+        9.0
+      ]
+    },
+    "lowest_mesh_height_above_ground_m": {
+      "samples": 1028,
+      "min": 1.8157055720058324e-12,
+      "median": 0.004854859169984202,
+      "mean": 0.0063188894870906155,
+      "p95": 0.018649920154961547,
+      "max": 0.03712998553954047
+    }
+  },
+  "semantic_proxies": [
+    {
+      "action": "martial",
+      "frames": [
+        60,
+        423
+      ],
+      "root_start_xyz": [
+        -0.19350121915340424,
+        0.8436583876609802,
+        0.06437599658966064
+      ],
+      "root_end_xyz": [
+        -0.6774589419364929,
+        0.8580964803695679,
+        0.14094451069831848
+      ],
+      "root_height_m": {
+        "samples": 364,
+        "min": 0.6892638206481934,
+        "median": 0.8432622849941254,
+        "mean": 0.8377525197280632,
+        "p95": 0.9058933794498444,
+        "max": 0.9278756976127625
+      },
+      "head_height_m": {
+        "samples": 364,
+        "min": 1.3304998874664307,
+        "median": 1.526206135749817,
+        "mean": 1.5139047932493819,
+        "p95": 1.5928105592727662,
+        "max": 1.6157253980636597
+      },
+      "torso_inclination_from_vertical_degrees": {
+        "samples": 364,
+        "min": 0.18022575974464417,
+        "median": 11.282662391662598,
+        "mean": 12.58981410315731,
+        "p95": 22.92805881500243,
+        "max": 25.626195907592773
+      },
+      "torso_inclination_first_last_degrees": [
+        6.009912014007568,
+        9.113371849060059
+      ],
+      "toe_max_height_above_floor_m": 1.3760920858383179,
+      "wrist_height_relative_head_m": {
+        "samples": 728,
+        "min": -0.5159319639205933,
+        "median": -0.18493151664733887,
+        "mean": -0.19716074571504696,
+        "p95": -0.10328637361526491,
+        "max": -0.015457987785339355
+      },
+      "internal_articulation": {
+        "right_elbow": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 40.89342581312778,
+            "median": 76.64415999752934,
+            "mean": 78.09819541531049,
+            "p95": 122.99393812417706,
+            "max": 159.50109581258155
+          },
+          "range_degrees": 118.60766999945378,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.006065965139328,
+            "median": 50.47411009101012,
+            "mean": 105.90029421616434,
+            "p95": 435.5197853037503,
+            "max": 988.7767633960366
+          },
+          "degenerate_frames": 0
+        },
+        "left_elbow": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 36.69032370862727,
+            "median": 52.02536760704023,
+            "mean": 59.757162742025976,
+            "p95": 108.20217913473499,
+            "max": 156.89168834216295
+          },
+          "range_degrees": 120.20136463353569,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.0511693066842156,
+            "median": 29.309598042297296,
+            "mean": 86.30109716109347,
+            "p95": 454.990735500271,
+            "max": 988.6888221327843
+          },
+          "degenerate_frames": 0
+        },
+        "right_knee": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 106.6557652572063,
+            "median": 131.77365425373068,
+            "mean": 132.7796092999322,
+            "p95": 154.73191422060086,
+            "max": 162.53490458747743
+          },
+          "range_degrees": 55.87913933027113,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.030466453445114894,
+            "median": 33.8419266517559,
+            "mean": 41.96973760816574,
+            "p95": 118.71793454529453,
+            "max": 209.69174942769058
+          },
+          "degenerate_frames": 0
+        },
+        "left_knee": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 58.570480895746584,
+            "median": 128.43813875621328,
+            "mean": 124.6227250180721,
+            "p95": 148.42014856042042,
+            "max": 176.11201158039924
+          },
+          "range_degrees": 117.54153068465266,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.1268176715586833,
+            "median": 44.5966281986756,
+            "mean": 111.22399912786224,
+            "p95": 501.6275335232227,
+            "max": 884.9964073536423
+          },
+          "degenerate_frames": 0
+        },
+        "spine": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 124.18072165599366,
+            "median": 143.50763061260722,
+            "mean": 142.10497810344197,
+            "p95": 147.832124068447,
+            "max": 149.22966817303111
+          },
+          "range_degrees": 25.04894651703745,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.04579428285978793,
+            "median": 13.017547537150449,
+            "mean": 19.45437093642049,
+            "p95": 61.5868912346542,
+            "max": 123.4927450197199
+          },
+          "degenerate_frames": 0
+        },
+        "right_hip": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 107.76989397405471,
+            "median": 152.87631501930122,
+            "mean": 150.83988597202503,
+            "p95": 173.6346531101995,
+            "max": 179.60481655487175
+          },
+          "range_degrees": 71.83492258081704,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.12091476606144624,
+            "median": 45.33862092264769,
+            "mean": 54.57071211144111,
+            "p95": 134.52016449502437,
+            "max": 201.00531953227318
+          },
+          "degenerate_frames": 0
+        },
+        "left_hip": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 95.17303631191616,
+            "median": 161.9666475482072,
+            "mean": 153.79733898471747,
+            "p95": 172.4165433464647,
+            "max": 177.06982900007125
+          },
+          "range_degrees": 81.89679268815509,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.05365070603147615,
+            "median": 35.77263028498322,
+            "mean": 68.62557791096253,
+            "p95": 244.24029963119648,
+            "max": 460.24329413973334
+          },
+          "degenerate_frames": 0
+        },
+        "right_shoulder": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 77.10797153097356,
+            "median": 107.02714299432907,
+            "mean": 106.88427436383614,
+            "p95": 128.78818634562353,
+            "max": 151.23730429190502
+          },
+          "range_degrees": 74.12933276093146,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.10219419876506208,
+            "median": 31.70796299306346,
+            "mean": 60.23931933530881,
+            "p95": 233.90103947007677,
+            "max": 511.75817228894743
+          },
+          "degenerate_frames": 0
+        },
+        "left_shoulder": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 64.78574989617738,
+            "median": 95.36205782174784,
+            "mean": 100.7169425190618,
+            "p95": 139.68899817565435,
+            "max": 154.04820042927517
+          },
+          "range_degrees": 89.26245053309779,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.11795812016941909,
+            "median": 45.142001543900676,
+            "mean": 73.05681919239342,
+            "p95": 244.72797484351182,
+            "max": 448.0849796486308
+          },
+          "degenerate_frames": 0
+        }
+      }
+    },
+    {
+      "action": "bow",
+      "frames": [
+        424,
+        787
+      ],
+      "root_start_xyz": [
+        -0.6818315982818604,
+        0.8552320599555969,
+        0.13645124435424805
+      ],
+      "root_end_xyz": [
+        -0.16416868567466736,
+        0.8868135809898376,
+        -0.32575199007987976
+      ],
+      "root_height_m": {
+        "samples": 364,
+        "min": 0.8048399686813354,
+        "median": 0.8757284283638,
+        "mean": 0.8759321658820897,
+        "p95": 0.9067816197872162,
+        "max": 0.9412815570831299
+      },
+      "head_height_m": {
+        "samples": 364,
+        "min": 1.051133632659912,
+        "median": 1.5515394806861877,
+        "mean": 1.4532198833895253,
+        "p95": 1.6252259612083435,
+        "max": 1.628075361251831
+      },
+      "torso_inclination_from_vertical_degrees": {
+        "samples": 364,
+        "min": 2.714690685272217,
+        "median": 12.022753238677979,
+        "mean": 24.700916296833164,
+        "p95": 65.06647567749023,
+        "max": 69.97071838378906
+      },
+      "torso_inclination_first_last_degrees": [
+        10.055863380432129,
+        3.017333984375
+      ],
+      "toe_max_height_above_floor_m": 0.03908879518508912,
+      "wrist_height_relative_head_m": {
+        "samples": 728,
+        "min": -0.6599754095077515,
+        "median": -0.22680991888046265,
+        "mean": -0.26718315408452525,
+        "p95": -0.14071608185768128,
+        "max": -0.08960700035095215
+      },
+      "internal_articulation": {
+        "right_elbow": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 60.82161302277107,
+            "median": 88.7957722098724,
+            "mean": 88.30819989167148,
+            "p95": 101.49197956982515,
+            "max": 121.36818036745512
+          },
+          "range_degrees": 60.54656734468406,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.005149965738837636,
+            "median": 5.269952853954578,
+            "mean": 18.447242651319982,
+            "p95": 86.1806319918041,
+            "max": 250.19261356946458
+          },
+          "degenerate_frames": 0
+        },
+        "left_elbow": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 48.36546159953519,
+            "median": 57.103671162055086,
+            "mean": 61.34431706873233,
+            "p95": 81.20815977651905,
+            "max": 117.84618688310259
+          },
+          "range_degrees": 69.48072528356741,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.009770883895896532,
+            "median": 7.010595553818462,
+            "mean": 27.221064143210338,
+            "p95": 140.5032714980773,
+            "max": 396.47074247392595
+          },
+          "degenerate_frames": 0
+        },
+        "right_knee": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 126.8965154541742,
+            "median": 144.38265662107744,
+            "mean": 143.59257005065254,
+            "p95": 157.13997828947254,
+            "max": 165.39618173711068
+          },
+          "range_degrees": 38.499666282936474,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.0652636164801379,
+            "median": 10.093275179244188,
+            "mean": 21.41065004815223,
+            "p95": 83.53026543334964,
+            "max": 285.01844106098304
+          },
+          "degenerate_frames": 0
+        },
+        "left_knee": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 113.42177903017708,
+            "median": 142.67211837651908,
+            "mean": 140.61151367363092,
+            "p95": 153.78631061395652,
+            "max": 154.87085637158503
+          },
+          "range_degrees": 41.44907734140796,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.0534700176598335,
+            "median": 10.410184103229199,
+            "mean": 18.86046269655512,
+            "p95": 68.93182175503134,
+            "max": 147.62394886731613
+          },
+          "degenerate_frames": 0
+        },
+        "spine": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 124.72478087487235,
+            "median": 144.27759085479335,
+            "mean": 139.75493097692282,
+            "p95": 148.89537415486106,
+            "max": 149.84556630441185
+          },
+          "range_degrees": 25.120785429539495,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.045123649705942626,
+            "median": 5.434142601301346,
+            "mean": 10.580730231549808,
+            "p95": 34.392688379608366,
+            "max": 88.65270068650375
+          },
+          "degenerate_frames": 0
+        },
+        "right_hip": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 96.98938145364197,
+            "median": 155.7417728434434,
+            "mean": 145.01883921925895,
+            "p95": 171.7925395157361,
+            "max": 174.1215199819058
+          },
+          "range_degrees": 77.13213852826384,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.02703325772131393,
+            "median": 17.110708708233346,
+            "mean": 28.54828372122207,
+            "p95": 89.82810965273751,
+            "max": 149.64570523211762
+          },
+          "degenerate_frames": 0
+        },
+        "left_hip": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 99.41548067805454,
+            "median": 162.61051925696944,
+            "mean": 150.43980747553417,
+            "p95": 177.41272400375084,
+            "max": 179.61794662919723
+          },
+          "range_degrees": 80.2024659511427,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.0013678294328656193,
+            "median": 18.459286484824133,
+            "mean": 31.324441325879018,
+            "p95": 105.22130240005912,
+            "max": 165.73031560694687
+          },
+          "degenerate_frames": 0
+        },
+        "right_shoulder": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 70.2058781625401,
+            "median": 108.20694300939715,
+            "mean": 100.3830117395735,
+            "p95": 119.26476543447836,
+            "max": 123.07218678587328
+          },
+          "range_degrees": 52.86630862333318,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.0016208180360877122,
+            "median": 8.36526758955074,
+            "mean": 21.03974317812932,
+            "p95": 86.18585479408756,
+            "max": 152.57289282151163
+          },
+          "degenerate_frames": 0
+        },
+        "left_shoulder": {
+          "angle_degrees": {
+            "samples": 364,
+            "min": 69.67738259680613,
+            "median": 88.3087129582047,
+            "mean": 84.44553954423748,
+            "p95": 93.82041239782762,
+            "max": 111.9933495451874
+          },
+          "range_degrees": 42.31596694838127,
+          "angular_speed_degrees_s": {
+            "samples": 363,
+            "min": 0.007807508866903845,
+            "median": 5.766000646443956,
+            "mean": 14.432641674439934,
+            "p95": 59.69939727706943,
+            "max": 119.60947604167814
+          },
+          "degenerate_frames": 0
+        }
+      }
+    },
+    {
+      "action": "stand_recovery",
+      "frames": [
+        788,
+        1027
+      ],
+      "root_start_xyz": [
+        -0.16326779127120972,
+        0.8873769044876099,
+        -0.32580482959747314
+      ],
+      "root_end_xyz": [
+        -0.19405192136764526,
+        0.9124627113342285,
+        -0.2498120665550232
+      ],
+      "root_height_m": {
+        "samples": 240,
+        "min": 0.886162519454956,
+        "median": 0.9023931324481964,
+        "mean": 0.9025682349999745,
+        "p95": 0.9125621795654297,
+        "max": 0.9130828976631165
+      },
+      "head_height_m": {
+        "samples": 240,
+        "min": 1.6044044494628906,
+        "median": 1.6269416809082031,
+        "mean": 1.626861719787121,
+        "p95": 1.6402577042579651,
+        "max": 1.64060378074646
+      },
+      "torso_inclination_from_vertical_degrees": {
+        "samples": 240,
+        "min": 0.10279206931591034,
+        "median": 0.9053616225719452,
+        "mean": 1.0824770662623147,
+        "p95": 2.723301398754119,
+        "max": 3.1381232738494873
+      },
+      "torso_inclination_first_last_degrees": [
+        3.02362060546875,
+        0.7324860692024231
+      ],
+      "toe_max_height_above_floor_m": 0.007728347778320321,
+      "wrist_height_relative_head_m": {
+        "samples": 480,
+        "min": -0.7461498379707336,
+        "median": -0.625068187713623,
+        "mean": -0.5359713345766067,
+        "p95": -0.15195109248161315,
+        "max": -0.1469634771347046
+      },
+      "internal_articulation": {
+        "right_elbow": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 81.01678861462251,
+            "median": 126.8115435509527,
+            "mean": 127.16551810368364,
+            "p95": 154.929871472208,
+            "max": 155.94097555180684
+          },
+          "range_degrees": 74.92418693718433,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.002151534855840964,
+            "median": 2.8282211762697784,
+            "mean": 8.46530929644147,
+            "p95": 43.06006685265176,
+            "max": 61.26223001377127
+          },
+          "degenerate_frames": 0
+        },
+        "left_elbow": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 49.54274628839609,
+            "median": 89.66586141460144,
+            "mean": 105.72008197758757,
+            "p95": 149.90288125992058,
+            "max": 150.17070901370857
+          },
+          "range_degrees": 100.62796272531249,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.010796981883345325,
+            "median": 2.427977921860247,
+            "mean": 9.645223127590182,
+            "p95": 51.35404474469197,
+            "max": 65.23614371773334
+          },
+          "degenerate_frames": 0
+        },
+        "right_knee": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 139.33809344526549,
+            "median": 152.41043273488117,
+            "mean": 153.82593741084676,
+            "p95": 163.9361142664861,
+            "max": 164.0493459608423
+          },
+          "range_degrees": 24.711252515576803,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.02690086781512946,
+            "median": 1.4411824960899366,
+            "mean": 2.7629071249650745,
+            "p95": 11.746668540238312,
+            "max": 18.49676353279051
+          },
+          "degenerate_frames": 0
+        },
+        "left_knee": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 144.01741196747122,
+            "median": 153.95116696488685,
+            "mean": 154.9290104866906,
+            "p95": 161.59708821242566,
+            "max": 161.79637517484508
+          },
+          "range_degrees": 17.778963207373863,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.013749494552826036,
+            "median": 1.145225236481906,
+            "mean": 2.332924824578458,
+            "p95": 9.842098298812004,
+            "max": 14.33838295612702
+          },
+          "degenerate_frames": 0
+        },
+        "spine": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 146.99132388736763,
+            "median": 150.24134123693426,
+            "mean": 150.56122289051703,
+            "p95": 152.69226340743123,
+            "max": 152.8749085614666
+          },
+          "range_degrees": 5.883584674098984,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.006146593341327389,
+            "median": 0.49388681790503597,
+            "mean": 0.843051206401337,
+            "p95": 2.921268914647783,
+            "max": 5.566749109515854
+          },
+          "degenerate_frames": 0
+        },
+        "right_hip": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 169.8411294080539,
+            "median": 174.24398806219608,
+            "mean": 174.13506582717517,
+            "p95": 178.45112392329497,
+            "max": 179.35821440527113
+          },
+          "range_degrees": 9.517084997217239,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.001779244408339764,
+            "median": 1.3282652714167398,
+            "mean": 1.9257752809954072,
+            "p95": 5.713166727754867,
+            "max": 10.584402067012775
+          },
+          "degenerate_frames": 0
+        },
+        "left_hip": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 166.51696379061687,
+            "median": 173.65785707267167,
+            "mean": 172.78201460135682,
+            "p95": 175.56882920471256,
+            "max": 175.78663717880826
+          },
+          "range_degrees": 9.269673388191393,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.010822302205042433,
+            "median": 0.9834179048675651,
+            "mean": 1.3703571871693578,
+            "p95": 4.205581080242778,
+            "max": 8.422576269961723
+          },
+          "degenerate_frames": 0
+        },
+        "right_shoulder": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 68.80868296417646,
+            "median": 79.28858130523213,
+            "mean": 82.60315221766945,
+            "p95": 111.15889116836331,
+            "max": 111.60635054416382
+          },
+          "range_degrees": 42.79766757998736,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.006225622890099203,
+            "median": 1.7693940155137966,
+            "mean": 4.398249279609313,
+            "p95": 21.268089009324477,
+            "max": 53.68366949757842
+          },
+          "degenerate_frames": 0
+        },
+        "left_shoulder": {
+          "angle_degrees": {
+            "samples": 240,
+            "min": 66.13959903062634,
+            "median": 80.51166766705015,
+            "mean": 77.66170274594478,
+            "p95": 92.30889789777,
+            "max": 92.6640707075131
+          },
+          "range_degrees": 26.524471676886762,
+          "angular_speed_degrees_s": {
+            "samples": 239,
+            "min": 0.0076834097600908535,
+            "median": 1.150506483139111,
+            "mean": 3.0488881610735095,
+            "p95": 13.048594203448857,
+            "max": 27.610156682192724
+          },
+          "degenerate_frames": 0
+        }
+      }
+    }
+  ],
+  "telemetry": {
+    "render_cadence": {
+      "sample_count": 3767,
+      "gaps_over_100_ms": 3,
+      "max_gap_ms": 432.7,
+      "p95_gap_ms": 18.6,
+      "excluded_loading_frames": 0
+    },
+    "continuations": [
+      {
+        "source_clip_id": "2740afbc3ed2",
+        "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+        "origin": "manual",
+        "prefix_frames": 60,
+        "commit_frame": 60,
+        "replaced_unplayed_frames": 100,
+        "command_received_at_utc": "2026-09-26T16:16:07.235Z",
+        "submitted_at_utc": "2026-09-26T16:16:07.235Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:08.591Z",
+        "job_ready_latency_ms": 1356,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:10.233Z",
+        "first_visible_latency_ms": 2999,
+        "command_to_visible_ms": 2999,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 1356,
+        "preserved_prefix_frames": 60,
+        "result_clip_id": "aa9d9c5dfabb",
+        "first_visible_frame": 60,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 49,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "aa9d9c5dfabb",
+        "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+        "origin": "live",
+        "prefix_frames": 140,
+        "commit_frame": 140,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:11.194Z",
+        "submitted_at_utc": "2026-09-26T16:16:11.194Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:12.552Z",
+        "job_ready_latency_ms": 1358,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:14.216Z",
+        "first_visible_latency_ms": 3023,
+        "command_to_visible_ms": 3023,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 1358,
+        "preserved_prefix_frames": 140,
+        "result_clip_id": "63f5f2a17569",
+        "first_visible_frame": 140,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 4008,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "63f5f2a17569",
+        "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+        "origin": "live",
+        "prefix_frames": 220,
+        "commit_frame": 220,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:15.196Z",
+        "submitted_at_utc": "2026-09-26T16:16:15.196Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:17.206Z",
+        "job_ready_latency_ms": 2010,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:18.216Z",
+        "first_visible_latency_ms": 3021,
+        "command_to_visible_ms": 3021,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2010,
+        "preserved_prefix_frames": 220,
+        "result_clip_id": "0e647999a6c5",
+        "first_visible_frame": 220,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 8010,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "0e647999a6c5",
+        "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+        "origin": "live",
+        "prefix_frames": 300,
+        "commit_frame": 300,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:19.196Z",
+        "submitted_at_utc": "2026-09-26T16:16:19.196Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:21.202Z",
+        "job_ready_latency_ms": 2006,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:22.233Z",
+        "first_visible_latency_ms": 3038,
+        "command_to_visible_ms": 3038,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2006,
+        "preserved_prefix_frames": 300,
+        "result_clip_id": "8b6433b8a1fa",
+        "first_visible_frame": 300,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 12010,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "8b6433b8a1fa",
+        "prompt": "A martial artist throws sharp alternating punches, performs a front kick and returns to a low guard.",
+        "origin": "live",
+        "prefix_frames": 380,
+        "commit_frame": 380,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:23.195Z",
+        "submitted_at_utc": "2026-09-26T16:16:23.195Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:25.225Z",
+        "job_ready_latency_ms": 2030,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:26.233Z",
+        "first_visible_latency_ms": 3038,
+        "command_to_visible_ms": 3038,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2030,
+        "preserved_prefix_frames": 380,
+        "result_clip_id": "0696b2baae63",
+        "first_visible_frame": 380,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 16009,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "0696b2baae63",
+        "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+        "origin": "queued",
+        "prefix_frames": 424,
+        "commit_frame": 424,
+        "replaced_unplayed_frames": 36,
+        "command_received_at_utc": "2026-09-26T16:16:23.752Z",
+        "submitted_at_utc": "2026-09-26T16:16:25.366Z",
+        "queue_wait_ms": 1614,
+        "job_ready_at_utc": "2026-09-26T16:16:27.374Z",
+        "job_ready_latency_ms": 2008,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:28.434Z",
+        "first_visible_latency_ms": 3068,
+        "command_to_visible_ms": 4682,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 3622,
+        "preserved_prefix_frames": 424,
+        "result_clip_id": "543f3441ebb3",
+        "first_visible_frame": 424,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 18180,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "543f3441ebb3",
+        "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+        "origin": "live",
+        "prefix_frames": 504,
+        "commit_frame": 504,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:29.395Z",
+        "submitted_at_utc": "2026-09-26T16:16:29.395Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:31.402Z",
+        "job_ready_latency_ms": 2007,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:32.434Z",
+        "first_visible_latency_ms": 3039,
+        "command_to_visible_ms": 3039,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2007,
+        "preserved_prefix_frames": 504,
+        "result_clip_id": "75d85975ef0a",
+        "first_visible_frame": 504,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 22209,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "75d85975ef0a",
+        "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+        "origin": "live",
+        "prefix_frames": 584,
+        "commit_frame": 584,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:33.394Z",
+        "submitted_at_utc": "2026-09-26T16:16:33.394Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:35.400Z",
+        "job_ready_latency_ms": 2006,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:36.434Z",
+        "first_visible_latency_ms": 3040,
+        "command_to_visible_ms": 3040,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2007,
+        "preserved_prefix_frames": 584,
+        "result_clip_id": "992463fc3fa2",
+        "first_visible_frame": 584,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 26208,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "992463fc3fa2",
+        "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+        "origin": "live",
+        "prefix_frames": 664,
+        "commit_frame": 664,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:37.395Z",
+        "submitted_at_utc": "2026-09-26T16:16:37.395Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:39.569Z",
+        "job_ready_latency_ms": 2174,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:40.849Z",
+        "first_visible_latency_ms": 3454,
+        "command_to_visible_ms": 3454,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2174,
+        "preserved_prefix_frames": 664,
+        "result_clip_id": "d6ea237f5a05",
+        "first_visible_frame": 664,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 30209,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "d6ea237f5a05",
+        "prompt": "The martial artist lowers both arms and bows deeply forward from the waist.",
+        "origin": "live",
+        "prefix_frames": 744,
+        "commit_frame": 744,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:41.812Z",
+        "submitted_at_utc": "2026-09-26T16:16:41.812Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:43.872Z",
+        "job_ready_latency_ms": 2060,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:44.850Z",
+        "first_visible_latency_ms": 3038,
+        "command_to_visible_ms": 3038,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2060,
+        "preserved_prefix_frames": 744,
+        "result_clip_id": "03a7e5d915ef",
+        "first_visible_frame": 744,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 34626,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "03a7e5d915ef",
+        "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+        "origin": "manual",
+        "prefix_frames": 788,
+        "commit_frame": 788,
+        "replaced_unplayed_frames": 36,
+        "command_received_at_utc": "2026-09-26T16:16:44.054Z",
+        "submitted_at_utc": "2026-09-26T16:16:44.054Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:46.055Z",
+        "job_ready_latency_ms": 2001,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:47.048Z",
+        "first_visible_latency_ms": 2994,
+        "command_to_visible_ms": 2994,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2001,
+        "preserved_prefix_frames": 788,
+        "result_clip_id": "d0f46ff6c427",
+        "first_visible_frame": 788,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 36868,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "d0f46ff6c427",
+        "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+        "origin": "live",
+        "prefix_frames": 868,
+        "commit_frame": 868,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:48.029Z",
+        "submitted_at_utc": "2026-09-26T16:16:48.029Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:50.771Z",
+        "job_ready_latency_ms": 2743,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:51.048Z",
+        "first_visible_latency_ms": 3020,
+        "command_to_visible_ms": 3020,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2743,
+        "preserved_prefix_frames": 868,
+        "result_clip_id": "c4e63e9a7bc0",
+        "first_visible_frame": 868,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 40842,
+        "first_visible_in_recording": true
+      },
+      {
+        "source_clip_id": "c4e63e9a7bc0",
+        "prompt": "The person straightens fully upright, stands still with both feet planted and rests both arms down at their sides.",
+        "origin": "live",
+        "prefix_frames": 948,
+        "commit_frame": 948,
+        "replaced_unplayed_frames": 0,
+        "command_received_at_utc": "2026-09-26T16:16:52.029Z",
+        "submitted_at_utc": "2026-09-26T16:16:52.029Z",
+        "queue_wait_ms": 0,
+        "job_ready_at_utc": "2026-09-26T16:16:54.709Z",
+        "job_ready_latency_ms": 2680,
+        "first_visible_appended_frame_at_utc": "2026-09-26T16:16:55.050Z",
+        "first_visible_latency_ms": 3021,
+        "command_to_visible_ms": 3021,
+        "first_visible_outcome": "shown",
+        "buffer_hold_seconds": 0,
+        "command_to_job_ready_ms": 2681,
+        "preserved_prefix_frames": 948,
+        "result_clip_id": "42d9d6588351",
+        "first_visible_frame": 948,
+        "recording_scope": "submitted_during_recording",
+        "submitted_at_recording_ms": 44843,
+        "first_visible_in_recording": true
+      }
+    ],
+    "live_events": [
+      {
+        "at_utc": "2026-09-26T16:16:07.203Z",
+        "enabled": true,
+        "clip_id": "2740afbc3ed2",
+        "frame": 0,
+        "at_recording_ms": 17
+      },
+      {
+        "at_utc": "2026-09-26T16:16:53.436Z",
+        "enabled": false,
+        "clip_id": "c4e63e9a7bc0",
+        "frame": 915,
+        "at_recording_ms": 46250
+      }
+    ],
+    "all_buffer_hold_seconds": 0,
+    "job_ready_ms": {
+      "samples": 13,
+      "min": 1356.0,
+      "median": 2008.0,
+      "mean": 2033.7692307692307,
+      "p95": 2705.2,
+      "max": 2743.0
+    },
+    "command_to_first_drawn_appended_frame_ms": {
+      "samples": 13,
+      "min": 2994.0,
+      "median": 3038.0,
+      "mean": 3185.153846153846,
+      "p95": 3945.199999999998,
+      "max": 4682.0
+    },
+    "interpretation": "Command-to-visible is command receipt to first drawn generated boundary pose, not measured recognition of the requested action. Ready includes polling; it is not pure inference duration.",
+    "cadence_assessment": "Observed3 RAF gaps over100ms, max432.7ms; not stall-free. No generation-buffer hold recorded. RAF statistics describe main-loop cadence, not capture-frame delivery or a per-frame proof.",
+    "duration_interpretation": "63.751s video contains51.4s of saved20fps motion plus wall-clock overhead and endpoint hold. It must not be described as63.751s of unique generated motion.",
+    "timing_assessment": "Typical command receipt to first drawn appended frame is about3.0s; queued bow is4.682s including1.614s queue. This measures first generated pose visibility, not semantic action onset."
+  },
+  "metadata_caveat": "This new recording has explicit current request seeds, requestIDs and framecounts; per-seam metadata is checked separately. It uses disclosed clearance-only fitted boot correction while preserving native source arrays.",
+  "semantic_assessment": [
+    {
+      "action": "martial combination",
+      "assessment": "substantial native articulation and repeated high kicks; naturalness and exact punch ordering require visual review",
+      "evidence": {
+        "peak_native_toe_height_m": 1.3660920858383179
+      }
+    },
+    {
+      "action": "deep forward bow",
+      "assessment": "deep bow supported, with subsequent native recovery toward upright",
+      "evidence": {
+        "peak_torso_inclination_degrees": 69.97071838378906,
+        "peak_frame": 656,
+        "over45degrees_frame_runs": [
+          [
+            489,
+            510
+          ],
+          [
+            568,
+            590
+          ],
+          [
+            649,
+            676
+          ],
+          [
+            732,
+            754
+          ]
+        ],
+        "inclination_at_frame787_degrees": 3.017333984375
+      }
+    },
+    {
+      "action": "upright, planted feet, arms down",
+      "assessment": "final upright posture and lowered hands supported; planted-foot mechanics remain approximate because source/skin sliding persists",
+      "evidence": {
+        "frames": [
+          988,
+          1027
+        ],
+        "root_displacement_m": 0.007638089824467897,
+        "root_speed_m_s": {
+          "samples": 39,
+          "min": 0.0020852144807577133,
+          "median": 0.008956197649240494,
+          "mean": 0.009132497711107135,
+          "p95": 0.01812959108501673,
+          "max": 0.022344466298818588
+        },
+        "joint_step_m": {
+          "samples": 1053,
+          "min": 3.0072023946559057e-06,
+          "median": 0.00043551228009164333,
+          "mean": 0.0004813509466245713,
+          "p95": 0.0010171244619414203,
+          "max": 0.0018634324660524726
+        },
+        "final_torso_inclination_degrees": 0.7324860692024231,
+        "final_wrist_minus_hip_height_m": [
+          -0.012115180492401123,
+          0.007310807704925537
+        ],
+        "final_toe_heights_m": [
+          -0.008173644542694092,
+          -0.008071064949035645
+        ]
+      },
+      "causal_caveat": "The body was already nearly upright at frame787 before the new command first appears at788. Do not attribute all recovery to that command; hands lower further during its generated section."
+    }
+  ],
+  "continuity_assessment": {
+    "all_raw_and_fitted_prefixes_bit_identical": true,
+    "largest_native_seam_joint_step_m": 0.20207171142101288,
+    "largest_rendered_seam_vertex_step_m": 0.20386431312938733,
+    "all_native_joint_steps_m": {
+      "samples": 27729,
+      "min": 3.0072023946559057e-06,
+      "median": 0.005848479922860861,
+      "mean": 0.019450678041156924,
+      "p95": 0.08107378929853437,
+      "max": 0.44631463289260864
+    },
+    "interpretation": "No displayed history is replaced. Native boundary velocity/acceleration is not guaranteed continuous. Raw motion is unedited; only disclosed foot-clearance retarget applies to the fitted mesh."
+  }
+}

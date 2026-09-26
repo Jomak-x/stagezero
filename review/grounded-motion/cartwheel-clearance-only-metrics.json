@@ -1,0 +1,19 @@
+{
+  "native-world wrists": {
+    "mesh_min_y": -0.11506999791274236,
+    "max_joint_step_m": 0.5151449194501846,
+    "foot_retarget": null
+  },
+  "wrists + vertical boot clearance": {
+    "mesh_min_y": -0.017104861436883872,
+    "max_joint_step_m": 0.5151449194501846,
+    "foot_retarget": {
+      "method": "causal vertical mesh clearance from existing fitted ankles; fixed-length leg IK; smooth native near-ground eligibility; no downward snap",
+      "root_motion": "unchanged from fixed clip-wide floor calibration; no per-frame root correction",
+      "target_space": "existing fitted ankle x/z retained; only penetrating near-ground boot targets lift vertically",
+      "max_sole_target_lift_m": 0.10507999791274236,
+      "max_unreachable_target_error_m": 8.326672684688674e-17,
+      "unreachable_fraction": 0.0
+    }
+  }
+}

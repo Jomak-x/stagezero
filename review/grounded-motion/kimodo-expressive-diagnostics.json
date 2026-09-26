@@ -1,0 +1,1155 @@
+{
+  "kind": "native motion diagnostics, not a quality certificate",
+  "clips": [
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/kimodo_hiphop_8s_core27.npz",
+      "sha256": "199bdfdfb1a36948326ea19107d3b3310c09d45940d1ee6fc435bb086c3f3995",
+      "metadata": {
+        "source": "Kimodo RP v1.1 \u2014 named SOMA\u2192Core27 retarget, 20fps",
+        "model": "kimodo-soma-rp-v1.1",
+        "fps": 20.0,
+        "seed": 6200,
+        "prompt": "A person performs an energetic hip hop dance with deep knee bends, alternating side steps, quick torso twists and broad rhythmic arm swings.",
+        "seconds": 8.0,
+        "steps": 100,
+        "post_processing": true,
+        "generation_seconds": 3.5252257629763335,
+        "model_load_seconds": 58.7202647421509,
+        "peak_gpu_allocated_bytes": 1236401664,
+        "gpu_fraction_cap": 0.1,
+        "original_source": "unmodified native Kimodo output",
+        "soma_conversion": {
+          "adapter": "SOMA77 native proportions in Core27 layout",
+          "source_fps": 30.0,
+          "target_fps": 20.0,
+          "source_frames": 240,
+          "target_frames": 160,
+          "source_duration_seconds": 7.966666666666667,
+          "target_duration_seconds": 7.95,
+          "source_fk_error_max_m": 1.9726378486907946e-07,
+          "mapping": {
+            "Hips": "Hips",
+            "Spine": "Spine1",
+            "Spine1": "Spine2",
+            "Spine3": "Chest",
+            "Neck": "Neck2",
+            "Head": "Head",
+            "LeftShoulder": "LeftShoulder",
+            "LeftArm": "LeftArm",
+            "LeftForeArm": "LeftForeArm",
+            "LeftHand": "LeftHand",
+            "LeftHandThumb1": "LeftHandThumb1",
+            "LeftFoot": "LeftFoot",
+            "LeftToeBase": "LeftToeBase",
+            "RightShoulder": "RightShoulder",
+            "RightArm": "RightArm",
+            "RightForeArm": "RightForeArm",
+            "RightHand": "RightHand",
+            "RightHandThumb1": "RightHandThumb1",
+            "RightFoot": "RightFoot",
+            "RightToeBase": "RightToeBase",
+            "LeftHandEnd": "LeftHandMiddle2",
+            "RightHandEnd": "RightHandMiddle2",
+            "LeftUpLeg": "LeftLeg",
+            "RightUpLeg": "RightLeg",
+            "LeftLeg": "LeftShin",
+            "RightLeg": "RightShin"
+          },
+          "derived_joint": {
+            "Spine2": "midpoint of SOMA Spine2 and Chest"
+          },
+          "sampling": "uniform timestamps; local SO(3) SLERP; native fixed-length FK; linear root translation",
+          "world_transform": "none; Y-up metres, native global root path retained",
+          "rotation_conversion": "named anatomical rest-axis alignment from standard SOMA T-pose to Core-style axes",
+          "limitations": [
+            "Uses native SOMA proportions, not canonical Core27 bone lengths.",
+            "Core27 layout omits detailed fingers, jaw and eyes; raw SOMA archive retains them."
+          ],
+          "raw_source_file": "kimodo_hiphop_8s.npz",
+          "raw_source_sha256": "7f4436e78988f7b5004cc447509a8e7d744e16e7e2471acbe74497ff149e6da4"
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.850242555141449,
+              "median": 0.9915463477373123,
+              "mean": 0.964070862531662,
+              "p95": 0.9995537042617798,
+              "max": 1.0105432271957397
+            },
+            "root_path_length_m": 2.447716554214521,
+            "root_net_displacement_m": 0.06561343741097488,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.002207096478445243,
+              "median": 0.225609174038046,
+              "mean": 0.307888874743965,
+              "p95": 0.8325069406239727,
+              "max": 0.9882740180392928
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 3.1453515136614575e-06,
+              "median": 0.011569669546931881,
+              "mean": 0.021857719335176117,
+              "p95": 0.0772751984497125,
+              "max": 0.18647341596770423
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.019288844646453626,
+                  "median": 0.02016384646503811,
+                  "mean": 0.02393556801163383,
+                  "p95": 0.047254609611701574,
+                  "max": 0.06277380960468153
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 141,
+                "inferred_contact_seconds": 7.05,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 141,
+                  "min": 0.0004231296890011094,
+                  "median": 0.020189200232164334,
+                  "mean": 0.047940691239860396,
+                  "p95": 0.17894383891623677,
+                  "max": 0.8587710832048884
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0004231296890011094,
+                  "median": 0.023585542112773247,
+                  "mean": 0.07016738513091862,
+                  "p95": 0.2660820625679413,
+                  "max": 0.8587710832048884
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 63,
+                    "duration_seconds": 3.15,
+                    "path_drift_m": 0.061068164398448956,
+                    "net_drift_m": 0.018522479065923785
+                  },
+                  {
+                    "first_frame": 64,
+                    "last_frame": 65,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.04293855416024442,
+                    "net_drift_m": 0.04293855416024442
+                  },
+                  {
+                    "first_frame": 66,
+                    "last_frame": 77,
+                    "duration_seconds": 0.55,
+                    "path_drift_m": 0.036116618281234344,
+                    "net_drift_m": 0.007753583646599588
+                  },
+                  {
+                    "first_frame": 78,
+                    "last_frame": 80,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.022400746172329872,
+                    "net_drift_m": 0.02223779688926081
+                  },
+                  {
+                    "first_frame": 81,
+                    "last_frame": 86,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.015185737138108286,
+                    "net_drift_m": 0.012065853700487668
+                  },
+                  {
+                    "first_frame": 88,
+                    "last_frame": 89,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.009068029719796773,
+                    "net_drift_m": 0.009068029719796773
+                  },
+                  {
+                    "first_frame": 90,
+                    "last_frame": 91,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.0008402885706481871,
+                    "net_drift_m": 0.0008402885706481871
+                  },
+                  {
+                    "first_frame": 92,
+                    "last_frame": 98,
+                    "duration_seconds": 0.3,
+                    "path_drift_m": 0.006150132610319631,
+                    "net_drift_m": 0.0010959228738609045
+                  },
+                  {
+                    "first_frame": 100,
+                    "last_frame": 102,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.007451719965418555,
+                    "net_drift_m": 0.0059627623948488185
+                  },
+                  {
+                    "first_frame": 104,
+                    "last_frame": 121,
+                    "duration_seconds": 0.85,
+                    "path_drift_m": 0.07276681785142834,
+                    "net_drift_m": 0.032426187629527405
+                  },
+                  {
+                    "first_frame": 127,
+                    "last_frame": 159,
+                    "duration_seconds": 1.6,
+                    "path_drift_m": 0.06399506437303837,
+                    "net_drift_m": 0.022321107513011893
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.019559676847040103,
+                  "median": 0.02016363676487864,
+                  "mean": 0.021615572340710133,
+                  "p95": 0.029561014003523695,
+                  "max": 0.049433350622364966
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 154,
+                "inferred_contact_seconds": 7.7,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 154,
+                  "min": 0.0001503790693901794,
+                  "median": 0.01812232664602917,
+                  "mean": 0.05071079207108489,
+                  "p95": 0.2354003640391662,
+                  "max": 0.7019152403352118
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0001503790693901794,
+                  "median": 0.019311005596293913,
+                  "mean": 0.05482855571095694,
+                  "p95": 0.26709288520274677,
+                  "max": 0.7019152403352118
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 62,
+                    "duration_seconds": 3.1,
+                    "path_drift_m": 0.06422588236585232,
+                    "net_drift_m": 0.027447627721673466
+                  },
+                  {
+                    "first_frame": 64,
+                    "last_frame": 65,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.03509576201676059,
+                    "net_drift_m": 0.03509576201676059
+                  },
+                  {
+                    "first_frame": 67,
+                    "last_frame": 88,
+                    "duration_seconds": 1.05,
+                    "path_drift_m": 0.09254696817346549,
+                    "net_drift_m": 0.029075408938779804
+                  },
+                  {
+                    "first_frame": 89,
+                    "last_frame": 159,
+                    "duration_seconds": 3.5,
+                    "path_drift_m": 0.1986044863912753,
+                    "net_drift_m": 0.03783515692849747
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 40.31884293158785,
+                    "median": 107.98154912375162,
+                    "mean": 108.50056726976077,
+                    "p95": 157.9221428268827,
+                    "max": 171.6408416758956
+                  },
+                  "range_degrees": 131.32199874430773,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.1361429061535091,
+                    "median": 76.87598168146053,
+                    "mean": 114.59231372870654,
+                    "p95": 370.1715988610072,
+                    "max": 660.9935307666021
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 66.92221543435164,
+                    "median": 125.41140974449914,
+                    "mean": 119.80367612651075,
+                    "p95": 150.5856912125007,
+                    "max": 150.70615659533175
+                  },
+                  "range_degrees": 83.7839411609801,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.0331087145264064,
+                    "median": 35.81591565912959,
+                    "mean": 64.1815961046204,
+                    "p95": 227.46377128877893,
+                    "max": 411.00198867200135
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 111.55860683706835,
+                    "median": 160.77281118949338,
+                    "mean": 151.83893778660868,
+                    "p95": 171.47095532477815,
+                    "max": 174.14817854317826
+                  },
+                  "range_degrees": 62.58957170610991,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.006476531935959429,
+                    "median": 84.13911441254328,
+                    "mean": 105.7487147154187,
+                    "p95": 287.6607243624168,
+                    "max": 365.6126976275658
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 111.81962302567753,
+                    "median": 156.11246197338198,
+                    "mean": 152.17282059485677,
+                    "p95": 172.396930304826,
+                    "max": 173.523737672716
+                  },
+                  "range_degrees": 61.70411464703848,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.013845486584500577,
+                    "median": 74.46693172422698,
+                    "mean": 94.39044551685264,
+                    "p95": 240.9381181122558,
+                    "max": 323.11522572665297
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 155.93934205321943,
+                    "median": 169.66259140243602,
+                    "mean": 169.4246456230294,
+                    "p95": 175.7628170814053,
+                    "max": 176.34042176366157
+                  },
+                  "range_degrees": 20.401079710442133,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.07008583511492361,
+                    "median": 9.011201936552311,
+                    "mean": 19.99675859768823,
+                    "p95": 65.61097930485857,
+                    "max": 86.02546641293998
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 156.33459477794358,
+                    "median": 165.75232215531355,
+                    "mean": 166.3346974883529,
+                    "p95": 174.46155875823624,
+                    "max": 178.17532796528587
+                  },
+                  "range_degrees": 21.840733187342295,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.011975832231314598,
+                    "median": 17.400673351566525,
+                    "mean": 26.968788881441668,
+                    "p95": 84.94375490752583,
+                    "max": 131.161356773124
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 157.49252424566234,
+                    "median": 164.63462193190855,
+                    "mean": 166.2651121202552,
+                    "p95": 176.41248290505837,
+                    "max": 178.66883729748247
+                  },
+                  "range_degrees": 21.17631305182013,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.041161659576118836,
+                    "median": 10.960695908840421,
+                    "mean": 18.783184298086706,
+                    "p95": 66.17627091279752,
+                    "max": 93.86048025917717
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 39.51923629553259,
+                    "median": 58.76999568606365,
+                    "mean": 75.37271290207698,
+                    "p95": 131.16051135407753,
+                    "max": 135.46662148016026
+                  },
+                  "range_degrees": 95.94738518462766,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.1871148676210055,
+                    "median": 32.38415230939296,
+                    "mean": 63.61090224339985,
+                    "p95": 200.42566646604084,
+                    "max": 321.63202585854634
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 53.58026853737757,
+                    "median": 60.321313873422554,
+                    "mean": 66.52249940585388,
+                    "p95": 104.44668085918775,
+                    "max": 132.06576995004676
+                  },
+                  "range_degrees": 78.48550141266918,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.0006218091192522479,
+                    "median": 20.445586459721028,
+                    "mean": 50.576636924822,
+                    "p95": 230.45374479525853,
+                    "max": 338.6960832824812
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 1.3877787807814457e-16,
+                "median": 3.2959746043559335e-16,
+                "mean": 0.0005675978946392351,
+                "p95": 8.241837941291852e-10,
+                "max": 0.014757543703731835
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 4.476907338367905e-16,
+                "median": 2.074325733963334e-15,
+                "mean": 0.00030134514486697324,
+                "p95": 1.2752088109465916e-09,
+                "max": 0.007834971245038206
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.1597303716578982,
+                "mean": 0.38585996780365944,
+                "p95": 1.513885250716405,
+                "max": 3.5973345389896574
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    },
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/kimodo_martial_combo_8s_core27.npz",
+      "sha256": "de78a66490d7c1651552758aa3f9f8a58e1c62dbfe7a069a4847bd35d773cf71",
+      "metadata": {
+        "source": "Kimodo RP v1.1 \u2014 named SOMA\u2192Core27 retarget, 20fps",
+        "model": "kimodo-soma-rp-v1.1",
+        "fps": 20.0,
+        "seed": 6201,
+        "prompt": "A martial artist performs a sharp combination: a left jab, a right cross, a front kick, then resets into a low guarded stance and repeats the combination.",
+        "seconds": 8.0,
+        "steps": 100,
+        "post_processing": true,
+        "generation_seconds": 3.466826603980735,
+        "model_load_seconds": 58.7202647421509,
+        "peak_gpu_allocated_bytes": 1236270592,
+        "gpu_fraction_cap": 0.1,
+        "original_source": "unmodified native Kimodo output",
+        "soma_conversion": {
+          "adapter": "SOMA77 native proportions in Core27 layout",
+          "source_fps": 30.0,
+          "target_fps": 20.0,
+          "source_frames": 240,
+          "target_frames": 160,
+          "source_duration_seconds": 7.966666666666667,
+          "target_duration_seconds": 7.95,
+          "source_fk_error_max_m": 2.071665065527645e-07,
+          "mapping": {
+            "Hips": "Hips",
+            "Spine": "Spine1",
+            "Spine1": "Spine2",
+            "Spine3": "Chest",
+            "Neck": "Neck2",
+            "Head": "Head",
+            "LeftShoulder": "LeftShoulder",
+            "LeftArm": "LeftArm",
+            "LeftForeArm": "LeftForeArm",
+            "LeftHand": "LeftHand",
+            "LeftHandThumb1": "LeftHandThumb1",
+            "LeftFoot": "LeftFoot",
+            "LeftToeBase": "LeftToeBase",
+            "RightShoulder": "RightShoulder",
+            "RightArm": "RightArm",
+            "RightForeArm": "RightForeArm",
+            "RightHand": "RightHand",
+            "RightHandThumb1": "RightHandThumb1",
+            "RightFoot": "RightFoot",
+            "RightToeBase": "RightToeBase",
+            "LeftHandEnd": "LeftHandMiddle2",
+            "RightHandEnd": "RightHandMiddle2",
+            "LeftUpLeg": "LeftLeg",
+            "RightUpLeg": "RightLeg",
+            "LeftLeg": "LeftShin",
+            "RightLeg": "RightShin"
+          },
+          "derived_joint": {
+            "Spine2": "midpoint of SOMA Spine2 and Chest"
+          },
+          "sampling": "uniform timestamps; local SO(3) SLERP; native fixed-length FK; linear root translation",
+          "world_transform": "none; Y-up metres, native global root path retained",
+          "rotation_conversion": "named anatomical rest-axis alignment from standard SOMA T-pose to Core-style axes",
+          "limitations": [
+            "Uses native SOMA proportions, not canonical Core27 bone lengths.",
+            "Core27 layout omits detailed fingers, jaw and eyes; raw SOMA archive retains them."
+          ],
+          "raw_source_file": "kimodo_martial_combo_8s.npz",
+          "raw_source_sha256": "7040da737abb041ebf04bcd1d8173284949b36efe0ac66b253976860f1b0482c"
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.8603436946868896,
+              "median": 0.8911547362804413,
+              "mean": 0.903635299578309,
+              "p95": 1.010888785123825,
+              "max": 1.0341100096702576
+            },
+            "root_path_length_m": 2.547649107347116,
+            "root_net_displacement_m": 0.9467886404562725,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.015700883264699414,
+              "median": 0.24910964104381958,
+              "mean": 0.3204590072134738,
+              "p95": 1.0700880280188132,
+              "max": 1.548395007225474
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 7.312135828073368e-06,
+              "median": 0.015923639704968216,
+              "mean": 0.027479031864898668,
+              "p95": 0.0990296959550501,
+              "max": 0.4485553778760643
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.016977892581741427,
+                  "median": 0.02016375730211212,
+                  "mean": 0.02184622379377967,
+                  "p95": 0.03226963070162367,
+                  "max": 0.07023688717050579
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 149,
+                "inferred_contact_seconds": 7.45,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 149,
+                  "min": 0.0008881689191594711,
+                  "median": 0.026624603309011976,
+                  "mean": 0.08112328914485929,
+                  "p95": 0.4029778641653823,
+                  "max": 0.642792047505029
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0008881689191594711,
+                  "median": 0.029348903097113792,
+                  "mean": 0.20033803468187764,
+                  "p95": 0.5663274807640996,
+                  "max": 5.031502111465429
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 34,
+                    "duration_seconds": 1.7,
+                    "path_drift_m": 0.22622640655545617,
+                    "net_drift_m": 0.08333228074924923
+                  },
+                  {
+                    "first_frame": 36,
+                    "last_frame": 37,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.013404001981137115,
+                    "net_drift_m": 0.013404001981137115
+                  },
+                  {
+                    "first_frame": 39,
+                    "last_frame": 56,
+                    "duration_seconds": 0.85,
+                    "path_drift_m": 0.051867602505648376,
+                    "net_drift_m": 0.019766990797895578
+                  },
+                  {
+                    "first_frame": 62,
+                    "last_frame": 159,
+                    "duration_seconds": 4.85,
+                    "path_drift_m": 0.3128704930869601,
+                    "net_drift_m": 0.12172754756652576
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.013509464806723256,
+                  "median": 0.020163820777272513,
+                  "mean": 0.084417802754432,
+                  "p95": 0.5731126804980828,
+                  "max": 1.2465988284106995
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 142,
+                "inferred_contact_intervals": 134,
+                "inferred_contact_seconds": 6.7,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 134,
+                  "min": 0.0003095205451057281,
+                  "median": 0.01766169761329755,
+                  "mean": 0.07911257777240166,
+                  "p95": 0.32199452201938367,
+                  "max": 0.9055580516957704
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0003095205451057281,
+                  "median": 0.03362253519830779,
+                  "mean": 0.45634753767774605,
+                  "p95": 3.0391425234755443,
+                  "max": 6.832785728661035
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 54,
+                    "duration_seconds": 2.7,
+                    "path_drift_m": 0.41233711872198464,
+                    "net_drift_m": 0.04008289040031839
+                  },
+                  {
+                    "first_frame": 55,
+                    "last_frame": 61,
+                    "duration_seconds": 0.3,
+                    "path_drift_m": 0.014842052514543229,
+                    "net_drift_m": 0.012334745780659954
+                  },
+                  {
+                    "first_frame": 82,
+                    "last_frame": 95,
+                    "duration_seconds": 0.65,
+                    "path_drift_m": 0.0326007425115198,
+                    "net_drift_m": 0.01583769862722858
+                  },
+                  {
+                    "first_frame": 96,
+                    "last_frame": 97,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.04527790258478852,
+                    "net_drift_m": 0.04527790258478852
+                  },
+                  {
+                    "first_frame": 99,
+                    "last_frame": 159,
+                    "duration_seconds": 3.0,
+                    "path_drift_m": 0.024996454742254703,
+                    "net_drift_m": 0.009303244606706621
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 28.637848105757886,
+                    "median": 62.4726289578142,
+                    "mean": 61.793796972099244,
+                    "p95": 87.7755099600258,
+                    "max": 148.2646528065584
+                  },
+                  "range_degrees": 119.6268047008005,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.36882328038814194,
+                    "median": 26.373438040028816,
+                    "mean": 93.31983600649207,
+                    "p95": 475.5168129592135,
+                    "max": 1066.8144240275933
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 30.61038243047164,
+                    "median": 48.084783751625054,
+                    "mean": 54.627302464105036,
+                    "p95": 100.04554656358394,
+                    "max": 152.28816422514782
+                  },
+                  "range_degrees": 121.67778179467618,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.002988769542469072,
+                    "median": 15.839087865234944,
+                    "mean": 72.0329594772969,
+                    "p95": 341.3555247067035,
+                    "max": 787.4819432166026
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 111.20197554448423,
+                    "median": 143.25973286758438,
+                    "mean": 140.82168382523105,
+                    "p95": 152.13184540181163,
+                    "max": 165.65337369095812
+                  },
+                  "range_degrees": 54.45139814647389,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.3577833398051098,
+                    "median": 44.91188700603118,
+                    "mean": 57.149166041584785,
+                    "p95": 162.59712004089573,
+                    "max": 281.30872080342783
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 55.2883160103451,
+                    "median": 135.01487479472877,
+                    "mean": 129.66323716163862,
+                    "p95": 145.20979583585608,
+                    "max": 156.5175868315423
+                  },
+                  "range_degrees": 101.2292708211972,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.34913058762356286,
+                    "median": 43.72220546365298,
+                    "mean": 84.57741833101448,
+                    "p95": 291.77408171240205,
+                    "max": 828.3130798759621
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 150.6359260638053,
+                    "median": 169.25488229702606,
+                    "mean": 168.0052071492165,
+                    "p95": 171.3596021001453,
+                    "max": 174.21703045465313
+                  },
+                  "range_degrees": 23.581104390847827,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.07824164745215967,
+                    "median": 5.159514166819008,
+                    "mean": 13.808950868033563,
+                    "p95": 51.829993989644294,
+                    "max": 116.50676972372253
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 126.855752992621,
+                    "median": 163.41846576984778,
+                    "mean": 160.0514696768815,
+                    "p95": 171.31812137067493,
+                    "max": 174.2802195502686
+                  },
+                  "range_degrees": 47.424466557647605,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.2845255530536406,
+                    "median": 27.550541200013186,
+                    "mean": 38.81438697474174,
+                    "p95": 106.66215009756608,
+                    "max": 170.27727749110795
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 111.74017066277572,
+                    "median": 166.7711511518154,
+                    "mean": 162.647371192857,
+                    "p95": 173.71012982660469,
+                    "max": 178.71152124034128
+                  },
+                  "range_degrees": 66.97135057756556,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.533632498170391,
+                    "median": 24.977263998725334,
+                    "mean": 50.17504886862564,
+                    "p95": 187.64010762300998,
+                    "max": 308.70549851987334
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 69.39864126887518,
+                    "median": 98.82604023286615,
+                    "mean": 97.99191013607394,
+                    "p95": 121.72409596613285,
+                    "max": 141.53291277862976
+                  },
+                  "range_degrees": 72.13427150975458,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.16072129347776354,
+                    "median": 23.459160187787234,
+                    "mean": 69.44712777926517,
+                    "p95": 323.99637631285776,
+                    "max": 557.335314012478
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 54.293562070569834,
+                    "median": 75.0365093089942,
+                    "mean": 80.18368655487015,
+                    "p95": 116.51229313759254,
+                    "max": 138.22805722779813
+                  },
+                  "range_degrees": 83.9344951572283,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.09293624671101952,
+                    "median": 31.50213237980921,
+                    "mean": 73.76131073976447,
+                    "p95": 301.83974086550364,
+                    "max": 586.0812514622726
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 1.5959455978986625e-16,
+                "median": 3.608224830031759e-16,
+                "mean": 0.00035400511472417375,
+                "p95": 8.013195419709351e-10,
+                "max": 0.009204131383439396
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 4.702512047244617e-16,
+                "median": 2.076138618047889e-15,
+                "mean": 0.0002079605876207594,
+                "p95": 1.363552704758932e-09,
+                "max": 0.005406972615025455
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.22795218755615787,
+                "mean": 0.48932657748928726,
+                "p95": 1.9672665724626508,
+                "max": 8.590518413882931
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    }
+  ]
+}

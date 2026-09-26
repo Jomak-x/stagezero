@@ -1,3 +1,5 @@
+> **Visually rejected experiment.** The user rejected this presentation: rigid body motion, unconvincing assisted flight/pickup, and poor character appearance. Its numerical checks do not establish animation quality. Preserve it as diagnostic history; do not treat it as a production-ready or accepted demo. Current work investigates full native body motion on generated human characters.
+
 # Live web-swing experiment
 
 This isolated prototype uses the existing generated city output, ARDY Core body

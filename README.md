@@ -1,3 +1,5 @@
+> **Isolated motion research lab:** See [the grounded motion results](docs/GROUNDED-MOTION-RESULTS.md) and [local launch commands](docs/GROUNDED-MOTION-LAB.md). Actual Core live steering, Kimodo comparisons, generated characters/background, and recorded evidence are available on this experimental branch. The earlier swing presentation was rejected; this is not a production release.
+
 # StageZero — Single-actor directing
 
 Real ARDY G1 generation is connected to the existing viewer. The original recorded preview is retained in a separate, clearly labeled mode. This is **complete-segment generation, not streaming**: each instruction produces 104 fresh frames (4.16 seconds at 25 fps), then playback begins.

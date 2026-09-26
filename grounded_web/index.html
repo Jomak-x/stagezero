@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StageZero · Native Motion Review</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="identity"><span class="mark">SZ</span><div><strong>STAGEZERO</strong><small>NATIVE MOTION REVIEW</small></div></div>
+      <div class="selection"><label for="clip-select">SOURCE CLIP</label><select id="clip-select" aria-label="Choose native model clip"><option>Loading native clips…</option></select></div>
+      <div class="continuation"><label for="action-prompt">NEXT ACTION</label><input id="action-prompt" type="text" maxlength="300" placeholder="Describe the next natural action" aria-label="Next action prompt"><button id="generate" type="button">GENERATE NEXT</button></div>
+    </header>
+    <section class="stage-wrap">
+      <canvas id="stage" aria-label="Native model clip in generated market scene"></canvas>
+      <div id="accessible-controls" aria-label="Playback controls"></div>
+      <input id="frame-input" type="number" min="0" step="1" aria-label="Go to exact source frame">
+      <div class="loading" id="loading"><div class="loading-ring"></div><strong>Preparing native motion review</strong><span id="loading-detail">Loading generated scene and textured characters…</span></div>
+    </section>
+    <footer class="footer"><span>GENERATED BODY MOTION · APPROXIMATE 17-BONE RETARGET · NO FINGER/FACE ANIMATION</span><span>SPACE PLAY / PAUSE &nbsp;·&nbsp; ← → FRAME &nbsp;·&nbsp; C CAMERA &nbsp;·&nbsp; R RECORD</span></footer>
+  </main>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Grounded motion lab packaging review — 2026-09-26
+
+**Result:** No reproducible blocker to offline sample replay in the current bundle. A fully new clone was not installed for this review; the launcher was exercised from the isolated worktree using an existing Python environment and Three.js installation through its documented overrides.
+
+## Verified
+
+- `run-motion-lab.command` launched on a separate loopback port with `STAGEZERO_PYTHON` and `STAGEZERO_THREE_DIR` set and no token file present. `GET /`, `/three/build/three.module.js`, `/api/grounded/clips` (seven samples), `/api/grounded/scene` (generated Market Square), `/api/grounded/rig?actor=0` (textured civilian), and `/api/grounded/clip` (160-frame Core sample) all returned HTTP 200. The server was then stopped.
+- Both bundled character GLBs loaded and retargeted all 120 frames of the bundled InterGen pair sample to 17 bones. Their SHA-256 hashes match the corresponding original user-generated GLBs and original character reports in `/Users/jakob/Desktop/Shellhacks/.runtime/character-quality/`.
+- Every one of the 16 current entries in `grounded_assets/artifact-manifest.json` exists, has the recorded byte count and SHA-256, and covers every bundled asset file other than the manifest itself. This includes the scene and generation metadata, seven playback clips, four raw Kimodo SOMA clips, and the named SOMA skeleton. The earlier missing Kimodo manifest entries were fixed during this review.
+- The launcher and server use paths derived from their checkout. `grounded_character.py` imports `motion_bridge.py`, which needs the pinned `vendor/ardy` submodule and PyTorch; `grounded_scene.py` uses `swing_scene.py` and `swing_assets/asset_geometry.py` to compile the bundled generated scene. The lab documentation now gives the required `git submodule update`, `uv` environment setup, and `npm ci` commands. No private recorded CSV or token was needed for the offline smoke test.
+- Source distinctions are stated in the lab documentation and sample metadata: Core clips retain native Core27 output and 330-feature history; the paired InterGen sample is a named SMPL22-to-Core27 retarget under CC BY-NC-SA 4.0; Kimodo playback clips are named SOMA77-to-Core27/20 fps conversions, while their raw SOMA77 files remain separately bundled. The market consists of generated props in a deterministic composition. No model checkpoint or credential is bundled.
+
+## Remaining publication caveat
+
+The manifest identifies the civilian and ranger broadly as user-generated Neon/TRELLIS assets, and their hashes match the original reconstruction reports. Those reports, reference prompts/images, and a per-character source-model record are outside this bundle in the original `.runtime/character-quality` directory. This does not prevent replay, but a portable provenance package should include a sanitized per-character record (source model, prompt/reference lineage, original report SHA, and the existing output GLB hash). The lab documentation already separates code/checkpoint license terms and correctly marks the bundled InterGen comparison as noncommercial research; it should not be described as a commercially reusable paired-motion sample.
+
+Final supplement: the asset manifest was regenerated after additional Kimodo samples and explicit retarget metadata were bundled. Consult that manifest for final file counts and hashes; earlier smoke-test counts reflect the reviewed snapshot.

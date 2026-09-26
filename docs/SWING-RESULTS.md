@@ -1,3 +1,5 @@
+> **Visually rejected experiment.** The user rejected this presentation: rigid body motion, unconvincing assisted flight/pickup, and poor character appearance. Its numerical checks do not establish animation quality. Preserve it as diagnostic history; do not treat it as a production-ready or accepted demo. Current work investigates full native body motion on generated human characters.
+
 # Live swing prototype results — 2026-09-26
 
 The tested scene runs in one continuous interactive session in the isolated
