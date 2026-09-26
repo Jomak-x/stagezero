@@ -28,7 +28,7 @@ Every attempted trial is retained, including failures. Full per-trial reports ar
 
 The decisive scheduling finding: ARDY only sees constraints in its current horizon. A target at the first frame of the next horizon cannot stop wandering at the end of the current one. Dense targets plus explicit frame 39/79/119 goals fixed the measured pair drift without editing poses.
 
-CPU regression verification: **178 tests passed** with the pinned ARDY checkout. The isolated service also passed live authentication, malformed-request recovery and exact save/load checks.
+CPU regression verification: **184 tests passed** (including the updated main-branch controller edge suite) with the pinned ARDY checkout. The isolated service also passed live authentication, malformed-request recovery and exact save/load checks.
 
 ## Visual review
 
