@@ -279,7 +279,8 @@ export function Timeline({
     cameraStore?.getState ?? getEmptyCameraState,
     cameraStore?.getState ?? getEmptyCameraState,
   );
-  const cameraTrackVisible = cameraState.received;
+  const coreTimeline = (timelineState?.prompts ?? []).some((prompt) => prompt.uuid.startsWith("core-scene-"));
+  const cameraTrackVisible = cameraState.received && !coreTimeline;
   const [selectedCameraCutId, setSelectedCameraCutId] = useState<string | null>(null);
   useEffect(() => setSelectedCameraCutId(null), [cameraState.project_id, cameraState.take_id]);
   useEffect(() => {
@@ -3184,8 +3185,8 @@ export function Timeline({
     >
       <canvas
         ref={canvasRef}
-        aria-label="Take timeline: click an action to edit it, or click or drag the ruler to choose a time"
-        title="Click an action to edit it. Click or drag the time ruler to review motion."
+        aria-label={coreTimeline ? "Scene direction timeline: drag the ruler to review native motion" : "Take timeline: click an action to edit it, or click or drag the ruler to choose a time"}
+        title={coreTimeline ? "Use Scene direction controls to redirect. Drag the ruler to review motion." : "Click an action to edit it. Click or drag the time ruler to review motion."}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

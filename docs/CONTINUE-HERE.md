@@ -1,3 +1,17 @@
+# Ready scene direction integration — 2026-09-26
+
+The main studio now includes an additive **Motion → Scene direction · Core** panel.
+Start with [SCENE-DIRECTION.md](SCENE-DIRECTION.md) for replay commands, measured live
+results, limits, and the exact two-actor/city/arch archives in `review/studio-core/`.
+The existing G1 studio, scene generation, objects and character workflows remain intact.
+Core uses a separate native timeline and bundled human cast. Two actors have independent
+prompts and shared playback; physical contact choreography remains experimental.
+Known geometry enables object approach/open-arch routes; this is not image recognition.
+The rejected swing/carry work and research-only model integrations are not promoted.
+No extra Pod was rented and existing workers were preserved.
+
+---
+
 # StageZero review handoff — 2026-09-26
 
 Workspace: `/Users/jakob/Desktop/Shellhacks`; branch: `feat/directing-workflow`.
