@@ -54,9 +54,11 @@ the feet level. This lab pose was checked against the actual TASM mesh silhouett
 not only joint-center alignment. The sweep
 opens both arms outward and returns along the same path; it does not deliberately
 move them across the torso. The robot's identity-local calibration pose remains
-the production retargeting reference. The lab places its floor at the standing
-mesh's lowest rendered vertex once per character selection, keeping it fixed
-during playback. This presentation alignment is not foot-contact IK.
+the production retargeting reference. Both the lab and Studio keep the ground
+at Y=0 and lift the character by a fixed offset calculated from its lowest
+rendered vertex in the standing reference pose. Static previews use their
+displayed rest geometry. The offset stays fixed during playback, preserving
+jumps and root travel. This presentation alignment is not foot-contact IK.
 It generates two simple textured test figures with different proportions and
 G1/Mixamo names. These are technical fixtures, not production character artwork.
 Use an unused port and separate runtime folder when sharing a machine.
@@ -74,11 +76,16 @@ for prompts and live generation. No Pod upload endpoint or backend contract was 
 1. Click **Load GLB**. The browser accepts one nonempty `.glb` up to 32 MiB.
 2. The server validates it and stores it under its content hash in the private
    character library. Source filenames are not used as filesystem paths.
-3. **Ready for motion** means a recognized and structurally validated humanoid
-   mapping is available. **Mapping required** needs a JSON mapping. **Static
-   preview** has no skin and can be inspected but cannot play/generate motion.
-4. For a custom rig, choose the model and click **Load rig mapping** (JSON,
-   maximum 1 MiB). See [rig mapping reference](../rig_profiles/README.md).
+3. The compatibility result distinguishes a motion-ready humanoid, a model
+   needing a bone mapping, a static-only model, and an unsupported file. It
+   explains the missing requirements and available next steps. Passing these
+   technical checks is not a guarantee of visual deformation quality.
+4. A model that is not motion-ready does not immediately replace the active
+   character. Choose **Open static preview** to inspect a supported mesh, or
+   **Choose another file** to dismiss it and keep the current character. A
+   model with an existing skin can offer **Load rig mapping** (JSON, maximum
+   1 MiB). A skinless model needs bones and vertex weights first; a mapping file
+   cannot create them. See [rig mapping reference](../rig_profiles/README.md).
 5. Use **Frame character** to fit the viewport, and the **Character** dropdown
    to return to G1 or another imported model.
 
@@ -91,7 +98,9 @@ animated characters preserves the source motion and playback state.
 
 Imported files and mappings persist locally; the current selection starts at G1
 on a new server run unless `director_viewer.py --glb` or `asset_viewer.py --glb`
-selects a startup model.
+requests a startup model. A non-motion startup model still requires explicit
+static-preview selection. Saved catalog entries and updated mappings go through
+the same compatibility checks as newly imported files.
 Reimporting identical bytes reuses the saved character, including its custom
 mapping and name, and does not consume another library slot.
 Character artwork is not embedded in exported motion project files. To use an
@@ -118,6 +127,29 @@ morph targets, external resources, non-triangle primitives and unsupported rigs.
 Rejecting optional extensions is intentional: silently processing them could
 bypass validated geometry/resource limits. Export a core GLB variant for now.
 Embedded animation clips do not auto-play in the controlled character renderer.
+
+## Preparing a skinless character in Blender
+
+A single GLB can contain everything required for motion: mesh, textures,
+skeleton, inverse bind matrices and vertex weights. A GLB containing only a
+mesh is suitable for static inspection, even if it looks like a person.
+
+1. Work on a copy. Keep the original dimensions and embedded textures; export
+   in glTF Y-up/metres with the soles at Y=0.
+2. Place a connected humanoid armature inside the actual geometry, including
+   pelvis, spine, arms, hands, thighs, shins and feet. Match a supported Mixamo
+   hierarchy/naming scheme or supply an explicit mapping.
+3. Bind the mesh with automatic weights as a starting point. Correct shoulders,
+   hips, elbows and knees while inspecting bent poses. Keep at most four
+   influences per vertex and export normalized weights.
+4. Export a core GLB with its skin and embedded textures, without unsupported
+   compression/material extensions. Save the editable Blender source too.
+5. Reimport and inspect standing, raised arms, walking and crouching. A valid
+   skeleton does not by itself establish good weighting or reliable foot contact.
+
+The local Mort preparation is documented in
+[the asset notes](../assets/characters/mort-rigged/README.md). This is a prepared
+character, not a general automatic rigging service in the Studio.
 
 The importer caps file/JSON size, decoded accessors/images, hierarchy counts and
 displayed geometry. Those are resource ceilings, not a claim that a 4-million-
@@ -185,3 +217,29 @@ knee flexion, level feet, relaxed forearms, full-clip outward clearance and FK
 consistency. Actual mesh front/side inspection remains necessary: joint tests
 alone do not certify the appearance of an arbitrary character's skinning.
 The TASM asset itself does not require another export for these motion fixes.
+
+### Compatibility and ground placement acceptance — 2026-09-26
+
+- Full local Python suite: 288 tests passed. Frontend: 16 tests, TypeScript
+  checking and the production build passed. Independent code review covered
+  selected-scene rigs, late mapping uploads and camera/reconnect behavior.
+- Real browser upload of the original `mort_LP.glb` kept G1 active until
+  **Open static preview** was chosen. **Choose another file** dismissed the
+  candidate without changing G1. Preview disabled motion and hid rig mapping.
+- The original Mort mesh minimum Y is -0.5547341108. A carrier offset of
+  +0.5547341108 places it on the fixed floor without rewriting the GLB.
+- The prepared `mort-rigged.glb` passed the actual browser load/commit path,
+  enabled playback, completed the synthetic sweep and retained its pose and
+  framing on page reload. Browser console showed no errors during that check.
+- `ActorGlbLoadMessage.ground_offset` is an optional signed world-space Y offset,
+  defaulting to zero for old messages. It includes the model scale once and is
+  applied outside posed glTF nodes. Reconnect replay carries the same offset.
+- Tests cover unused geometry, nonunit scale, upward root travel, static/startup
+  consent, malformed uploads, hidden-scene rigs, mapping preparation failures,
+  delayed A-to-B-to-A mapping callbacks and cancellation of one upload while
+  preserving another. Successful commit frames only the initiating viewer.
+
+The separate local lab uses synthetic FK inputs through the production
+retargeter. These checks did not request new live ARDY inference or restart the
+user's existing Studio session. See the Mort asset notes for visual QA and the
+remaining limitations of contact handling without IK.

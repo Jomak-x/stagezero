@@ -12,8 +12,11 @@ import numpy as np
 
 from bounded_upload import ScopedUploadLimits
 from character_assets import DEFAULT_LIMITS, import_glb, load_character_asset
+from character_compatibility import assess_character, inspect_character, unsupported_character
+from character_diagnostics import standing_reference
+from character_geometry import ground_offset
+from character_guide import add_character_guide
 from character_renderer import GlbCharacterRenderer
-from retargeting import build_retargeter, RigMappingError
 
 
 @dataclass
@@ -21,6 +24,10 @@ class CharacterEntry:
     asset: object
     retargeter: object | None
     reason: str
+    compatibility: object
+    ground_offset: float
+    mapping: object = None
+    preview: bool = False
 
 
 class CharacterControls:
@@ -44,15 +51,17 @@ class CharacterControls:
         self._results = SimpleQueue()
         self._ticket = 0
         self._pending = None
+        self._candidate_id = None
+        self.compatibility = None
         self._requested_id = None
         self._initial_id = None
         self._last_pose_key = None
         self._root = None
         self._controls = None
+        self._diagnostics = None
         self._mapping_binding = None
         self._mapping_folder = None
         self._mapping_gui = None
-        self._diagnostics = None
         self.renderer = renderer or GlbCharacterRenderer(server, on_result=self._on_result)
         self.upload_limits = None
         self._restore_catalog()
@@ -64,14 +73,16 @@ class CharacterControls:
         with self._lock:
             self.status = 'Load failed · ' + str(message)[:240]
 
-    def _entry(self, asset, mapping=None):
-        if asset.kind == 'static':
-            return CharacterEntry(asset, None, 'Static preview · model has no skin')
-        try:
-            rig = build_retargeter(asset, mapping=mapping, skeleton=self.skeleton)
-            return CharacterEntry(asset, rig, 'Ready for motion')
-        except RigMappingError as exc:
-            return CharacterEntry(asset, None, 'Mapping required · ' + str(exc)[:200])
+    def _entry(self, asset, mapping=None, *, report=None, preview=False):
+        report = report or assess_character(asset, mapping=mapping, skeleton=self.skeleton)
+        rig = None if preview else report.retargeter
+        world = None
+        if rig is not None:
+            world = rig.retarget(*standing_reference(rig.skeleton)).world_matrices
+        reason = report.title + ' · ' + ' '.join(report.reasons)
+        if preview:
+            reason = 'Static preview · motion generation disabled. ' + ' '.join(report.reasons)
+        return CharacterEntry(asset, rig, reason, report, ground_offset(asset, world), mapping, preview)
 
     def _restore_catalog(self):
         # A bounded startup catalog; imports are local to this installation.
@@ -83,8 +94,9 @@ class CharacterControls:
                 self.entries[asset.sha256] = self._entry(asset, mapping)
             except (ValueError, OSError, KeyError) as exc:
                 self.status = 'Skipped an invalid saved character · ' + str(exc)[:160]
+                self.compatibility = unsupported_character(exc)
 
-    def add_file(self, data, name):
+    def add_file(self, data, name, *, ticket=None):
         if not name.lower().endswith('.glb'):
             raise ValueError('Choose a .glb file')
         if not isinstance(data, bytes):
@@ -98,8 +110,14 @@ class CharacterControls:
                     return digest
                 if len(self.entries) >= 16:
                     raise ValueError('Character library is full (16 models); use a new character directory')
-            asset = import_glb(data, self.storage_root, display_name=Path(name).name)
-            entry = self._entry(asset)
+            asset, report = inspect_character(data, display_name=Path(name).name, skeleton=self.skeleton)
+            if asset is None:
+                with self._lock:
+                    if ticket is None or ticket == self._ticket:
+                        self.compatibility = report
+                raise ValueError(report.title + ' · ' + ' '.join(report.reasons))
+            entry = self._entry(asset, report=report)
+            import_glb(data, self.storage_root, display_name=Path(name).name)
             with self._lock:
                 self.entries[asset.sha256] = entry
         return asset.sha256
@@ -112,10 +130,14 @@ class CharacterControls:
             if self._initial_id is not None:
                 asset_id, self._initial_id = self._initial_id, None
                 self.select(asset_id, client.client_id)
+            if self.active_entry is not None:
+                self.frame_character(client)
 
     def select(self, asset_id, client_id):
         with self._lock:
             self._ticket += 1
+            self._cancel_pending()
+            self._candidate_id = None
             if asset_id is None:
                 self.renderer.restore_g1()
                 self._pending = None
@@ -125,15 +147,73 @@ class CharacterControls:
                 self.revision += 1
                 self._last_pose_key = None
                 self._root = None
+                self.compatibility = None
                 self.session.set_character_motion_enabled(True)
                 self.status = 'G1 robot · ready for motion'
                 return
-            entry = self.entries[asset_id]
-            required_nodes = tuple(sorted(set(entry.retargeter.profile.bones.values()))) if entry.retargeter else ()
-            revision = self.renderer.load(asset_id, entry.asset.glb_bytes, client_id, required_nodes=required_nodes)
-            self._pending = (revision, asset_id, client_id, entry)
+            saved = self.entries[asset_id]
+            entry = self._entry(saved.asset, saved.mapping)
+            self.entries[asset_id] = entry
+            self.compatibility = entry.compatibility
             self._requested_id = asset_id
-            self.status = 'Loading · ' + entry.asset.display_name
+            if not entry.compatibility.motion_ready:
+                self._candidate_id = asset_id
+                self.status = entry.asset.display_name + ' · ' + entry.reason + ' Current character is unchanged.'
+                return
+            self._start_load(asset_id, entry, client_id)
+
+    def _cancel_pending(self):
+        if self._pending is not None:
+            self.renderer.reject(self._pending[0])
+            self._pending = None
+
+    def _start_load(self, asset_id, entry, client_id):
+        required_nodes = tuple(sorted(set(entry.retargeter.profile.bones.values()))) if entry.retargeter else ()
+        revision = self.renderer.load(asset_id, entry.asset.glb_bytes, client_id,
+                                      required_nodes=required_nodes, ground_offset=entry.ground_offset)
+        self._pending = (revision, asset_id, client_id, entry)
+        self._candidate_id = None
+        self._requested_id = asset_id
+        self.status = 'Loading · ' + entry.asset.display_name
+
+    def open_static_preview(self, client_id):
+        """Explicit consent to replace the actor with the candidate's rest pose."""
+        with self._lock:
+            if self._candidate_id is None:
+                return
+            asset_id = self._candidate_id
+            saved = self.entries[asset_id]
+            if not saved.compatibility.can_preview:
+                return
+            self._ticket += 1
+            entry = self._entry(saved.asset, saved.mapping, preview=True)
+            self._start_load(asset_id, entry, client_id)
+
+    def choose_another_file(self):
+        """Dismiss a proposed selection without affecting the committed actor."""
+        with self._lock:
+            self._ticket += 1
+            self._cancel_pending()
+            self._candidate_id = None
+            self._requested_id = self.active_id
+            self.compatibility = self.active_entry.compatibility if self.active_entry else None
+            self.status = 'Choose another .glb file with Load GLB. Current character is unchanged.'
+
+    def apply_mapping(self, asset_id, mapping, client_id):
+        """Validate and persist a mapping, then request a browser-confirmed swap."""
+        with self._lock:
+            saved = self.entries[asset_id]
+            if not saved.compatibility.can_map:
+                raise ValueError('This model needs rig preparation in Blender; a mapping cannot create bones or weights')
+            entry = self._entry(saved.asset, mapping)
+            if not entry.compatibility.motion_ready:
+                self.compatibility = entry.compatibility
+                raise ValueError(entry.reason)
+            text = mapping.decode('utf-8') if isinstance(mapping, bytes) else mapping
+            parsed = json.loads(text) if isinstance(text, str) else text
+            (self.storage_root / asset_id / 'mapping.json').write_text(json.dumps(parsed, indent=2))
+            self.entries[asset_id] = entry
+            self.select(asset_id, client_id)
 
     def _pose(self, entry):
         if entry.retargeter is None:
@@ -147,6 +227,7 @@ class CharacterControls:
         self.renderer.poll()
         if self.upload_limits is not None:
             self.upload_limits.poll()
+        frame_request = None
         with self._lock:
             while True:
                 try:
@@ -160,6 +241,7 @@ class CharacterControls:
                     self.renderer.reject(revision)
                     self._pending = None
                     self._requested_id = self.active_id
+                    self.compatibility = self.active_entry.compatibility if self.active_entry else None
                     self._set_error(error or 'Browser could not load this model')
                     continue
                 entry = pending[3]
@@ -173,16 +255,17 @@ class CharacterControls:
                     self.renderer.reject(revision)
                     self._pending = None
                     self._requested_id = self.active_id
+                    self.compatibility = self.active_entry.compatibility if self.active_entry else None
                     self._set_error(exc)
                     continue
                 self.active_id = asset_id
                 self.active_entry = entry
-                self.entries[asset_id] = entry
                 self._pending = None
                 self.revision += 1
                 self._last_pose_key = None
                 self.session.set_character_motion_enabled(entry.retargeter is not None)
                 self.status = entry.asset.display_name + ' · ' + entry.reason
+                frame_request = (client, self.revision)
             key = (self.revision, pose_key)
             if self.active_id is not None and key != self._last_pose_key:
                 entry = self.active_entry
@@ -194,11 +277,14 @@ class CharacterControls:
                     else:
                         self._root = entry.asset.bounds.mean(axis=0)
                         self._root[1] = 0.
+                    self._root[1] += entry.ground_offset
                     self._last_pose_key = key
                 except (ValueError, RuntimeError) as exc:
                     # A bad transform must never reach the GPU or lose the source take.
                     self.select(None, None)
                     self._set_error('Motion mapping failed; showing G1. ' + str(exc))
+            if frame_request is not None and frame_request[1] == self.revision and self.active_entry is not None:
+                self.frame_character(self.server.get_clients().get(frame_request[0]))
             self._update_gui()
 
     def actor_root(self):
@@ -212,6 +298,8 @@ class CharacterControls:
     def mapping_asset_id(self):
         """The same asset the selection control currently presents to the user."""
         with self._lock:
+            if self._candidate_id is not None:
+                return self._candidate_id
             return self._pending[1] if self._pending is not None else self.active_id
 
     def frame_character(self, client):
@@ -227,6 +315,8 @@ class CharacterControls:
             if entry is not None and entry.retargeter is not None:
                 rest_root = entry.retargeter.retarget(*entry.retargeter.neutral_source_pose()).root_position
                 target += self.actor_root() - rest_root
+            elif entry is not None:
+                target[1] += entry.ground_offset
             radius = max(float(np.linalg.norm(high - low)) / 2, .25)
             distance = radius / np.sin(np.deg2rad(21.)) * 1.2
             direction = np.array((.55, .25, 1.))
@@ -239,17 +329,20 @@ class CharacterControls:
     def build_gui(self, gui):
         gui.add_html('<div class="sz-section">Character<small>Load a rigged GLB to use its appearance with ARDY motion.</small></div>')
         upload = gui.add_upload_button('Load GLB', mime_type='.glb')
+        add_character_guide(gui)
         choose = gui.add_dropdown('Character', ('G1 robot',))
         self._mapping_gui = gui
-        self._mapping_folder = gui.add_folder('Rig mapping')
+        self._mapping_folder = gui.add_folder('Rig mapping', visible=False)
         with self._mapping_folder:
-            mapping = gui.add_upload_button('Load rig mapping', mime_type='.json')
+            mapping = gui.add_upload_button('Load rig mapping', mime_type='.json', visible=False)
+        preview = gui.add_button('Open static preview', visible=False)
+        another = gui.add_button('Choose another file', visible=False)
         frame = gui.add_button('Frame character')
         status = gui.add_html('')
         with gui.add_folder('Rig diagnostics', expand_by_default=False):
             self._diagnostics = gui.add_html('')
-        gui.add_markdown('Static models can be inspected. Motion needs a supported humanoid rig or a mapping file. Selection is shared between connected viewers.')
-        self._controls = (choose, mapping, status)
+        gui.add_markdown('Motion needs a humanoid skeleton and skin weights. A mapping file assigns existing bones; it cannot rig a static mesh. Technical compatibility does not guarantee natural deformation. Selection is shared between connected viewers.')
+        self._controls = (choose, mapping, status, preview, another)
         self.upload_limits = ScopedUploadLimits(self.server)
         self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
@@ -262,14 +355,18 @@ class CharacterControls:
             with self._lock:
                 self._ticket += 1
                 ticket = self._ticket
+                self._cancel_pending()
+                self._candidate_id = None
+                self._requested_id = self.active_id
             try:
-                asset_id = self.add_file(event.file.content, event.file.name)
+                asset_id = self.add_file(event.file.content, event.file.name, ticket=ticket)
                 with self._lock:
                     if ticket == self._ticket:
                         self.select(asset_id, event.client.client_id)
             except (ValueError, OSError) as exc:
                 with self._lock:
                     if ticket == self._ticket:
+                        self.compatibility = unsupported_character(exc)
                         self._set_error(exc)
 
         @choose.on_update
@@ -279,12 +376,22 @@ class CharacterControls:
                     asset_id = self._options().get(choose.value)
                     self.select(asset_id, event.client.client_id)
 
+        @preview.on_click
+        def previewed(event):
+            if event.client is not None:
+                self.open_static_preview(event.client.client_id)
+
+        @another.on_click
+        def dismissed(event):
+            if event.client is not None:
+                self.choose_another_file()
+
         @frame.on_click
         def framed(event):
             self.frame_character(event.client)
 
     def _bind_mapping_upload(self, handle, asset_id, ticket):
-        """Bind each mapping upload control to one asset and selection epoch."""
+        """Bind an immutable upload handle to one asset and selection epoch."""
         self._mapping_binding = (asset_id, ticket)
 
         @handle.on_upload
@@ -298,28 +405,21 @@ class CharacterControls:
                     self._set_error('Load a rigged GLB before its mapping')
                     return
                 try:
-                    text = event.file.content.decode('utf-8')
-                    entry = self._entry(self.entries[asset_id].asset, text)
-                    if entry.retargeter is None:
-                        raise ValueError(entry.reason)
-                    # Store only the validated mapping next to its content-addressed asset.
-                    (self.storage_root / asset_id / 'mapping.json').write_text(json.dumps(json.loads(text), indent=2))
-                    self.entries[asset_id] = entry
-                    self.select(asset_id, event.client.client_id)
+                    self.apply_mapping(asset_id, event.file.content, event.client.client_id)
                 except (ValueError, OSError) as exc:
                     self._set_error(exc)
 
     def _mapping_control(self, target):
-        choose, mapping, status = self._controls
+        choose, mapping, status, preview, another = self._controls
         if self._mapping_binding != (target, self._ticket):
-            # Retire both the old UUID and its buffers. A callback already
-            # queued for that handle still fails its captured epoch check.
+            # Remove the old GUI UUID and its buffers together. A callback
+            # already queued by Viser still fails its captured epoch check.
             self.upload_limits.unregister(mapping, remove=True)
             with self._mapping_folder:
-                mapping = self._mapping_gui.add_upload_button('Load rig mapping', mime_type='.json')
+                mapping = self._mapping_gui.add_upload_button('Load rig mapping', mime_type='.json', visible=False)
             self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
             self._bind_mapping_upload(mapping, target, self._ticket)
-            self._controls = (choose, mapping, status)
+            self._controls = (choose, mapping, status, preview, another)
         return mapping
 
     def _options(self):
@@ -329,24 +429,36 @@ class CharacterControls:
     def _update_gui(self):
         if self._controls is None:
             return
-        choose, mapping, status = self._controls
+        choose, mapping, status, preview, another = self._controls
         options = self._options()
         if choose.options != tuple(options):
             choose.options = tuple(options)
-        target = self._requested_id if self._pending is not None else self.active_id
+        target = self.mapping_asset_id
         mapping = self._mapping_control(target)
         label = next((label for label, value in options.items() if value == target), 'G1 robot')
         if choose.value != label:
             choose.value = label
-        mapping.disabled = target is None
+        entry = self.entries.get(target)
+        mapping.visible = (entry is not None and entry.compatibility.can_map
+                           and (self.compatibility is None or self.compatibility.status != 'unsupported'))
+        mapping.disabled = not mapping.visible
+        self._mapping_folder.visible = mapping.visible
+        preview.visible = self._candidate_id is not None
+        preview.disabled = not preview.visible
+        another.visible = self._candidate_id is not None or self._pending is not None or (
+            self.compatibility is not None and self.compatibility.status == 'unsupported')
         content = '<div class="sz-note">' + escape(self.status) + '</div>'
         if status.content != content:
             status.content = content
-        entry = self.entries.get(target)
         if self._diagnostics is not None:
-            details = 'Built-in G1 rig' if entry is None else f'{entry.asset.triangle_count:,} triangles · {entry.reason}'
-            if entry is not None and entry.retargeter is not None:
-                details += ' · ' + ' · '.join(entry.retargeter.warnings)
+            report = self.compatibility
+            details = 'Built-in G1 rig' if report is None else report.title + ' · ' + ' '.join(report.reasons)
+            if entry is not None:
+                details += f' · {entry.asset.triangle_count:,} triangles'
+            if report is not None:
+                details += ' · Checked: ' + ', '.join(report.checks) if report.checks else ''
+                details += ' · ' + ' '.join(report.warnings)
+                details += ' · Actions: ' + ', '.join(report.actions)
             details = '<div class="sz-note">' + escape(details) + '</div>'
             if self._diagnostics.content != details:
                 self._diagnostics.content = details

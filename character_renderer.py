@@ -33,6 +33,7 @@ class ActorGlbLoadMessage(_messages.Message):
     scale: float
     fallback_name: str
     required_nodes: tuple[int, ...]
+    ground_offset: float = 0.0
     cast_shadow: bool = True
     receive_shadow: bool = True
     props: dict[str, object] = field(default_factory=dict)
@@ -84,6 +85,7 @@ class _AssetState:
     glb_data: bytes
     scale: float
     required_nodes: tuple[int, ...]
+    ground_offset: float
     initiator_id: int | None = None
     deadline: float = 0.0
     client_status: dict[int, Status] = field(default_factory=dict)
@@ -162,6 +164,7 @@ class GlbCharacterRenderer:
             scale=state.scale,
             fallback_name=self.fallback_name,
             required_nodes=state.required_nodes,
+            ground_offset=state.ground_offset,
         )
 
     def _send_state(self, client: viser.ClientHandle, state: _AssetState, *, committed: bool) -> None:
@@ -232,6 +235,7 @@ class GlbCharacterRenderer:
         initiating_client_id: int,
         *,
         scale: float = 1.0,
+        ground_offset: float = 0.0,
         required_nodes: tuple[int, ...] = (),
         initial_node_matrices: np.ndarray | Mapping[int, np.ndarray] | None = None,
     ) -> int:
@@ -241,6 +245,8 @@ class GlbCharacterRenderer:
             raise ValueError("glb_data is empty")
         if not np.isfinite(scale) or scale <= 0:
             raise ValueError("scale must be finite and positive")
+        if not np.isfinite(ground_offset):
+            raise ValueError("ground_offset must be finite")
         if any(index < 0 for index in required_nodes):
             raise ValueError("required_nodes must contain nonnegative glTF indices")
         with self._lock:
@@ -256,6 +262,7 @@ class GlbCharacterRenderer:
                 glb_data=bytes(glb_data),
                 scale=float(scale),
                 required_nodes=tuple(required_nodes),
+                ground_offset=float(ground_offset),
                 initiator_id=initiating_client_id,
                 deadline=time.monotonic() + self.timeout_seconds,
             )

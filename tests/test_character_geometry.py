@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 
 from character_assets import inspect_glb
-from character_geometry import posed_minimum_y
+from character_geometry import ground_offset, posed_minimum_y
 from tests.glb_fixtures import base_document_and_binary, make_glb, make_humanoid_glb
 
 
@@ -64,6 +64,36 @@ class CharacterGeometryTests(unittest.TestCase):
             posed_minimum_y(asset, np.eye(4))
         with self.assertRaises(ValueError):
             posed_minimum_y(asset, np.full((1, 4, 4), np.nan))
+
+    def test_waist_origin_and_existing_ground_origin_at_different_scales(self):
+        for bottom in (-.555, 0., .25):
+            doc, binary = base_document_and_binary()
+            doc['nodes'][0]['translation'] = [0, bottom, 0]
+            asset = inspect_glb(make_glb(doc, binary))
+            for scale in (.1, 1., 3.):
+                with self.subTest(bottom=bottom, scale=scale):
+                    offset = ground_offset(asset, scale=scale)
+                    self.assertAlmostEqual(offset, -scale * bottom)
+                    self.assertAlmostEqual(scale * bottom + offset, 0)
+                    self.assertAlmostEqual(ground_offset(asset, scale=scale, floor_y=2.), 2. - scale * bottom)
+
+    def test_ground_offset_uses_referenced_geometry_and_keeps_source(self):
+        doc, binary = base_document_and_binary()
+        start = doc['bufferViews'][doc['accessors'][2]['bufferView']]['byteOffset']
+        binary = binary[:start] + struct.pack('<3H', 2, 2, 2)
+        source = make_glb(doc, binary)
+        asset = inspect_glb(source)
+        self.assertAlmostEqual(ground_offset(asset), -.4, places=6)
+        self.assertEqual(asset.glb_bytes, source)
+
+    def test_ground_offset_rejects_invalid_placement(self):
+        doc, binary = base_document_and_binary()
+        asset = inspect_glb(make_glb(doc, binary))
+        for scale in (0., -1., float('inf')):
+            with self.assertRaises(ValueError):
+                ground_offset(asset, scale=scale)
+        with self.assertRaises(ValueError):
+            ground_offset(asset, floor_y=float('nan'))
 
 
 if __name__ == '__main__':
