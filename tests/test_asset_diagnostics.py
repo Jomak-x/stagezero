@@ -16,7 +16,7 @@ class AssetDiagnosticsTests(unittest.TestCase):
         cls.skeleton = G1Skeleton34()
         cls.positions, cls.rotations = diagnostic_clip(cls.skeleton)
 
-    def test_stand_pose_has_straight_anatomical_legs_and_grounded_toes(self):
+    def test_stand_pose_has_narrow_forward_bent_legs_and_level_grounded_feet(self):
         positions = self.positions[0]
         skeleton = self.skeleton
         for side in ('left', 'right'):
@@ -24,17 +24,27 @@ class AssetDiagnosticsTests(unittest.TestCase):
             knee = positions[skeleton.bone_index[f'{side}_knee_skel']]
             ankle = positions[skeleton.bone_index[f'{side}_ankle_roll_skel']]
             thigh, shin = knee - hip, ankle - knee
+            thigh_pitch = np.degrees(np.arctan2(thigh[2], -thigh[1]))
+            shin_pitch = np.degrees(np.arctan2(shin[2], -shin[1]))
             with self.subTest(side=side):
-                self.assertLess(abs(thigh[2]), 1e-6)
-                self.assertLess(abs(shin[2]), 1e-6)
-                # The G1 hip has a fixed lateral motor offset; sagittal
-                # straightness is the relevant backward-knee check.
-                self.assertLess(abs(thigh[0]), .06)
-                self.assertLess(abs(shin[0]), .01)
+                # The joint chain has a 52 mm outward hip motor offset. Its
+                # rotations must bring both knee and ankle beneath the hip.
+                self.assertLess(abs(knee[0] - hip[0]), .006)
+                self.assertLess(abs(ankle[0] - hip[0]), .006)
+                self.assertLess(abs(ankle[0] - knee[0]), .003)
+                self.assertGreater(thigh_pitch - shin_pitch, 11)
+                self.assertLess(thigh_pitch - shin_pitch, 13)
+                self.assertGreater(knee[2] - hip[2], .03)
+                self.assertGreater(knee[2] - ankle[2], .03)
+                self.assertLess(abs(ankle[2] - hip[2]), .008)
                 self.assertLess(thigh[1], -.3)
                 self.assertLess(shin[1], -.3)
                 toe = positions[skeleton.bone_index[f'{side}_toe_base']]
                 self.assertAlmostEqual(float(toe[1]), 0, places=6)
+                np.testing.assert_allclose(
+                    self.rotations[0, skeleton.bone_index[f'{side}_ankle_roll_skel']],
+                    np.eye(3), atol=1e-9,
+                )
 
     def test_both_arms_only_sweep_outward_and_return(self):
         skeleton = self.skeleton

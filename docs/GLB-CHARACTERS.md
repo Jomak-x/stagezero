@@ -22,7 +22,11 @@ cd ..
 
 Open `http://127.0.0.1:2341`. The lab requires no token, private CSV or Pod. Its
 joint sweep is deterministic **synthetic test motion**, not ARDY inference.
-**Stand pose** uses a separate FK standing input with relaxed forearms. The sweep
+**Stand pose** uses a separate FK standing input with relaxed forearms, ankles
+under the hips and approximately 12 degrees of forward knee flexion. Hip roll
+compensates for the robot's lateral motor offsets; ankle counter-rotation keeps
+the feet level. This lab pose was checked against the actual TASM mesh silhouette,
+not only joint-center alignment. The sweep
 opens both arms outward and returns along the same path; it does not deliberately
 move them across the torso. The robot's identity-local calibration pose remains
 the production retargeting reference. The lab places its floor at the standing
@@ -148,6 +152,10 @@ Real-character review exposed two gaps in the initial tests: terminal hip/should
 motor positions were used as anatomical centers, and the original signed sweep
 deliberately crossed inward. Position landmarks now use hip/shoulder pitch while
 rotation still comes from the complete motor chain. Independent G1 anatomy tests
-cover this distinction and terminal-axis twist. Lab tests check sagittal knee
-alignment, relaxed forearms, full-clip outward clearance and FK consistency.
+cover this distinction and terminal-axis twist. A second visual review exposed
+that sagittally collinear bones still produced wide legs and a backward-looking
+knee silhouette on TASM. Lab tests now check hip-relative ankle width, positive
+knee flexion, level feet, relaxed forearms, full-clip outward clearance and FK
+consistency. Actual mesh front/side inspection remains necessary: joint tests
+alone do not certify the appearance of an arbitrary character's skinning.
 The TASM asset itself does not require another export for these motion fixes.
