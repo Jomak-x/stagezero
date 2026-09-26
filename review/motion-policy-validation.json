@@ -1,0 +1,2748 @@
+{
+  "schema_version": 1,
+  "source_report": ".runtime/motion-research/validation-v1/report.json",
+  "source_summary": "review/motion-validation-summary.json",
+  "history_source": {
+    "file": ".runtime/projects/StageZero-two-endings-20260926-015459-6a268b.stagezero.npz",
+    "take_key": "t0",
+    "source_frames": 104
+  },
+  "model": {
+    "name": "ARDY-G1-RP-25FPS-Horizon52",
+    "skeleton": "g1skel34",
+    "fps": 25,
+    "generation_horizon_frames": 52,
+    "features": 414,
+    "frames_per_token": 4,
+    "diffusion_num_base_steps": 10,
+    "cfg_wrapper": "AutoLatentClassifierFreeGuidedModelSeparated",
+    "text_encoder": "LLM2VecEncoder",
+    "torch": "2.8.0+cu128",
+    "gpu": "NVIDIA RTX 6000 Ada Generation",
+    "load_seconds": 73.86772472993471
+  },
+  "design": "10 held-out seeds per action; same-seed responsive+expressive for overhead/squat, responsive for wave, expressive for stop; legacy independently assessed",
+  "selector_proxy_rule": "Actual motion_policy.select_candidate: overhead/wave require 5 consecutive frames above shoulder, squat drop >= 0.15 m, stop final 25-frame mean planar root speed <= 0.15 m/s",
+  "summary_proxy_rule": "Original summary counts 5 qualifying frames anywhere for hands; squat and stop thresholds are equivalent",
+  "quality_rule": "Finite positions, valid rotations, <= 0.05 m toe penetration, <= 0.15 m mean joint seam at history and internal horizon",
+  "timing_caveat": "Case seconds sum saved isolated model timings; excludes loading, RPC, queueing and selection overhead. First recorded case includes one-time warmup.",
+  "proxy_caveat": "Geometric proxies do not prove the intended acting, hand oscillation, correct squat form, contact, or visual quality.",
+  "aggregates": {
+    "overhead": {
+      "planned_seeds": [
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110
+      ],
+      "planned_cases": 10,
+      "selected_configs": {
+        "h12cfg4": 7,
+        "h4cfg2": 3
+      },
+      "no_safe_selection_count": 0,
+      "legacy_selector_proxy_successes": 0,
+      "selected_selector_proxy_successes": 5,
+      "legacy_summary_proxy_successes": 0,
+      "selected_summary_proxy_successes": 5,
+      "selector_proxy_success_gain_count": 5,
+      "summary_proxy_success_gain_count": 5,
+      "legacy_mean_case_seconds": 0.17131827622652054,
+      "selected_mean_total_candidate_seconds": 0.28741393075324595,
+      "legacy_median_case_seconds": 0.1457469555316493,
+      "selected_median_total_candidate_seconds": 0.2849469445645809,
+      "mean_extra_case_seconds": 0.1160956545267254,
+      "mean_selected_worst_seam_joint_m": 0.03532667321525166,
+      "mean_selected_floor_penetration_depth_m": 0.003557300567626953,
+      "mean_selected_foot_sliding_proxy_mps": 0.04699922715730076
+    },
+    "wave": {
+      "planned_seeds": [
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110
+      ],
+      "planned_cases": 10,
+      "selected_configs": {
+        "h4cfg2": 10
+      },
+      "no_safe_selection_count": 0,
+      "legacy_selector_proxy_successes": 10,
+      "selected_selector_proxy_successes": 10,
+      "legacy_summary_proxy_successes": 10,
+      "selected_summary_proxy_successes": 10,
+      "selector_proxy_success_gain_count": 0,
+      "summary_proxy_success_gain_count": 0,
+      "legacy_mean_case_seconds": 0.14688674020580947,
+      "selected_mean_total_candidate_seconds": 0.14288837779313326,
+      "legacy_median_case_seconds": 0.14548837940674275,
+      "selected_median_total_candidate_seconds": 0.14253725612070411,
+      "mean_extra_case_seconds": -0.003998362412676215,
+      "mean_selected_worst_seam_joint_m": 0.03638980348936323,
+      "mean_selected_floor_penetration_depth_m": 0.004018604755401611,
+      "mean_selected_foot_sliding_proxy_mps": 0.18534708547823303
+    },
+    "squat": {
+      "planned_seeds": [
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110
+      ],
+      "planned_cases": 10,
+      "selected_configs": {
+        "h12cfg4": 5,
+        "h4cfg2": 5
+      },
+      "no_safe_selection_count": 0,
+      "legacy_selector_proxy_successes": 1,
+      "selected_selector_proxy_successes": 3,
+      "legacy_summary_proxy_successes": 1,
+      "selected_summary_proxy_successes": 3,
+      "selector_proxy_success_gain_count": 2,
+      "summary_proxy_success_gain_count": 2,
+      "legacy_mean_case_seconds": 0.1447823479771614,
+      "selected_mean_total_candidate_seconds": 0.3150845977477729,
+      "legacy_median_case_seconds": 0.14471112005412579,
+      "selected_median_total_candidate_seconds": 0.28278551006224006,
+      "mean_extra_case_seconds": 0.17030224977061154,
+      "mean_selected_worst_seam_joint_m": 0.03634551499253312,
+      "mean_selected_floor_penetration_depth_m": 0.0025812208652496336,
+      "mean_selected_foot_sliding_proxy_mps": 0.062351470694508124
+    },
+    "stop": {
+      "planned_seeds": [
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110
+      ],
+      "planned_cases": 10,
+      "selected_configs": {
+        "h12cfg4": 10
+      },
+      "no_safe_selection_count": 0,
+      "legacy_selector_proxy_successes": 10,
+      "selected_selector_proxy_successes": 10,
+      "legacy_summary_proxy_successes": 10,
+      "selected_summary_proxy_successes": 10,
+      "selector_proxy_success_gain_count": 0,
+      "summary_proxy_success_gain_count": 0,
+      "legacy_mean_case_seconds": 0.14467455081176012,
+      "selected_mean_total_candidate_seconds": 0.14216025483328848,
+      "legacy_median_case_seconds": 0.14450558798853308,
+      "selected_median_total_candidate_seconds": 0.14175105013418943,
+      "mean_extra_case_seconds": -0.0025142959784716368,
+      "mean_selected_worst_seam_joint_m": 0.03561410893064887,
+      "mean_selected_floor_penetration_depth_m": 0.002681058645248413,
+      "mean_selected_foot_sliding_proxy_mps": 0.05199453595012639
+    }
+  },
+  "cases": [
+    {
+      "action": "overhead",
+      "seed": 101,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 16.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 16.0,
+            "longest_continuous_frames": 16,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03546570995419664,
+          "floor_penetration_max_depth_m": 0.003126800060272217,
+          "root_mean_speed_mps": 0.2736793423280618,
+          "foot_sliding_proxy_mean_mps": 0.09758397991557727
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 36.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 36.0,
+            "longest_continuous_frames": 36,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035007115770437365,
+          "floor_penetration_max_depth_m": 0.004307985305786133,
+          "root_mean_speed_mps": 0.21739213868004215,
+          "foot_sliding_proxy_mean_mps": 0.06376518148347397
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03526516817015757,
+        "floor_penetration_max_depth_m": 0.003871738910675049,
+        "root_mean_speed_mps": 0.4280131625522816,
+        "foot_sliding_proxy_mean_mps": 0.17683293365912214
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.38721715309657156,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.16542179719544947,
+        "h12cfg4": 0.14277287106961012
+      },
+      "total_candidate_case_seconds": 0.3081946682650596
+    },
+    {
+      "action": "overhead",
+      "seed": 102,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 89.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 89.0,
+            "longest_continuous_frames": 89,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03502670649044436,
+          "floor_penetration_max_depth_m": 0.004090487957000732,
+          "root_mean_speed_mps": 0.14726796137514372,
+          "foot_sliding_proxy_mean_mps": 0.0385735099053138
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03458043006309037,
+          "floor_penetration_max_depth_m": 0.0024495720863342285,
+          "root_mean_speed_mps": 0.11727223419072028,
+          "foot_sliding_proxy_mean_mps": 0.02512161842652857
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03609142127418241,
+        "floor_penetration_max_depth_m": 0.003854691982269287,
+        "root_mean_speed_mps": 0.488669509264351,
+        "foot_sliding_proxy_mean_mps": 0.16486208265248908
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14694714918732643,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1423285088967532,
+        "h12cfg4": 0.141576703870669
+      },
+      "total_candidate_case_seconds": 0.2839052127674222
+    },
+    {
+      "action": "overhead",
+      "seed": 103,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.0361407793058842,
+          "floor_penetration_max_depth_m": 0.0045670270919799805,
+          "root_mean_speed_mps": 0.19461850168991504,
+          "foot_sliding_proxy_mean_mps": 0.05090555402223975
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03461653531344283,
+          "floor_penetration_max_depth_m": 0.0049285888671875,
+          "root_mean_speed_mps": 0.1919489499664905,
+          "foot_sliding_proxy_mean_mps": 0.05797534209612902
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03598226445483804,
+        "floor_penetration_max_depth_m": 0.00489199161529541,
+        "root_mean_speed_mps": 0.7163276183107287,
+        "foot_sliding_proxy_mean_mps": 0.23075255166676303
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14580860105343163,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14156084414571524,
+        "h12cfg4": 0.1412366928998381
+      },
+      "total_candidate_case_seconds": 0.2827975370455533
+    },
+    {
+      "action": "overhead",
+      "seed": 104,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03730456826510003,
+          "floor_penetration_max_depth_m": 0.002428114414215088,
+          "root_mean_speed_mps": 0.12056829157309046,
+          "foot_sliding_proxy_mean_mps": 0.02232532266794803
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03559140885510986,
+          "floor_penetration_max_depth_m": 0.0029653310775756836,
+          "root_mean_speed_mps": 0.11680970624561746,
+          "foot_sliding_proxy_mean_mps": 0.029148145181297155
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03651687717150592,
+        "floor_penetration_max_depth_m": 0.0049076080322265625,
+        "root_mean_speed_mps": 0.40482003618328977,
+        "foot_sliding_proxy_mean_mps": 0.14158391734468323
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14738182118162513,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1415146340150386,
+        "h12cfg4": 0.1464952160604298
+      },
+      "total_candidate_case_seconds": 0.2880098500754684
+    },
+    {
+      "action": "overhead",
+      "seed": 105,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.036759514309276514,
+          "floor_penetration_max_depth_m": 0.0016266703605651855,
+          "root_mean_speed_mps": 0.21637487693692714,
+          "foot_sliding_proxy_mean_mps": 0.06492597005551383
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 9.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 9.0,
+            "longest_continuous_frames": 9,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035414053070504006,
+          "floor_penetration_max_depth_m": 0.004706084728240967,
+          "root_mean_speed_mps": 0.22280701105275932,
+          "foot_sliding_proxy_mean_mps": 0.06254593616828337
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03573712228093971,
+        "floor_penetration_max_depth_m": 0.004393100738525391,
+        "root_mean_speed_mps": 0.5007036485738954,
+        "foot_sliding_proxy_mean_mps": 0.16003221289140399
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14568531000986695,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14110405091196299,
+        "h12cfg4": 0.14177888608537614
+      },
+      "total_candidate_case_seconds": 0.28288293699733913
+    },
+    {
+      "action": "overhead",
+      "seed": 106,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.034511363092937175,
+          "floor_penetration_max_depth_m": 0.0030976533889770508,
+          "root_mean_speed_mps": 0.2256514954357679,
+          "foot_sliding_proxy_mean_mps": 0.05937634859733905
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.033642592282246836,
+          "floor_penetration_max_depth_m": 0.001607358455657959,
+          "root_mean_speed_mps": 0.14836085759915255,
+          "foot_sliding_proxy_mean_mps": 0.04575759098727935
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03582369163632393,
+        "floor_penetration_max_depth_m": 0.004714250564575195,
+        "root_mean_speed_mps": 0.8230397442730397,
+        "foot_sliding_proxy_mean_mps": 0.24036231470720457
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14519078796729445,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1467667471151799,
+        "h12cfg4": 0.14135426306165755
+      },
+      "total_candidate_case_seconds": 0.28812101017683744
+    },
+    {
+      "action": "overhead",
+      "seed": 107,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03691458744018638,
+          "floor_penetration_max_depth_m": 0.00305330753326416,
+          "root_mean_speed_mps": 0.11436681422497984,
+          "foot_sliding_proxy_mean_mps": 0.043507559828715854
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035806436424213384,
+          "floor_penetration_max_depth_m": 0.003538072109222412,
+          "root_mean_speed_mps": 0.10906440602460392,
+          "foot_sliding_proxy_mean_mps": 0.03752110882340695
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.0363829595247846,
+        "floor_penetration_max_depth_m": 0.0059770941734313965,
+        "root_mean_speed_mps": 0.7010139664298415,
+        "foot_sliding_proxy_mean_mps": 0.20718581413134762
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.15982971107587218,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14114274084568024,
+        "h12cfg4": 0.14182183612138033
+      },
+      "total_candidate_case_seconds": 0.28296457696706057
+    },
+    {
+      "action": "overhead",
+      "seed": 108,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 65.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 65.0,
+            "longest_continuous_frames": 65,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.037201394279682776,
+          "floor_penetration_max_depth_m": 0.0023929476737976074,
+          "root_mean_speed_mps": 0.20908027852642755,
+          "foot_sliding_proxy_mean_mps": 0.03634490446898225
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03577894978867435,
+          "floor_penetration_max_depth_m": 0.0031235218048095703,
+          "root_mean_speed_mps": 0.17950948865537486,
+          "foot_sliding_proxy_mean_mps": 0.021153941486561405
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03605614172008575,
+        "floor_penetration_max_depth_m": 0.003656327724456787,
+        "root_mean_speed_mps": 0.8078986474721267,
+        "foot_sliding_proxy_mean_mps": 0.30962237582125274
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1451823969837278,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14115754212252796,
+        "h12cfg4": 0.1447508039418608
+      },
+      "total_candidate_case_seconds": 0.28590834606438875
+    },
+    {
+      "action": "overhead",
+      "seed": 109,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03652255443854714,
+          "floor_penetration_max_depth_m": 0.0021597743034362793,
+          "root_mean_speed_mps": 0.13944607938134015,
+          "foot_sliding_proxy_mean_mps": 0.034655671030056776
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.0,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.0,
+            "longest_continuous_frames": 0,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03503161384747964,
+          "floor_penetration_max_depth_m": 0.00397104024887085,
+          "root_mean_speed_mps": 0.12993318859550337,
+          "foot_sliding_proxy_mean_mps": 0.04086701354189686
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03560716905054535,
+        "floor_penetration_max_depth_m": 0.0033039450645446777,
+        "root_mean_speed_mps": 0.8321825641532468,
+        "foot_sliding_proxy_mean_mps": 0.28844500427864783
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14515429688617587,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1416368440259248,
+        "h12cfg4": 0.14234869903884828
+      },
+      "total_candidate_case_seconds": 0.2839855430647731
+    },
+    {
+      "action": "overhead",
+      "seed": 110,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "overhead",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 73.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 73.0,
+            "longest_continuous_frames": 73,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035928875818955514,
+          "floor_penetration_max_depth_m": 0.0030651092529296875,
+          "root_mean_speed_mps": 0.27118091259819305,
+          "foot_sliding_proxy_mean_mps": 0.05749353891694488
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 70.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 70.0,
+            "longest_continuous_frames": 70,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03507081348514468,
+          "floor_penetration_max_depth_m": 0.003713369369506836,
+          "root_mean_speed_mps": 0.23848769389040428,
+          "foot_sliding_proxy_mean_mps": 0.06003588981355598
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.0,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.0,
+          "longest_continuous_frames": 0,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.035732868696974764,
+        "floor_penetration_max_depth_m": 0.0045539140701293945,
+        "root_mean_speed_mps": 0.6154892662533952,
+        "foot_sliding_proxy_mean_mps": 0.2122446397989763
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14478553482331336,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14593784208409488,
+        "h12cfg4": 0.1414317840244621
+      },
+      "total_candidate_case_seconds": 0.287369626108557
+    },
+    {
+      "action": "wave",
+      "seed": 101,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 75.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 75.0,
+            "longest_continuous_frames": 75,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03532857403124713,
+          "floor_penetration_max_depth_m": 0.0018513202667236328,
+          "root_mean_speed_mps": 0.4351825217506103,
+          "foot_sliding_proxy_mean_mps": 0.13253268412940003
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 42.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 42.0,
+          "longest_continuous_frames": 42,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03518378962053131,
+        "floor_penetration_max_depth_m": 0.0041065216064453125,
+        "root_mean_speed_mps": 0.23879815660530382,
+        "foot_sliding_proxy_mean_mps": 0.06063170082936214
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14517674688249826,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1448260450270027
+      },
+      "total_candidate_case_seconds": 0.1448260450270027
+    },
+    {
+      "action": "wave",
+      "seed": 102,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 76.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 76.0,
+            "longest_continuous_frames": 76,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.036375032703685924,
+          "floor_penetration_max_depth_m": 0.002496778964996338,
+          "root_mean_speed_mps": 0.18853040371689256,
+          "foot_sliding_proxy_mean_mps": 0.047795290185869053
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 38.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 38.0,
+          "longest_continuous_frames": 38,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03543054632957599,
+        "floor_penetration_max_depth_m": 0.003949224948883057,
+        "root_mean_speed_mps": 0.4302199221500832,
+        "foot_sliding_proxy_mean_mps": 0.21722444738069674
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14570062095299363,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14161156513728201
+      },
+      "total_candidate_case_seconds": 0.14161156513728201
+    },
+    {
+      "action": "wave",
+      "seed": 103,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 71.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 71.0,
+            "longest_continuous_frames": 71,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03619450412200805,
+          "floor_penetration_max_depth_m": 0.0056032538414001465,
+          "root_mean_speed_mps": 0.22274324627489867,
+          "foot_sliding_proxy_mean_mps": 0.053905140039365675
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 34.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 34.0,
+          "longest_continuous_frames": 34,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.038691431283950806,
+        "floor_penetration_max_depth_m": 0.0064119696617126465,
+        "root_mean_speed_mps": 0.7271502836735362,
+        "foot_sliding_proxy_mean_mps": 0.2736612158638346
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14886917104013264,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14097674982622266
+      },
+      "total_candidate_case_seconds": 0.14097674982622266
+    },
+    {
+      "action": "wave",
+      "seed": 104,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 78.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 78.0,
+            "longest_continuous_frames": 78,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03579354143652482,
+          "floor_penetration_max_depth_m": 0.003455221652984619,
+          "root_mean_speed_mps": 0.30023762554810635,
+          "foot_sliding_proxy_mean_mps": 0.14380911430014182
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 31.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 31.0,
+          "longest_continuous_frames": 31,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.036062871796963915,
+        "floor_penetration_max_depth_m": 0.00374758243560791,
+        "root_mean_speed_mps": 0.4391883749381072,
+        "foot_sliding_proxy_mean_mps": 0.16877735318491494
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1518969601020217,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14095294987782836
+      },
+      "total_candidate_case_seconds": 0.14095294987782836
+    },
+    {
+      "action": "wave",
+      "seed": 105,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 79.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 79.0,
+            "longest_continuous_frames": 79,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.0360973108770093,
+          "floor_penetration_max_depth_m": 0.005290508270263672,
+          "root_mean_speed_mps": 0.7500728391024712,
+          "foot_sliding_proxy_mean_mps": 0.4066392495060504
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 44.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 44.0,
+          "longest_continuous_frames": 44,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03611471409652561,
+        "floor_penetration_max_depth_m": 0.005977153778076172,
+        "root_mean_speed_mps": 0.8275865352597943,
+        "foot_sliding_proxy_mean_mps": 0.26130562293791476
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.15061871195212007,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14103561104275286
+      },
+      "total_candidate_case_seconds": 0.14103561104275286
+    },
+    {
+      "action": "wave",
+      "seed": 106,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 81.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 81.0,
+            "longest_continuous_frames": 81,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035378743105124004,
+          "floor_penetration_max_depth_m": 0.0037970542907714844,
+          "root_mean_speed_mps": 0.204721138404124,
+          "foot_sliding_proxy_mean_mps": 0.08491949257222521
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 31.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 31.0,
+          "longest_continuous_frames": 31,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03490864395329742,
+        "floor_penetration_max_depth_m": 0.003598034381866455,
+        "root_mean_speed_mps": 0.20982328606875497,
+        "foot_sliding_proxy_mean_mps": 0.09600375221290974
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1479944451712072,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1409838111139834
+      },
+      "total_candidate_case_seconds": 0.1409838111139834
+    },
+    {
+      "action": "wave",
+      "seed": 107,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 37.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 37.0,
+            "longest_continuous_frames": 37,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03648464830574739,
+          "floor_penetration_max_depth_m": 0.0064334869384765625,
+          "root_mean_speed_mps": 0.7218714239221701,
+          "foot_sliding_proxy_mean_mps": 0.32994090247420066
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 36.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 36.0,
+          "longest_continuous_frames": 36,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.03664577007293701,
+        "floor_penetration_max_depth_m": 0.008408784866333008,
+        "root_mean_speed_mps": 0.7056391490341039,
+        "foot_sliding_proxy_mean_mps": 0.2370769444952038
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14527613786049187,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14459275407716632
+      },
+      "total_candidate_case_seconds": 0.14459275407716632
+    },
+    {
+      "action": "wave",
+      "seed": 108,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 29.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 29.0,
+            "longest_continuous_frames": 29,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.04052448272705078,
+          "floor_penetration_max_depth_m": 0.003576934337615967,
+          "root_mean_speed_mps": 0.802677110146937,
+          "foot_sliding_proxy_mean_mps": 0.3073920856832008
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 39.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 39.0,
+          "longest_continuous_frames": 39,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.042097896337509155,
+        "floor_penetration_max_depth_m": 0.0044539570808410645,
+        "root_mean_speed_mps": 0.654564814685799,
+        "foot_sliding_proxy_mean_mps": 0.30069108425376007
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14413501089438796,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14346294710412621
+      },
+      "total_candidate_case_seconds": 0.14346294710412621
+    },
+    {
+      "action": "wave",
+      "seed": 109,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 78.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 78.0,
+            "longest_continuous_frames": 78,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.03658688209451223,
+          "floor_penetration_max_depth_m": 0.0056465864181518555,
+          "root_mean_speed_mps": 0.17738010582932334,
+          "foot_sliding_proxy_mean_mps": 0.0677585100722481
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 37.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 37.0,
+          "longest_continuous_frames": 37,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.034808053095854316,
+        "floor_penetration_max_depth_m": 0.0033245086669921875,
+        "root_mean_speed_mps": 0.1883763287274315,
+        "foot_sliding_proxy_mean_mps": 0.06648033752159792
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14501627604477108,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14373235777020454
+      },
+      "total_candidate_case_seconds": 0.14373235777020454
+    },
+    {
+      "action": "wave",
+      "seed": 110,
+      "candidate_configs": [
+        "h4cfg2"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "wave",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 77.0,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 77.0,
+            "longest_continuous_frames": 77,
+            "required_continuous_frames": 5,
+            "description": "Hand height above same-side shoulder by more than 0.15 m"
+          },
+          "worst_seam_mean_joint_m": 0.035134315490722656,
+          "floor_penetration_max_depth_m": 0.002034902572631836,
+          "root_mean_speed_mps": 0.7303786644283577,
+          "foot_sliding_proxy_mean_mps": 0.2787783858196286
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 40.0,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 40.0,
+          "longest_continuous_frames": 40,
+          "required_continuous_frames": 5,
+          "description": "Hand height above same-side shoulder by more than 0.15 m"
+        },
+        "worst_seam_mean_joint_m": 0.036416538059711456,
+        "floor_penetration_max_depth_m": 0.003250598907470703,
+        "root_mean_speed_mps": 0.6499926530861081,
+        "foot_sliding_proxy_mean_mps": 0.27827359087041253
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14418332115747035,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14670898695476353
+      },
+      "total_candidate_case_seconds": 0.14670898695476353
+    },
+    {
+      "action": "squat",
+      "seed": 101,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.010684788227081299,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.010684788227081299,
+            "drop_m": 0.010684788227081299,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.0358635252045888,
+          "floor_penetration_max_depth_m": 0.0014036893844604492,
+          "root_mean_speed_mps": 0.24005292075925863,
+          "foot_sliding_proxy_mean_mps": 0.024268097392838733
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.1272103190422058,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.1272103190422058,
+            "drop_m": 0.1272103190422058,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03527987724660836,
+          "floor_penetration_max_depth_m": 0.0010009407997131348,
+          "root_mean_speed_mps": 0.27034299434167214,
+          "foot_sliding_proxy_mean_mps": 0.02735759181006254
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.010102272033691406,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.010102272033691406,
+          "drop_m": 0.010102272033691406,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.035618627591330804,
+        "floor_penetration_max_depth_m": 0.0032355785369873047,
+        "root_mean_speed_mps": 0.2359510871908989,
+        "foot_sliding_proxy_mean_mps": 0.05551756413014574
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14471733500249684,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.1414450032170862,
+        "h12cfg4": 0.14134139195084572
+      },
+      "total_candidate_case_seconds": 0.2827863951679319
+    },
+    {
+      "action": "squat",
+      "seed": 102,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.09175300598144531,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.09175300598144531,
+            "drop_m": 0.09175300598144531,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03760644791657727,
+          "floor_penetration_max_depth_m": 0.0009384751319885254,
+          "root_mean_speed_mps": 0.27376494723412653,
+          "foot_sliding_proxy_mean_mps": 0.056752598426672664
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.1474982500076294,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.1474982500076294,
+            "drop_m": 0.1474982500076294,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.036245226956492106,
+          "floor_penetration_max_depth_m": 0.0017619729042053223,
+          "root_mean_speed_mps": 0.2466355829827694,
+          "foot_sliding_proxy_mean_mps": 0.045712498104906234
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.009971797466278076,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.009971797466278076,
+          "drop_m": 0.009971797466278076,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.036216110446561096,
+        "floor_penetration_max_depth_m": 0.004108309745788574,
+        "root_mean_speed_mps": 0.3506566867029014,
+        "foot_sliding_proxy_mean_mps": 0.11375972322404092
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.1450385560747236,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14119667117483914,
+        "h12cfg4": 0.14158795378170907
+      },
+      "total_candidate_case_seconds": 0.2827846249565482
+    },
+    {
+      "action": "squat",
+      "seed": 103,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 0.3369562029838562,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 0.3369562029838562,
+            "drop_m": 0.3369562029838562,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.0366067726064281,
+          "floor_penetration_max_depth_m": 0.004304349422454834,
+          "root_mean_speed_mps": 0.26098417868128354,
+          "foot_sliding_proxy_mean_mps": 0.02865170793991645
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 0.2989119589328766,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 0.2989119589328766,
+            "drop_m": 0.2989119589328766,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03543544061575606,
+          "floor_penetration_max_depth_m": 0.003847360610961914,
+          "root_mean_speed_mps": 0.2659304382473246,
+          "foot_sliding_proxy_mean_mps": 0.04333095459127791
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.010092079639434814,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.010092079639434814,
+          "drop_m": 0.010092079639434814,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.0355048537082675,
+        "floor_penetration_max_depth_m": 0.004901766777038574,
+        "root_mean_speed_mps": 0.4283346104201897,
+        "foot_sliding_proxy_mean_mps": 0.12986440220147336
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1450538570061326,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14130975282751024,
+        "h12cfg4": 0.14413813082501292
+      },
+      "total_candidate_case_seconds": 0.28544788365252316
+    },
+    {
+      "action": "squat",
+      "seed": 104,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.011218070983886719,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.011218070983886719,
+            "drop_m": 0.011218070983886719,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.0374230258558708,
+          "floor_penetration_max_depth_m": 0.0020880699157714844,
+          "root_mean_speed_mps": 0.11955608208372907,
+          "foot_sliding_proxy_mean_mps": 0.026774895494152486
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.011245191097259521,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.011245191097259521,
+            "drop_m": 0.011245191097259521,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03623741751279748,
+          "floor_penetration_max_depth_m": 0.002881467342376709,
+          "root_mean_speed_mps": 0.12930445357514228,
+          "foot_sliding_proxy_mean_mps": 0.03843989832000481
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.010183274745941162,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.010183274745941162,
+          "drop_m": 0.010183274745941162,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.036635063736188606,
+        "floor_penetration_max_depth_m": 0.005545258522033691,
+        "root_mean_speed_mps": 0.3410060421973288,
+        "foot_sliding_proxy_mean_mps": 0.07995377893315114
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14601481286808848,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14113082201220095,
+        "h12cfg4": 0.14141569403000176
+      },
+      "total_candidate_case_seconds": 0.2825465160422027
+    },
+    {
+      "action": "squat",
+      "seed": 105,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.010421276092529297,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.010421276092529297,
+            "drop_m": 0.010421276092529297,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.036778992453159576,
+          "floor_penetration_max_depth_m": 0.0026097893714904785,
+          "root_mean_speed_mps": 0.271542633618698,
+          "foot_sliding_proxy_mean_mps": 0.0849844153279813
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.009629249572753906,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.009629249572753906,
+            "drop_m": 0.009629249572753906,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03563586250832394,
+          "floor_penetration_max_depth_m": 0.003115057945251465,
+          "root_mean_speed_mps": 0.27240189689506433,
+          "foot_sliding_proxy_mean_mps": 0.07948717624191677
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.010084152221679688,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.010084152221679688,
+          "drop_m": 0.010084152221679688,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.03569003866401706,
+        "floor_penetration_max_depth_m": 0.0034145116806030273,
+        "root_mean_speed_mps": 0.34664781197763384,
+        "foot_sliding_proxy_mean_mps": 0.08930543839138004
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14470490510575473,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14125369302928448,
+        "h12cfg4": 0.14122833195142448
+      },
+      "total_candidate_case_seconds": 0.28248202498070896
+    },
+    {
+      "action": "squat",
+      "seed": 106,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.09765684604644775,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.09765684604644775,
+            "drop_m": 0.09765684604644775,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.035989359031741594,
+          "floor_penetration_max_depth_m": 0.0041155219078063965,
+          "root_mean_speed_mps": 0.26578278048471116,
+          "foot_sliding_proxy_mean_mps": 0.07168584019598137
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.11264389753341675,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.11264389753341675,
+            "drop_m": 0.11264389753341675,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.034681871208438575,
+          "floor_penetration_max_depth_m": 0.004001617431640625,
+          "root_mean_speed_mps": 0.2617916306010094,
+          "foot_sliding_proxy_mean_mps": 0.03970597895393412
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.012428700923919678,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.012428700923919678,
+          "drop_m": 0.012428700923919678,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.03581030312214022,
+        "floor_penetration_max_depth_m": 0.004151105880737305,
+        "root_mean_speed_mps": 0.3609204476259745,
+        "foot_sliding_proxy_mean_mps": 0.1260109431398035
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14466915396042168,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14178478601388633,
+        "h12cfg4": 0.14184569590725005
+      },
+      "total_candidate_case_seconds": 0.2836304819211364
+    },
+    {
+      "action": "squat",
+      "seed": 107,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.11738163232803345,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.11738163232803345,
+            "drop_m": 0.11738163232803345,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03825003429807593,
+          "floor_penetration_max_depth_m": 0.003327310085296631,
+          "root_mean_speed_mps": 0.3112307630855085,
+          "foot_sliding_proxy_mean_mps": 0.07929549892233148
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.08506715297698975,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.08506715297698975,
+            "drop_m": 0.08506715297698975,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.036654513868173616,
+          "floor_penetration_max_depth_m": 0.003705441951751709,
+          "root_mean_speed_mps": 0.24636708649469966,
+          "foot_sliding_proxy_mean_mps": 0.062338335751027096
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.010061025619506836,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.010061025619506836,
+          "drop_m": 0.010061025619506836,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.036550026336228315,
+        "floor_penetration_max_depth_m": 0.005630314350128174,
+        "root_mean_speed_mps": 0.5493312236768316,
+        "foot_sliding_proxy_mean_mps": 0.15047584914805237
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14396473881788552,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14095722092315555,
+        "h12cfg4": 0.141401442931965
+      },
+      "total_candidate_case_seconds": 0.28235866385512054
+    },
+    {
+      "action": "squat",
+      "seed": 108,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.011028289794921875,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.011028289794921875,
+            "drop_m": 0.011028289794921875,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03725009436313511,
+          "floor_penetration_max_depth_m": 0.0024915337562561035,
+          "root_mean_speed_mps": 0.2953175965597008,
+          "foot_sliding_proxy_mean_mps": 0.11764586567793213
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.010088145732879639,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.010088145732879639,
+            "drop_m": 0.010088145732879639,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03609383930783992,
+          "floor_penetration_max_depth_m": 0.0021176934242248535,
+          "root_mean_speed_mps": 0.27087187436273,
+          "foot_sliding_proxy_mean_mps": 0.07577060403627388
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.01025623083114624,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.01025623083114624,
+          "drop_m": 0.01025623083114624,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.03600047633859224,
+        "floor_penetration_max_depth_m": 0.003141641616821289,
+        "root_mean_speed_mps": 0.6131975212291917,
+        "foot_sliding_proxy_mean_mps": 0.22470804666435185
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": false,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": false,
+      "legacy_case_seconds": 0.14397039986215532,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14113875199109316,
+        "h12cfg4": 0.46179407997988164
+      },
+      "total_candidate_case_seconds": 0.6029328319709748
+    },
+    {
+      "action": "squat",
+      "seed": 109,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h4cfg2",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 0.46067360043525696,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 0.46067360043525696,
+            "drop_m": 0.46067360043525696,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03678740856496374,
+          "floor_penetration_max_depth_m": 0.003149867057800293,
+          "root_mean_speed_mps": 0.2394250879933438,
+          "foot_sliding_proxy_mean_mps": 0.03527361115806075
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 0.32943159341812134,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 0.32943159341812134,
+            "drop_m": 0.32943159341812134,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.03569988541818764,
+          "floor_penetration_max_depth_m": 0.005103111267089844,
+          "root_mean_speed_mps": 0.24589492406529515,
+          "foot_sliding_proxy_mean_mps": 0.05117776237192083
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": 0.2569924592971802,
+        "selector_proxy_details": {
+          "met": true,
+          "score": 0.2569924592971802,
+          "drop_m": 0.2569924592971802,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.035608240199312455,
+        "floor_penetration_max_depth_m": 0.006997108459472656,
+        "root_mean_speed_mps": 0.4938452012004735,
+        "foot_sliding_proxy_mean_mps": 0.1761961081382874
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1438828301616013,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14104265091009438,
+        "h12cfg4": 0.14144396409392357
+      },
+      "total_candidate_case_seconds": 0.28248661500401795
+    },
+    {
+      "action": "squat",
+      "seed": 110,
+      "candidate_configs": [
+        "h4cfg2",
+        "h12cfg4"
+      ],
+      "chosen_index": 1,
+      "chosen_config": "h12cfg4",
+      "selector_action": "squat",
+      "candidate_assessments": {
+        "h4cfg2": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": false,
+          "selector_proxy_score": 0.010655820369720459,
+          "selector_proxy_details": {
+            "met": false,
+            "score": 0.010655820369720459,
+            "drop_m": 0.010655820369720459,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.036138079561779814,
+          "floor_penetration_max_depth_m": 0.0004960298538208008,
+          "root_mean_speed_mps": 0.34794029983808766,
+          "foot_sliding_proxy_mean_mps": 0.07887797243754033
+        },
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": 0.1817583441734314,
+          "selector_proxy_details": {
+            "met": true,
+            "score": 0.1817583441734314,
+            "drop_m": 0.1817583441734314,
+            "required_drop_m": 0.15,
+            "description": "Minimum pelvis height relative to median of previous four frames"
+          },
+          "worst_seam_mean_joint_m": 0.035337454715232225,
+          "floor_penetration_max_depth_m": 0.00028336048126220703,
+          "root_mean_speed_mps": 0.3449572578456895,
+          "foot_sliding_proxy_mean_mps": 0.12644764072995146
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": false,
+        "selector_proxy_score": 0.01158595085144043,
+        "selector_proxy_details": {
+          "met": false,
+          "score": 0.01158595085144043,
+          "drop_m": 0.01158595085144043,
+          "required_drop_m": 0.15,
+          "description": "Minimum pelvis height relative to median of previous four frames"
+        },
+        "worst_seam_mean_joint_m": 0.035668117323691406,
+        "floor_penetration_max_depth_m": 0.0018165111541748047,
+        "root_mean_speed_mps": 0.3832107881125446,
+        "foot_sliding_proxy_mean_mps": 0.08621768201684343
+      },
+      "legacy_selector_proxy_met": false,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": false,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.145806890912354,
+      "candidate_case_seconds": {
+        "h4cfg2": 0.14166074502281845,
+        "h12cfg4": 0.14172919490374625
+      },
+      "total_candidate_case_seconds": 0.2833899399265647
+    },
+    {
+      "action": "stop",
+      "seed": 101,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.003353481791548979,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.003353481791548979,
+            "mean_final_25_root_speed_mps": 0.003353481791548979,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.035084116686743036,
+          "floor_penetration_max_depth_m": 0.0027237534523010254,
+          "root_mean_speed_mps": 0.20388450291232305,
+          "foot_sliding_proxy_mean_mps": 0.05794113006663889
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.020688393096807377,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.020688393096807377,
+          "mean_final_25_root_speed_mps": 0.020688393096807377,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.035649812139711926,
+        "floor_penetration_max_depth_m": 0.0038241147994995117,
+        "root_mean_speed_mps": 0.3702770643200803,
+        "foot_sliding_proxy_mean_mps": 0.12390981380455743
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.1445769527927041,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14177533518522978
+      },
+      "total_candidate_case_seconds": 0.14177533518522978
+    },
+    {
+      "action": "stop",
+      "seed": 102,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.005409487799764418,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.005409487799764418,
+            "mean_final_25_root_speed_mps": 0.005409487799764418,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03614383699194335,
+          "floor_penetration_max_depth_m": 0.00277787446975708,
+          "root_mean_speed_mps": 0.18080155707107456,
+          "foot_sliding_proxy_mean_mps": 0.04151499454430115
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.008036580489356258,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.008036580489356258,
+          "mean_final_25_root_speed_mps": 0.008036580489356258,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.03644130467797532,
+        "floor_penetration_max_depth_m": 0.003922581672668457,
+        "root_mean_speed_mps": 0.39997743947105835,
+        "foot_sliding_proxy_mean_mps": 0.17205088033894583
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14468658389523625,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14161538402549922
+      },
+      "total_candidate_case_seconds": 0.14161538402549922
+    },
+    {
+      "action": "stop",
+      "seed": 103,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.012437646603163955,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.012437646603163955,
+            "mean_final_25_root_speed_mps": 0.012437646603163955,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03535685462588057,
+          "floor_penetration_max_depth_m": 0.004339635372161865,
+          "root_mean_speed_mps": 0.17049891780613274,
+          "foot_sliding_proxy_mean_mps": 0.05199429679693062
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.1356929422433336,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.1356929422433336,
+          "mean_final_25_root_speed_mps": 0.1356929422433336,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.035675646308631945,
+        "floor_penetration_max_depth_m": 0.005320608615875244,
+        "root_mean_speed_mps": 0.5546062629157531,
+        "foot_sliding_proxy_mean_mps": 0.15419018215030622
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14504037611186504,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.1418954860419035
+      },
+      "total_candidate_case_seconds": 0.1418954860419035
+    },
+    {
+      "action": "stop",
+      "seed": 104,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.0026625077173511396,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.0026625077173511396,
+            "mean_final_25_root_speed_mps": 0.0026625077173511396,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.036074166363437035,
+          "floor_penetration_max_depth_m": 0.0016454458236694336,
+          "root_mean_speed_mps": 0.11424029224290931,
+          "foot_sliding_proxy_mean_mps": 0.02518410868168087
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.0031033798785189658,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.0031033798785189658,
+          "mean_final_25_root_speed_mps": 0.0031033798785189658,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.03655110400081403,
+        "floor_penetration_max_depth_m": 0.004972696304321289,
+        "root_mean_speed_mps": 0.34018886747129934,
+        "foot_sliding_proxy_mean_mps": 0.10283184499177027
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14605543203651905,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.1425029500387609
+      },
+      "total_candidate_case_seconds": 0.1425029500387609
+    },
+    {
+      "action": "stop",
+      "seed": 105,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.004445357490933867,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.004445357490933867,
+            "mean_final_25_root_speed_mps": 0.004445357490933867,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03589376158896651,
+          "floor_penetration_max_depth_m": 0.002080857753753662,
+          "root_mean_speed_mps": 0.21091706815364744,
+          "foot_sliding_proxy_mean_mps": 0.0648438215748363
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.005407632352202537,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.005407632352202537,
+          "mean_final_25_root_speed_mps": 0.005407632352202537,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.035818885876189525,
+        "floor_penetration_max_depth_m": 0.004194438457489014,
+        "root_mean_speed_mps": 0.34799302758369416,
+        "foot_sliding_proxy_mean_mps": 0.09937956506215193
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14439670206047595,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14172676508314908
+      },
+      "total_candidate_case_seconds": 0.14172676508314908
+    },
+    {
+      "action": "stop",
+      "seed": 106,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.005825700695520385,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.005825700695520385,
+            "mean_final_25_root_speed_mps": 0.005825700695520385,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.0350743845983002,
+          "floor_penetration_max_depth_m": 0.0032912492752075195,
+          "root_mean_speed_mps": 0.21115015885477692,
+          "foot_sliding_proxy_mean_mps": 0.05911531075589708
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.011366276697807464,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.011366276697807464,
+          "mean_final_25_root_speed_mps": 0.011366276697807464,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.03598856911232795,
+        "floor_penetration_max_depth_m": 0.005351901054382324,
+        "root_mean_speed_mps": 0.42743737548547694,
+        "foot_sliding_proxy_mean_mps": 0.17743656031748337
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14443422318436205,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14181735599413514
+      },
+      "total_candidate_case_seconds": 0.14181735599413514
+    },
+    {
+      "action": "stop",
+      "seed": 107,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.0037059457157413572,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.0037059457157413572,
+            "mean_final_25_root_speed_mps": 0.0037059457157413572,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03631689770453548,
+          "floor_penetration_max_depth_m": 0.0028342604637145996,
+          "root_mean_speed_mps": 0.16389823619790658,
+          "foot_sliding_proxy_mean_mps": 0.06985839810581944
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.01006555280318932,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.01006555280318932,
+          "mean_final_25_root_speed_mps": 0.01006555280318932,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.03637121673798054,
+        "floor_penetration_max_depth_m": 0.006300508975982666,
+        "root_mean_speed_mps": 0.44635894674527293,
+        "foot_sliding_proxy_mean_mps": 0.13792730987472215
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14418768091127276,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14143692306242883
+      },
+      "total_candidate_case_seconds": 0.14143692306242883
+    },
+    {
+      "action": "stop",
+      "seed": 108,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.003750933155954052,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.003750933155954052,
+            "mean_final_25_root_speed_mps": 0.003750933155954052,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03556750543682438,
+          "floor_penetration_max_depth_m": 0.002008974552154541,
+          "root_mean_speed_mps": 0.1651391666456341,
+          "foot_sliding_proxy_mean_mps": 0.06074440382767315
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.0908945762165634,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.0908945762165634,
+          "mean_final_25_root_speed_mps": 0.0908945762165634,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.036129702827757654,
+        "floor_penetration_max_depth_m": 0.00391918420791626,
+        "root_mean_speed_mps": 0.588795862420292,
+        "foot_sliding_proxy_mean_mps": 0.23022294225946244
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14441191195510328,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.141265532001853
+      },
+      "total_candidate_case_seconds": 0.141265532001853
+    },
+    {
+      "action": "stop",
+      "seed": 109,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.00336841735055288,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.00336841735055288,
+            "mean_final_25_root_speed_mps": 0.00336841735055288,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.03535775298799596,
+          "floor_penetration_max_depth_m": 0.003644704818725586,
+          "root_mean_speed_mps": 0.1118892575715302,
+          "foot_sliding_proxy_mean_mps": 0.024217342581633258
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.08377784542240803,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.08377784542240803,
+          "mean_final_25_root_speed_mps": 0.08377784542240803,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.036173415351679096,
+        "floor_penetration_max_depth_m": 0.004082739353179932,
+        "root_mean_speed_mps": 0.5105261419436179,
+        "foot_sliding_proxy_mean_mps": 0.20212538465882326
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14418272115290165,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14134616288356483
+      },
+      "total_candidate_case_seconds": 0.14134616288356483
+    },
+    {
+      "action": "stop",
+      "seed": 110,
+      "candidate_configs": [
+        "h12cfg4"
+      ],
+      "chosen_index": 0,
+      "chosen_config": "h12cfg4",
+      "selector_action": "stop",
+      "candidate_assessments": {
+        "h12cfg4": {
+          "safe": true,
+          "reasons": [],
+          "selector_proxy_met": true,
+          "selector_proxy_score": -0.006590308395587334,
+          "selector_proxy_details": {
+            "met": true,
+            "score": -0.006590308395587334,
+            "mean_final_25_root_speed_mps": 0.006590308395587334,
+            "maximum_mean_speed_mps": 0.15,
+            "description": "Final 25-frame mean planar pelvis speed"
+          },
+          "worst_seam_mean_joint_m": 0.035271812321862134,
+          "floor_penetration_max_depth_m": 0.0014638304710388184,
+          "root_mean_speed_mps": 0.2256203048092424,
+          "foot_sliding_proxy_mean_mps": 0.06453155256585316
+        }
+      },
+      "legacy_assessment": {
+        "safe": true,
+        "reasons": [],
+        "selector_proxy_met": true,
+        "selector_proxy_score": -0.014693122480288324,
+        "selector_proxy_details": {
+          "met": true,
+          "score": -0.014693122480288324,
+          "mean_final_25_root_speed_mps": 0.014693122480288324,
+          "maximum_mean_speed_mps": 0.15,
+          "description": "Final 25-frame mean planar pelvis speed"
+        },
+        "worst_seam_mean_joint_m": 0.03560321685636601,
+        "floor_penetration_max_depth_m": 0.003789365291595459,
+        "root_mean_speed_mps": 0.3790691429854573,
+        "foot_sliding_proxy_mean_mps": 0.0904119065224029
+      },
+      "legacy_selector_proxy_met": true,
+      "selected_selector_proxy_met": true,
+      "legacy_summary_proxy_met": true,
+      "selected_summary_proxy_met": true,
+      "legacy_case_seconds": 0.14477292401716113,
+      "candidate_case_seconds": {
+        "h12cfg4": 0.14622065401636064
+      },
+      "total_candidate_case_seconds": 0.14622065401636064
+    }
+  ]
+}
