@@ -373,7 +373,7 @@ export interface GuiTabGroupMessage {
   type: "GuiTabGroupMessage";
   uuid: string;
   container_uuid: string;
-  props: {'_tab_labels': string[], '_tab_icons_html': (string | null)[], '_tab_container_ids': string[], 'order': number, 'visible': boolean};
+  props: {'_studio_tab_request'?: {index: number; nonce: string}, '_tab_labels': string[], '_tab_icons_html': (string | null)[], '_tab_container_ids': string[], 'order': number, 'visible': boolean};
 }
 /** GuiButtonMessage(uuid: 'str', value: 'bool', container_uuid: 'str', props: 'GuiButtonProps')
  *

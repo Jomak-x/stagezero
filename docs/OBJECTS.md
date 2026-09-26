@@ -48,8 +48,18 @@ current scene and never silently switches to recipes.
 `127.0.0.1:11434`, using `qwen3:4b` by default. Set `STAGEZERO_LOCAL_MODEL` in the
 viewer process environment to select another installed model. This mode sends no
 credentials and does not contact Neon. It never installs or downloads a model.
-The local request adapter is tested with simulated responses; no local model was
-installed or benchmarked in this implementation. See
+Local generation uses a compact JSON schema for the model's prop/effect choices,
+positions, dimensions and colors. Python adds IDs, interaction defaults and seeds,
+then validates the normal scene document. Requests allow up to 300 seconds for
+model loading and generation, with a distinct message for a read timeout.
+
+Verified on an M4 MacBook Air with 16 GB RAM, Ollama 0.34.4 and `qwen3:4b`:
+the loaded model used about 3.3 GB, and a detailed six-prop scene took about
+27 seconds after loading. General prompts can still produce poor placement;
+explicit object counts, positions and dimensions improve control. If the viewer
+runs on a remote machine, its loopback Ollama address must reach the Mac through
+a private SSH reverse tunnel. The model runs on the Mac, not in the browser.
+See
 [local and mesh-model options](SCENE-GENERATION-OPTIONS.md) for hardware, licenses
 and an optional setup command.
 

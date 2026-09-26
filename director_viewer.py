@@ -144,7 +144,7 @@ def main():
         edit_gate(gizmo.position)
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls, characters.build_gui)
-    timeline = StudioTimeline(server, session)
+    timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid)
 
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):

@@ -5,7 +5,7 @@ import time
 import uuid
 import numpy as np
 from live_motion import MotionSession, validate_result
-from takes import Take, encode_project, decode_project, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
+from takes import Take, encode_project, decode_project, validate_take, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
 from duration_planning import CHUNK_FRAMES, plan_duration
 
 
@@ -13,12 +13,15 @@ class DirectorSession(MotionSession):
     def __init__(self, *args, **kwargs):
         self.takes = {}
         self.active_take = None
+        self._removed_take = None
+        self._undo_action_edit = None
         self.edit_context = None
         self.planned_frames = CHUNK_FRAMES
         self.planned_seconds = CHUNK_FRAMES / 25
         self.duration_label = 'Auto · text-length estimate'
         self.project_status = ''
         self.project_revision = 0
+        self.action_edit_revision = 0
         self.playback_speed = 1.0
         self.loop_playback = False
         self._clock_revision = -1
@@ -30,16 +33,105 @@ class DirectorSession(MotionSession):
             super().set_mode(mode)
             if mode == 'Live ARDY' and self.active_take in self.takes:
                 self._select(self.active_take, 0)
+            elif mode == 'Live ARDY':
+                self._hold_reference_pose()
+
+    def _hold_reference_pose(self):
+        """Show a still reference frame for an empty draft, never the demo clip."""
+        self.positions = self.recorded[0][:1].copy()
+        self.rotations = self.recorded[1][:1].copy()
+        self.motion = None
+        self.fps = 60
+        self.frame = 0
+        self.playing = False
+        self.kind = 'reference'
+        self.metrics = None
+        self.clip_revision += 1
 
     def new_take(self):
         with self.lock:
+            if self.busy:
+                self.status = 'Wait for generation to finish before starting a new take'
+                return False
             if len(self.takes) >= MAX_TAKES:
                 self.status = 'Project has 12 takes; save it and start a new project.'
-                return
+                return False
+            self.mode = 'Live ARDY'
             super().reset()
             self.active_take = None
             self.edit_context = None
+            self.prompt = ''
+            self._hold_reference_pose()
             self.status = 'New take · enter an instruction to begin'
+            return True
+
+    @property
+    def can_undo_take_removal(self):
+        with self.lock:
+            return self._removed_take is not None
+
+    def remove_active_take(self):
+        """Remove the selected saved take, retaining one in-memory undo step."""
+        with self.lock:
+            if self.busy:
+                self.status = 'Wait for generation to finish before removing a take'
+                return False
+            take = self.takes.get(self.active_take) if self.mode == 'Live ARDY' else None
+            if take is None:
+                self.status = 'Select a take to remove'
+                return False
+            removed_id = take.id
+            index = list(self.takes).index(removed_id)
+            frame = self.frame
+            child_links = [(child.id, child.branch_frame) for child in self.takes.values()
+                           if child.parent == removed_id]
+            for child_id, _ in child_links:
+                child = self.takes[child_id]
+                child.parent = None
+                child.branch_frame = None
+            del self.takes[removed_id]
+            self._removed_take = (index, take, frame, child_links)
+            if self.takes:
+                self._select(next(reversed(self.takes)), 0)
+            else:
+                self._invalidate()
+                self.active_take = None
+                self.prompt = ''
+                self._hold_reference_pose()
+            self.edit_context = None
+            self.project_revision += 1
+            self.project_status = 'Unsaved changes · Save project stores every take'
+            self.status = f'Removed take · {take.name} · Undo is available'
+            return True
+
+    def undo_remove_take(self):
+        """Restore the most recently removed take and its direct child links."""
+        with self.lock:
+            if self.busy:
+                self.status = 'Wait for generation to finish before undoing removal'
+                return False
+            removed = self._removed_take
+            if removed is None:
+                self.status = 'No take removal to undo'
+                return False
+            index, take, frame, child_links = removed
+            if take.id in self.takes or not self._can_add_take(len(take.positions)):
+                return False
+            entries = list(self.takes.items())
+            entries.insert(min(index, len(entries)), (take.id, take))
+            self.takes = dict(entries)
+            for child_id, branch_frame in child_links:
+                child = self.takes.get(child_id)
+                if child is not None and child.parent is None:
+                    child.parent = take.id
+                    child.branch_frame = branch_frame
+            self._removed_take = None
+            self.mode = 'Live ARDY'
+            self._select(take.id, frame)
+            self.project_revision += 1
+            self.project_status = 'Unsaved changes · Save project stores every take'
+            self.status = f'Restored take · {take.name}'
+            return True
 
     def reset(self):
         """Rewind safely. Unlike New take, this never discards recorded motion."""
@@ -119,6 +211,8 @@ class DirectorSession(MotionSession):
                 return False
             if t.name != name:
                 t.name = name
+                if self._undo_action_edit is not None and self._undo_action_edit[1] is t:
+                    self._undo_action_edit = None
                 self.project_revision += 1
                 self.project_status = 'Unsaved changes · Save project stores every take'
             self.status = f'Renamed take · {name}'
@@ -298,6 +392,106 @@ class DirectorSession(MotionSession):
                 action = 'alternate ending · original preserved' if branch else 'new take' if t is None else 'extension'
                 self.status = f'Generating {plan.seconds:.2f} s {action} · 0/{(plan.frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES} chunks'
 
+    @property
+    def can_undo_action_edit(self):
+        with self.lock:
+            undo = self._undo_action_edit
+            return undo is not None and self.takes.get(undo[0].id) is undo[1]
+
+    def undo_action_edit(self):
+        """Restore the take snapshot from the most recent completed action edit."""
+        with self.lock:
+            if self.busy:
+                self.status = 'Wait for generation to finish before undoing an action edit'
+                return False
+            undo = self._undo_action_edit
+            if undo is None or self.takes.get(undo[0].id) is not undo[1]:
+                self.status = 'No action edit to undo'
+                return False
+            original, _, frame, stop, detached = undo
+            for child in self.takes.values():
+                if child.parent == original.id and child.branch_frame >= stop:
+                    child.parent = None
+                    child.branch_frame = None
+            self.takes[original.id] = original
+            for child, branch_frame in detached:
+                if self.takes.get(child.id) is child and child.parent is None:
+                    child.parent = original.id
+                    child.branch_frame = branch_frame
+            self._undo_action_edit = None
+            self.mode = 'Live ARDY'
+            self._select(original.id, frame)
+            self.project_revision += 1
+            self.project_status = 'Unsaved changes · Save project stores every take'
+            self.status = 'Restored actions · most recent edit undone'
+            return True
+
+    def submit_action_edit(self, prompt, segment_index, operation, seconds=None):
+        """Regenerate an action and its suffix within the selected take, atomically."""
+        with self.lock:
+            if not self.character_motion_enabled:
+                self.status = 'Select a motion-ready character before generating motion'
+                return False
+            if self.busy:
+                self.status = 'Wait for generation to finish before editing an action'
+                return False
+            source = self.takes.get(self.active_take) if self.mode == 'Live ARDY' else None
+            if source is None:
+                self.status = 'Select a take to edit an action'
+                return False
+            if type(segment_index) is not int or not 0 <= segment_index < len(source.segments):
+                self.status = 'Select an action on the current timeline'
+                return False
+            if operation not in ('replace', 'insert_before', 'insert_after'):
+                self.status = 'Choose Replace, Insert before, or Insert after'
+                return False
+            prompt = str(prompt).strip()
+            if not 1 <= len(prompt) <= 500:
+                self.status = 'Enter a movement instruction (1–500 characters)'
+                return False
+            selected = source.segments[segment_index]
+            if operation == 'replace':
+                stop = selected['start']
+                suffix = source.segments[segment_index + 1:]
+                requested_seconds = seconds
+            elif operation == 'insert_before':
+                stop = selected['start']
+                suffix = source.segments[segment_index:]
+                requested_seconds = seconds
+            else:
+                stop = selected['end']
+                suffix = source.segments[segment_index + 1:]
+                requested_seconds = seconds
+            if operation == 'replace' and seconds is None:
+                new_frames = selected['end'] - selected['start']
+            else:
+                try:
+                    new_frames = plan_duration(prompt, requested_seconds).frames
+                except ValueError as exc:
+                    self.status = str(exc)
+                    return False
+            actions = [(prompt, new_frames)] + [(s['prompt'], s['end'] - s['start']) for s in suffix]
+            final_length = stop + sum(frames for _, frames in actions)
+            total = sum(len(t.positions) for t in self.takes.values()) - len(source.positions) + final_length
+            if final_length > MAX_FRAMES or total > MAX_TOTAL_FRAMES:
+                self.status = 'Motion budget reached; shorten an action before continuing.'
+                return False
+            self._invalidate()
+            self.prompt = prompt
+            self.playing = False
+            self.resume_after_generation = True
+            request_id = str(uuid.uuid4())
+            self.current_id = request_id
+            self.busy = True
+            submitted = time.perf_counter()
+            self.pending = dict(kind='action_edit', version=self.version, request_id=request_id,
+                                source=source, stop=stop, actions=actions, frame=self.frame,
+                                submitted=submitted)
+            self.wake.set()
+            chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames in actions)
+            self.status = f'Regenerating {len(actions)} action' + ('s' if len(actions) != 1 else '') + f' · 0/{chunks} chunks'
+            return True
+
     def _work(self):
         """Build every backend chunk privately; install only a complete take."""
         while True:
@@ -307,6 +501,9 @@ class DirectorSession(MotionSession):
                 self.pending = None
                 self.wake.clear()
             if job is None:
+                continue
+            if isinstance(job, dict) and job.get('kind') == 'action_edit':
+                self._work_action_edit(job)
                 continue
             version, request_id, prompt, history, submitted, frames = job
             count = (frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
@@ -357,6 +554,91 @@ class DirectorSession(MotionSession):
                     self.playing = False
                     self.status = f'Generation failed · {type(exc).__name__}: {str(exc)[:200]}. Original take preserved; retry.'
 
+    def _work_action_edit(self, job):
+        """Build all replacement segments before changing any visible take state."""
+        source, stop = job['source'], job['stop']
+        version, request_id = job['version'], job['request_id']
+        actions = job['actions']
+        total_chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames in actions)
+        completed_chunks = 0
+        generated = {key: [] for key in ('positions', 'rotations', 'motion')}
+        segments, events = source.prefix(stop)
+        motion_so_far = source.motion[max(0, stop - 52):stop].copy()
+        generation_seconds = 0.0
+        final_meta = None
+        try:
+            for prompt, frames in actions:
+                count = (frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
+                action_start = stop + sum(len(part) for part in generated['motion'])
+                action_seconds = 0.0
+                for index in range(count):
+                    with self.lock:
+                        if version != self.version or request_id != self.current_id:
+                            return
+                    history_count = min(52, len(motion_so_far)) // 4 * 4
+                    history = motion_so_far[-history_count:].copy() if history_count else None
+                    result = self.backend.generate(request_id, prompt, history)
+                    validate_result(result, request_id)
+                    final_meta = result['metadata']
+                    seconds = float(final_meta['generation_seconds'])
+                    action_seconds += seconds
+                    generation_seconds += seconds
+                    trim = min(CHUNK_FRAMES, frames - index * CHUNK_FRAMES)
+                    for key in generated:
+                        generated[key].append(result[key][:trim])
+                    motion_so_far = np.concatenate((motion_so_far, result['motion'][:trim]), axis=0)[-52:]
+                    completed_chunks += 1
+                    with self.lock:
+                        if version != self.version or request_id != self.current_id:
+                            return
+                        if completed_chunks < total_chunks:
+                            request_id = str(uuid.uuid4())
+                            self.current_id = request_id
+                            self.status = f'Regenerating actions · {completed_chunks}/{total_chunks} chunks received; holding pose'
+                segments.append(dict(start=action_start, end=action_start + frames, prompt=prompt,
+                                     request_id=final_meta['request_id'], generation_seconds=action_seconds))
+            arrays = [np.concatenate([getattr(source, key)[:stop]] + generated[key], axis=0)
+                      for key in ('positions', 'rotations', 'motion')]
+            inherited_prefix_changed = source.branch_frame is not None and stop <= source.branch_frame
+            edited = Take(source.id, source.name, *arrays, segments=segments,
+                          parent=None if inherited_prefix_changed else source.parent,
+                          branch_frame=None if inherited_prefix_changed else source.branch_frame, events=events)
+            self._record_gate_events(edited)
+            validate_take(edited)
+            with self.lock:
+                if version != self.version or request_id != self.current_id or self.takes.get(source.id) is not source:
+                    return
+                detached = []
+                for child in self.takes.values():
+                    if child.parent == source.id and child.branch_frame >= stop:
+                        detached.append((child, child.branch_frame))
+                        child.parent = None
+                        child.branch_frame = None
+                self.takes[source.id] = edited
+                self._undo_action_edit = (source, edited, job['frame'], stop, detached)
+                self.active_take = source.id
+                self.positions, self.rotations, self.motion = edited.positions, edited.rotations, edited.motion
+                self.fps, self.kind = 25, 'generated'
+                self.frame = stop
+                self.clip_revision += 1
+                self.busy = False
+                self.status = f'Regenerated {len(actions)} action' + ('s' if len(actions) != 1 else '') + ' · Undo is available'
+                self.metrics = {**final_meta, 'generation_seconds': generation_seconds,
+                                'command_to_received_seconds': time.perf_counter() - job['submitted']}
+                self.needs_ack = (request_id, job['submitted'])
+                self.started = time.perf_counter() - self.frame / self.fps
+                self.playing = self.resume_after_generation
+                self.project_revision += 1
+                self.action_edit_revision += 1
+                self.project_status = 'Unsaved changes · Save project stores every take'
+        except Exception as exc:
+            with self.lock:
+                if version != self.version:
+                    return
+                self.busy = False
+                self.playing = False
+                self.status = f'Action edit failed · {type(exc).__name__}: {str(exc)[:200]}. Original take preserved; retry.'
+
     def _install_result(self, result):
         t, stop, branch = self.edit_context
         arrays = [result[k] for k in ('positions', 'rotations', 'motion')]
@@ -401,9 +683,7 @@ class DirectorSession(MotionSession):
 
     def save_project(self, directory, name):
         with self.lock:
-            if not self.takes:
-                raise ValueError('Generate a take before saving')
-            active = self.active_take or next(iter(self.takes))
+            active = self.active_take or next(iter(self.takes), None)
             frame = self.frame if self.mode == 'Live ARDY' and self.active_take else 0
             data = encode_project(self.takes, active, frame, self.scene)
             saved_revision = self.project_revision
@@ -426,13 +706,18 @@ class DirectorSession(MotionSession):
 
     def new_project(self, directory):
         with self.lock:
-            backup = self.save_project(directory, 'automatic-backup')[0] if self.takes else None
+            backup = self.save_project(directory, 'automatic-backup')[0] if self.project_revision else None
             self._invalidate()
             self.takes = {}
+            self._removed_take = None
+            self._undo_action_edit = None
             self.project_revision += 1
             self.active_take = None
+            self.edit_context = None
+            self.prompt = ''
             self.mode = 'Live ARDY'
             super().reset()
+            self._hold_reference_pose()
             self.scene = {'gate': {'position': [0., 0., 1.5], 'radius': .55, 'enabled': True}}
             self.project_status = f'Previous project backed up: {backup.name}' if backup else 'New project'
 
@@ -447,7 +732,17 @@ class DirectorSession(MotionSession):
         with self.lock:
             self._invalidate()
             self.takes, self.scene = takes, scene
+            self._removed_take = None
+            self._undo_action_edit = None
+            self.edit_context = None
             self.project_revision += 1
             self.mode = 'Live ARDY'
-            self._select(active, frame)
-            self.project_status = 'Loaded stored motion · no regeneration'
+            if active is None:
+                self.active_take = None
+                self.prompt = ''
+                self._hold_reference_pose()
+                self.status = 'Empty project · enter an instruction to begin'
+                self.project_status = 'Loaded empty project'
+            else:
+                self._select(active, frame)
+                self.project_status = 'Loaded stored motion · no regeneration'

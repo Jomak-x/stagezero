@@ -211,6 +211,8 @@ export function useGuiState(initialServer: string) {
               // nastiness here, we should revisit...
               if (key === "value") {
                 (state.guiConfigFromUuid[id] as any).value = value;
+              } else if (key === "_studio_tab_request" && config.type === "GuiTabGroupMessage") {
+                config.props._studio_tab_request = value;
               } else if (!(key in config.props)) {
                 console.error(
                   `Tried to update nonexistent property '${key}' of GUI element ${id}!`,

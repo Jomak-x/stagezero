@@ -2,11 +2,15 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+import json
+import socket
 import threading
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch, PropertyMock
 
 import numpy as np
+import viser
+from viser._gui_handles import GuiButtonGroupHandle
 
 from directing import DirectorSession
 from studio_ui import StudioUI, CREATE, EXTEND, REPLACE, AUTO, SET_DURATION, TARGET_TOTAL
@@ -47,8 +51,16 @@ class Handle:
         self.value = value
         self.callbacks['update'](SimpleNamespace(client=object()))
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
 
 class ButtonGroupHandle(Handle):
+    """Mirror Viser's button group: disabling it raises an assertion."""
+
     @property
     def disabled(self):
         return False
@@ -61,6 +73,7 @@ class ButtonGroupHandle(Handle):
 class Gui:
     def __init__(self):
         self.handles = []
+        self.tab_labels = []
 
     def _handle(self, handle_type=Handle, **values):
         values.setdefault('visible', True)
@@ -97,10 +110,11 @@ class Gui:
         return self
 
     def add_tab(self, label):
+        self.tab_labels.append(label)
         return self
 
     def add_folder(self, label, **kwargs):
-        return self
+        return self._handle(label=label)
 
     def __enter__(self):
         return self
@@ -141,8 +155,7 @@ class StudioUITests(unittest.TestCase):
         self.ui.update()
         self.assertEqual(self.ui.seek_time.value, '0.25')
         self.assertEqual(self.ui.seek_time.writes, [])
-        self.assertIn('0.50', self.ui.playhead.content)
-        self.assertIn('/ 2.00 s', self.ui.playhead.content)
+        self.assertFalse(self.ui.playhead.visible)
         self.assertIn('Paused', self.ui.status.content)
         self.assertLessEqual(sum(len(handle.writes) for handle in self.gui.handles), 3)
 
@@ -168,12 +181,13 @@ class StudioUITests(unittest.TestCase):
 
     def test_static_character_hides_motion_groups_then_restores_selected_take(self):
         take = self._seed_take(100)
+        self.ui.edit_action.edit(EXTEND)
         self.session.seek(25)
         self.ui.update()
         source_positions = self.session.positions
         self.assertIsInstance(self.ui.transport, ButtonGroupHandle)
         self.assertIsInstance(self.ui.frames, ButtonGroupHandle)
-        self.assertTrue(self.ui.transport.visible)
+        self.assertFalse(self.ui.transport.visible)
         self.assertTrue(self.ui.frames.visible)
 
         self.ui.transport.writes.clear()
@@ -183,7 +197,7 @@ class StudioUITests(unittest.TestCase):
         self.assertFalse(self.ui.transport.visible)
         self.assertFalse(self.ui.frames.visible)
         self.assertTrue(self.ui.generate.disabled)
-        self.assertEqual(self.ui.transport.writes, [('visible', False)])
+        self.assertEqual(self.ui.transport.writes, [])
         self.assertEqual(self.ui.frames.writes, [('visible', False)])
         self.assertEqual(self.session.active_take, take.id)
         self.assertIs(self.session.takes[take.id], take)
@@ -198,7 +212,7 @@ class StudioUITests(unittest.TestCase):
 
         self.session.set_character_motion_enabled(True)
         self.ui.update()
-        self.assertTrue(self.ui.transport.visible)
+        self.assertFalse(self.ui.transport.visible)
         self.assertTrue(self.ui.frames.visible)
         self.assertFalse(self.ui.generate.disabled)
         self.assertEqual(self.session.active_take, take.id)
@@ -210,8 +224,68 @@ class StudioUITests(unittest.TestCase):
         self.ui.frames.click('+1 frame')
         self.assertEqual(self.session.frame, 26)
 
+    def test_static_character_blocks_timeline_transport_and_action_generation(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'open-editor')
+        self.ui.action_prompt.edit('Wave gently')
+        self.session.seek(25)
+        source_positions = self.session.positions
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertTrue(self.ui.save_action.disabled)
+        self.assertTrue(self.ui.seek_go.disabled)
+
+        # Delayed clicks must not bypass static preview restrictions, including
+        # the new timeline route and an editor opened before the model changed.
+        self._timeline_edit(take.id, 0, 'play', 'static-play')
+        self._timeline_edit(take.id, 0, 'start', 'static-start')
+        self._timeline_edit(take.id, 1, 'replace', 'static-edit')
+        self.ui.seek_time.value = '3.00'
+        self.ui.seek_go.click()
+        self.assertFalse(self.session.playing)
+        self.assertEqual(self.session.frame, 25)
+        self.assertEqual(self.ui.action_edit, (take.id, 0, 'replace'))
+        with patch.object(self.session, 'submit_action_edit', autospec=True, return_value=True) as submit:
+            self.ui.save_action.click()
+            submit.assert_not_called()
+            self.session.set_character_motion_enabled(True)
+            self.ui.update()
+            self.assertFalse(self.ui.save_action.disabled)
+            self.assertFalse(self.ui.seek_go.disabled)
+            self.assertEqual(self.session.active_take, take.id)
+            self.assertIs(self.session.positions, source_positions)
+            self.assertEqual(self.session.frame, 25)
+            self.ui.save_action.click()
+            submit.assert_called_once_with('Wave gently', 0, 'replace', seconds=2.0)
+
+        self._timeline_edit(take.id, 0, 'play', 'animated-play')
+        self.assertTrue(self.session.playing)
+        self._timeline_edit(take.id, 0, 'pause', 'animated-pause')
+        self.assertFalse(self.session.playing)
+
+    def test_character_controls_preserve_tabs_and_guide_navigation(self):
+        gui = Gui()
+        character_guis = []
+        camera = SimpleNamespace(build_gui=lambda gui: None)
+        ui = StudioUI(SimpleNamespace(gui=gui), self.session, camera,
+                      Path(self.temp.name), lambda gui: None,
+                      character_controls=character_guis.append)
+        self.assertEqual(character_guis, [gui])
+        self.assertEqual(gui.tab_labels,
+                         ['Motion', 'Takes', 'Scene', 'Character', 'View', 'Project', 'Guide'])
+        with patch('studio_ui.navigate_tab') as navigate:
+            ui.quick_actions.click('Guide')
+            ui.guide_browse_takes.click()
+            ui.guide_scene.click()
+            self.assertEqual([gui.tab_labels[call.args[1]] for call in navigate.call_args_list],
+                             ['Guide', 'Takes', 'Scene'])
+
     def test_create_switches_to_live_and_requires_valid_prompt(self):
         self.assertEqual(self.ui.edit_action.value, CREATE)
+        self.assertEqual(self.ui.prompt.value, '')
+        self.assertTrue(self.ui.generate.disabled)
+        self.assertIn('Enter a direction', self.ui.prompt_count.content)
+        self.ui.prompt.edit('A person waves with their right hand.')
         self.assertFalse(self.ui.generate.disabled)
         self.assertIn('4.16 seconds', self.ui.duration_preview.content)
         self.ui.prompt.edit('x' * 501)
@@ -247,7 +321,229 @@ class StudioUITests(unittest.TestCase):
         self.session.takes = {take.id: take}
         self.session.select_take(take.id)
         self.ui.update()
+        self.ui.prompt.edit('A person waves with their right hand.')
         return take
+
+    def _seed_segmented_take(self):
+        take = self._seed_take(100)
+        take.segments = [
+            dict(start=0, end=50, prompt='Walk forward'),
+            dict(start=50, end=100, prompt='Wave once'),
+        ]
+        self.ui.update()
+        return take
+
+    def _timeline_edit(self, take_id, index, operation, nonce='1'):
+        self.ui.timeline_command.edit(json.dumps(dict(
+            take_id=take_id, index=index, operation=operation, nonce=nonce)))
+
+    def test_timeline_action_command_opens_focused_editor_and_routes_generation(self):
+        take = self._seed_segmented_take()
+        client = object()
+        payload = dict(take_id=take.id, index=1, operation='replace', nonce='first')
+        with patch('studio_ui.navigate_tab') as navigate:
+            self.ui.timeline_command.value = json.dumps(payload)
+            self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
+            navigate.assert_called_once_with(self.ui.tabs, 0, client)
+        self.assertEqual(self.ui.action_edit, (take.id, 1, 'replace'))
+        self.assertIn('Edit action 2', self.ui.action_heading.content)
+        self.assertIn('Later actions regenerate', self.ui.action_note.content)
+        self.assertEqual(self.ui.action_prompt.value, 'Wave once')
+        self.assertEqual(self.ui.action_duration.value, '2.00')
+        self.assertEqual(self.session.frame, 50)
+        self.assertFalse(self.ui.prompt.visible)
+        self.assertFalse(self.ui.ideas_folder.visible)
+        self.assertFalse(self.ui.advanced_folder.visible)
+        self.assertEqual(self.ui.save_action.label, 'Save action')
+
+        self.ui.action_prompt.edit('Wave twice')
+        self.ui.action_duration.edit('3.00')
+        self.session.submit_action_edit = Mock(return_value=True)
+        self.ui.save_action.click()
+        self.session.submit_action_edit.assert_called_once_with(
+            'Wave twice', 1, 'replace', seconds=3.0)
+
+    def test_timeline_command_rejects_stale_invalid_and_busy_input(self):
+        take = self._seed_segmented_take()
+        with patch('studio_ui.navigate_tab') as navigate:
+            self._timeline_edit('other', 0, 'replace')
+            self._timeline_edit(take.id, 3, 'replace')
+            self._timeline_edit(take.id, True, 'replace')
+            self._timeline_edit(take.id, 0, 'remove')
+            self.ui.timeline_command.edit('invalid json')
+            self.assertIsNone(self.ui.action_edit)
+            self._timeline_edit(take.id, 0, 'insert_before', 'accepted')
+            self.assertEqual(self.ui.action_edit, (take.id, 0, 'insert_before'))
+            self.assertEqual(self.ui.action_prompt.value, '')
+            self.assertEqual(self.ui.save_action.label, 'Add action')
+            self.ui.cancel_action.click()
+            self._timeline_edit(take.id, 1, 'replace', 'accepted')
+            self.assertIsNone(self.ui.action_edit)
+            self.session.busy = True
+            self._timeline_edit(take.id, 1, 'replace', 'busy')
+            self.assertIsNone(self.ui.action_edit)
+            self.assertEqual(navigate.call_count, 1)
+        self.session.busy = False
+
+    def test_timeline_transport_uses_current_take_and_keeps_editor_state(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'edit')
+        original_editor = self.ui.action_edit
+        with patch('studio_ui.navigate_tab') as navigate:
+            self._timeline_edit('old-take', 0, 'play', 'stale')
+            self.assertFalse(self.session.playing)
+            self._timeline_edit(take.id, 0, 'play', 'play')
+            self.assertTrue(self.session.playing)
+            self.assertEqual(self.ui.action_edit, original_editor)
+            self._timeline_edit(take.id, 0, 'play', 'play')
+            self._timeline_edit(take.id, 0, 'pause', 'pause')
+            self.assertFalse(self.session.playing)
+            self.session.seek(25)
+            self._timeline_edit(take.id, 0, 'start', 'start')
+            self.assertEqual(self.session.frame, 0)
+            self.assertEqual(navigate.call_count, 0)
+        self.session.busy = True
+        with patch.object(self.session, 'pause') as pause:
+            self._timeline_edit(take.id, 0, 'play', 'busy-play')
+            self._timeline_edit(take.id, 0, 'pause', 'busy-pause')
+            pause.assert_called_once_with()
+        self.session.busy = False
+
+    def test_selected_take_opens_compact_summary_and_advanced_ending(self):
+        take = self._seed_segmented_take()
+        self.assertIn('2 actions', self.ui.editor_context.content)
+        self.assertFalse(self.ui.prompt.visible)
+        self.assertFalse(self.ui.generate.visible)
+        self.assertFalse(self.ui.edit_action.visible)
+        self.assertTrue(self.ui.add_to_end.visible)
+        self.assertTrue(self.ui.advanced_folder.visible)
+        self.ui.advanced_replace.click()
+        self.assertEqual(self.ui.edit_action.value, REPLACE)
+        self.assertTrue(self.ui.prompt.visible)
+        self.assertTrue(self.ui.cancel_alternate.visible)
+        self.ui.cancel_alternate.click()
+        self.assertFalse(self.ui.prompt.visible)
+        self.assertEqual(self.ui.edit_action.value, EXTEND)
+
+    def test_action_editor_validates_duration_and_clears_on_switch(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 1, 'insert_after')
+        self.assertIn('Add action to end', self.ui.action_heading.content)
+        self.ui.action_prompt.edit('Turn around')
+        self.ui.action_duration.edit('40')
+        self.assertTrue(self.ui.save_action.disabled)
+        self.assertIn('0.16 to 30', self.ui.action_feedback.content)
+        self.ui.action_duration.edit('2.00')
+        self.assertFalse(self.ui.save_action.disabled)
+        self.ui.quick_actions.click('New take')
+        self.assertIsNone(self.ui.action_edit)
+        self.assertTrue(self.ui.prompt.visible)
+        self.assertFalse(self.ui.add_to_end.visible)
+
+    def test_action_edit_keeps_draft_on_failure_and_closes_after_commit(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace')
+        self.ui.action_prompt.edit('Step left')
+
+        def start(*_args, **_kwargs):
+            self.session.busy = True
+            return True
+
+        self.session.submit_action_edit = Mock(side_effect=start)
+        self.ui.save_action.click()
+        self.assertTrue(self.ui.save_action.disabled)
+        self.session.busy = False
+        self.ui.update()
+        self.assertEqual(self.ui.action_edit, (take.id, 0, 'replace'))
+        self.assertEqual(self.ui.action_prompt.value, 'Step left')
+
+        self.ui.save_action.click()
+        self.session.busy = False
+        self.session.action_edit_revision += 1
+        self.ui.update()
+        self.assertIsNone(self.ui.action_edit)
+        self.assertFalse(self.ui.prompt.visible)
+        self.assertTrue(self.ui.add_to_end.visible)
+
+    def test_add_to_end_uses_action_editor_and_undo_is_available(self):
+        take = self._seed_segmented_take()
+        self.assertTrue(self.ui.add_to_end.visible)
+        self.ui.add_to_end.click()
+        self.assertEqual(self.ui.action_edit, (take.id, 1, 'insert_after'))
+        self.assertEqual(self.ui.action_prompt.value, '')
+        self.ui.cancel_action.click()
+        self.ui.prepare_extend.click()
+        self.assertEqual(self.ui.action_edit, (take.id, 1, 'insert_after'))
+        self.session.undo_action_edit = Mock(return_value=True)
+        with patch.object(DirectorSession, 'can_undo_action_edit', new_callable=PropertyMock) as can_undo:
+            can_undo.return_value = True
+            self.ui.update()
+            self.assertTrue(self.ui.undo_action.visible)
+            self.ui.undo_action.click()
+        self.session.undo_action_edit.assert_called_once_with()
+        self.assertIsNone(self.ui.action_edit)
+
+    def test_new_take_clears_draft_and_keeps_saved_takes(self):
+        saved = self._seed_take()
+        self.ui.edit_action.edit(EXTEND)
+        self.ui.quick_actions.click('New take')
+        self.assertEqual(set(self.session.takes), {saved.id})
+        self.assertIsNone(self.session.active_take)
+        self.assertEqual(self.session.kind, 'reference')
+        self.assertEqual(self.ui.prompt.value, '')
+        self.assertEqual(self.session.prompt, '')
+        self.assertEqual(self.ui.edit_action.value, CREATE)
+        self.assertTrue(self.ui.generate.disabled)
+        self.assertIn('New take draft', self.ui.editor_context.content)
+
+    def test_choosing_create_from_saved_take_starts_blank_draft(self):
+        saved = self._seed_take()
+        self.ui.edit_action.edit(EXTEND)
+        self.ui.edit_action.edit(CREATE)
+        self.assertIsNone(self.session.active_take)
+        self.assertEqual(self.ui.prompt.value, '')
+        self.assertIn(saved.id, self.session.takes)
+        self.assertTrue(self.ui.generate.disabled)
+
+    def test_take_rows_select_for_edit_and_context_actions(self):
+        first = self._seed_take()
+        positions, rotations, motion = first.positions.copy(), first.rotations.copy(), first.motion.copy()
+        second = Take('b', 'Second', positions, rotations, motion)
+        self.session.takes[second.id] = second
+        self.ui.update()
+        self.assertEqual(self.gui.tab_labels, ['Motion', 'Takes', 'Scene', 'View', 'Project', 'Guide'])
+        self.assertFalse(self.ui.takes.visible)
+        self.assertTrue(self.ui.take_slots[1].visible)
+        self.assertIn('Edit Second', self.ui.take_slots[1].label)
+        with patch('studio_ui.navigate_tab') as navigate:
+            self.ui.take_slots[1].click()
+            self.assertEqual(navigate.call_args.args[1], 0)
+        self.assertEqual(self.session.active_take, second.id)
+        self.assertFalse(self.session.playing)
+        self.assertEqual(self.ui.edit_action.value, EXTEND)
+        self.assertIn('Second · 4.00 s', self.ui.editor_context.content)
+        with patch('studio_ui.navigate_tab') as navigate:
+            self.ui.prepare_replace.click()
+            self.assertEqual(navigate.call_args.args[1], 0)
+        self.assertEqual(self.ui.edit_action.value, REPLACE)
+        self.assertIn('Ready to change this ending', self.ui.status.content)
+
+    def test_guide_actions_open_relevant_tabs(self):
+        with patch('studio_ui.navigate_tab') as navigate:
+            self.ui.quick_actions.click('Guide')
+            self.ui.guide_browse_takes.click()
+            self.ui.guide_scene.click()
+            self.assertEqual([call.args[1] for call in navigate.call_args_list], [5, 1, 2])
+
+    def test_remove_take_can_be_undone_from_takes(self):
+        saved = self._seed_take()
+        self.ui.remove_take.click()
+        self.assertNotIn(saved.id, self.session.takes)
+        self.assertFalse(self.ui.undo_remove.disabled)
+        self.assertFalse(self.ui.save.disabled)
+        self.ui.undo_remove.click()
+        self.assertIn(saved.id, self.session.takes)
+        self.assertEqual(self.session.active_take, saved.id)
 
     def test_extend_uses_selected_take_and_target_total_not_playhead(self):
         self._seed_take()
@@ -329,13 +625,56 @@ class StudioUITests(unittest.TestCase):
         self.ui.mode.edit('Live ARDY')
         self.ui.update()
         self.assertIn('Reference pose', self.ui.status.content)
-        self.assertIn('/ 0.00 s', self.ui.playhead.content)
+        self.assertFalse(self.ui.playhead.visible)
+        self.assertFalse(self.ui.transport.visible)
         self.assertTrue(self.ui.seek_go.disabled)
         self.ui.mode.edit('Recorded preview')
         self.session.seek(119)
         self.ui.update()
         self.assertIn('Finished', self.ui.status.content)
-        self.assertIn('/ 2.00 s', self.ui.playhead.content)
+        self.assertFalse(self.ui.playhead.visible)
+        self.assertFalse(self.ui.transport.visible)
+
+    def test_transport_visibility_during_draft_and_generation(self):
+        self.assertFalse(self.ui.transport.visible)
+        self.ui.quick_actions.click('New take')
+        self.assertEqual(self.session.kind, 'reference')
+        self.assertFalse(self.ui.transport.visible)
+        self.ui.prompt.edit('Wave gently')
+        self.ui.generate.click()
+        self.assertTrue(self.session.busy)
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.seek_go.disabled)
+        self.assertTrue(self.backend.started.wait(1))
+
+    def test_real_viser_button_group_handles_draft_and_busy_updates(self):
+        with socket.socket() as probe:
+            try:
+                probe.bind(('127.0.0.1', 0))
+            except OSError as exc:
+                self.skipTest(f'localhost sockets unavailable: {exc}')
+        server = viser.ViserServer(host='127.0.0.1', port=0, verbose=False)
+        try:
+            camera = SimpleNamespace(build_gui=lambda gui: None)
+            ui = StudioUI(server, self.session, camera, Path(self.temp.name),
+                          lambda gui: None)
+            self.assertIsInstance(ui.transport, GuiButtonGroupHandle)
+            self.assertFalse(ui.transport.visible)
+
+            self.session.new_take()
+            ui.update()
+            self.assertEqual(self.session.kind, 'reference')
+            self.assertFalse(ui.transport.visible)
+
+            self.session.submit('Wave gently')
+            self.assertTrue(self.session.busy)
+            ui.update()
+            self.assertFalse(ui.transport.visible)
+            self.assertTrue(ui.seek_go.disabled)
+        finally:
+            self.backend.release.set()
+            server.stop()
 
     def test_pending_take_choice_is_not_overwritten_before_callback(self):
         positions = np.zeros((4, 34, 3), dtype=np.float32)

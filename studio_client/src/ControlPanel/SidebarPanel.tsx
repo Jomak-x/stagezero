@@ -1,14 +1,6 @@
 // @refresh reset
 
-import {
-  ActionIcon,
-  Box,
-  Divider,
-  Paper,
-  ScrollArea,
-  Tooltip,
-  useMantineColorScheme,
-} from "@mantine/core";
+import { ActionIcon, Box, Divider, Paper, ScrollArea, Tooltip } from "@mantine/core";
 import React from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
@@ -18,7 +10,7 @@ const SidebarPanelContext = React.createContext<null | {
   toggleCollapsed: () => void;
 }>(null);
 
-/** A fixed or collapsible side panel for displaying controls. */
+/** A full-height inspector next to the viewport and timeline. */
 export default function SidebarPanel({
   children,
   collapsible,
@@ -30,80 +22,49 @@ export default function SidebarPanel({
 }) {
   const [collapsed, { toggle: toggleCollapsed }] = useDisclosure(false);
 
-  const collapsedView = (
-    <Box
-      style={(theme) => ({
-        /* Animate in when collapsed. */
-        position: "absolute",
-        top: 0,
-        right: collapsed ? "0em" : "-3em",
-        transitionProperty: "right",
-        transitionDuration: "0.5s",
-        transitionDelay: "0.25s",
-        /* Visuals. */
-        borderBottomLeftRadius: "0.5em",
-        backgroundColor:
-          useMantineColorScheme().colorScheme == "dark"
-            ? theme.colors.dark[5]
-            : theme.colors.gray[2],
-        padding: "0.5em",
-      })}
-    >
-      <ActionIcon
-        onClick={(evt) => {
-          evt.stopPropagation();
-          toggleCollapsed();
-        }}
-      >
-        <Tooltip zIndex={100} label={"Show sidebar"}>
-          {<IconChevronLeft />}
-        </Tooltip>
-      </ActionIcon>
-    </Box>
-  );
-
   return (
-    <SidebarPanelContext.Provider
-      value={{
-        collapsible: collapsible,
-        toggleCollapsed: toggleCollapsed,
-      }}
-    >
-      {collapsedView}
-      {/* Using an <Aside /> below will break Mantine color inputs. */}
-      {/* We create two <Paper /> elements. The first is only used for a drop
-      shadow. Note the z-index difference, which is used to put the shadow
-      behind the titlebar but the content in front of it. (and thus also in
-      front of the titlebar's shadow) */}
+    <SidebarPanelContext.Provider value={{ collapsible, toggleCollapsed }}>
       <Paper
-        shadow="0 0 1em 0 rgba(0,0,0,0.1)"
+        component="aside"
+        data-testid="studio-inspector"
+        aria-label="Inspector"
+        radius={0}
+        shadow="-0.25em 0 0.8em rgba(0,0,0,0.12)"
         style={{
-          width: collapsed ? 0 : width,
-          boxSizing: "content-box",
-          transition: "width 0.5s 0s",
+          width: collapsed ? "2.75em" : `min(${width}, 40vw)`,
+          height: "100%",
+          minWidth: 0,
+          minHeight: 0,
+          flex: "0 0 auto",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          boxSizing: "border-box",
+          transition: "width 180ms ease",
           zIndex: 8,
         }}
-      ></Paper>
-      <Paper
-        radius={0}
-        style={{
-          width: collapsed ? 0 : width,
-          top: 0,
-          bottom: 0,
-          right: 0,
-          position: "absolute",
-          boxSizing: "content-box",
-          transition: "width 0.5s 0s",
-          zIndex: 20,
-        }}
       >
+        {collapsed && (
+          <Tooltip zIndex={100} label="Show sidebar">
+            <ActionIcon
+              aria-label="Show sidebar"
+              m="xs"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                toggleCollapsed();
+              }}
+            >
+              <IconChevronLeft />
+            </ActionIcon>
+          </Tooltip>
+        )}
         <Box
-          /* Prevent DOM reflow, as well as internals from getting too wide.
-           * Needs to match the width of the wrapper element above. */
           style={{
-            width: width,
-            height: "100%",
-            display: "flex",
+            width: "100%",
+            minWidth: 0,
+            minHeight: 0,
+            flex: "1 1 auto",
+            display: collapsed ? "none" : "flex",
             flexDirection: "column",
           }}
         >
@@ -114,27 +75,14 @@ export default function SidebarPanel({
   );
 }
 
-/** Handle object helps us hide, show, and drag our panel.*/
+/** Header with the control to collapse the inspector. */
 SidebarPanel.Handle = function SidebarPanelHandle({
   children,
 }: {
   children: string | React.ReactNode;
 }) {
-  const { toggleCollapsed, collapsible } =
-    React.useContext(SidebarPanelContext)!;
+  const { toggleCollapsed, collapsible } = React.useContext(SidebarPanelContext)!;
 
-  const collapseSidebarToggleButton = (
-    <ActionIcon
-      onClick={(evt) => {
-        evt.stopPropagation();
-        toggleCollapsed();
-      }}
-    >
-      <Tooltip zIndex={100} label={"Collapse sidebar"}>
-        {<IconChevronRight stroke={1.625} />}
-      </Tooltip>
-    </ActionIcon>
-  );
   return (
     <>
       <Box
@@ -147,20 +95,39 @@ SidebarPanel.Handle = function SidebarPanelHandle({
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
+          minWidth: 0,
+          flex: "0 0 auto",
         }}
       >
         {children}
-        {collapsible ? collapseSidebarToggleButton : null}
+        {collapsible && (
+          <Tooltip zIndex={100} label="Collapse sidebar">
+            <ActionIcon
+              aria-label="Collapse sidebar"
+              onClick={(evt) => {
+                evt.stopPropagation();
+                toggleCollapsed();
+              }}
+            >
+              <IconChevronRight stroke={1.625} />
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Box>
       <Divider mx="xs" />
     </>
   );
 };
-/** Contents of a panel. */
+
+/** Independently scrolling inspector controls. */
 SidebarPanel.Contents = function SidebarPanelContents({
   children,
 }: {
   children: string | React.ReactNode;
 }) {
-  return <ScrollArea style={{ flexGrow: 1 }}>{children}</ScrollArea>;
+  return (
+    <ScrollArea style={{ flex: "1 1 auto", minHeight: 0, minWidth: 0 }}>
+      {children}
+    </ScrollArea>
+  );
 };
