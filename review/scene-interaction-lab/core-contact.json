@@ -1,0 +1,1171 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "started_utc": "2026-09-26T08:09:40.092360+00:00",
+  "model": "ARDY-Core-RP-20FPS-Horizon40",
+  "reference_directory": "motion-research/core-v1",
+  "design": "Five held-out seeds x two source-pose contact scenarios x paired same-RNG baseline/native-conditioned second horizon",
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "text_cfg": 4.0,
+  "yaw_offsets_deg": [
+    -20.0,
+    0.0,
+    20.0,
+    -10.0,
+    10.0
+  ],
+  "scenarios": {
+    "right_touch": {
+      "prompt": "A person reaches their right hand to touch an object and holds their hand there.",
+      "reference": "wave__cfg4__seed33.npz",
+      "reference_frame": 72,
+      "hands": [
+        "RightHand"
+      ]
+    },
+    "two_hand_hold": {
+      "prompt": "A person raises both hands to touch an object above them and holds it.",
+      "reference": "overhead__cfg4__seed33.npz",
+      "reference_frame": 72,
+      "hands": [
+        "LeftHand",
+        "RightHand"
+      ]
+    }
+  },
+  "keyframes": [
+    56,
+    68,
+    76
+  ],
+  "caveat": "An object marker is placed at a hand location from a prior coherent Core motion. This tests native target following, not arbitrary prop awareness or physical grasp.",
+  "cases": [
+    {
+      "scenario": "right_touch",
+      "seed": 101,
+      "status": "ok",
+      "yaw_offset_deg": -20.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.6077160239219666,
+                  0.6492711305618286,
+                  0.6776418685913086
+                ],
+                "mean_keyframe_error_m": 0.6448763012886047,
+                "min_after_first_goal_m": 0.6077160239219666,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0014981509884819388,
+            "internal_horizon_seam_mean_joint_m": 0.0020303039345890284,
+            "minimum_foot_height_m": 0.06550776958465576,
+            "root_path_m": 0.054340966045856476,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07746380614116788,
+          "peak_gpu_allocated_gib": 14.93227481842041,
+          "file": "right_touch__seed101__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.0347212478518486,
+                  0.03132827579975128,
+                  0.026042696088552475
+                ],
+                "mean_keyframe_error_m": 0.030697405338287354,
+                "min_after_first_goal_m": 0.026042696088552475,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0014981509884819388,
+            "internal_horizon_seam_mean_joint_m": 0.002382118022069335,
+            "minimum_foot_height_m": 0.05731809139251709,
+            "root_path_m": 0.11558444052934647,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 69,
+          "seconds_second_horizon_and_decode": 0.07314916211180389,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "right_touch__seed101__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": -20.0,
+        "alignment_yaw_rad": -0.23147473009618877,
+        "alignment_translation_xz_m": [
+          0.009243056178092957,
+          0.0013493932783603668
+        ],
+        "root_xz_m": [
+          0.006446595769375563,
+          -0.016307178884744644
+        ],
+        "hand_targets_m": {
+          "RightHand": [
+            -0.43360012769699097,
+            1.574889063835144,
+            0.11812305450439453
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "right_touch",
+      "seed": 102,
+      "status": "ok",
+      "yaw_offset_deg": 0.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.3679105341434479,
+                  0.3648838996887207,
+                  0.3603312075138092
+                ],
+                "mean_keyframe_error_m": 0.36437520384788513,
+                "min_after_first_goal_m": 0.3567225933074951,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.001525301020592451,
+            "internal_horizon_seam_mean_joint_m": 0.004434661939740181,
+            "minimum_foot_height_m": 0.06648945808410645,
+            "root_path_m": 0.07334909588098526,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07105957600288093,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "right_touch__seed102__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.029638269916176796,
+                  0.03293116018176079,
+                  0.025864077731966972
+                ],
+                "mean_keyframe_error_m": 0.029477836564183235,
+                "min_after_first_goal_m": 0.025864077731966972,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.001525301020592451,
+            "internal_horizon_seam_mean_joint_m": 0.0043829926289618015,
+            "minimum_foot_height_m": 0.059538304805755615,
+            "root_path_m": 0.10154823213815689,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 69,
+          "seconds_second_horizon_and_decode": 0.07203083694912493,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "right_touch__seed102__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 0.0,
+        "alignment_yaw_rad": 0.23418330401182175,
+        "alignment_translation_xz_m": [
+          -0.011649644002318382,
+          0.025694742798805237
+        ],
+        "root_xz_m": [
+          -0.014446103945374489,
+          0.008038170635700226
+        ],
+        "hand_targets_m": {
+          "RightHand": [
+            -0.34727877378463745,
+            1.574889063835144,
+            0.32574087381362915
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "right_touch",
+      "seed": 103,
+      "status": "ok",
+      "yaw_offset_deg": 20.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.40898337960243225,
+                  0.4219629466533661,
+                  0.4241819977760315
+                ],
+                "mean_keyframe_error_m": 0.4183761179447174,
+                "min_after_first_goal_m": 0.40898337960243225,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.001480401842854917,
+            "internal_horizon_seam_mean_joint_m": 0.003091131104156375,
+            "minimum_foot_height_m": 0.06631356477737427,
+            "root_path_m": 0.14707227051258087,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07184721482917666,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "right_touch__seed103__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.0150454081594944,
+                  0.02979665994644165,
+                  0.037785742431879044
+                ],
+                "mean_keyframe_error_m": 0.027542604133486748,
+                "min_after_first_goal_m": 0.0150454081594944,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.001480401842854917,
+            "internal_horizon_seam_mean_joint_m": 0.003327971091493964,
+            "minimum_foot_height_m": 0.0559578537940979,
+            "root_path_m": 0.15293215215206146,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 69,
+          "seconds_second_horizon_and_decode": 0.07163458201102912,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "right_touch__seed103__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 20.0,
+        "alignment_yaw_rad": 0.530105086884824,
+        "alignment_translation_xz_m": [
+          -0.050383929163217545,
+          0.06957929581403732
+        ],
+        "root_xz_m": [
+          -0.05318038910627365,
+          0.05192272365093231
+        ],
+        "hand_targets_m": {
+          "RightHand": [
+            -0.27889707684516907,
+            1.574889063835144,
+            0.45287731289863586
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "right_touch",
+      "seed": 104,
+      "status": "ok",
+      "yaw_offset_deg": -10.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.48091691732406616,
+                  0.49734586477279663,
+                  0.5017356872558594
+                ],
+                "mean_keyframe_error_m": 0.4933328330516815,
+                "min_after_first_goal_m": 0.48091691732406616,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.00164021085947752,
+            "internal_horizon_seam_mean_joint_m": 0.003998699132353067,
+            "minimum_foot_height_m": 0.06515270471572876,
+            "root_path_m": 0.1510157585144043,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07128506782464683,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "right_touch__seed104__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.028934581205248833,
+                  0.040966231375932693,
+                  0.04523436352610588
+                ],
+                "mean_keyframe_error_m": 0.03837839141488075,
+                "min_after_first_goal_m": 0.028934581205248833,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.00164021085947752,
+            "internal_horizon_seam_mean_joint_m": 0.00469832681119442,
+            "minimum_foot_height_m": 0.053148865699768066,
+            "root_path_m": 0.19936607778072357,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 69,
+          "seconds_second_horizon_and_decode": 0.07217677892185748,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "right_touch__seed104__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": -10.0,
+        "alignment_yaw_rad": -0.0175968831886488,
+        "alignment_translation_xz_m": [
+          -0.06752189248800278,
+          -0.020890001207590103
+        ],
+        "root_xz_m": [
+          -0.07031835615634918,
+          -0.038546573370695114
+        ],
+        "hand_targets_m": {
+          "RightHand": [
+            -0.47180575132369995,
+            1.574889063835144,
+            0.18622103333473206
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "right_touch",
+      "seed": 105,
+      "status": "ok",
+      "yaw_offset_deg": 10.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.36416885256767273,
+                  0.3772676885128021,
+                  0.3896026909351349
+                ],
+                "mean_keyframe_error_m": 0.37701308727264404,
+                "min_after_first_goal_m": 0.3639613091945648,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0015226947143673897,
+            "internal_horizon_seam_mean_joint_m": 0.0036423506680876017,
+            "minimum_foot_height_m": 0.06568014621734619,
+            "root_path_m": 0.04767711088061333,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07192597608081996,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "right_touch__seed105__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.02895202487707138,
+                  0.026101918891072273,
+                  0.03004399687051773
+                ],
+                "mean_keyframe_error_m": 0.028365978971123695,
+                "min_after_first_goal_m": 0.020670218393206596,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0015226947143673897,
+            "internal_horizon_seam_mean_joint_m": 0.003821794642135501,
+            "minimum_foot_height_m": 0.05841422080993652,
+            "root_path_m": 0.08181890100240707,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 69,
+          "seconds_second_horizon_and_decode": 0.07219569990411401,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "right_touch__seed105__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 10.0,
+        "alignment_yaw_rad": 0.41960528255598134,
+        "alignment_translation_xz_m": [
+          0.011544410139322281,
+          -0.003921905532479286
+        ],
+        "root_xz_m": [
+          0.008747950196266174,
+          -0.021578477695584297
+        ],
+        "hand_targets_m": {
+          "RightHand": [
+            -0.25980737805366516,
+            1.574889063835144,
+            0.35203981399536133
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "two_hand_hold",
+      "seed": 101,
+      "status": "ok",
+      "yaw_offset_deg": -20.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.23812353610992432,
+                  0.19484879076480865,
+                  0.18787412345409393
+                ],
+                "mean_keyframe_error_m": 0.20694881677627563,
+                "min_after_first_goal_m": 0.18474990129470825,
+                "frames_within_10cm_after_first_goal": 0
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.36875519156455994,
+                  0.32316717505455017,
+                  0.4081971049308777
+                ],
+                "mean_keyframe_error_m": 0.3667064905166626,
+                "min_after_first_goal_m": 0.3145926594734192,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0017512941267341375,
+            "internal_horizon_seam_mean_joint_m": 0.003107501659542322,
+            "minimum_foot_height_m": 0.06463503837585449,
+            "root_path_m": 0.18148748576641083,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07168945297598839,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "two_hand_hold__seed101__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.06546615064144135,
+                  0.04995390772819519,
+                  0.033858295530080795
+                ],
+                "mean_keyframe_error_m": 0.04975945129990578,
+                "min_after_first_goal_m": 0.03363363817334175,
+                "frames_within_10cm_after_first_goal": 24
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.048572491854429245,
+                  0.04704522341489792,
+                  0.0344206728041172
+                ],
+                "mean_keyframe_error_m": 0.04334612563252449,
+                "min_after_first_goal_m": 0.028830263763666153,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0017512941267341375,
+            "internal_horizon_seam_mean_joint_m": 0.0038678105920553207,
+            "minimum_foot_height_m": 0.049722492694854736,
+            "root_path_m": 0.19925695657730103,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 105,
+          "seconds_second_horizon_and_decode": 0.07420613500289619,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "two_hand_hold__seed101__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": -20.0,
+        "alignment_yaw_rad": -0.4281333423251187,
+        "alignment_translation_xz_m": [
+          0.16804423928260803,
+          -0.09470733255147934
+        ],
+        "root_xz_m": [
+          0.013227209448814392,
+          0.0007238984107971191
+        ],
+        "hand_targets_m": {
+          "LeftHand": [
+            0.23437483608722687,
+            2.0039501190185547,
+            0.1630188226699829
+          ],
+          "RightHand": [
+            -0.1901892125606537,
+            2.030358076095581,
+            -0.0764847993850708
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "two_hand_hold",
+      "seed": 102,
+      "status": "ok",
+      "yaw_offset_deg": 0.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.4085555970668793,
+                  0.3492264151573181,
+                  0.3558756113052368
+                ],
+                "mean_keyframe_error_m": 0.3712191879749298,
+                "min_after_first_goal_m": 0.3480517864227295,
+                "frames_within_10cm_after_first_goal": 0
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.40668654441833496,
+                  0.3548499047756195,
+                  0.36560705304145813
+                ],
+                "mean_keyframe_error_m": 0.375714510679245,
+                "min_after_first_goal_m": 0.35462918877601624,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0016522756777703762,
+            "internal_horizon_seam_mean_joint_m": 0.007111973594874144,
+            "minimum_foot_height_m": 0.0657120943069458,
+            "root_path_m": 0.1429251879453659,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.0729573389980942,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "two_hand_hold__seed102__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.04880683124065399,
+                  0.04645856097340584,
+                  0.04631117731332779
+                ],
+                "mean_keyframe_error_m": 0.04719218611717224,
+                "min_after_first_goal_m": 0.03948216885328293,
+                "frames_within_10cm_after_first_goal": 24
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.019297905266284943,
+                  0.03342576324939728,
+                  0.032705146819353104
+                ],
+                "mean_keyframe_error_m": 0.028476273640990257,
+                "min_after_first_goal_m": 0.018763788044452667,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0016522756777703762,
+            "internal_horizon_seam_mean_joint_m": 0.00655457703396678,
+            "minimum_foot_height_m": 0.05043470859527588,
+            "root_path_m": 0.17126376926898956,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 105,
+          "seconds_second_horizon_and_decode": 0.07220027013681829,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "two_hand_hold__seed102__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 0.0,
+        "alignment_yaw_rad": -0.10649056825786829,
+        "alignment_translation_xz_m": [
+          0.1143004298210144,
+          -0.07583983987569809
+        ],
+        "root_xz_m": [
+          -0.040516600012779236,
+          0.01959139108657837
+        ],
+        "hand_targets_m": {
+          "LeftHand": [
+            0.2205955535173416,
+            2.0039501190185547,
+            0.10365302115678787
+          ],
+          "RightHand": [
+            -0.2579089403152466,
+            2.030358076095581,
+            0.010647289454936981
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "two_hand_hold",
+      "seed": 103,
+      "status": "ok",
+      "yaw_offset_deg": 20.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.5629154443740845,
+                  0.41146320104599,
+                  0.3939432203769684
+                ],
+                "mean_keyframe_error_m": 0.4561072885990143,
+                "min_after_first_goal_m": 0.3868868052959442,
+                "frames_within_10cm_after_first_goal": 0
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.44102972745895386,
+                  0.3833450973033905,
+                  0.37127551436424255
+                ],
+                "mean_keyframe_error_m": 0.3985501229763031,
+                "min_after_first_goal_m": 0.3663935363292694,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0016420249594375491,
+            "internal_horizon_seam_mean_joint_m": 0.005540976766496897,
+            "minimum_foot_height_m": 0.06532269716262817,
+            "root_path_m": 0.14246784150600433,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.0711776060052216,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "two_hand_hold__seed103__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.04066396877169609,
+                  0.042360562831163406,
+                  0.03745052218437195
+                ],
+                "mean_keyframe_error_m": 0.04015835002064705,
+                "min_after_first_goal_m": 0.03727497160434723,
+                "frames_within_10cm_after_first_goal": 24
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.027213331311941147,
+                  0.01849059760570526,
+                  0.019804997369647026
+                ],
+                "mean_keyframe_error_m": 0.021836308762431145,
+                "min_after_first_goal_m": 0.01276419498026371,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0016420249594375491,
+            "internal_horizon_seam_mean_joint_m": 0.0034500136971473694,
+            "minimum_foot_height_m": 0.0499953031539917,
+            "root_path_m": 0.1975831538438797,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 105,
+          "seconds_second_horizon_and_decode": 0.07565555302426219,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "two_hand_hold__seed103__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 20.0,
+        "alignment_yaw_rad": 0.239512333556441,
+        "alignment_translation_xz_m": [
+          0.1285969465970993,
+          -0.060236893594264984
+        ],
+        "root_xz_m": [
+          -0.026220083236694336,
+          0.035194337368011475
+        ],
+        "hand_targets_m": {
+          "LeftHand": [
+            0.24792617559432983,
+            2.0039501190185547,
+            0.02572045475244522
+          ],
+          "RightHand": [
+            -0.23376215994358063,
+            2.030358076095581,
+            0.10050681978464127
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "two_hand_hold",
+      "seed": 104,
+      "status": "ok",
+      "yaw_offset_deg": -10.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.23870569467544556,
+                  0.24625658988952637,
+                  0.31840980052948
+                ],
+                "mean_keyframe_error_m": 0.26779070496559143,
+                "min_after_first_goal_m": 0.19082285463809967,
+                "frames_within_10cm_after_first_goal": 0
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.32125911116600037,
+                  0.3373475968837738,
+                  0.38993072509765625
+                ],
+                "mean_keyframe_error_m": 0.3495124876499176,
+                "min_after_first_goal_m": 0.30657732486724854,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0016650597099214792,
+            "internal_horizon_seam_mean_joint_m": 0.004329700022935867,
+            "minimum_foot_height_m": 0.06352365016937256,
+            "root_path_m": 0.20389039814472198,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07224333984777331,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "two_hand_hold__seed104__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.04684126004576683,
+                  0.053510989993810654,
+                  0.04281340539455414
+                ],
+                "mean_keyframe_error_m": 0.04772188141942024,
+                "min_after_first_goal_m": 0.03912938013672829,
+                "frames_within_10cm_after_first_goal": 24
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.024781595915555954,
+                  0.039913348853588104,
+                  0.03616445139050484
+                ],
+                "mean_keyframe_error_m": 0.03361979499459267,
+                "min_after_first_goal_m": 0.024781595915555954,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0016650597099214792,
+            "internal_horizon_seam_mean_joint_m": 0.0045844148844480515,
+            "minimum_foot_height_m": 0.052475035190582275,
+            "root_path_m": 0.2408580631017685,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 105,
+          "seconds_second_horizon_and_decode": 0.07197191589511931,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "two_hand_hold__seed104__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": -10.0,
+        "alignment_yaw_rad": -0.3458268180970985,
+        "alignment_translation_xz_m": [
+          0.09048384428024292,
+          -0.08078828454017639
+        ],
+        "root_xz_m": [
+          -0.06433318555355072,
+          0.014642946422100067
+        ],
+        "hand_targets_m": {
+          "LeftHand": [
+            0.1694086492061615,
+            2.0039501190185547,
+            0.15820711851119995
+          ],
+          "RightHand": [
+            -0.2734086215496063,
+            2.030358076095581,
+            -0.04558077082037926
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    },
+    {
+      "scenario": "two_hand_hold",
+      "seed": 105,
+      "status": "ok",
+      "yaw_offset_deg": 10.0,
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.4902825355529785,
+                  0.34963881969451904,
+                  0.38583555817604065
+                ],
+                "mean_keyframe_error_m": 0.40858563780784607,
+                "min_after_first_goal_m": 0.34230291843414307,
+                "frames_within_10cm_after_first_goal": 0
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.3972845673561096,
+                  0.3135785162448883,
+                  0.3428983986377716
+                ],
+                "mean_keyframe_error_m": 0.35125383734703064,
+                "min_after_first_goal_m": 0.31333667039871216,
+                "frames_within_10cm_after_first_goal": 0
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 0,
+            "contact_at_all_three_keyframes": false,
+            "history_seam_mean_joint_m": 0.0016056294552981853,
+            "internal_horizon_seam_mean_joint_m": 0.006079629063606262,
+            "minimum_foot_height_m": 0.06533586978912354,
+            "root_path_m": 0.13573749363422394,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 0,
+          "seconds_second_horizon_and_decode": 0.07385566108860075,
+          "peak_gpu_allocated_gib": 14.932329654693604,
+          "file": "two_hand_hold__seed105__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "metrics": {
+            "hands": {
+              "LeftHand": {
+                "keyframe_error_m": [
+                  0.057260461151599884,
+                  0.04683295637369156,
+                  0.04080881550908089
+                ],
+                "mean_keyframe_error_m": 0.048300743103027344,
+                "min_after_first_goal_m": 0.03686909377574921,
+                "frames_within_10cm_after_first_goal": 24
+              },
+              "RightHand": {
+                "keyframe_error_m": [
+                  0.03831704333424568,
+                  0.041656263172626495,
+                  0.03696877136826515
+                ],
+                "mean_keyframe_error_m": 0.038980692625045776,
+                "min_after_first_goal_m": 0.034519799053668976,
+                "frames_within_10cm_after_first_goal": 24
+              }
+            },
+            "simultaneous_contact_frames_after_first_goal": 24,
+            "contact_at_all_three_keyframes": true,
+            "history_seam_mean_joint_m": 0.0016056294552981853,
+            "internal_horizon_seam_mean_joint_m": 0.005019973963499069,
+            "minimum_foot_height_m": 0.0474361777305603,
+            "root_path_m": 0.14932002127170563,
+            "quality_guard_met": true
+          },
+          "conditioned_channels": 105,
+          "seconds_second_horizon_and_decode": 0.07282733800821006,
+          "peak_gpu_allocated_gib": 14.93254804611206,
+          "file": "two_hand_hold__seed105__conditioned.npz"
+        }
+      },
+      "target": {
+        "reference_frame": 72,
+        "generated_keyframes": [
+          56,
+          68,
+          76
+        ],
+        "window_keyframes": [
+          20,
+          32,
+          40
+        ],
+        "yaw_offset_deg": 10.0,
+        "alignment_yaw_rad": 0.1027789976929265,
+        "alignment_translation_xz_m": [
+          0.1390594094991684,
+          -0.07790300250053406
+        ],
+        "root_xz_m": [
+          -0.015757620334625244,
+          0.0175282284617424
+        ],
+        "hand_targets_m": {
+          "LeftHand": [
+            0.2571212649345398,
+            2.0039501190185547,
+            0.04551100730895996
+          ],
+          "RightHand": [
+            -0.23026521503925323,
+            2.030358076095581,
+            0.05394153296947479
+          ]
+        },
+        "native_constraint": "EndEffectorConstraintSet",
+        "caveat": "Targets are reference-assisted reachable poses, not arbitrary object geometry or a learned grasp."
+      }
+    }
+  ],
+  "model_load_seconds": 67.86436795815825,
+  "gpu": "NVIDIA RTX 6000 Ada Generation",
+  "diffusion_steps": 10,
+  "finished_utc": "2026-09-26T08:10:54.485031+00:00",
+  "counts": {
+    "ok": 10,
+    "failed": 0
+  },
+  "summary": {
+    "right_touch": {
+      "completed_pairs": 5,
+      "baseline": {
+        "contact_at_all_three_keyframes": 0,
+        "quality_guard_met": 5,
+        "mean_hand_keyframe_error_m": 0.4595947086811066
+      },
+      "conditioned": {
+        "contact_at_all_three_keyframes": 5,
+        "quality_guard_met": 5,
+        "mean_hand_keyframe_error_m": 0.030892443284392355
+      }
+    },
+    "two_hand_hold": {
+      "completed_pairs": 5,
+      "baseline": {
+        "contact_at_all_three_keyframes": 0,
+        "quality_guard_met": 5,
+        "mean_hand_keyframe_error_m": 0.35523890852928164
+      },
+      "conditioned": {
+        "contact_at_all_three_keyframes": 5,
+        "quality_guard_met": 5,
+        "mean_hand_keyframe_error_m": 0.039939180761575696
+      }
+    }
+  }
+}

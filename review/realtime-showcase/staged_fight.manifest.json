@@ -1,0 +1,169 @@
+{
+  "output": "staged_fight.mp4",
+  "input": "staged_fight.raw.npz",
+  "input_sha256": "89e4c5a7a7aadf57bed9c827edc995da11960a3f3a485cbb1bb0eaac12f05cb7",
+  "report": "staged_fight.report.json",
+  "report_sha256": "8d92d31a12478b1418056368de4884f5b85da647fd1423512cf41e89432960a8",
+  "frames": 600,
+  "fps": 20,
+  "duration_seconds": 30.0,
+  "fixture": false,
+  "source_status": "complete",
+  "actor_ids": [
+    "fighter_a",
+    "fighter_b"
+  ],
+  "mesh_vertices_per_actor": 9084,
+  "mesh_faces_per_actor": 18152,
+  "mesh_cache_key": "6d57f2809acd84f54d37833e",
+  "snapshots": [
+    "staged_fight.frame-0000.png",
+    "staged_fight.frame-0059.png",
+    "staged_fight.frame-0119.png",
+    "staged_fight.frame-0120.png",
+    "staged_fight.frame-0139.png",
+    "staged_fight.frame-0159.png",
+    "staged_fight.frame-0160.png",
+    "staged_fight.frame-0184.png",
+    "staged_fight.frame-0199.png",
+    "staged_fight.frame-0222.png",
+    "staged_fight.frame-0239.png",
+    "staged_fight.frame-0240.png",
+    "staged_fight.frame-0246.png",
+    "staged_fight.frame-0259.png",
+    "staged_fight.frame-0279.png",
+    "staged_fight.frame-0280.png",
+    "staged_fight.frame-0359.png",
+    "staged_fight.frame-0439.png",
+    "staged_fight.frame-0440.png",
+    "staged_fight.frame-0519.png",
+    "staged_fight.frame-0599.png"
+  ],
+  "snapshot_selection": {
+    "0": [
+      "first frame",
+      "beat boundary after"
+    ],
+    "59": [
+      "beat midpoint"
+    ],
+    "119": [
+      "beat boundary before"
+    ],
+    "120": [
+      "beat boundary after"
+    ],
+    "139": [
+      "beat midpoint"
+    ],
+    "159": [
+      "beat boundary before"
+    ],
+    "160": [
+      "beat boundary after"
+    ],
+    "184": [
+      "closest hand-pair frame"
+    ],
+    "199": [
+      "beat midpoint"
+    ],
+    "222": [
+      "maximum hand-motion frame"
+    ],
+    "239": [
+      "beat boundary before"
+    ],
+    "240": [
+      "beat boundary after",
+      "closest hand-pair frame"
+    ],
+    "246": [
+      "maximum hand-motion frame"
+    ],
+    "259": [
+      "beat midpoint"
+    ],
+    "279": [
+      "beat boundary before"
+    ],
+    "280": [
+      "beat boundary after"
+    ],
+    "359": [
+      "beat midpoint"
+    ],
+    "439": [
+      "beat boundary before"
+    ],
+    "440": [
+      "beat boundary after"
+    ],
+    "519": [
+      "beat midpoint"
+    ],
+    "599": [
+      "last frame"
+    ]
+  },
+  "contact_sheets": [
+    "/Users/jakob/Desktop/Shellhacks/review/realtime-showcase/staged_fight.contact-sheet-01.png",
+    "/Users/jakob/Desktop/Shellhacks/review/realtime-showcase/staged_fight.contact-sheet-02.png"
+  ],
+  "camera": {
+    "azimuth_degrees": 30.0,
+    "elevation_degrees": 18.0,
+    "same_frame_detail_inset_beats": [
+      "align_dodge",
+      "dodge_block_push",
+      "fight_release"
+    ],
+    "detail_azimuth_degrees": {
+      "align_dodge": 337.53117966630924,
+      "dodge_block_push": 403.8210325732629,
+      "fight_release": 379.3432938431272
+    }
+  },
+  "no_pose_edits": true,
+  "no_interpolation": true,
+  "geometry": "Exact ObjectSceneLayer procedural parts; static planned scene state",
+  "renderer": "Official CoreSkin CPU LBS; PIL painter raster; ffmpeg libx264",
+  "beats": [
+    {
+      "id": "square_up",
+      "source": "ardy_core",
+      "start_frame": 0,
+      "end_frame": 120
+    },
+    {
+      "id": "align_dodge",
+      "source": "ardy_core",
+      "start_frame": 120,
+      "end_frame": 160
+    },
+    {
+      "id": "dodge_block_push",
+      "source": "intergen",
+      "start_frame": 160,
+      "end_frame": 240
+    },
+    {
+      "id": "fight_release",
+      "source": "intergen",
+      "start_frame": 240,
+      "end_frame": 280
+    },
+    {
+      "id": "recover",
+      "source": "ardy_core",
+      "start_frame": 280,
+      "end_frame": 440
+    },
+    {
+      "id": "disengage",
+      "source": "ardy_core",
+      "start_frame": 440,
+      "end_frame": 600
+    }
+  ]
+}
