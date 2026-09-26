@@ -1,5 +1,7 @@
 # StageZero — Single-actor directing
 
+Create a person from a prompt in **Character → Create from description**. See [character generation](docs/CHARACTERS.md) for the private backend setup and current motion limits.
+
 The Studio now supports [GLB character import and humanoid rig mapping](docs/GLB-CHARACTERS.md).
 Use `director_viewer.py --glb /path/to/character.glb` for GLB characters with the
 normal **Direct** prompt/Generate controls, takes and timeline. The **Character**
