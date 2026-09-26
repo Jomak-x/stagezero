@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import requests
 from scene_objects import KINDS, make_object
-from scene_effects import make_effect
+from scene_effects import EFFECT_KINDS, make_effect
 from scene_composition import validate_scene, generate_recipe, LIGHTING
 from object_generation import GatewayGenerator, gateway_config, validate_prompt, MAX_RESPONSE_BYTES
 
@@ -59,13 +59,46 @@ class LocalSceneGenerator:
 
     def generate(self, prompt):
         prompt = validate_prompt(prompt)
+        position = {'type': 'array', 'items': {'type': 'number', 'minimum': -20, 'maximum': 20},
+                    'minItems': 3, 'maxItems': 3}
+        color = {'type': 'array', 'items': {'type': 'integer', 'minimum': 0, 'maximum': 255},
+                 'minItems': 3, 'maxItems': 3}
+        def item_schema(kinds, size_minimum, size_maximum, *, effect=False):
+            properties = {'kind': {'type': 'string', 'enum': list(kinds)}, 'position': position,
+                          'size': {'type': 'array', 'items': {'type': 'number', 'minimum': size_minimum,
+                                                             'maximum': size_maximum}, 'minItems': 3, 'maxItems': 3},
+                          'color': color}
+            if effect:
+                properties['intensity'] = {'type': 'number', 'minimum': 0, 'maximum': 1}
+            return {'type': 'object', 'properties': properties, 'required': list(properties),
+                    'additionalProperties': False}
+        schema = {'type': 'object', 'properties': {
+            'name': {'type': 'string', 'minLength': 1, 'maxLength': 80},
+            'lighting': {'type': 'string', 'enum': list(LIGHTING)},
+            'objects': {'type': 'array', 'items': item_schema(KINDS, .05, 12),
+                        'minItems': 1, 'maxItems': 18},
+            'effects': {'type': 'array', 'items': item_schema(EFFECT_KINDS, .1, 8, effect=True),
+                        'maxItems': 3}},
+            'required': ['name', 'lighting', 'objects', 'effects'], 'additionalProperties': False}
+        catalog = ', '.join(f'{kind} {values["size"]}' for kind, values in KINDS.items())
+        effect_catalog = ', '.join(f'{kind} {values["size"]}' for kind, values in EFFECT_KINDS.items())
+        system = ('Plan one coherent stylized scene for a 1.3-meter actor at the origin. '
+                  'Choose 6–10 props relevant to the request and 0–3 effects; never list the entire catalog. '
+                  'Catalog kinds and typical sizes (width,height,depth): ' + catalog + '. '
+                  'Effect kinds and typical sizes: ' + effect_catalog + '. '
+                  'Coordinates are meters, Y up; position is the center. Keep a clear 1-meter radius around the actor. '
+                  'Put tall backdrops at negative Z, smaller props to the sides around X=±3, and vary positions. '
+                  'Place object bottoms at Y=0 except platforms may have tops at Y=0 and balls may be at hand height. '
+                  'Colors are RGB integer bytes from 0 to 255, not normalized values: teal [40,180,180], '
+                  'magenta [200,50,170], dark gray [35,40,50]. '
+                  'Choose a coherent palette and focal point. Return only the compact JSON plan in the required schema.')
         try:
             with self.transport.post('http://127.0.0.1:11434/api/chat', json={
-                'model': self.model, 'stream': False, 'format': 'json', 'think': False,
-                'messages': [{'role': 'system', 'content': scene_system_prompt()},
+                'model': self.model, 'stream': False, 'format': schema, 'think': False,
+                'messages': [{'role': 'system', 'content': system},
                              {'role': 'user', 'content': prompt}],
-                'options': {'temperature': .4, 'num_predict': 8000}},
-                timeout=(3, 90), stream=True, allow_redirects=False) as response:
+                'options': {'temperature': .4, 'num_predict': 3500}},
+                timeout=(3, 300), stream=True, allow_redirects=False) as response:
                 if response.status_code != 200:
                     raise ValueError('Local model unavailable; start Ollama and install the selected model')
                 body = bytearray()
@@ -73,11 +106,39 @@ class LocalSceneGenerator:
                     body.extend(chunk)
                     if len(body) > MAX_RESPONSE_BYTES:
                         raise ValueError('Local model response is too large')
-            return validate_generated_scene(json.loads(json.loads(body)['message']['content']))
+            plan = json.loads(json.loads(body)['message']['content'])
+            return _expand_local_scene_plan(plan)
+        except requests.ReadTimeout:
+            raise ValueError('Local model took too long to generate a scene; try again after it has loaded') from None
         except requests.RequestException:
             raise ValueError('Cannot reach local Ollama; start it or choose Recipes / AI gateway') from None
         except (KeyError, TypeError, json.JSONDecodeError):
             raise ValueError('Local model returned invalid scene JSON; current scene preserved') from None
+
+
+def _expand_local_scene_plan(plan):
+    if not isinstance(plan, dict) or set(plan) != {'name', 'lighting', 'objects', 'effects'}:
+        raise ValueError('Local model returned an invalid scene plan')
+    if not isinstance(plan['objects'], list) or not 1 <= len(plan['objects']) <= 18:
+        raise ValueError('Local model must choose 1–18 props')
+    if not isinstance(plan['effects'], list) or len(plan['effects']) > 3:
+        raise ValueError('Local model must choose at most three effects')
+    objects = []
+    for index, item in enumerate(plan['objects']):
+        if not isinstance(item, dict) or set(item) != {'kind', 'position', 'size', 'color'}:
+            raise ValueError(f'Local model prop {index} has missing or unknown fields')
+        obj = make_object(item['kind'], index)
+        obj.update({key: item[key] for key in ('position', 'size', 'color')})
+        objects.append(obj)
+    effects = []
+    for index, item in enumerate(plan['effects']):
+        if not isinstance(item, dict) or set(item) != {'kind', 'position', 'size', 'color', 'intensity'}:
+            raise ValueError(f'Local model effect {index} has missing or unknown fields')
+        effect = make_effect(item['kind'], index)
+        effect.update({key: item[key] for key in ('position', 'size', 'color', 'intensity')})
+        effects.append(effect)
+    return validate_generated_scene({'version': 2, 'name': plan['name'], 'lighting': plan['lighting'],
+                                     'objects': objects, 'effects': effects})
 
 
 def main():

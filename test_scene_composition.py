@@ -148,24 +148,40 @@ class SceneGenerationTests(unittest.TestCase):
             SceneGenerator(gateway).generate('rain')
 
     def test_local_ollama_success_and_failure_use_fake_transport(self):
-        expected = make_preset('Enchanted grove', seed=3)
-        envelope = {'message': {'content': json.dumps(expected)}}
+        plan = {'name': 'İstanbul garden', 'lighting': 'moonlight', 'objects': [
+            {'kind': 'tree', 'position': [-3, 1.6, -3], 'size': [1.8, 3.2, 1.8], 'color': [70, 140, 80]},
+            {'kind': 'lamp', 'position': [2.5, .7, -2], 'size': [.35, 1.4, .35], 'color': [230, 190, 90]}],
+            'effects': [{'kind': 'fireflies', 'position': [0, 1.3, -2], 'size': [3.5, 1.8, 3.5],
+                         'color': [244, 224, 100], 'intensity': .6}]}
+        tree = make_object('tree', 0)
+        tree.update({key: plan['objects'][0][key] for key in ('position', 'size', 'color')})
+        lamp = make_object('lamp', 1)
+        lamp.update({key: plan['objects'][1][key] for key in ('position', 'size', 'color')})
+        fireflies = make_effect('fireflies', 0)
+        fireflies.update({key: plan['effects'][0][key] for key in ('position', 'size', 'color', 'intensity')})
+        expected = validate_scene({'version': 2, 'name': 'İstanbul garden', 'lighting': 'moonlight',
+                                   'objects': [tree, lamp], 'effects': [fireflies]})
+        envelope = {'message': {'content': json.dumps(plan)}}
         response = _FakeResponse(json.dumps(envelope).encode())
         transport = _FakeTransport(response)
         generator = LocalSceneGenerator(model='test-local-model', transport=transport)
-        self.assertEqual(generator.generate('  enchanted grove  '), expected)
+        self.assertEqual(generator.generate('  İstanbul bahçesi  '), expected)
         self.assertTrue(response.closed)
         args, kwargs = transport.calls[0]
         self.assertEqual(args, ('http://127.0.0.1:11434/api/chat',))
         self.assertEqual(kwargs['json']['model'], 'test-local-model')
-        self.assertEqual(kwargs['json']['messages'][-1]['content'], 'enchanted grove')
-        self.assertEqual(kwargs['timeout'], (3, 90))
+        self.assertEqual(kwargs['json']['messages'][-1]['content'], 'İstanbul bahçesi')
+        self.assertEqual(kwargs['json']['format']['properties']['objects']['maxItems'], 18)
+        self.assertFalse(kwargs['json']['format']['properties']['objects']['items']['additionalProperties'])
+        self.assertLessEqual(kwargs['json']['options']['num_predict'], 3500)
+        self.assertNotIn('OBJECT CATALOG', kwargs['json']['messages'][0]['content'])
+        self.assertEqual(kwargs['timeout'], (3, 300))
         self.assertFalse(kwargs['allow_redirects'])
         for bad_response, error in (
             (_FakeResponse(status_code=503), None),
             (_FakeResponse(b'not json'), None),
             (_FakeResponse(json.dumps({'message': {'content': '{bad'}}).encode()), None),
-            (_FakeResponse(json.dumps({'message': {'content': json.dumps(dict(expected, lighting='bad'))}}).encode()), None),
+            (_FakeResponse(json.dumps({'message': {'content': json.dumps(dict(plan, lighting='bad'))}}).encode()), None),
             (None, requests.Timeout('offline')),
         ):
             with self.subTest(error=error, body=getattr(bad_response, 'body', b'')[:30]):
@@ -174,6 +190,32 @@ class SceneGenerationTests(unittest.TestCase):
                     LocalSceneGenerator(model='test-local-model', transport=fake).generate('forest')
                 if bad_response is not None:
                     self.assertTrue(bad_response.closed)
+
+    def test_local_ollama_rejects_invalid_compact_plan(self):
+        base = {'name': 'Small grove', 'lighting': 'moonlight', 'objects': [
+            {'kind': 'tree', 'position': [3, 1.6, -3], 'size': [1.8, 3.2, 1.8], 'color': [70, 140, 80]}],
+            'effects': []}
+        for plan in (
+            dict(base, objects=[dict(base['objects'][0], kind='dragon')]),
+            dict(base, objects=[dict(base['objects'][0], script='unsafe')]),
+            dict(base, objects=[dict(base['objects'][0], size=[0, 3.2, 1.8])]),
+            dict(base, unexpected='field'),
+        ):
+            with self.subTest(plan=plan):
+                response = _FakeResponse(json.dumps({'message': {'content': json.dumps(plan)}}).encode())
+                with self.assertRaises(ValueError):
+                    LocalSceneGenerator(model='test-local-model', transport=_FakeTransport(response)).generate('grove')
+                self.assertTrue(response.closed)
+
+    def test_local_ollama_read_timeout_is_distinct_from_connection_failure(self):
+        for error, expected_message in (
+            (requests.ReadTimeout('model is still generating'), 'Local model took too long'),
+            (requests.ConnectionError('Ollama is offline'), 'Cannot reach local Ollama'),
+        ):
+            with self.subTest(error=type(error).__name__):
+                generator = LocalSceneGenerator(model='test-local-model', transport=_FakeTransport(error=error))
+                with self.assertRaisesRegex(ValueError, expected_message):
+                    generator.generate('forest')
 
 
 class ScenePersistenceTests(unittest.TestCase):
