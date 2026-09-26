@@ -1164,7 +1164,11 @@ export interface TimelinePromptMergeMessage {
   prompt_id_right: string;
 }
 
+import type { CameraStudioStateMessage, CameraStudioCommandMessage } from "./cameraProtocol";
+
 export type Message = 
+  | CameraStudioStateMessage
+  | CameraStudioCommandMessage
   | CameraFrustumMessage
   | GlbMessage
   | ActorGlbLoadMessage

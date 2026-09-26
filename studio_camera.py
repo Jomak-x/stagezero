@@ -98,6 +98,11 @@ class StudioCamera:
         self._lock = RLock()
         self.follow = False
         self.follow_handle = None
+        self.studio = None
+
+    def _manual(self, client) -> None:
+        if self.studio is not None:
+            self.studio.enter_free(client)
 
     def _root(self) -> np.ndarray:
         root = self.root_getter()
@@ -107,6 +112,7 @@ class StudioCamera:
         return tuple(self.server.get_clients().values())
 
     def reset(self, client: viser.ClientHandle) -> None:
+        self._manual(client)
         root = self._root()
         _set_view(client.camera, self.default_position + root, self.default_target + root)
         client.camera.fov = np.deg2rad(42.0)
@@ -115,6 +121,7 @@ class StudioCamera:
 
     def focus(self, client: viser.ClientHandle) -> None:
         """Center the actor while retaining the current angle and distance."""
+        self._manual(client)
         position, target = _camera_pair(client.camera)
         new_target = self.default_target + self._root()
         if np.linalg.norm(position - target) < _MIN_DISTANCE:
@@ -122,6 +129,7 @@ class StudioCamera:
         _set_view(client.camera, position + (new_target - target), new_target)
 
     def preset(self, client: viser.ClientHandle, name: str) -> None:
+        self._manual(client)
         current_position, current_target = _camera_pair(client.camera)
         radius = float(np.linalg.norm(current_position - current_target))
         radius = float(np.clip(radius, 2.0, 30.0))
@@ -138,14 +146,17 @@ class StudioCamera:
         _set_view(client.camera, target + radius * direction, target)
 
     def orbit(self, client: viser.ClientHandle, *, yaw: float = 0.0, pitch: float = 0.0) -> None:
+        self._manual(client)
         position, target = _camera_pair(client.camera)
         _set_view(client.camera, _orbit_position(position, target, yaw, pitch), target)
 
     def pan(self, client: viser.ClientHandle, *, horizontal: float = 0.0, vertical: float = 0.0) -> None:
+        self._manual(client)
         position, target = _camera_pair(client.camera)
         client.camera.position = position + _pan_offset(position, target, horizontal, vertical)
 
     def zoom(self, client: viser.ClientHandle, direction: int) -> None:
+        self._manual(client)
         position, target = _camera_pair(client.camera)
         offset = position - target
         distance = float(np.linalg.norm(offset))
@@ -185,6 +196,8 @@ class StudioCamera:
             for client in clients:
                 previous = self._last_root.get(client.client_id)
                 self._last_root[client.client_id] = current.copy()
+                if self.studio is not None and self.studio.is_locked(client.client_id):
+                    continue
                 if previous is None:
                     continue
                 delta = current - previous
@@ -194,6 +207,8 @@ class StudioCamera:
 
     def build_gui(self, gui: viser.GuiApi) -> None:
         """Add a compact Camera tab or folder inside the caller's GUI context."""
+        if self.studio is not None:
+            gui.add_html('<div data-stagezero-cameras></div>')
         gui.add_markdown("**Camera** · Drag or two-finger scroll to pan · Pinch to zoom · Choose Orbit or Look in the viewport · WASD to move, Q/E down/up")
         presets = gui.add_button_group("View", ("Perspective", "Front", "Side", "Top"))
         focus = gui.add_button("Focus actor", hint="Center the actor while keeping your current angle and distance")

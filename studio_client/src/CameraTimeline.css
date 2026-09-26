@@ -1,0 +1,127 @@
+.sz-camera-toolbar {
+  --camera-ink: #edf2f5;
+  --camera-muted: #aab4c0;
+  --camera-line: rgba(255,255,255,.13);
+  --camera-field: #292e38;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 9px;
+  min-height: 45px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  background: #1c2028;
+  border-bottom: 1px solid var(--camera-line);
+  color: var(--camera-ink);
+  font: 11px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  z-index: 5;
+}
+.sz-camera-toolbar[data-theme="light"] {
+  --camera-ink: #283441;
+  --camera-muted: #667484;
+  --camera-line: rgba(35,48,60,.14);
+  --camera-field: #fff;
+  background: #f8fafb;
+}
+.sz-camera-toolbar-title { font-weight: 700; white-space: nowrap; }
+.sz-camera-toolbar-title span { color: var(--camera-muted); font-weight: 500; }
+.sz-camera-toolbar-divider { height: 18px; width: 1px; background: var(--camera-line); }
+.sz-camera-toolbar button, .sz-camera-toolbar select, .sz-camera-toolbar input { font: inherit; }
+.sz-camera-toolbar button {
+  appearance: none;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--camera-line);
+  border-radius: 7px;
+  background: var(--camera-field);
+  color: var(--camera-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.sz-camera-toolbar button:hover:not(:disabled) { background: rgba(161,229,208,.13); }
+.sz-camera-toolbar button[aria-pressed="true"] { border-color: #a1e5d0; color: #a1e5d0; }
+.sz-camera-toolbar button:disabled { opacity: .42; cursor: not-allowed; }
+.sz-camera-toolbar .sz-camera-field { display: inline-flex; align-items: center; gap: 5px; color: var(--camera-muted); white-space: nowrap; }
+.sz-camera-toolbar .sz-camera-field select, .sz-camera-toolbar .sz-camera-field input {
+  min-height: 30px;
+  max-width: 140px;
+  box-sizing: border-box;
+  padding: 0 7px;
+  border: 1px solid var(--camera-line);
+  border-radius: 6px;
+  background: var(--camera-field);
+  color: var(--camera-ink);
+}
+.sz-camera-toolbar .sz-camera-time input { width: 78px; }
+.sz-camera-cut-editor { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.sz-camera-cut-frame { color: var(--camera-muted); font-variant-numeric: tabular-nums; }
+.sz-camera-toolbar-error { color: #fca5a5; font-weight: 600; }
+.sz-camera-track {
+  --camera-track-ink: #e9f8f3;
+  --camera-track-label: #aab3c0;
+  --camera-track-bg: #1c2028;
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(255,255,255,.1);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  pointer-events: auto;
+  z-index: 6;
+  font: 11px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.sz-camera-track[data-theme="light"] {
+  --camera-track-ink: #ffffff;
+  --camera-track-label: #495057;
+  --camera-track-bg: #f8f9fa;
+  border-color: #ced4da;
+}
+.sz-camera-track-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  box-sizing: border-box;
+  padding-right: 10px;
+  border-right: 1px solid rgba(255,255,255,.1);
+  background: var(--camera-track-bg);
+  color: var(--camera-track-label);
+  font-size: 12px;
+  pointer-events: none;
+}
+.sz-camera-track-empty { position: absolute; top: 13px; color: var(--camera-track-label); opacity: .75; white-space: nowrap; pointer-events: none; }
+.sz-camera-cut {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  overflow: hidden;
+  border: 1px solid #65bca5;
+  border-right-color: #244b43;
+  border-radius: 5px;
+  background: linear-gradient(#367668,#285c51);
+  color: var(--camera-track-ink);
+  text-align: left;
+  white-space: nowrap;
+  cursor: grab;
+  touch-action: none;
+}
+.sz-camera-cut[data-fixed="true"] { cursor: pointer; }
+.sz-camera-cut[data-selected="true"] { border: 2px solid #a1e5d0; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+.sz-camera-cut-name { overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+.sz-camera-cut-duration { flex: none; opacity: .78; font-variant-numeric: tabular-nums; }
+.sz-camera-track-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #a1e5d0; box-shadow: 0 0 4px rgba(0,0,0,.4); pointer-events: none; }
+.sz-camera-track[data-theme="light"] .sz-camera-track-playhead { background: #2563eb; }
+.sz-camera-toolbar :is(button,select,input):focus-visible, .sz-camera-cut:focus-visible { outline: 2px solid #a1e5d0; outline-offset: 2px; }
+@media (max-width: 48rem), (pointer: coarse) {
+  .sz-camera-toolbar { padding: 7px 10px; }
+  .sz-camera-toolbar button, .sz-camera-toolbar .sz-camera-field select, .sz-camera-toolbar .sz-camera-field input { min-height: 44px; }
+  .sz-camera-cut-editor { margin-left: 0; }
+}
