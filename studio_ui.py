@@ -8,6 +8,8 @@ from takes import MAX_TAKES
 from duration_planning import plan_duration
 from studio_guide import GUIDE_HTML
 from studio_navigation import navigate_tab
+from prompt_assistant import needs_clarification
+from prompt_assistant_ui import PromptAssistantUI
 from upload_events import install_upload_snapshots
 
 CREATE = 'Create new'
@@ -107,6 +109,7 @@ class StudioUI:
             self.action_heading = gui.add_html('')
             self.action_note = gui.add_html('')
             self.action_prompt = gui.add_text('Direction', initial_value='', multiline=True)
+            self.action_assistant = self._make_prompt_assistant(gui, action=True)
             self.action_duration = gui.add_text('Length (s)', initial_value='4.16')
             self.action_feedback = gui.add_html('')
             self.save_action = gui.add_button('Update motion', icon=viser.Icon.SPARKLES)
@@ -119,6 +122,7 @@ class StudioUI:
             self.edit_explainer = gui.add_html('')
             self.replace_time = gui.add_text('Keep motion before this time (seconds)', initial_value='0.00')
             self.prompt = gui.add_text('Direction', initial_value='', multiline=True)
+            self.prompt_assistant = self._make_prompt_assistant(gui, action=False)
             self.prompt_count = gui.add_html('')
             self.duration_mode = gui.add_dropdown('Length', (AUTO, SET_DURATION, TARGET_TOTAL), initial_value=AUTO)
             self.duration_seconds = gui.add_text('New motion length (seconds, 0.16–30)', initial_value='4.16')
@@ -232,6 +236,31 @@ class StudioUI:
             return seconds, None
         except ValueError:
             return None, 'Enter an action length from 0.16 to 30 seconds.'
+
+    def _assistant_context(self, action):
+        s = self.session
+        with s.lock:
+            return (s.active_take, s.project_revision, s.clip_revision,
+                    s.character_motion_enabled, s.busy,
+                    self._action_context() if action else self._generation_context())
+
+    def _make_prompt_assistant(self, gui, *, action):
+        target = self.action_prompt if action else self.prompt
+
+        def apply(text, expected_context, expected_prompt):
+            s = self.session
+            with s.lock:
+                if (s.busy or not s.character_motion_enabled or not target.visible
+                        or self._assistant_context(action) != expected_context
+                        or target.value != expected_prompt or not self._valid_prompt(text)):
+                    return False
+                self._set(target, 'value', text)
+                if not action:
+                    s.edit_prompt(text)
+            self.update()
+            return True
+
+        return PromptAssistantUI(gui, target, lambda: self._assistant_context(action), apply)
 
     def _action_context(self):
         return (self.action_edit, id(self._action_source), self.session.project_revision,
@@ -573,6 +602,11 @@ class StudioUI:
                 if error is not None:
                     s.status = error
                     return
+                if needs_clarification(self.action_prompt.value):
+                    self.action_assistant.clarify()
+                    s.status = 'Clarify the direction in Prompt assistant before updating motion'
+                    self.update()
+                    return
                 revision = s.action_edit_revision
                 if s.submit_action_edit(self.action_prompt.value, edit[1], edit[2], seconds=seconds):
                     self._submitted_action_edit = revision
@@ -656,6 +690,11 @@ class StudioUI:
         def generate(_):
             with s.lock:
                 if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
+                    return
+                if needs_clarification(self.prompt.value):
+                    self.prompt_assistant.clarify()
+                    s.status = 'Clarify the direction in Prompt assistant before generating motion'
+                    self.update()
                     return
                 take = s.takes.get(s.active_take)
                 plan, error = self._generation_plan(take)
@@ -885,6 +924,10 @@ class StudioUI:
             self._refresh_action_edit(take, s.busy)
             self._prompt_feedback()
             self._refresh_generation(take, s.busy)
+            self.prompt_assistant.refresh(
+                visible=self.prompt.visible and s.character_motion_enabled, busy=s.busy)
+            self.action_assistant.refresh(
+                visible=self.action_prompt.visible and s.character_motion_enabled, busy=s.busy)
             self._set(self.cancel, 'visible', s.busy)
             if s.busy:
                 if self._generation_started_at is None:
