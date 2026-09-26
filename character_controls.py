@@ -541,6 +541,8 @@ class CharacterControls:
                 self._diagnostics.content = details
 
     def close(self):
+        if self.creation is not None:
+            self.creation.stop()
         if self.upload_limits is not None:
             if self._upload_handle is not None:
                 self.upload_limits.unregister(self._upload_handle, remove=True)

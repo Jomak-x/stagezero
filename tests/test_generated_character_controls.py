@@ -42,6 +42,12 @@ class GeneratedCharacterCatalogTests(unittest.TestCase):
         export.assert_called_once_with(self.source, self.skeleton)
         return asset_id
 
+    def test_close_cancels_in_flight_creation(self):
+        from unittest.mock import Mock
+        self.controls.creation = Mock()
+        self.controls.close()
+        self.controls.creation.stop.assert_called_once_with()
+
     def test_generated_model_saves_and_activates_only_after_browser_ack(self):
         revision = self.controls.selection_revision
         asset_id = self.add_generated('  Original explorer  ')
