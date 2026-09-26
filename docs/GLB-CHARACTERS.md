@@ -25,6 +25,9 @@ joint sweep is deterministic **synthetic test motion**, not ARDY inference.
 It generates two simple textured test figures with different proportions and
 G1/Mixamo names. These are technical fixtures, not production character artwork.
 Use an unused port and separate runtime folder when sharing a machine.
+The lab uses studio environment lighting so metallic and other PBR materials
+have reflections. Use `--environment warehouse` for another preset or
+`--environment none` for the earlier direct-light-only view.
 After rebuilding the client, restart your own viewer process so Viser serves the
 new asset index. Keep other workers' viewer processes running.
 

@@ -48,6 +48,8 @@ def main():
     parser.add_argument('--port', type=int, default=2341)
     parser.add_argument('--glb', type=Path, help='Open a local GLB on first browser connection')
     parser.add_argument('--characters', type=Path, default=ROOT / '.runtime/characters')
+    parser.add_argument('--environment', choices=('studio', 'warehouse', 'none'), default='studio',
+                        help='Reflection lighting for inspecting PBR materials')
     args = parser.parse_args()
     torch.set_num_threads(2)
     skeleton = G1Skeleton34()
@@ -56,7 +58,7 @@ def main():
     server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False)
     server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
-    server.scene.configure_environment_map(None)
+    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
     server.scene.configure_default_lights(enabled=True, cast_shadow=True)
     server.scene.add_light_ambient('/fill', intensity=.6)
     server.scene.add_box('/floor', dimensions=(20, .05, 20), position=(0, -.026, 0), color=(28, 37, 47))
