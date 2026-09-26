@@ -1,5 +1,6 @@
 # StageZero — Single-actor directing
 
+Create a person from a prompt in **Character → Create from description**. See [character generation](docs/CHARACTERS.md) for the private backend setup and current motion limits.
 The **Scene** tab supports one-prompt backgrounds with custom geometry and a
 separate **Add one object** flow that preserves the current set. Reusable city,
 harbor and temple starter sets are included. See [scene generation](docs/OBJECTS.md)

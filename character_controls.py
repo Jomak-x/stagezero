@@ -1,13 +1,14 @@
 """Shared character selection with client-confirmed GLB activation."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from html import escape
 from pathlib import Path
 from queue import SimpleQueue, Empty
 from threading import Lock, RLock
 import hashlib
 import json
+import tempfile
 import numpy as np
 
 from bounded_upload import (ScopedUploadLimits, acquire_scoped_upload_limits,
@@ -65,6 +66,7 @@ class CharacterControls:
         self._mapping_gui = None
         self.renderer = renderer or GlbCharacterRenderer(server, on_result=self._on_result)
         self.upload_limits = None
+        self.creation = None
         self._upload_gui = None
         self._upload_handle = None
         self._restore_catalog()
@@ -79,13 +81,77 @@ class CharacterControls:
     def _entry(self, asset, mapping=None, *, report=None, preview=False):
         report = report or assess_character(asset, mapping=mapping, skeleton=self.skeleton)
         rig = None if preview else report.retargeter
+        generated = not preview and mapping is None and report.motion_ready and self._generated_origin(asset.sha256)
+        if generated:
+            from generated_character_rig import build_generated_retargeter
+            rig = build_generated_retargeter(asset, self.skeleton)
+            report = replace(report, retargeter=rig,
+                             title='Generated character',
+                             reasons=('Automatic body fit. Fingers and face remain still.',))
         world = None
         if rig is not None:
             world = rig.retarget(*standing_reference(rig.skeleton)).world_matrices
         reason = report.title + ' · ' + ' '.join(report.reasons)
         if preview:
             reason = 'Static preview · motion generation disabled. ' + ' '.join(report.reasons)
-        return CharacterEntry(asset, rig, reason, report, ground_offset(asset, world), mapping, preview)
+        return CharacterEntry(asset, rig, reason, report, 0.0 if generated else ground_offset(asset, world), mapping, preview)
+
+    def _generated_origin(self, asset_id):
+        path = self.storage_root / asset_id / 'generated.json'
+        try:
+            if path.is_symlink() or path.stat().st_size > 4096:
+                return False
+            doc = json.loads(path.read_text())
+            return (isinstance(doc, dict) and doc.get('version') == 1
+                    and doc.get('source') == 'neon-trellis' and doc.get('asset_id') == asset_id)
+        except (OSError, ValueError):
+            return False
+
+    @property
+    def selection_revision(self):
+        with self._lock:
+            return self._ticket
+
+    def select_generated(self, asset_id, client_id, expected_revision):
+        """Do not replace a character explicitly selected while generation ran."""
+        with self._lock:
+            if self._ticket != expected_revision:
+                return False
+            self.select(asset_id, client_id)
+            return True
+
+    def add_generated_file(self, data, prompt):
+        """Fit a generated body, then store it in the existing GLB catalog."""
+        from generated_character_rig import export_generated_character, build_generated_retargeter
+        if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 800:
+            raise ValueError('Describe a person in 1–800 characters')
+        with self._import_lock:
+            with self._lock:
+                if len(self.entries) >= 16:
+                    raise ValueError('Character library is full (16 models)')
+            rigged = export_generated_character(data, self.skeleton)
+            name = 'Generated - ' + ' '.join(prompt.split())[:60]
+            asset, report = inspect_character(rigged, display_name=name, skeleton=self.skeleton)
+            if asset is None or not report.motion_ready:
+                raise ValueError('Could not fit this character. Try one person with separated arms and legs.')
+            # Validate our fitted adapter before writing anything to the catalog.
+            build_generated_retargeter(asset, self.skeleton)
+            import_glb(rigged, self.storage_root, display_name=name)
+            folder = self.storage_root / asset.sha256
+            staged = None
+            try:
+                with tempfile.NamedTemporaryFile('w', dir=folder, prefix='.generated-', suffix='.tmp', encoding='utf-8', delete=False) as f:
+                    staged = Path(f.name)
+                    json.dump({'version': 1, 'source': 'neon-trellis', 'asset_id': asset.sha256,
+                               'prompt': prompt.strip()}, f, ensure_ascii=False)
+                staged.replace(folder / 'generated.json')
+            finally:
+                if staged is not None:
+                    staged.unlink(missing_ok=True)
+            entry = self._entry(asset, report=report)
+            with self._lock:
+                self.entries[asset.sha256] = entry
+            return asset.sha256
 
     def _restore_catalog(self):
         # A bounded startup catalog; imports are local to this installation.
@@ -330,10 +396,14 @@ class CharacterControls:
             client.camera.fov = np.deg2rad(42.)
 
     def build_gui(self, gui):
-        gui.add_html('<div class="sz-section">Character<small>Load a rigged GLB to use its appearance with ARDY motion.</small></div>')
-        upload = gui.add_upload_button('Load GLB', mime_type='.glb')
-        add_character_guide(gui)
+        gui.add_html('<div class="sz-section">Character<small>Choose a saved person or create one from a description.</small></div>')
         choose = gui.add_dropdown('Character', ('G1 robot',))
+        from character_creation import CharacterCreation
+        self.creation = CharacterCreation(self.server, self)
+        self.creation.build_gui(gui)
+        with gui.add_folder('Import a rigged model', expand_by_default=False):
+            upload = gui.add_upload_button('Load GLB', mime_type='.glb')
+            add_character_guide(gui)
         self._mapping_gui = gui
         self._mapping_folder = gui.add_folder('Rig mapping', visible=False)
         with self._mapping_folder:
@@ -344,7 +414,7 @@ class CharacterControls:
         status = gui.add_html('')
         with gui.add_folder('Rig diagnostics', expand_by_default=False):
             self._diagnostics = gui.add_html('')
-        gui.add_markdown('Motion needs a humanoid skeleton and skin weights. A mapping file assigns existing bones; it cannot rig a static mesh. Technical compatibility does not guarantee natural deformation. Selection is shared between connected viewers.')
+        gui.add_markdown('Body motion is approximate; fingers and faces stay still. Character selection is shared between viewers.')
         self._controls = (choose, mapping, status, preview, another)
         self.upload_limits = acquire_scoped_upload_limits(self.server, gui=gui,
                                                            factory=ScopedUploadLimits)
@@ -446,6 +516,7 @@ class CharacterControls:
             choose.value = label
         entry = self.entries.get(target)
         mapping.visible = (entry is not None and entry.compatibility.can_map
+                           and not self._generated_origin(target)
                            and (self.compatibility is None or self.compatibility.status != 'unsupported'))
         mapping.disabled = not mapping.visible
         self._mapping_folder.visible = mapping.visible
@@ -470,6 +541,8 @@ class CharacterControls:
                 self._diagnostics.content = details
 
     def close(self):
+        if self.creation is not None:
+            self.creation.stop()
         if self.upload_limits is not None:
             if self._upload_handle is not None:
                 self.upload_limits.unregister(self._upload_handle, remove=True)

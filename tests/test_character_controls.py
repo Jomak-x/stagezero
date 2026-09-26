@@ -100,6 +100,14 @@ class CharacterGui:
     def add_upload_button(self, label, **kwargs):
         return self.add_button(label, **kwargs)
 
+    def add_text(self, label, **kwargs):
+        handle = self.add_button(label, **kwargs)
+        handle.value = kwargs.get('initial_value', '')
+        return handle
+
+    def add_image(self, image, **kwargs):
+        return GuiHandle(image=image, visible=kwargs.get('visible', True))
+
     def add_dropdown(self, label, options):
         handle = self.add_button(label)
         handle.options, handle.value = options, options[0]
