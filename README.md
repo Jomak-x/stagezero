@@ -147,6 +147,8 @@ Model: [nvidia/ARDY-G1-RP-25FPS-Horizon52](https://huggingface.co/nvidia/ARDY-G1
 
 Pod: Python 3.12.3, torch 2.8.0+cu128, RTX 6000 Ada. Exact installed packages are recorded in `review/pod-packages.txt`. The existing isolated environment is `/workspace/stagezero/.venv`, with official source in `/workspace/stagezero/ardy`. `start-backend.sh` sets PYTHONPATH explicitly to avoid an editable-install assets namespace collision. Checkpoints and the local Llama/LLM2Vec encoder are cached. Required gated access was verified; no terms were accepted by this implementation.
 
+The backend launcher preserves an explicit `HF_HOME`. Without one, it uses `/workspace/hf` when `.runtime/hf-token` is present, or the existing `/workspace/.cache/huggingface` directory otherwise. This keeps restarts pointed at the cached model and credentials used by the original deployment.
+
 Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating that environment. The Mac renders and manages playback; it does not run inference. No new local inference compatibility investigation was performed.
 
 ```sh
