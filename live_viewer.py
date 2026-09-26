@@ -122,7 +122,7 @@ def main():
                                 delta = root - previous_root
                                 for client in server.get_clients().values():
                                     client.camera.position = np.asarray(client.camera.position) + delta
-                                    client.camera.look_at = np.asarray(client.camera.look_at) + delta
+                                    # Viser moves look_at by the same offset in its position setter.
                             previous_root = root
                         else:
                             previous_root = None

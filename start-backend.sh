@@ -6,6 +6,10 @@ if pgrep -f '^.venv/bin/python -u pod_backend.py$' >/dev/null; then
   exit 0
 fi
 test -s .runtime/api-token
+if [[ -f .runtime/hf-token ]]; then
+  export HF_TOKEN_PATH="$PWD/.runtime/hf-token"
+  export HF_HOME=/workspace/hf
+fi
 nohup env PYTHONPATH=/workspace/stagezero/ardy HF_XET_CHUNK_CACHE_SIZE_BYTES=0 \
   .venv/bin/python -u pod_backend.py >> backend.log 2>&1 </dev/null &
 echo $! > .runtime/backend.pid
