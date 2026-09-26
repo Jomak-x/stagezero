@@ -336,6 +336,8 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             display: "flex",
             position: "relative",
             flexDirection: "column",
+            minWidth: 0,
+            minHeight: 0,
           }}
         >
           <Titlebar />
@@ -344,26 +346,57 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
               width: "100%",
               position: "relative",
               flexGrow: 1,
+              minWidth: 0,
+              minHeight: 0,
               overflow: "hidden",
               display: "flex",
             }}
           >
             <Box
-              style={(theme) => ({
-                backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
-                flexGrow: 1,
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: "1 1 0",
+                minWidth: 0,
+                minHeight: 0,
                 overflow: "hidden",
-                height: "100%",
-              })}
+              }}
             >
-              {canvases}
-              {showLogo && messageSource === "websocket" && <ViserLogo />}
+              <Box
+                data-testid="studio-viewport"
+                style={(theme) => ({
+                  position: "relative",
+                  backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
+                  flex: "1 1 0",
+                  minWidth: 0,
+                  minHeight: 0,
+                  overflow: "hidden",
+                })}
+              >
+                {canvases}
+                {showLogo && messageSource === "websocket" && <ViserLogo />}
+                {messageSource === "websocket" && controlLayout === "floating" && (
+                  <ControlPanel control_layout={controlLayout} />
+                )}
+              </Box>
+              <Box
+                data-testid="studio-timeline-dock"
+                style={{
+                  flex: "0 1 auto",
+                  maxHeight: "48%",
+                  minHeight: 0,
+                  minWidth: 0,
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                }}
+              >
+                <TimelineWithState />
+              </Box>
             </Box>
-            {messageSource === "websocket" && (
+            {messageSource === "websocket" && controlLayout !== "floating" && (
               <ControlPanel control_layout={controlLayout} />
             )}
           </Box>
-          <TimelineWithState />
           <ArrowKeyOverlay />
         </Box>
         {showStats && <Stats className="stats-panel" />}

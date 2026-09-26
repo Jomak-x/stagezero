@@ -86,13 +86,14 @@ with measured results and screenshots.
 
 ## Studio interface
 
-The viewer now has a collapsible studio sidebar with **Direct**, **Takes**,
-**Scene**, **Camera**, and **Project** tabs. Playback and a seconds-based playhead
+The viewer now has a collapsible studio sidebar with **Motion**, **Takes**,
+**Scene**, **View**, **Project**, and **Guide** tabs. Playback and a seconds-based playhead
 remain above the tabs; the bottom timeline shows the generated action segments
-and supports frame scrubbing. Segment blocks describe stored motion and are
-read-only; choose Replace ending in Direct to generate an alternate version.
+and supports frame scrubbing. Click a generated action block to edit its prompt and duration. Insertion buttons
+before and after actions open a draft at that point in the sequence. The ruler
+remains dedicated to scrubbing.
 
-- **Direct:** choose Create, Extend, or Replace ending; describe motion; set an
+- **Motion:** choose Create, Extend, or Replace ending; describe motion; set an
   Auto, new-motion, or total duration; and cancel an in-flight generation.
 - **Takes:** rename, duplicate, trim through the playhead into a new take, jump to
   action boundaries, reuse an action's prompt, loop, and play at 0.25–2× speed.
@@ -100,7 +101,7 @@ read-only; choose Replace ending in Direct to generate an alternate version.
 - **Scene:** show/hide the grid and platform, enable the gate, and edit its floor
   position and trigger radius. Enable the move handle to drag the gate. Gate
   events are recalculated for stored takes when its geometry changes.
-- **Camera:** perspective/front/side/top views, focus actor, orbit/pan/dolly
+- **View:** perspective/front/side/top views, focus actor, orbit/pan/dolly
   buttons, and reset. Drag or two-finger scroll to pan, pinch to zoom, select Orbit or Look, and use
   WASD/QE for movement. Follow is off by default, preserves manual camera offsets,
   and does not sweep the camera on playhead jumps. Rewinding preserves the view.
@@ -130,3 +131,35 @@ The directing workflow separates three operations. New take starts from the refe
 Duration planning runs at 25 frames per second. An explicit duration is rounded to the nearest frame. Requests longer than one model segment are generated as consecutive conditioned segments, with the final segment trimmed to the planned length. The controller installs the complete result only after every segment succeeds; cancellation or failure leaves the stored original intact.
 
 Auto uses a duration written in the prompt when one is present, otherwise a labelled estimate based on instruction length and sequence words. It is an editing convenience, not an AI prediction of when an action is complete. Each request is limited to 30 seconds of new motion. Scene props and effects follow the take's timeline; this duration control concerns the motion take, not a separate scene clip.
+
+### Discoverable take workflow and guide
+
+Use **New take** to clear the motion draft and hold a still starting pose while retaining existing takes. **Takes** lists named, clickable versions. Selecting a take opens **Motion**; Add motion extends it and Change ending creates a revision. Remove take supports one session-local Undo remove, including restoring branch links. Empty projects can be saved after removing the last take.
+
+The **Guide** tab explains these workflows and links users to the relevant tools. Its content lives in `studio_guide.py`; update it when adding or renaming user-facing controls. Keep limitations visible: editing an action regenerates later actions for continuity, Auto duration is an estimate, and scene geometry is shared across takes. Per-client navigation is handled by the small pinned-client adapter `studio_navigation.py`; one viewer's edit action does not switch another viewer's open tab.
+
+
+### Edit actions directly on the timeline
+
+Click an action at the bottom to open its prompt and duration in Motion. Save action
+updates the same take. Use Add before or Add after to insert another instruction;
+Add action to end appends to the current take. The selected action retains its
+original duration unless you change it.
+
+An edit keeps all earlier motion, generates the changed or inserted action, then
+regenerates subsequent actions using their existing prompts and durations so
+they can follow the new motion. Later motion may look different. Results install
+only after the entire sequence succeeds; a failed or cancelled request preserves
+the stored take. Undo edit restores the prior take for the latest successful edit
+in this session. The older alternate-ending tool explicitly creates another version.
+
+
+### Compact editor workspace
+
+The viewport and sequence timeline share the left workspace. The inspector stays
+full-height on the right and scrolls independently, so timeline controls cannot
+cover action fields. Playback lives in the single sequence toolbar above the
+clips. Click a clip to inspect it; use Add before/after for the selection or Add
+to end for the sequence. A selected take shows a concise summary until an action
+is selected. Camera modes sit in the viewport; the question-mark button reveals
+navigation instructions.

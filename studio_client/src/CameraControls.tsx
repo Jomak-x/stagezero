@@ -38,7 +38,7 @@ function NavigationOverlay({
     if (!parent) return;
     const container = document.createElement("div");
     Object.assign(container.style, {
-      position: "absolute", right: "12px", bottom: "12px",
+      position: "absolute", right: "12px", top: "12px",
       maxWidth: "calc(100% - 24px)", zIndex: "20",
       display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px",
       pointerEvents: "none", fontFamily: "system-ui, sans-serif",
@@ -66,9 +66,23 @@ function NavigationOverlay({
     }
     const hint = document.createElement("div");
     Object.assign(hint.style, {
-      padding: "4px 7px", borderRadius: "5px", maxWidth: "100%",
-      background: "rgba(20, 24, 32, 0.65)", textAlign: "right",
+      padding: "8px 10px", borderRadius: "5px",
+      background: "rgba(20, 24, 32, 0.94)", textAlign: "right",
+      display: "none", lineHeight: "1.6", maxWidth: "280px",
     });
+    const help = document.createElement("button");
+    help.type = "button";
+    help.textContent = "?";
+    help.title = "Camera controls";
+    help.setAttribute("aria-label", "Camera controls help");
+    help.setAttribute("aria-expanded", "false");
+    Object.assign(help.style, { border: "0", borderRadius: "5px", padding: "5px 9px", color: "#bad1dd", background: "transparent", cursor: "pointer" });
+    help.onclick = () => {
+      const expanded = help.getAttribute("aria-expanded") !== "true";
+      help.setAttribute("aria-expanded", String(expanded));
+      hint.style.display = expanded ? "block" : "none";
+    };
+    row.appendChild(help);
     hintRef.current = hint;
     container.append(row, hint);
     parent.appendChild(container);

@@ -1,4 +1,4 @@
-"""Read-only Viser timeline for stored takes and recorded preview playback.
+"""Viser timeline for stored takes and recorded preview playback.
 
 The prompt blocks describe motion that already exists in a take. Changing a
 block's text or bounds would not change those frames, so Viser's constraint
@@ -25,9 +25,10 @@ class StudioTimeline:
     dispatches playhead clicks through ``on_frame_change`` on its own worker.
     """
 
-    def __init__(self, server, session):
+    def __init__(self, server, session, command_uuid=None):
         self.timeline = server.timeline
         self.session = session
+        self.command_uuid = command_uuid
         self._layout = None
         self._frame = None
         self._visible = None
@@ -54,12 +55,13 @@ class StudioTimeline:
             fps = float(self.session.fps)
             frame = max(0, min(int(self.session.frame), length - 1))
             take = self.session.takes.get(self.session.active_take) if kind == "generated" else None
+            take_id = self.session.active_take if take is not None else None
             segments = tuple(
                 (int(s["start"]), int(s["end"]), str(s["prompt"]))
                 for s in (take.segments if take is not None else ())
             )
-            layout = (kind, self.session.active_take if take is not None else None,
-                      length, fps, segments)
+            command_uuid = self.command_uuid if not self.session.busy else None
+            layout = (kind, take_id, length, fps, segments, command_uuid)
 
         if layout != self._layout:
             self.timeline.clear_prompts()
@@ -67,7 +69,9 @@ class StudioTimeline:
                 self.timeline.add_prompt(
                     prompt, start, end,
                     color=SEGMENT_COLORS[index % len(SEGMENT_COLORS)],
-                    uuid=f"stagezero-segment-{index}",
+                    uuid=(f"stagezero|{take_id}|{index}|{command_uuid or ''}"
+                          if self.command_uuid is not None and take_id is not None
+                          else f"stagezero-segment-{index}"),
                 )
             self.timeline.set_fps(fps)
             self.timeline.set_zoom_settings(

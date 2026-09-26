@@ -1,13 +1,16 @@
 """Studio controls built on public Viser GUI handles."""
 from html import escape
+import json
 import math
 import viser
 from takes import MAX_TAKES
 from duration_planning import plan_duration
+from studio_guide import GUIDE_HTML
+from studio_navigation import navigate_tab
 
-CREATE = 'Create new take'
-EXTEND = 'Extend selected take'
-REPLACE = 'Replace ending from time'
+CREATE = 'Create new'
+EXTEND = 'Add action to end'
+REPLACE = 'Change ending (new version)'
 AUTO = 'Auto'
 SET_DURATION = 'Set new motion length'
 TARGET_TOTAL = 'Set total scene length'
@@ -35,42 +38,24 @@ STYLE = """<style>
 .mantine-Textarea-input { min-height: 68px; line-height: 1.5; padding: 8px; }
 .mantine-Text-root label { color: #a0b1c1; letter-spacing: 0; font-size: 11px; }
 .mantine-Checkbox-label { color: #b6c7d5; }
-.sz-brand { display: flex; align-items: baseline; gap: 9px; padding: 5px 12px; border-bottom: 1px solid #293746; margin-bottom: 3px; }
-.sz-brand strong { font-size: 15px; letter-spacing: -.5px; color: #f0f6fa; }
-.sz-brand span { color: #8fa3b8; font-size: 11px; }
-.sz-eyebrow { font-size: 10px; color: #83dec7; letter-spacing: 2px; font-weight: 650; text-transform: uppercase; }
-.sz-brand h1 { margin: 2px 0; font-size: 21px; letter-spacing: -1px; font-weight: 650; color: #f0f6fa; }
 .sz-sub { color: #8fa3b8; font-size: 12px; line-height: 1.6; }
 .sz-section { margin: 5px 12px 7px; color: #f0f6fa; font-size: 13px; font-weight: 600; }
 .sz-section small { display: block; color: #8fa3b8; font-size: 11px; font-weight: 400; line-height: 1.45; margin-top: 2px; }
-.sz-status { margin: 0 12px 4px; padding: 5px 8px; border: 1px solid #2c424a; border-radius: 7px; background: #15252c; }
-.sz-status b { color: #9fe7d5; font-size: 12px; }
-.sz-status p { margin: 2px 0 0; color: #a7bdcb; font-size: 11px; line-height: 1.45; }
-.sz-clock { margin: 0 12px 2px; font-variant-numeric: tabular-nums; color: #e6f4f6; font-size: 15px; font-weight: 650; }
-.sz-clock small { color: #96acb9; font-size: 11px; font-weight: 400; }
+.sz-status { margin: 5px 12px 7px; color: #9bc6bc; font-size: 11px; line-height: 1.35; }
+.sz-status span { color: #d7b5a6; }
 .sz-count { margin: -2px 12px 5px; color: #91a9b8; font-size: 11px; }
 .sz-count.invalid { color: #ffab9c; }
-.sz-hud { position: fixed; left: 26px; top: 24px; z-index: 5; pointer-events: none; }
-.sz-hud strong { display: block; font-size: 13px; color: #deedf4; margin-top: 8px; }
-.sz-hud span { font-size: 11px; color: #8eabbc; }
 .sz-note { margin: 4px 12px 7px; padding-left: 8px; border-left: 2px solid #39545b; color: #93abba; font-size: 11px; line-height: 1.45; }
-.sz-step { margin: 7px 12px 3px; color: #e9f5f5; font-size: 12px; font-weight: 650; }
-.sz-step span { display: inline-block; width: 20px; height: 20px; margin-right: 7px; border-radius: 50%; background: #22514c; color: #c1f4e7; text-align: center; line-height: 20px; font-size: 11px; }
 .sz-preview { margin: 5px 12px 7px; padding: 7px 8px; border: 1px solid #36554f; border-radius: 7px; background: #152a29; color: #cfe9e5; font-size: 11px; line-height: 1.45; }
 .sz-preview.invalid { border-color: #805145; color: #ffb9a9; }
 .sz-segments { display: flex; margin: 8px 12px; height: 7px; gap: 3px; }
 .sz-segments i { background: #518c88; border-radius: 3px; min-width: 3px; }
 .sz-segments i.active { background: #a6f2db; }
-@media (max-width: 600px) { .sz-hud { top: 14px; left: 14px; } }
 </style>"""
 
 
 def section(gui, title, description=''):
     gui.add_html(f'<div class="sz-section">{escape(title)}<small>{escape(description)}</small></div>')
-
-
-def step(gui, number, title):
-    gui.add_html(f'<div class="sz-step"><span>{number}</span>{escape(title)}</div>')
 
 
 class StudioUI:
@@ -82,44 +67,69 @@ class StudioUI:
         self.last_take = None
         self._published_take_selection = None
         self._last_action_choice = None
+        self.action_edit = None
+        self._last_timeline_nonce = None
+        self._submitted_action_edit = None
+        self.take_slots = []
+        self.slot_ids = ()
         gui = server.gui
         gui.add_html(STYLE)
-        gui.add_html('<div class="sz-hud"><div class="sz-eyebrow">STAGEZERO / VIEWPORT</div><strong>G1 · Motion studio</strong><span>Drag to pan · Alt-drag to orbit · pinch/Alt-scroll to zoom · WASD/QE</span></div>')
-        gui.add_html('<div class="sz-brand"><strong>StageZero.</strong><span>Motion studio</span></div>')
         self.status = gui.add_html('')
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
-        tabs = gui.add_tab_group()
-        with tabs.add_tab('Direct'):
-            step(gui, 1, 'Choose what to make')
-            self.edit_action = gui.add_dropdown('Action', (CREATE, EXTEND, REPLACE), initial_value=CREATE)
+        self.quick_actions = gui.add_button_group('Quick actions', ('New take', 'Guide'))
+        self.tabs = gui.add_tab_group()
+        with self.tabs.add_tab('Motion'):
+            # Timeline clicks arrive through a normal Viser text update. The
+            # browser keeps this control hidden; JSON identifies the take and
+            # action so an old click cannot edit a newly selected take.
+            self.timeline_command = gui.add_text('Timeline action command', initial_value='')
+            self.timeline_command.visible = False
+            self.action_heading = gui.add_html('')
+            self.action_note = gui.add_html('')
+            self.action_prompt = gui.add_text('Direction', initial_value='', multiline=True)
+            self.action_duration = gui.add_text('Length (s)', initial_value='4.16')
+            self.action_feedback = gui.add_html('')
+            self.save_action = gui.add_button('Save action', icon=viser.Icon.SPARKLES)
+            self.cancel_action = gui.add_button('Cancel', color='gray')
+            self.undo_action = gui.add_button('Undo edit', color='gray')
+            self.editor_context = gui.add_html('')
+            self.add_to_end = gui.add_button('Add action', color='green')
+            self.edit_action = gui.add_dropdown('Action', (CREATE, EXTEND, REPLACE), initial_value=EXTEND if session.active_take in session.takes else CREATE)
             self.edit_explainer = gui.add_html('')
             self.replace_time = gui.add_text('Keep motion before this time (seconds)', initial_value='0.00')
-            step(gui, 2, 'Describe the motion')
-            self.prompt = gui.add_text('What should the person do?', initial_value='A person waves with their right hand.', multiline=True)
+            self.prompt = gui.add_text('Direction', initial_value='', multiline=True)
             self.prompt_count = gui.add_html('')
-            step(gui, 3, 'Choose how long')
             self.duration_mode = gui.add_dropdown('Length', (AUTO, SET_DURATION, TARGET_TOTAL), initial_value=AUTO)
             self.duration_seconds = gui.add_text('New motion length (seconds, 0.16–30)', initial_value='4.16')
             self.duration_preview = gui.add_html('')
             self.generate = gui.add_button('Generate', icon=viser.Icon.SPARKLES)
             self.cancel = gui.add_button('Cancel generation', color='gray', visible=False)
-            with gui.add_folder('Example directions', expand_by_default=False):
+            self.ideas_folder = gui.add_folder('Example directions', expand_by_default=False)
+            with self.ideas_folder:
                 self.ideas = gui.add_button_group('Try an example', ('Wave', 'Walk', 'Dance'))
-            with gui.add_folder('How editing works', expand_by_default=False):
-                gui.add_html('<div class="sz-note">The selected take sets scene playback length. Props and effects follow its timeline. Drag the bottom time ruler to inspect motion.</div>')
-                gui.add_html('<div class="sz-note">Create new starts another take. Extend adds motion to the end of the selected take. Replace ending keeps motion before your chosen time and creates a separate take with new motion after it; the original stays available. Choose a take in Takes first for either edit.</div>')
-        with tabs.add_tab('Takes'):
+            self.advanced_folder = gui.add_folder('Advanced: change ending as a new version', expand_by_default=False)
+            with self.advanced_folder:
+                self.advanced_replace = gui.add_button('Change ending', color='gray')
+            self.cancel_alternate = gui.add_button('Back to take', color='gray')
+        with self.tabs.add_tab('Takes'):
             with gui.add_folder('Precise playback', expand_by_default=False):
                 self.frames = gui.add_button_group('Frame', ('−1 frame', '+1 frame', 'End'))
                 self.seek_time = gui.add_text('Seek to second', initial_value='0.00')
                 self.seek_go = gui.add_button('Go to time', color='gray')
+            section(gui, 'Selected take', 'Click an action on the timeline to edit it, or add to the end.')
+            self.take_info = gui.add_html('')
+            self.prepare_extend = gui.add_button('Add action to end', color='gray')
+            self.prepare_replace = gui.add_button('Change ending · new version', color='gray')
+            self.remove_take = gui.add_button('Remove selected take', color='gray')
+            self.undo_remove = gui.add_button('Undo remove', color='gray')
             section(gui, 'Your takes', 'Select a version to watch or change. Each generated ending is saved as a separate take.')
             self.takes = gui.add_dropdown('Selected take', ('No takes yet',))
-            self.take_info = gui.add_html('')
-            self.prepare_extend = gui.add_button('Prepare to add motion at the end', color='gray')
-            self.prepare_replace = gui.add_button('Prepare to change the ending', color='gray')
-            gui.add_html('<div class="sz-note">Choose an edit above, then open Direct to write the new direction and duration. Changing an ending keeps the original take. Motion before the chosen time stays in the new take; motion after it is replaced there.</div>')
+            self.takes.visible = False  # Keep its state for older clients; buttons are the visible selector.
+            self.empty_takes = gui.add_html('<div class="sz-note">No saved takes yet. Use New take to make one.</div>')
+            for _ in range(MAX_TAKES):
+                button = gui.add_button('Edit take', color='gray', visible=False)
+                self.take_slots.append(button)
             self.take_name = gui.add_text('Take name', initial_value='')
             self.rename = gui.add_button('Rename take', color='gray')
             self.duplicate = gui.add_button('Make a copy of this take', color='gray')
@@ -127,16 +137,16 @@ class StudioUI:
             section(gui, 'Motion in this take', 'Jump to an action or reuse its direction for another version.')
             self.segments = gui.add_dropdown('Generated motion', ('No generated actions',))
             self.jump = gui.add_button_group('Find motion', ('Previous', 'Go to action', 'Next'))
-            self.reuse = gui.add_button('Copy this direction to Direct', color='gray')
+            self.reuse = gui.add_button('Copy this direction to Motion', color='gray')
             self.action = gui.add_html('')
             self.speed = gui.add_dropdown('Speed', ('0.25×', '0.5×', '1×', '1.5×', '2×'), initial_value='1×')
             self.loop = gui.add_checkbox('Loop playback', initial_value=False)
-        with tabs.add_tab('Scene'):
+        with self.tabs.add_tab('Scene'):
             scene_controls(gui)
-        with tabs.add_tab('Camera'):
+        with self.tabs.add_tab('View'):
             section(gui, 'Camera')
             camera.build_gui(gui)
-        with tabs.add_tab('Project'):
+        with self.tabs.add_tab('Project'):
             section(gui, 'Project')
             self.project_name = gui.add_text('Project name', initial_value='My performance')
             self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD)
@@ -152,6 +162,11 @@ class StudioUI:
                 self.mode = gui.add_dropdown('Source', ('Recorded preview', 'Live ARDY'), initial_value=session.mode)
                 gui.add_html('<div class="sz-note">Recorded preview is the included example. Generating or selecting a take switches to your live project automatically.</div>')
             gui.add_markdown('[ARDY G1 model](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon52) · [Recorded motion source](https://huggingface.co/datasets/bones-studio/seed)')
+        with self.tabs.add_tab('Guide'):
+            gui.add_html(GUIDE_HTML)
+            self.guide_new_take = gui.add_button('Start a new take', color='green')
+            self.guide_browse_takes = gui.add_button('Browse takes', color='gray')
+            self.guide_scene = gui.add_button('Add scene objects', color='gray')
         self.refresh_saved()
         self.bind()
         self.update()
@@ -172,12 +187,95 @@ class StudioUI:
         message = 'Enter a direction' if count == 0 else '500 character limit' if count > 500 else 'Direction ready'
         self._set(self.prompt_count, 'content',
                   f'<div class="sz-count{" invalid" if invalid else ""}">{count}/500 · {message}</div>')
+        self._set(self.prompt_count, 'visible', invalid and self.prompt.visible)
+
+    def _clear_action_edit(self):
+        self.action_edit = None
+        self._submitted_action_edit = None
+
+    def _begin_action_edit(self, take, index, operation):
+        segment = take.segments[index]
+        self.action_edit = (take.id, index, operation)
+        self._submitted_action_edit = None
+        self._set(self.action_prompt, 'value', segment['prompt'] if operation == 'replace' else '')
+        self._set(self.action_duration, 'value',
+                  f'{(segment["end"] - segment["start"])/25:.2f}' if operation == 'replace' else '4.16')
+
+    def _action_duration_value(self):
+        try:
+            seconds = float(self.action_duration.value)
+            if not math.isfinite(seconds) or not 0.16 <= seconds <= 30:
+                raise ValueError
+            return seconds, None
+        except ValueError:
+            return None, 'Enter an action length from 0.16 to 30 seconds.'
+
+    def _refresh_action_edit(self, take, busy):
+        edit = self.action_edit
+        editing = edit is not None
+        if editing and (take is None or take.id != edit[0] or edit[1] >= len(take.segments)):
+            self._clear_action_edit()
+            editing = False
+        submitted = self._submitted_action_edit
+        if editing and submitted is not None and not busy and self.session.action_edit_revision > submitted:
+            self._clear_action_edit()
+            editing = False
+        elif not busy and submitted is not None:
+            # Failed or cancelled generation leaves the form ready to retry.
+            self._submitted_action_edit = None
+
+        for control in (self.action_heading, self.action_note, self.action_prompt,
+                        self.action_duration, self.action_feedback, self.save_action,
+                        self.cancel_action):
+            self._set(control, 'visible', editing)
+        alternate = take is not None and self.edit_action.value == REPLACE
+        show_form = not editing and (take is None or not take.segments or alternate)
+        self._set(self.ideas_folder, 'visible', show_form)
+        self._set(self.advanced_folder, 'visible', take is not None and bool(take.segments) and not editing and not alternate)
+        self._set(self.cancel_alternate, 'visible', alternate and not editing)
+        self._set(self.cancel_alternate, 'disabled', busy)
+        self._set(self.undo_action, 'visible', take is not None and self.session.can_undo_action_edit)
+        self._set(self.undo_action, 'disabled', busy)
+        self._set(self.editor_context, 'visible', not editing)
+        # The action dropdown remains as a compatibility handle for older
+        # clients; the visible routes are New take, Add action and Change ending.
+        self._set(self.edit_action, 'visible', False)
+        for control in (self.prompt, self.prompt_count, self.duration_mode,
+                        self.generate, self.ideas):
+            self._set(control, 'visible', show_form)
+        self._set(self.add_to_end, 'visible', take is not None and not editing and not alternate)
+        self._set(self.add_to_end, 'disabled', take is None or busy)
+        if not editing:
+            return
+        _, index, operation = edit
+        action_number = index + 1
+        title = (f'Edit action {action_number}' if operation == 'replace'
+                 else f'Add before action {action_number}' if operation == 'insert_before'
+                 else 'Add action to end' if index == len(take.segments) - 1
+                 else f'Add after action {action_number}')
+        self._set(self.action_heading, 'content', f'<div class="sz-section">{escape(title)}</div>')
+        self._set(self.action_note, 'content',
+                  '<div class="sz-note">Later actions regenerate. Undo edit restores the previous motion.</div>')
+        seconds, error = self._action_duration_value()
+        if not self._valid_prompt(self.action_prompt.value):
+            error = 'Enter a direction (1–500 characters).'
+        self._set(self.action_feedback, 'visible', error is not None)
+        self._set(self.action_feedback, 'content',
+                  f'<div class="sz-preview invalid">{escape(error)}</div>' if error else '')
+        self._set(self.save_action, 'label', 'Saving action…' if busy else
+                  'Save action' if operation == 'replace' else 'Add action')
+        self._set(self.save_action, 'disabled', busy or error is not None)
+        self._set(self.action_prompt, 'disabled', busy)
+        self._set(self.action_duration, 'disabled', busy)
+        self._set(self.cancel_action, 'disabled', busy)
 
     def _generation_plan(self, take):
         """Resolve the explicit UI choice without moving the playback position."""
         choice = self.edit_action.value
         if choice not in (CREATE, EXTEND, REPLACE):
             return None, 'Choose what to make.'
+        if choice == CREATE and take is not None:
+            return None, 'Use New take to start a blank draft.'
         if choice != CREATE and take is None:
             return None, 'Select a take in Takes first.'
         at_frame = None
@@ -224,15 +322,15 @@ class StudioUI:
 
     def _refresh_generation(self, take, busy):
         choice = self.edit_action.value
-        context = {
-            CREATE: 'Start a separate take from the reference pose. Existing takes stay in the project.',
-            EXTEND: 'Add motion after the selected take ends. Its existing motion stays in this take.',
-            REPLACE: 'Keep motion before the time below and make a new ending in a separate take. The original stays available. This replaces the rest of the new take, not a middle section.',
-        }.get(choice, 'Choose what to make.')
-        self._set(self.edit_explainer, 'content', f'<div class="sz-note">{escape(context)}</div>')
-        self._set(self.replace_time, 'visible', choice == REPLACE)
+        show_form = self.action_edit is None and (take is None or not take.segments or choice == REPLACE)
+        context = ('A changed ending makes a separate take; the original stays available.'
+                   if choice == REPLACE else '')
+        self._set(self.edit_explainer, 'content',
+                  f'<div class="sz-note">{escape(context)}</div>' if context else '')
+        self._set(self.edit_explainer, 'visible', bool(context) and show_form)
+        self._set(self.replace_time, 'visible', choice == REPLACE and show_form)
         self._set(self.replace_time, 'disabled', busy or choice != REPLACE)
-        self._set(self.duration_seconds, 'visible', self.duration_mode.value != AUTO)
+        self._set(self.duration_seconds, 'visible', self.duration_mode.value != AUTO and show_form)
         self._set(self.duration_seconds, 'disabled', busy or self.duration_mode.value == AUTO)
         length_label = ('Target total scene length (seconds)' if self.duration_mode.value == TARGET_TOTAL
                         else 'New motion length (seconds, 0.16–30)')
@@ -257,6 +355,7 @@ class StudioUI:
                         if self.duration_mode.value == AUTO else f'Generate {duration.seconds:.2f} seconds of new motion')
             preview = f'<div class="sz-preview">{escape(estimate)}. {escape(outcome)}</div>'
         self._set(self.duration_preview, 'content', preview)
+        self._set(self.duration_preview, 'visible', self._valid_prompt(self.prompt.value) and show_form)
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
         disabled = busy or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
         self._set(self.generate, 'disabled', disabled)
@@ -271,6 +370,41 @@ class StudioUI:
 
     def bind(self):
         s = self.session
+
+        def begin_new_take(client):
+            with s.lock:
+                if s.busy: return
+                if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
+                if s.new_take() is False: return
+                self._clear_action_edit()
+                self._set(self.mode, 'value', 'Live ARDY')
+                self._set(self.edit_action, 'value', CREATE)
+                self._set(self.prompt, 'value', '')
+                s.edit_prompt('')
+                self._set(self.duration_mode, 'value', AUTO)
+                self._set(self.replace_time, 'value', '0.00')
+            self.update()
+            navigate_tab(self.tabs, 0, client)
+
+        @self.quick_actions.on_click
+        def quick_action(e):
+            if self.quick_actions.value == 'New take':
+                begin_new_take(e.client)
+            elif self.quick_actions.value == 'Guide':
+                navigate_tab(self.tabs, 5, e.client)
+
+        @self.guide_new_take.on_click
+        def guide_new_take(e):
+            begin_new_take(e.client)
+
+        @self.guide_browse_takes.on_click
+        def guide_browse_takes(e):
+            navigate_tab(self.tabs, 1, e.client)
+
+        @self.guide_scene.on_click
+        def guide_scene(e):
+            navigate_tab(self.tabs, 2, e.client)
+
         @self.transport.on_click
         def transport(_):
             transport_command(self.transport.value)
@@ -314,7 +448,105 @@ class StudioUI:
                     if s.busy:
                         self._set(self.mode, 'value', s.mode)
                     elif self.mode.value != s.mode:
+                        self._clear_action_edit()
                         s.set_mode(self.mode.value)
+
+        @self.timeline_command.on_update
+        def timeline_command(e):
+            if e.client is None:
+                return
+            try:
+                command = json.loads(self.timeline_command.value)
+                take_id = command['take_id']
+                index = command['index']
+                operation = command['operation']
+                nonce = command['nonce']
+            except (TypeError, ValueError, KeyError):
+                return
+            if (type(take_id) is not str or type(index) is not int or
+                    operation not in ('replace', 'insert_before', 'insert_after',
+                                      'start', 'play', 'pause') or
+                    type(nonce) not in (str, int) or nonce == self._last_timeline_nonce):
+                return
+            with s.lock:
+                take = s.takes.get(s.active_take)
+                if take is None or take.id != take_id or not 0 <= index < len(take.segments):
+                    return
+                if operation in ('start', 'play', 'pause'):
+                    if s.busy and operation != 'pause':
+                        return
+                    self._last_timeline_nonce = nonce
+                    if operation == 'play': s.play()
+                    elif operation == 'pause': s.pause()
+                    else: s.seek(0)
+                    self.update()
+                    return
+                if s.busy:
+                    return
+                self._last_timeline_nonce = nonce
+                self._begin_action_edit(take, index, operation)
+                selected = take.segments[index]
+                s.seek(selected['end'] - 1 if operation == 'insert_after' else selected['start'])
+                s.status = f'Editing action {index + 1} · write a direction and save'
+            self.update()
+            navigate_tab(self.tabs, 0, e.client)
+
+        @self.action_prompt.on_update
+        def action_prompt(e):
+            if e.client is not None:
+                self.update()
+
+        @self.action_duration.on_update
+        def action_duration(e):
+            if e.client is not None:
+                self.update()
+
+        @self.save_action.on_click
+        def save_action(_):
+            with s.lock:
+                edit = self.action_edit
+                take = s.takes.get(s.active_take)
+                if (s.busy or edit is None or take is None or take.id != edit[0] or
+                        edit[1] >= len(take.segments) or not self._valid_prompt(self.action_prompt.value)):
+                    return
+                seconds, error = self._action_duration_value()
+                if error is not None:
+                    s.status = error
+                    return
+                revision = s.action_edit_revision
+                if s.submit_action_edit(self.action_prompt.value, edit[1], edit[2], seconds=seconds):
+                    self._submitted_action_edit = revision
+            self.update()
+
+        @self.cancel_action.on_click
+        def cancel_action(_):
+            with s.lock:
+                if s.busy:
+                    return
+                self._clear_action_edit()
+            self.update()
+
+        @self.undo_action.on_click
+        def undo_action(_):
+            with s.lock:
+                if not s.busy and s.undo_action_edit():
+                    self._clear_action_edit()
+            self.update()
+
+        @self.add_to_end.on_click
+        def add_to_end(e):
+            with s.lock:
+                take = s.takes.get(s.active_take)
+                if s.busy or take is None:
+                    return
+                if take.segments:
+                    self._begin_action_edit(take, len(take.segments) - 1, 'insert_after')
+                else:
+                    self._clear_action_edit()
+                    self._set(self.edit_action, 'value', EXTEND)
+                s.status = 'Ready to add an action at the end'
+            self.update()
+            navigate_tab(self.tabs, 0, e.client)
 
         @self.prompt.on_update
         def prompt(e):
@@ -328,6 +560,10 @@ class StudioUI:
         @self.edit_action.on_update
         def edit_action(e):
             if e.client is not None:
+                self._clear_action_edit()
+                if self.edit_action.value == CREATE and s.active_take is not None:
+                    begin_new_take(e.client)
+                    return
                 self.update()
 
         @self.replace_time.on_update
@@ -391,22 +627,60 @@ class StudioUI:
                     if s.busy: return
                     if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                     self._set(self.mode, 'value', 'Live ARDY')
+                    self._clear_action_edit()
                     s.select_take(take_id)
 
+        for slot_index, button in enumerate(self.take_slots):
+            @button.on_click
+            def open_take(e, index=slot_index):
+                # Resolve the clicked row before acquiring the session lock. A
+                # concurrent viewer update may republish the rows while we wait.
+                take_id = self.slot_ids[index] if index < len(self.slot_ids) else None
+                with s.lock:
+                    if s.busy or take_id not in s.takes: return
+                    if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
+                    self._set(self.mode, 'value', 'Live ARDY')
+                    self._clear_action_edit()
+                    s.select_take(take_id)
+                    self._set(self.edit_action, 'value', EXTEND)
+                self.update()
+                navigate_tab(self.tabs, 0, e.client)
+
         @self.prepare_extend.on_click
-        def prepare_extend(_):
+        def prepare_extend(e):
             with s.lock:
-                if s.busy or s.active_take not in s.takes: return
-                self._set(self.edit_action, 'value', EXTEND)
-                s.status = 'Ready to extend this take · open Direct, add a direction, then generate'
+                take = s.takes.get(s.active_take)
+                if s.busy or take is None: return
+                if take.segments:
+                    self._begin_action_edit(take, len(take.segments) - 1, 'insert_after')
+                else:
+                    self._clear_action_edit()
+                    self._set(self.edit_action, 'value', EXTEND)
+                s.status = 'Ready to add an action at the end'
+            self.update()
+            navigate_tab(self.tabs, 0, e.client)
 
         @self.prepare_replace.on_click
-        def prepare_replace(_):
+        def prepare_replace(e):
             with s.lock:
                 if s.busy or s.active_take not in s.takes: return
+                self._clear_action_edit()
                 self._set(self.edit_action, 'value', REPLACE)
                 self._set(self.replace_time, 'value', f'{s.frame/s.fps:.2f}')
-                s.status = 'Ready to change this ending · open Direct and choose the time to keep'
+                s.status = 'Ready to change this ending · choose the time to keep'
+            self.update()
+            navigate_tab(self.tabs, 0, e.client)
+
+        @self.advanced_replace.on_click
+        def advanced_replace(e):
+            prepare_replace(e)
+
+        @self.cancel_alternate.on_click
+        def cancel_alternate(_):
+            with s.lock:
+                if s.busy: return
+                self._set(self.edit_action, 'value', EXTEND)
+            self.update()
 
         @self.rename.on_click
         def rename(_):
@@ -416,6 +690,16 @@ class StudioUI:
         def duplicate(_):
             with s.lock:
                 if not s.busy: s.duplicate_active_take()
+        @self.remove_take.on_click
+        def remove_take(_):
+            with s.lock:
+                if not s.busy: s.remove_active_take()
+            self.update()
+        @self.undo_remove.on_click
+        def undo_remove(_):
+            with s.lock:
+                if not s.busy: s.undo_remove_take()
+            self.update()
         @self.trim.on_click
         def trim(_):
             with s.lock:
@@ -442,7 +726,9 @@ class StudioUI:
                     self._set(self.prompt, 'value', seg['prompt'])
                     s.edit_prompt(self.prompt.value)
                     self._prompt_feedback()
-                    s.status = 'Direction copied · open Direct and choose how to use it'
+                    s.status = 'Direction copied · choose how to use it in Motion'
+            self.update()
+            navigate_tab(self.tabs, 0, _.client)
 
         @self.save.on_click
         def save(e):
@@ -469,19 +755,27 @@ class StudioUI:
                 with s.lock:
                     if s.busy: return
                     s.new_project(self.folder)
+                    self._clear_action_edit()
                     self._set(self.mode, 'value', s.mode)
+                    self._set(self.edit_action, 'value', CREATE)
+                    self._set(self.prompt, 'value', '')
                 self.refresh_saved()
+                self.update()
             except Exception as exc: s.project_status = f'Backup failed; project retained: {exc}'
 
     def open_data(self, data):
         try:
             with self.session.lock:
                 if self.session.busy: return
-                if self.session.takes:
-                    self.session.save_project(self.folder, 'before-open-backup')
+                self.session.save_project(self.folder, 'before-open-backup')
                 self.session.load_project(data)
+                self._clear_action_edit()
                 self._set(self.mode, 'value', self.session.mode)
+                self._set(self.edit_action, 'value', EXTEND if self.session.active_take else CREATE)
+                self._set(self.prompt, 'value', '')
+                self.session.edit_prompt('')
             self.refresh_saved()
+            self.update()
         except Exception as exc:
             self.session.project_status = f'Open failed; current takes preserved: {exc}'
 
@@ -493,9 +787,6 @@ class StudioUI:
             take = s.takes.get(s.active_take)
             has_clip = s.kind in ('recorded', 'generated')
             last_frame = len(s.positions)-1
-            elapsed = s.frame/s.fps if has_clip else 0.
-            # A clip of N frames occupies N/FPS seconds; its final sample is at (N-1)/FPS.
-            duration = len(s.positions)/s.fps if has_clip else 0.
             if s.busy: state = 'Generating'
             elif s.kind == 'reference': state = 'Reference pose'
             elif s.playing: state = 'Playing'
@@ -503,16 +794,28 @@ class StudioUI:
             else: state = 'Paused'
             source = take.name if live and take else 'Ready to create' if live else 'Example preview'
             detail = '' if s.status.startswith(ROUTINE_STATUS_PREFIXES) else s.status
-            detail_html = f'<p>{escape(detail)}</p>' if detail else ''
-            self._set(self.status, 'content', f'<div class="sz-status"><b>● {state} · {escape(source)}</b>{detail_html}</div>')
-            self._set(self.playhead, 'content', f'<div class="sz-clock">{elapsed:.2f} <small>/ {duration:.2f} s</small></div>')
+            detail_html = f' <span>· {escape(detail)}</span>' if detail else ''
+            self._set(self.status, 'content', f'<div class="sz-status">{state} · {escape(source)}{detail_html}</div>')
+            # Playback and clock live in the bottom timeline toolbar.
+            self._set(self.playhead, 'visible', False)
+            self._set(self.transport, 'visible', False)
             self._set(self.seek_go, 'disabled', not has_clip or s.busy)
             self._set(self.seek_time, 'disabled', not has_clip or s.busy)
             self._set(self.mode, 'disabled', s.busy)
             self._set(self.prompt, 'disabled', s.busy)
+            self._set(self.guide_new_take, 'disabled', s.busy or len(s.takes) >= MAX_TAKES)
+            self._refresh_action_edit(take, s.busy)
             self._prompt_feedback()
             self._refresh_generation(take, s.busy)
             self._set(self.cancel, 'visible', s.busy)
+            if take is None:
+                editor_state = 'New take draft' if live else 'Start a new take'
+            elif self.edit_action.value == REPLACE:
+                editor_state = f'New ending for {take.name}'
+            else:
+                editor_state = (f'{take.name} · {len(take.positions)/25:.2f} s · '
+                                f'{len(take.segments)} actions. Click a timeline action to edit.')
+            self._set(self.editor_context, 'content', f'<div class="sz-note">{escape(editor_state)}</div>')
             self.take_map = {f'{i+1:02d} · {t.name} · {len(t.positions)/25:.2f}s':t.id for i,t in enumerate(s.takes.values())}
             options = tuple(self.take_map) or ('No takes yet',)
             self._set(self.takes, 'options', options)
@@ -522,22 +825,35 @@ class StudioUI:
                 self._set(self.takes, 'value', selection)
                 self._published_take_selection = selection_key
             self._set(self.takes, 'disabled', not s.takes or s.busy)
+            self.slot_ids = tuple(s.takes)
+            self._set(self.empty_takes, 'visible', not s.takes)
+            for index, button in enumerate(self.take_slots):
+                if index < len(self.slot_ids):
+                    row = s.takes[self.slot_ids[index]]
+                    marker = '● ' if row.id == s.active_take else ''
+                    self._set(button, 'label', f'{marker}Edit {row.name} · {len(row.positions)/25:.2f}s')
+                    self._set(button, 'visible', True)
+                    self._set(button, 'disabled', s.busy)
+                else:
+                    self._set(button, 'visible', False)
             active_id = (take.id, take.name) if take else None
             if active_id != self.last_take:
                 self.last_take = active_id
                 self._set(self.take_name, 'value', take.name if take else '')
             for control in (self.rename,self.duplicate,self.take_name):
                 self._set(control, 'disabled', take is None or s.busy)
+            self._set(self.remove_take, 'disabled', take is None or s.busy)
+            self._set(self.undo_remove, 'disabled', s.busy or not s.can_undo_take_removal)
             for control in (self.prepare_extend, self.prepare_replace):
                 self._set(control, 'disabled', take is None or s.busy)
             self._set(self.trim, 'disabled', not live or take is None or s.busy or s.frame < 3 or s.frame >= last_frame)
-            self._set(self.save, 'disabled', not s.takes or s.busy)
+            self._set(self.save, 'disabled', s.busy)
             self._set(self.open, 'disabled', not self.saved_map or s.busy)
             self._set(self.upload, 'disabled', s.busy)
             self._set(self.clear, 'disabled', s.busy)
             self._set(self.reuse, 'disabled', take is None or s.busy or not take.segments)
             self._set(self.segments, 'disabled', take is None or s.busy or not take.segments)
-            self._set(self.take_info, 'content', f'<div class="sz-note">{len(take.positions)/25:.2f} seconds · {len(take.segments)} generated actions. Select it to preview, or prepare an edit below.</div>' if take else '<div class="sz-note">No take selected yet. Open Direct to create one.</div>')
+            self._set(self.take_info, 'content', f'<div class="sz-note">{escape(take.name)} · {len(take.positions)/25:.2f} s · {len(take.segments)} actions</div>' if take else '<div class="sz-note">No take selected. Use New take to begin.</div>')
             self.segment_map = {f'{i+1:02d} · {seg["start"]/25:.2f}s · {seg["prompt"][:30]}':seg for i,seg in enumerate(take.segments)} if take else {}
             segments = tuple(self.segment_map) or ('No generated actions',)
             self._set(self.segments, 'options', segments)

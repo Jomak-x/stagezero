@@ -56,9 +56,33 @@ def validate_take(take):
             raise ValueError('Invalid scene event')
 
 
+def validate_provenance(takes):
+    for take in takes.values():
+        if take.parent is None:
+            if take.branch_frame is not None:
+                raise ValueError('Invalid branch provenance')
+        elif (not isinstance(take.parent, str) or take.parent not in takes or take.parent == take.id or
+              type(take.branch_frame) is not int or
+              not 3 <= take.branch_frame < len(takes[take.parent].positions)):
+            raise ValueError('Invalid branch provenance')
+    for take in takes.values():
+        seen = set()
+        current = take
+        while current.parent is not None:
+            if current.id in seen:
+                raise ValueError('Cyclic branch provenance')
+            seen.add(current.id)
+            current = takes[current.parent]
+
+
 def encode_project(takes, active, frame, scene):
-    if not 1 <= len(takes) <= MAX_TAKES or active not in takes:
-        raise ValueError('Select a generated take before saving')
+    if not 0 <= len(takes) <= MAX_TAKES:
+        raise ValueError('Invalid take count')
+    if takes:
+        if active not in takes or type(frame) is not int or not 0 <= frame < len(takes[active].positions):
+            raise ValueError('Invalid saved playhead')
+    elif active is not None or type(frame) is not int or frame != 0:
+        raise ValueError('Invalid saved playhead')
     if sum(len(t.positions) for t in takes.values()) > MAX_TOTAL_FRAMES:
         raise ValueError('Project exceeds the supported motion budget')
     data, items = {}, []
@@ -69,6 +93,7 @@ def encode_project(takes, active, frame, scene):
             data[key + '_' + field_name] = getattr(t, field_name)
         items.append(dict(key=key, id=t.id, name=t.name, segments=t.segments,
                           parent=t.parent, branch_frame=t.branch_frame, events=t.events))
+    validate_provenance(takes)
     manifest = dict(version=1, model=MODEL, fps=25, active=active, frame=int(frame), scene=scene, takes=items)
     data['manifest'] = np.array(json.dumps(manifest, allow_nan=False))
     out = io.BytesIO()
@@ -94,7 +119,7 @@ def decode_project(content):
         if doc.get('version') != 1 or doc.get('model') != MODEL or doc.get('fps') != 25:
             raise ValueError('Unsupported project version or skeleton')
         items = doc.get('takes')
-        if not isinstance(items, list) or not 1 <= len(items) <= MAX_TAKES:
+        if not isinstance(items, list) or not 0 <= len(items) <= MAX_TAKES:
             raise ValueError('Invalid take count')
         takes, total = {}, 0
         for i, item in enumerate(items):
@@ -108,11 +133,12 @@ def decode_project(content):
                 raise ValueError('Project exceeds the supported motion budget')
             takes[t.id] = t
         active, frame = doc['active'], doc['frame']
-        if active not in takes or type(frame) is not int or not 0 <= frame < len(takes[active].positions):
+        if takes:
+            if active not in takes or type(frame) is not int or not 0 <= frame < len(takes[active].positions):
+                raise ValueError('Invalid saved playhead')
+        elif active is not None or type(frame) is not int or frame != 0:
             raise ValueError('Invalid saved playhead')
-        for t in takes.values():
-            if t.parent is not None and (t.parent not in takes or t.parent == t.id or type(t.branch_frame) is not int or not 3 <= t.branch_frame < len(takes[t.parent].positions)):
-                raise ValueError('Invalid branch provenance')
+        validate_provenance(takes)
         scene = doc.get('scene', {})
         if not isinstance(scene, dict):
             raise ValueError('Invalid scene')

@@ -51,6 +51,11 @@ import {
   interactionReducer,
 } from "./timeline/interactions";
 import { formatSeconds, frameSeconds } from "./timeline/time";
+import {
+  parseStudioActionUuid,
+  studioActionMessage,
+  StudioActionOperation,
+} from "./timeline/studioActions";
 
 interface TimelineProps {
   timelineState: TimelineMessage | null;
@@ -259,6 +264,34 @@ export function Timeline({
     () => timelineState?.intervals ?? [],
     [timelineState?.intervals],
   );
+  const studioActions = useMemo(
+    () => prompts.map((prompt) => ({ prompt, action: parseStudioActionUuid(prompt.uuid) }))
+      .filter((entry) => entry.action !== null)
+      .sort((a, b) => a.action!.index - b.action!.index),
+    [prompts],
+  );
+  const [selectedStudioPromptUuid, setSelectedStudioPromptUuid] = useState<string | null>(null);
+  const [hoveredStudioPromptUuid, setHoveredStudioPromptUuid] = useState<string | null>(null);
+  const selectedStudioPrompt = studioActions.find((entry) => entry.prompt.uuid === selectedStudioPromptUuid);
+  const sendStudioAction = useCallback((prompt: TimelinePrompt, operation: StudioActionOperation) => {
+    const action = parseStudioActionUuid(prompt.uuid);
+    if (!action?.commandUuid || !viewer?.mutable.current?.sendMessage) return;
+    setSelectedStudioPromptUuid(prompt.uuid);
+    viewer.mutable.current.sendMessage(studioActionMessage(
+      action,
+      operation,
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    ));
+  }, [viewer]);
+  const sendStudioTransport = useCallback((operation: "start" | "play" | "pause") => {
+    const firstAction = studioActions[0]?.action;
+    if (!firstAction?.commandUuid || !viewer?.mutable.current?.sendMessage) return;
+    viewer.mutable.current.sendMessage(studioActionMessage(
+      { ...firstAction, index: 0 },
+      operation,
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    ));
+  }, [studioActions, viewer]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1242,11 +1275,8 @@ export function Timeline({
       // If constraints are disabled, don't allow any other interactions
       if (timelineState.constraints_enabled === false) {
         if (e.button === 0 && trackInfo.type === 'prompt' && x >= TRACK_LABEL_WIDTH) {
-          cursorDragActiveRef.current = true;
-          cancelPendingScrubTimeout();
-          pendingScrubFrameRef.current = null;
-          dispatchInteraction({ type: "startCursorDrag" });
-          seekFromPointer(getFrameFromX(x), true);
+          const clickedPrompt = findPromptAtPosition(x, y);
+          if (clickedPrompt) sendStudioAction(clickedPrompt, "replace");
         }
         return;
       }
@@ -1502,7 +1532,7 @@ export function Timeline({
         }
       }
     },
-    [timelineState, promptsByStart, promptsByEndDesc, editingPrompt, getFrameFromX, getTrackFromY, findKeyframeAtPosition, findIntervalAtPosition, findIntervalEdge, findPromptEdge, findPromptAtPosition, findPromptIntersection, seekFromPointer, cancelPendingScrubTimeout, onKeyframeAdd, onKeyframeDelete, onIntervalDelete, getLatestState],
+    [timelineState, promptsByStart, promptsByEndDesc, editingPrompt, getFrameFromX, getTrackFromY, findKeyframeAtPosition, findIntervalAtPosition, findIntervalEdge, findPromptEdge, findPromptAtPosition, findPromptIntersection, seekFromPointer, cancelPendingScrubTimeout, onKeyframeAdd, onKeyframeDelete, onIntervalDelete, getLatestState, sendStudioAction],
   );
 
   const handleMouseMove = useCallback(
@@ -1525,6 +1555,8 @@ export function Timeline({
       
       // If constraints are disabled, only allow cursor dragging
       if (timelineState.constraints_enabled === false) {
+        setHoveredStudioPromptUuid(trackInfo.type === 'prompt'
+          ? findPromptAtPosition(x, y)?.uuid ?? null : null);
         // Clear all hover states
         setHoverEdge(null);
         setHoveredPromptForResize(null);
@@ -1540,6 +1572,7 @@ export function Timeline({
         return;
       }
       
+      setHoveredStudioPromptUuid(null);
       // Check for split preview when Shift is held
       if (isShiftKey && trackInfo.type === 'prompt') {
         const clickedPrompt = findPromptAtPosition(x, y);
@@ -2337,16 +2370,15 @@ export function Timeline({
       const visiblePromptEndX = Math.min(endX, width);
       const visiblePromptWidth = Math.max(0, visiblePromptEndX - visiblePromptStartX);
       // Compute centered text width, but ensure it never overlaps the seconds pill.
-      const textCenterX = visiblePromptStartX + visiblePromptWidth / 2;
       let textLeftLimitX = visiblePromptStartX + 10;
       const textRightLimitX = visiblePromptEndX - 10;
       if (canDrawPill) {
         textLeftLimitX = Math.max(textLeftLimitX, pillRightX);
       }
-      const maxTextWidth = Math.max(
-        0,
-        2 * Math.min(textCenterX - textLeftLimitX, textRightLimitX - textCenterX),
-      );
+      // Center in the space remaining after the duration badge, so short
+      // action names remain readable in a narrow editor column.
+      const textCenterX = (textLeftLimitX + textRightLimitX) / 2;
+      const maxTextWidth = Math.max(0, textRightLimitX - textLeftLimitX);
       let displayText = prompt.text || "(Empty)";
       
         if (bgCtx.measureText(displayText).width > maxTextWidth) {
@@ -2365,7 +2397,7 @@ export function Timeline({
           bgCtx.shadowBlur = 3;
           bgCtx.shadowOffsetX = 0;
           bgCtx.shadowOffsetY = 1;
-          // Center around the visible portion (do not account for the seconds pill).
+          // Center within the label area after the duration badge.
           bgCtx.fillText(displayText, textCenterX, textY);
           // Reset shadow completely
           bgCtx.shadowColor = 'transparent';
@@ -3008,8 +3040,84 @@ export function Timeline({
   const containerHeight = FRAME_LABELS_HEIGHT + tracksHeight;
   const counterFrame = hoveredRulerFrame !== null && !isDraggingCursor
     ? hoveredRulerFrame : scrubFrame ?? timelineState.current_frame;
+  const selectedAction = selectedStudioPrompt?.action;
+  const selectedPrompt = selectedStudioPrompt?.prompt;
+  const studioCoords = studioActions.length > 0 && canvasSize.width > 0
+    ? calculateTimelineCoordinates(canvasSize.width, timelineState, zoomLevel, panOffset)
+    : null;
+  const selectedLeft = studioCoords && selectedPrompt
+    ? studioCoords.timelineStartX + (selectedPrompt.start_frame - studioCoords.viewStartFrame) * studioCoords.pixelRange
+    : 0;
+  const selectedRight = studioCoords && selectedPrompt
+    ? studioCoords.timelineStartX + (selectedPrompt.end_frame - studioCoords.viewStartFrame) * studioCoords.pixelRange
+    : 0;
+  const lastStudioPrompt = studioActions[studioActions.length - 1]?.prompt;
+  const studioCommandsEnabled = Boolean(studioActions[0]?.action?.commandUuid);
+  const studioButtonStyle: React.CSSProperties = {
+    border: `1px solid ${darkMode ? "#526078" : "#b9c6d6"}`,
+    borderRadius: 5,
+    background: darkMode ? "#283344" : "#ffffff",
+    color: darkMode ? "#f2f5f9" : "#26354a",
+    height: 24,
+    padding: "0 7px",
+    fontSize: 11,
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    flexShrink: 0,
+  };
+  const studioTransportButtonStyle: React.CSSProperties = {
+    ...studioButtonStyle,
+    width: 25,
+    padding: 0,
+    fontSize: 13,
+  };
 
   return (
+    <>
+    {studioActions.length > 0 && (
+      <div style={{
+        background: darkMode ? "#1e2734" : "#edf2f7",
+        color: darkMode ? "#e3eaf4" : "#26354a",
+        borderTop: `1px solid ${darkMode ? "#405069" : "#ccd7e2"}`,
+        boxSizing: "border-box",
+        height: 33,
+        padding: "3px 7px",
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+        minWidth: 0,
+        flexShrink: 0,
+        zIndex: 5,
+      }}>
+        <div aria-label="Playback controls" style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
+          <button type="button" aria-label="Start sequence" title="Start sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("start")} style={studioTransportButtonStyle}>↤</button>
+          <button type="button" aria-label="Play sequence" title="Play sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("play")} style={studioTransportButtonStyle}>▶</button>
+          <button type="button" aria-label="Pause sequence" title="Pause sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("pause")} style={studioTransportButtonStyle}>Ⅱ</button>
+        </div>
+        <span style={{ borderLeft: `1px solid ${darkMode ? "#46546a" : "#c4cfda"}`, height: 17, margin: "0 3px", flexShrink: 0 }} />
+        <span style={{ fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
+          Sequence <span style={{ fontWeight: 500, opacity: 0.72 }}>· {studioActions.length} {studioActions.length === 1 ? "action" : "actions"}</span>
+        </span>
+        <span style={{ fontSize: 11, opacity: selectedAction ? 1 : 0.7, minWidth: 0, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", paddingLeft: 6 }}>
+          {selectedAction ? `Action ${selectedAction.index + 1}` : "Click a clip to edit"}
+        </span>
+        {selectedAction && selectedPrompt && <>
+          <button type="button" style={studioButtonStyle} disabled={!selectedAction.commandUuid}
+            aria-label={`Add before action ${selectedAction.index + 1}`}
+            onClick={() => sendStudioAction(selectedPrompt, "insert_before")}>Add before</button>
+          <button type="button" style={studioButtonStyle} disabled={!selectedAction.commandUuid}
+            aria-label={`Add after action ${selectedAction.index + 1}`}
+            onClick={() => sendStudioAction(selectedPrompt, "insert_after")}>Add after</button>
+        </>}
+        {lastStudioPrompt && <button type="button" style={studioButtonStyle}
+          disabled={!studioCommandsEnabled} aria-label="Add action to end"
+          onClick={() => sendStudioAction(lastStudioPrompt, "insert_after")}>Add to end</button>}
+      </div>
+    )}
     <div
       ref={containerRef}
       style={{
@@ -3027,13 +3135,14 @@ export function Timeline({
     >
       <canvas
         ref={canvasRef}
-        aria-label="Take timeline: click or drag the ruler to choose a time"
-        title="Click or drag the time ruler to review motion. To change an action, choose Replace ending in Direct."
+        aria-label="Take timeline: click an action to edit it, or click or drag the ruler to choose a time"
+        title="Click an action to edit it. Click or drag the time ruler to review motion."
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={() => {
           setHoveredRulerFrame(null);
+          setHoveredStudioPromptUuid(null);
           if (!isDraggingCursor) handleMouseUp();
         }}
         onContextMenu={handleContextMenu}
@@ -3056,10 +3165,42 @@ export function Timeline({
                       ? "grabbing"
                       : "pointer"
             )
-            : (isHoveringHeader || isDraggingCursor ? (isDraggingCursor ? "grabbing" : "pointer") : "default"),
+            : (isDraggingCursor ? "grabbing" : (isHoveringHeader || (hoveredStudioPromptUuid && parseStudioActionUuid(hoveredStudioPromptUuid)?.commandUuid) ? "pointer" : "default")),
           display: "block",
         }}
       />
+      {studioCoords && studioActions.map(({ prompt, action }) => {
+        if (!action?.commandUuid) return null;
+        const left = studioCoords.timelineStartX + (prompt.start_frame - studioCoords.viewStartFrame) * studioCoords.pixelRange;
+        const right = studioCoords.timelineStartX + (prompt.end_frame - studioCoords.viewStartFrame) * studioCoords.pixelRange;
+        const visibleLeft = Math.max(studioCoords.timelineStartX, left);
+        const visibleRight = Math.min(canvasSize.width, right);
+        if (visibleRight <= visibleLeft) return null;
+        return <button key={prompt.uuid} type="button"
+          aria-label={`Edit action ${action.index + 1}: ${prompt.text}`}
+          aria-pressed={selectedStudioPromptUuid === prompt.uuid}
+          title={`Edit action ${action.index + 1}`}
+          onFocus={() => setSelectedStudioPromptUuid(prompt.uuid)}
+          onClick={() => sendStudioAction(prompt, "replace")}
+          style={{ position: "absolute", left: visibleLeft, top: FRAME_LABELS_HEIGHT + 1,
+            width: visibleRight - visibleLeft, height: TRACK_HEIGHT - 2,
+            padding: 0, border: 0, background: "transparent", cursor: "pointer", zIndex: 2 }} />;
+      })}
+      {studioCoords && selectedPrompt && selectedRight >= studioCoords.timelineStartX && selectedLeft <= canvasSize.width && (
+        <div aria-hidden="true" style={{
+          position: "absolute",
+          left: Math.max(studioCoords.timelineStartX, selectedLeft),
+          top: FRAME_LABELS_HEIGHT + 1,
+          width: Math.max(0, Math.min(canvasSize.width, selectedRight) - Math.max(studioCoords.timelineStartX, selectedLeft)),
+          height: TRACK_HEIGHT - 2,
+          border: "2px solid #fbbf24",
+          borderRadius: 5,
+          boxSizing: "border-box",
+          boxShadow: "0 0 0 2px rgba(251,191,36,0.24)",
+          pointerEvents: "none",
+          zIndex: 3,
+        }} />
+      )}
       <div
         aria-live="off"
         style={{
@@ -3187,5 +3328,6 @@ export function Timeline({
         );
       })()}
     </div>
+    </>
   );
 }
