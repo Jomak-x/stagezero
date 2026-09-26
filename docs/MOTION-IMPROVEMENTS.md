@@ -47,6 +47,23 @@ alongside `pod_backend.py`; updating only the backend file is insufficient.
 
 ## What changed
 
+### Quality-rejection recovery
+
+Automatic requests without an explicit candidate count now recover from a
+failed quality check by trying additional model samples, up to three total.
+Recovery uses distinct recorded seeds and the legacy profile's longer
+52-frame history/carry window. A successful initial selection keeps its
+existing generation cost. Explicit profiles and candidate counts retain their
+requested budgets. The prompt, native pose/root conditions, quality thresholds,
+and atomic take replacement remain in effect for every attempt.
+
+If all samples fail, the backend records the request's candidate settings and
+full rejection measurements in `metrics.jsonl` and returns a short explanation
+of the failed checks. Action-edit errors also identify the timeline action and
+chunk that failed; editing an earlier action regenerates its following actions.
+These changes do not guarantee that arbitrary prompts will produce valid or
+semantically correct motion. Rejected samples never replace the original take.
+
 StageZero continues to use NVIDIA's pinned `ARDY-G1-RP-25FPS-Horizon52`
 checkpoint on the existing RTX 6000 Ada Pod. No weights were fine-tuned or
 retrained. We changed inference control: the backend can use a shorter recent

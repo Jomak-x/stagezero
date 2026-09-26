@@ -47,6 +47,7 @@ def load_backend(token_path):
 class FakeMotionRep:
     def __init__(self):
         self.inverse_calls = []
+        self.unsafe_markers = set()
 
     def inverse(self, motion, *, is_normalized):
         assert is_normalized is True
@@ -60,6 +61,8 @@ class FakeMotionRep:
         # Candidate 1 is the expressive alternative: both hands overhead.
         if frames == 104 and marker == 21:
             positions[:, :, HANDS, 1] = 1.7
+        if frames == 104 and marker in self.unsafe_markers:
+            positions[:, :, 7, 1] = -.06
         rotations = np.tile(np.eye(3, dtype=np.float32), (1, frames, 34, 1, 1))
         return {"posed_joints": torch.from_numpy(positions),
                 "global_rot_mats": torch.from_numpy(rotations)}
@@ -178,6 +181,118 @@ class BackendPolicyTests(unittest.TestCase):
         self.assertEqual(result["metadata"]["selection"]["chosen_index"], 1)
         self.assertEqual(result["metadata"]["seed"], 10)
         self.assertEqual(result["metadata"]["base_seed"], 9)
+
+    def test_automatic_quality_failure_recovers_with_longer_history_and_new_seed(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        result = self.generate({"request_id": "recovery", "prompt": "Do a backflip",
+                                "history": np.zeros((52, 414)).tolist(),
+                                "generation_options": {"seed": 42}})
+        self.assertEqual(result["metadata"]["selection"]["chosen_index"], 1)
+        self.assertIn("floor_penetration", result["metadata"]["selection"]["assessments"][0]["reasons"])
+        self.assertEqual([entry["profile"] for entry in result["metadata"]["candidate_settings"]],
+                         ["responsive", "legacy"])
+        self.assertEqual([step["history_len"] for step in self.model.steps], [4, 4, 52, 52])
+        self.assertEqual(self.seeds, [42, 43])
+        self.assertEqual(result["metadata"]["seed"], 43)
+        self.assertEqual(self.model.encode_calls, 1)
+        np.testing.assert_array_equal(result["motion"][:52], np.full((52, 414), 21))
+
+    def test_default_request_stops_after_first_safe_candidate(self):
+        result = self.generate({"request_id": "default", "prompt": "Do a backflip"})
+        self.assertEqual(result["metadata"]["selection"]["chosen_index"], 0)
+        self.assertEqual(len(result["metadata"]["candidate_settings"]), 1)
+        self.assertEqual(len(self.model.steps), 2)
+
+    def test_default_request_recovers_without_supplied_options(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        with mock.patch.object(self.backend.secrets, "randbelow", return_value=42):
+            result = self.generate({"request_id": "default-recovery", "prompt": "Do a backflip"})
+        self.assertEqual(result["metadata"]["selection"]["chosen_index"], 1)
+        self.assertEqual(self.seeds, [42, 43])
+
+    def test_automatic_recovery_can_use_third_candidate_and_wrap_seed(self):
+        self.model.motion_rep.unsafe_markers = {11, 21}
+        result = self.generate({"request_id": "third", "prompt": "Do a backflip",
+                                "generation_options": {"seed": 2**32 - 1}})
+        self.assertEqual(result["metadata"]["selection"]["chosen_index"], 2)
+        self.assertEqual(self.seeds, [2**32 - 1, 0, 1])
+        self.assertEqual(len(self.model.steps), 6)
+        self.assertEqual(result["metadata"]["seed"], 1)
+
+    def test_exhausted_quality_recovery_logs_reasons_and_settings(self):
+        self.model.motion_rep.unsafe_markers = {11, 21, 31}
+        with self.assertRaisesRegex(RuntimeError, "floor penetration") as failure:
+            self.generate({"request_id": "exhausted", "prompt": "Do a backflip",
+                           "generation_options": {"seed": 42}})
+        self.assertLess(len(str(failure.exception)), 180)
+        self.assertIn("No motion committed", str(failure.exception))
+        self.assertNotIn("take preserved", str(failure.exception))
+        rows = [json.loads(line) for line in (self.temp_path / "metrics.jsonl").read_text().splitlines()]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["status"], "rejected")
+        self.assertEqual(rows[0]["request_id"], "exhausted")
+        self.assertIsNone(rows[0]["selection"]["chosen_index"])
+        self.assertTrue(all(not row["safe"] for row in rows[0]["selection"]["assessments"]))
+        self.assertEqual([entry["seed"] for entry in rows[0]["candidate_settings"]], [42, 43, 44])
+        self.assertEqual(len(self.model.steps), 6)
+
+    def test_explicit_candidate_budgets_never_expand_on_quality_failure(self):
+        for options, count in (({"profile": "legacy", "seed": 42}, 1),
+                               ({"seed": 42, "candidates": 1}, 1),
+                               ({"seed": 42, "candidates": 2}, 2),
+                               ({"profile": "responsive", "seed": 42, "candidates": 3}, 3)):
+            with self.subTest(options=options):
+                self.model = FakeModel()
+                self.backend.model = self.model
+                self.model.motion_rep.unsafe_markers = {11, 21, 31}
+                with self.assertRaises(RuntimeError):
+                    self.generate({"request_id": "explicit", "prompt": "Do a backflip",
+                                   "generation_options": options})
+                self.assertEqual(len(self.model.steps), count * 2)
+                rows = (self.temp_path / "metrics.jsonl").read_text().splitlines()
+                self.assertEqual(len(json.loads(rows[-1])["candidate_settings"]), count)
+
+    def test_cancellation_after_failed_candidate_does_not_start_recovery(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        self.model.on_step = lambda count: self.backend.CANCELLED.add("cancel-recovery") if count == 2 else None
+        with self.assertRaises(InterruptedError):
+            self.generate({"request_id": "cancel-recovery", "prompt": "Do a backflip",
+                           "generation_options": {"seed": 42}})
+        self.assertEqual(len(self.model.steps), 2)
+        self.assertEqual(self.seeds, [42])
+        self.assertFalse((self.temp_path / "metrics.jsonl").exists())
+
+    def test_cancellation_during_recovery_does_not_finish_or_write_result(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        self.model.on_step = lambda count: self.backend.CANCELLED.add("cancel-recovery-mid") if count == 3 else None
+        with self.assertRaises(InterruptedError):
+            self.generate({"request_id": "cancel-recovery-mid", "prompt": "Do a backflip",
+                           "generation_options": {"seed": 42}})
+        self.assertEqual(len(self.model.steps), 3)
+        self.assertEqual(self.seeds, [42, 43])
+        self.assertFalse((self.temp_path / "metrics.jsonl").exists())
+
+    def test_recovery_preserves_native_pose_goal(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        with mock.patch.object(self.backend, "build_action_conditions", return_value=(None, None, {"action": "squat"})) as build:
+            result = self.generate({"request_id": "pose-recovery", "prompt": "Do a squat",
+                                    "history": np.zeros((52, 414)).tolist(),
+                                    "generation_options": {"seed": 42}})
+        self.assertEqual(result["metadata"]["pose_goal"], {"action": "squat"})
+        self.assertEqual([call.args[1] for call in build.call_args_list], ["squat"] * 4)
+        self.assertEqual([call.kwargs["generated_offset"] for call in build.call_args_list], [0, 52, 0, 52])
+        self.assertEqual([step["history_len"] for step in self.model.steps], [12, 12, 52, 52])
+
+    def test_recovery_preserves_root_waypoint(self):
+        self.model.motion_rep.unsafe_markers = {11}
+        target = {"position_xz": [0.0, 0.8], "frame": 103}
+        with mock.patch.object(self.backend, "build_root_conditions", return_value=(None, None)) as build:
+            result = self.generate({"request_id": "target-recovery", "prompt": "walk to the mark",
+                                    "history": np.zeros((52, 414)).tolist(), "motion_target": target,
+                                    "generation_options": {"seed": 42}})
+        self.assertEqual(result["metadata"]["motion_target"], target)
+        self.assertEqual([call.args[1] for call in build.call_args_list], [target] * 4)
+        self.assertEqual([call.kwargs["history_length"] for call in build.call_args_list], [4, 4, 52, 52])
 
     def test_auto_stop_uses_expressive_profile(self):
         result = self.generate({"request_id": "stop", "prompt": "A person stops and stands still.",

@@ -566,8 +566,9 @@ class DirectorSession(MotionSession):
         motion_so_far = source.motion[max(0, stop - 52):stop].copy()
         generation_seconds = 0.0
         final_meta = None
+        failure_context = ''
         try:
-            for prompt, frames in actions:
+            for action_number, (prompt, frames) in enumerate(actions, start=len(segments) + 1):
                 count = (frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
                 action_start = stop + sum(len(part) for part in generated['motion'])
                 action_seconds = 0.0
@@ -577,6 +578,7 @@ class DirectorSession(MotionSession):
                             return
                     history_count = min(52, len(motion_so_far)) // 4 * 4
                     history = motion_so_far[-history_count:].copy() if history_count else None
+                    failure_context = f'action {action_number} "{prompt[:60]}", chunk {index + 1}/{count} · '
                     result = self.backend.generate(request_id, prompt, history)
                     validate_result(result, request_id)
                     final_meta = result['metadata']
@@ -595,6 +597,7 @@ class DirectorSession(MotionSession):
                             request_id = str(uuid.uuid4())
                             self.current_id = request_id
                             self.status = f'Regenerating actions · {completed_chunks}/{total_chunks} chunks received; holding pose'
+                    failure_context = ''
                 segments.append(dict(start=action_start, end=action_start + frames, prompt=prompt,
                                      request_id=final_meta['request_id'], generation_seconds=action_seconds))
             arrays = [np.concatenate([getattr(source, key)[:stop]] + generated[key], axis=0)
@@ -637,7 +640,7 @@ class DirectorSession(MotionSession):
                     return
                 self.busy = False
                 self.playing = False
-                self.status = f'Action edit failed · {type(exc).__name__}: {str(exc)[:200]}. Original take preserved; retry.'
+                self.status = f'Action edit failed · {failure_context}{type(exc).__name__}: {str(exc)[:200]}. Original take preserved; retry.'
 
     def _install_result(self, result):
         t, stop, branch = self.edit_context
