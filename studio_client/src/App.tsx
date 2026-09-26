@@ -55,6 +55,7 @@ import { VISER_VERSION, GITHUB_CONTRIBUTORS, Contributor } from "./VersionInfo";
 import { ArrowKeyOverlay } from "./ArrowKeyOverlay";
 import { BatchedLabelManager } from "./BatchedLabelManager";
 import { Timeline } from "./Timeline";
+import { WelcomeScreen } from "./WelcomeScreen";
 
 // ======= Utility functions =======
 
@@ -284,6 +285,22 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
   const showLogo = viewer.useGui((state) => state.theme.show_logo);
   const showStats = viewer.useDevSettings((state) => state.showStats);
   const { messageSource } = viewer;
+  const [welcomeVisible, setWelcomeVisible] = React.useState(messageSource === "websocket");
+  const websocketConnected = viewer.useGui((state) => state.websocketConnected);
+  const [connectionAttemptExpired, setConnectionAttemptExpired] = React.useState(false);
+
+  React.useEffect(() => {
+    setConnectionAttemptExpired(false);
+    if (websocketConnected) return;
+    const timer = window.setTimeout(() => setConnectionAttemptExpired(true), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [websocketConnected]);
+
+  const enterStudio = () => {
+    // Entering the workspace is local navigation, never a project reset.
+    setWelcomeVisible(false);
+    window.requestAnimationFrame(() => viewer.mutable.current.canvas?.focus());
+  };
 
   // Create Mantine theme with custom colors if provided.
   const mantineTheme = useMemo(
@@ -327,7 +344,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
         <NotificationsPanel />
         <BrowserWarning />
         <ViserModal />
-        <GlobalKeyboardListener />
+        {!welcomeVisible && <GlobalKeyboardListener />}
         {/* App layout */}
         <Box
           style={{
@@ -338,7 +355,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             flexDirection: "column",
           }}
         >
-          <Titlebar />
+          {!welcomeVisible && <Titlebar />}
           <Box
             style={{
               width: "100%",
@@ -346,25 +363,42 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
               flexGrow: 1,
               overflow: "hidden",
               display: "flex",
+              // Keep the panel's measurable parent and mounted state while
+              // hiding the workspace behind the welcome screen.
+              visibility: welcomeVisible ? "hidden" : "visible",
             }}
           >
             <Box
+              className={welcomeVisible ? "sz-welcome-scene" : undefined}
               style={(theme) => ({
                 backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
                 flexGrow: 1,
                 overflow: "hidden",
                 height: "100%",
+                visibility: welcomeVisible ? "hidden" : "visible",
               })}
             >
               {canvases}
-              {showLogo && messageSource === "websocket" && <ViserLogo />}
+              {!welcomeVisible && showLogo && messageSource === "websocket" && <ViserLogo />}
             </Box>
             {messageSource === "websocket" && (
               <ControlPanel control_layout={controlLayout} />
             )}
           </Box>
-          <TimelineWithState />
-          <ArrowKeyOverlay />
+          <div style={{ display: welcomeVisible ? "none" : "contents" }}>
+            <TimelineWithState />
+            <ArrowKeyOverlay />
+          </div>
+          {welcomeVisible ? (
+            <WelcomeScreen
+              onEnter={enterStudio}
+              connectionState={websocketConnected ? "connected" : connectionAttemptExpired ? "disconnected" : "connecting"}
+            />
+          ) : messageSource === "websocket" ? (
+            <button className="sz-welcome-return" onClick={() => setWelcomeVisible(true)}>
+              <span aria-hidden="true">↖</span> Welcome
+            </button>
+          ) : null}
         </Box>
         {showStats && <Stats className="stats-panel" />}
       </MantineProvider>
