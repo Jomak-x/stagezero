@@ -10,7 +10,8 @@ import hashlib
 import json
 import numpy as np
 
-from bounded_upload import ScopedUploadLimits
+from bounded_upload import (ScopedUploadLimits, acquire_scoped_upload_limits,
+                            release_scoped_upload_limits)
 from character_assets import DEFAULT_LIMITS, import_glb, load_character_asset
 from character_compatibility import assess_character, inspect_character, unsupported_character
 from character_diagnostics import standing_reference
@@ -64,6 +65,8 @@ class CharacterControls:
         self._mapping_gui = None
         self.renderer = renderer or GlbCharacterRenderer(server, on_result=self._on_result)
         self.upload_limits = None
+        self._upload_gui = None
+        self._upload_handle = None
         self._restore_catalog()
 
     def _on_result(self, client_id, asset_id, revision, status, error):
@@ -343,7 +346,10 @@ class CharacterControls:
             self._diagnostics = gui.add_html('')
         gui.add_markdown('Motion needs a humanoid skeleton and skin weights. A mapping file assigns existing bones; it cannot rig a static mesh. Technical compatibility does not guarantee natural deformation. Selection is shared between connected viewers.')
         self._controls = (choose, mapping, status, preview, another)
-        self.upload_limits = ScopedUploadLimits(self.server)
+        self.upload_limits = acquire_scoped_upload_limits(self.server, gui=gui,
+                                                           factory=ScopedUploadLimits)
+        self._upload_gui = gui
+        self._upload_handle = upload
         self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
         self._bind_mapping_upload(mapping, None, self._ticket)
@@ -465,5 +471,10 @@ class CharacterControls:
 
     def close(self):
         if self.upload_limits is not None:
-            self.upload_limits.close()
+            if self._upload_handle is not None:
+                self.upload_limits.unregister(self._upload_handle, remove=True)
+            if self._controls is not None:
+                self.upload_limits.unregister(self._controls[1], remove=True)
+            release_scoped_upload_limits(self._upload_gui)
+            self.upload_limits = None
         self.renderer.restore_g1()

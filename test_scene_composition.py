@@ -27,8 +27,8 @@ class SceneCompositionTests(unittest.TestCase):
             'Industrial yard': (9, ['sparks', 'smoke', 'rain'], 'sunset', [179, 117, 59]),
             'Winter plaza': (8, ['snow'], 'moonlight', [185, 206, 220]),
         }
-        self.assertEqual(set(PRESETS), set(expected))
-        for name in PRESETS:
+        self.assertEqual(set(PRESETS), set(expected) | {'Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Designed apartment', 'Residential neighborhood', 'Market square', 'Warehouse workshop'})
+        for name in expected:
             with self.subTest(name=name):
                 count, effect_kinds, lighting, accent = expected[name]
                 scene = make_preset(name, seed=17)
@@ -293,6 +293,19 @@ class ScenePersistenceTests(unittest.TestCase):
         self.assertIsInstance(errors[0], ValueError)
         self.assertIn('Project changed', str(errors[0]))
         self.assertEqual(self.session.scene_document(), newer)
+
+
+    def test_custom_assets_and_camera_survive_project_roundtrip(self):
+        scene = make_preset('Designed apartment')
+        scene['targets']=[{'id':'shelf-reach','name':'Shelf reach','object_id':scene['objects'][7]['id'],'kind':'climb','local_position':[0,.5,0]}]
+        self.session.set_scene(scene)
+        self._generate_take()
+        with tempfile.TemporaryDirectory() as folder:
+            _, payload = self.session.save_project(folder, 'custom-room')
+        self.session.set_scene(make_preset('Winter plaza'))
+        self.session.load_project(payload)
+        self.assertEqual(self.session.scene_document(), scene)
+        self.assertEqual(self.session.object_states()['assets'], scene['assets'])
 
 
 if __name__ == '__main__':

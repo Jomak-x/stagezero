@@ -1,5 +1,7 @@
 # Scene generation options
 
+Implementation update: Neon now designs original bounded geometry packs, saves them locally, and composes version 3 scenes from their reusable assets. See [OBJECTS.md](OBJECTS.md). The model comparisons below are background research; no mesh model has been installed.
+
 Checked 2026-09-26 against upstream documentation. This Mac mini has an Apple M6 and 32 GB unified memory. `ollama` 0.34.3 is installed, but its local server was not reachable during this check. No model manifests were present in the default `~/.ollama/models/manifests` directory, and `OLLAMA_MODELS` was not set in this shell. No local model availability or inference speed has been verified. The existing motion Pod has an RTX 6000 Ada GPU, but its ARDY environment and VRAM are already used for motion generation.
 
 ## Best next step: a local scene planner

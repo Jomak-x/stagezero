@@ -67,7 +67,7 @@ class SceneObjectValidationTests(unittest.TestCase):
             lambda o: o["interaction"].update(trigger="proximity"),
             lambda o: o["interaction"].update(radius=1.0),
             lambda o: o.update(position=[0, math.nan, 0]),
-            lambda o: o.update(position=[21, 0, 0]),
+            lambda o: o.update(position=[101, 0, 0]),
             lambda o: o.update(size=[-1, 1, 1]),
             lambda o: o.update(size=[0.3, 0.4, 0.3]),
             lambda o: o.update(color=[256, 2, 3]),
@@ -93,7 +93,7 @@ class SceneObjectValidationTests(unittest.TestCase):
         self.assertEqual(clean["interaction"]["radius"], 0.7)
 
     def test_static_props_and_large_environment_sizes(self):
-        self.assertEqual(MAX_OBJECTS, 40)
+        self.assertEqual(MAX_OBJECTS, 64)
         objects = [make_object('wall', i) for i in range(MAX_OBJECTS)]
         objects[0]['size'] = [12, 3, .2]
         self.assertEqual(len(validate_objects(objects)), MAX_OBJECTS)
