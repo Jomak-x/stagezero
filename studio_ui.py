@@ -68,9 +68,12 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, core_controls=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
+        self.core_session = core_session
+        self._core_visibility = []
+        self._legacy_motion_controls = []
         self.folder = project_folder
         self.folder.mkdir(parents=True, exist_ok=True)
         self.take_map, self.saved_map, self.segment_map = {}, {}, {}
@@ -97,6 +100,9 @@ class StudioUI:
         self.files = gui.add_html('')
         self.tabs = gui.add_tab_group()
         with self.tabs.add_tab('Motion'):
+            if core_controls is not None:
+                core_controls(gui)
+            legacy_before = set(vars(self))
             # Timeline clicks arrive through a normal Viser text update. The
             # browser keeps this control hidden; JSON identifies the take and
             # action so an old click cannot edit a newly selected take.
@@ -134,6 +140,8 @@ class StudioUI:
             with self.advanced_folder:
                 self.advanced_replace = gui.add_button('Change ending', color='gray')
             self.cancel_alternate = gui.add_button('Back to take', color='gray')
+            self._legacy_motion_controls = [value for name, value in vars(self).items()
+                if name not in legacy_before and hasattr(value, 'visible') and name != 'timeline_command']
         with self.tabs.add_tab('Takes'):
             with gui.add_folder('Precise playback', expand_by_default=False):
                 self.frames = gui.add_button_group('Frame', ('−1 frame', '+1 frame', 'End'))
@@ -194,9 +202,14 @@ class StudioUI:
         self.bind()
         self.update()
 
-    @staticmethod
-    def _set(handle, property_name, value):
+    def _set(self, handle, property_name, value):
         """Viser setters broadcast to clients, so publish changed properties only."""
+        if (property_name == 'visible' and self.core_session is not None
+                and self.core_session.snapshot()['active']
+                and any(handle is item for item in self._legacy_motion_controls)):
+            self._core_visibility = [(h, v) for h, v in self._core_visibility if h is not handle]
+            self._core_visibility.append((handle, value))
+            value = False
         if getattr(handle, property_name) != value:
             setattr(handle, property_name, value)
 
@@ -498,6 +511,16 @@ class StudioUI:
             transport_command(self.frames.value)
 
         def transport_command(value):
+            if self.core_session is not None and self.core_session.snapshot()['active']:
+                core = self.core_session
+                state = core.snapshot()
+                if value == 'Play': core.play()
+                elif value == 'Pause': core.pause()
+                elif value == 'Start': core.seek(0)
+                elif value == 'End': core.seek(max(0, state['total_frames']-1))
+                elif value == '−1 frame': core.seek(max(0, state['frame']-1))
+                elif value == '+1 frame': core.seek(state['frame']+1)
+                return
             with s.lock:
                 if not s.character_motion_enabled and value != 'Pause':
                     return
@@ -896,6 +919,10 @@ class StudioUI:
     def update(self):
         """Synchronize the sidebar after the viewer advances the session clock."""
         s = self.session
+        if self.core_session is None or not self.core_session.snapshot()['active']:
+            for handle, visible in self._core_visibility:
+                self._set(handle, 'visible', visible)
+            self._core_visibility = []
         with s.lock:
             live = s.mode == 'Live ARDY'
             # Viser button groups cannot be disabled; static previews hide
@@ -1010,3 +1037,15 @@ class StudioUI:
                       f'<div class="sz-project-status" role="status">{escape(project_status)}</div>')
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')
+
+            if self.core_session is not None:
+                core = self.core_session.snapshot()
+                if core['active']:
+                    remembered = {id(h) for h, _ in self._core_visibility}
+                    for handle in self._legacy_motion_controls:
+                        if id(handle) not in remembered:
+                            self._core_visibility.append((handle, handle.visible))
+                        if handle.visible:
+                            handle.visible = False
+                    self._set(self.status, 'content', '<div class="sz-status">Scene direction · '
+                              + escape(str(core['status'])) + '</div>')

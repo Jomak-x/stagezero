@@ -25,9 +25,11 @@ class StudioTimeline:
     dispatches playhead clicks through ``on_frame_change`` on its own worker.
     """
 
-    def __init__(self, server, session, command_uuid=None):
+    def __init__(self, server, session, command_uuid=None, *, core_session=None):
         self.timeline = server.timeline
         self.session = session
+        self.core_session = core_session
+        self._core_mode = False
         self.command_uuid = command_uuid
         self._layout = None
         self._frame = None
@@ -37,6 +39,12 @@ class StudioTimeline:
         self.update()
 
     def _seek(self, frame: int) -> None:
+        if self.core_session is not None and self.core_session.snapshot()['active']:
+            self._frame = None
+            total = self.core_session.snapshot()['total_frames']
+            if total:
+                self.core_session.seek(max(0, min(int(frame), total-1)))
+            return
         # The native ruler can scroll past the take. DirectorSession.seek()
         # clamps to the actual final frame and pauses playback.
         with self.session.lock:
@@ -49,6 +57,13 @@ class StudioTimeline:
 
     def update(self) -> None:
         """Publish only changed layout or playhead values (safe at 10 Hz)."""
+        if self.core_session is not None and self.core_session.snapshot()['active']:
+            self._core_mode = True
+            self._update_core()
+            return
+        if self._core_mode:
+            self._layout = self._frame = self._visible = None
+            self._core_mode = False
         with self.session.lock:
             kind = self.session.kind
             visible = kind in ("recorded", "generated")
@@ -94,3 +109,29 @@ class StudioTimeline:
             self._frame = frame
         elif not visible:
             self._frame = None
+
+
+    def _update_core(self):
+        state = self.core_session.snapshot()
+        length = state['total_frames']
+        segments = tuple((x['start'], x['end'], x['prompt'])
+                         for x in state.get('segments', ()))
+        layout = ('core', length, segments)
+        if layout != self._layout:
+            self.timeline.clear_prompts()
+            for index, (start, end, prompt) in enumerate(segments):
+                self.timeline.add_prompt(prompt, start, end,
+                    color=SEGMENT_COLORS[index % len(SEGMENT_COLORS)],
+                    uuid=f'core-scene-{index}')
+            self.timeline.set_fps(20.)
+            self.timeline.set_zoom_settings(default_num_frames_zoom=max(1, length),
+                                             max_frames_zoom=max(1, length))
+            self.timeline.set_frame_range(0, max(0, length-1))
+            self._layout = layout
+        visible = bool(length)
+        if visible != self._visible:
+            self.timeline.set_visible(visible)
+            self._visible = visible
+        if visible and state['frame'] != self._frame:
+            self.timeline.set_current_frame(state['frame'])
+            self._frame = state['frame']

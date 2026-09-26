@@ -162,3 +162,36 @@ class StudioTimelineTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class CoreTimelineTests(unittest.TestCase):
+    def test_native_timeline_uses_twenty_fps_and_routes_scrub_without_touching_g1(self):
+        class Core:
+            def __init__(self):
+                self.state = dict(active=True,total_frames=80,frame=7,
+                    segments=[{'start':0,'end':40,'prompt':'Two people gesture'},
+                              {'start':40,'end':80,'prompt':'They turn'}])
+            def snapshot(self): return dict(self.state)
+            def seek(self, frame): self.state['frame']=frame
+        core=Core(); timeline=FakeTimeline(); g1=FakeSession()
+        adapter=StudioTimeline(SimpleNamespace(timeline=timeline),g1,core_session=core)
+        self.assertIn(('set_fps',(20.0,),{}),timeline.calls)
+        self.assertEqual(timeline.end_frame,79)
+        timeline.on_scrub(999)
+        self.assertEqual(core.state['frame'],79)
+        self.assertEqual(g1.frame,0)
+        core.state['active']=False
+        adapter.update()
+        self.assertEqual(timeline.end_frame,99)
+        self.assertIn(('set_fps',(25.0,),{}),timeline.calls)
+        timeline.on_scrub(21)
+        self.assertEqual(g1.frame,21)
+
+    def test_native_playhead_does_not_republish_timeline_layout(self):
+        state=dict(active=True,total_frames=40,frame=0,segments=[])
+        core=SimpleNamespace(snapshot=lambda:dict(state),seek=lambda f:None)
+        timeline=FakeTimeline()
+        adapter=StudioTimeline(SimpleNamespace(timeline=timeline),FakeSession(),core_session=core)
+        count=sum(c[0]=='clear_prompts' for c in timeline.calls)
+        state['frame']=17;adapter.update()
+        self.assertEqual(sum(c[0]=='clear_prompts' for c in timeline.calls),count)
+        self.assertEqual(timeline.current_frame,17)

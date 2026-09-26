@@ -213,7 +213,7 @@ export interface IcosphereMessage {
 export interface SkinnedMeshMessage {
   type: "SkinnedMeshMessage";
   name: string;
-  props: {'vertices': Uint8Array<ArrayBuffer>, 'faces': Uint8Array<ArrayBuffer>, 'color': [number, number, number], 'wireframe': boolean, 'opacity': (number | null), 'flat_shading': boolean, 'side': 'front' | 'back' | 'double', 'material': 'standard' | 'toon3' | 'toon5', 'cast_shadow': boolean, 'receive_shadow': (boolean | number), 'bone_wxyzs': Uint8Array<ArrayBuffer>, 'bone_positions': Uint8Array<ArrayBuffer>, 'skin_indices': Uint8Array<ArrayBuffer>, 'skin_weights': Uint8Array<ArrayBuffer>};
+  props: {'vertices': Uint8Array<ArrayBuffer>, 'faces': Uint8Array<ArrayBuffer>, 'color': [number, number, number], 'wireframe': boolean, 'opacity': (number | null), 'flat_shading': boolean, 'side': 'front' | 'back' | 'double', 'material': 'standard' | 'toon3' | 'toon5', 'cast_shadow': boolean, 'receive_shadow': (boolean | number), 'bone_wxyzs': Uint8Array<ArrayBuffer>, 'bone_positions': Uint8Array<ArrayBuffer>, 'skin_indices': Uint8Array<ArrayBuffer>, 'skin_weights': Uint8Array<ArrayBuffer>, 'uv'?: Uint8Array<ArrayBuffer>, 'normals'?: Uint8Array<ArrayBuffer>, 'texture_png'?: Uint8Array<ArrayBuffer>, 'normal_texture_png'?: Uint8Array<ArrayBuffer> | null, 'metallic_roughness_texture_png'?: Uint8Array<ArrayBuffer> | null, 'metallic_factor'?: number, 'roughness_factor'?: number, 'base_color_factor'?: [number, number, number, number]};
 }
 /** Message from server->client carrying batched meshes information.
  *

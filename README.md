@@ -1,3 +1,5 @@
+Scene-aware Core direction is now available inside the existing studio Motion panel: [setup, two actors, navigation, and limits](docs/SCENE-DIRECTION.md).
+
 # StageZero — Single-actor directing
 
 Create a person from a prompt in **Character → Create from description**. See [character generation](docs/CHARACTERS.md) for the private backend setup and current motion limits.

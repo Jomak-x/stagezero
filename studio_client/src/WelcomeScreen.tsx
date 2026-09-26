@@ -148,7 +148,7 @@ export function WelcomeScreen({
             </span>
           </h1>
           <p className="welcome-screen__description">
-            Give an idea a body. Direct one actor through movement, then make
+            Give an idea a body. Direct a performance through movement, then make
             every moment your own.
           </p>
 
@@ -201,7 +201,7 @@ export function WelcomeScreen({
       <footer className="welcome-screen__footer">
         <div className="welcome-screen__footer-left">
           <span className="welcome-screen__footer-rule" aria-hidden="true" />
-          <span>ONE ACTOR. YOUR DIRECTION.</span>
+          <span>YOUR CAST. YOUR DIRECTION.</span>
         </div>
         <div
           className={`welcome-screen__connection welcome-screen__connection--${connectionState}`}

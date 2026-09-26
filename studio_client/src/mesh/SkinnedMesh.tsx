@@ -5,6 +5,7 @@ import { SkinnedMeshMessage } from "../WebsocketMessages";
 import { OutlinesIfHovered } from "../OutlinesIfHovered";
 import { ViewerContext } from "../ViewerContext";
 import { useFrame } from "@react-three/fiber";
+import { attachSkinnedMeshTextures } from "./SkinnedMeshTexture";
 
 /**
  * Component for rendering skinned meshes with animations
@@ -20,7 +21,18 @@ export const SkinnedMesh = React.forwardRef<
 
   // Create material based on props.
   const material = React.useMemo(() => {
-    return createStandardMaterial(message.props);
+    const created = createStandardMaterial(message.props);
+    if (created instanceof THREE.MeshStandardMaterial) {
+      const factor = message.props.base_color_factor;
+      if (factor) {
+        created.color.multiply(new THREE.Color(factor[0], factor[1], factor[2]));
+        created.opacity *= factor[3];
+        created.transparent ||= factor[3] < 1;
+      }
+      created.metalness = message.props.metallic_factor ?? created.metalness;
+      created.roughness = message.props.roughness_factor ?? created.roughness;
+    }
+    return created;
   }, [
     message.props.material,
     message.props.color,
@@ -28,7 +40,18 @@ export const SkinnedMesh = React.forwardRef<
     message.props.opacity,
     message.props.flat_shading,
     message.props.side,
+    message.props.base_color_factor,
+    message.props.metallic_factor,
+    message.props.roughness_factor,
   ]);
+
+  // The app's generated-human transport extends Viser's skinned props with
+  // original GLB material maps. Ordinary Viser meshes retain their materials.
+  React.useEffect(() => {
+    if (!(material instanceof THREE.MeshStandardMaterial)) return;
+    return attachSkinnedMeshTextures(material, message.props);
+  }, [material, message.props.texture_png, message.props.normal_texture_png,
+      message.props.metallic_roughness_texture_png]);
 
   // Reference to bones for animation updates.
   const bonesRef = React.useRef<THREE.Bone[]>();
@@ -61,7 +84,24 @@ export const SkinnedMesh = React.forwardRef<
         1,
       ),
     );
-    geometry.computeVertexNormals();
+    if (message.props.uv) {
+      geometry.setAttribute("uv", new THREE.BufferAttribute(
+        new Float32Array(message.props.uv.buffer.slice(
+          message.props.uv.byteOffset,
+          message.props.uv.byteOffset + message.props.uv.byteLength,
+        )), 2,
+      ));
+    }
+    if (message.props.normals) {
+      geometry.setAttribute("normal", new THREE.BufferAttribute(
+        new Float32Array(message.props.normals.buffer.slice(
+          message.props.normals.byteOffset,
+          message.props.normals.byteOffset + message.props.normals.byteLength,
+        )), 3,
+      ));
+    } else {
+      geometry.computeVertexNormals();
+    }
     geometry.computeBoundingSphere();
 
     // Setup skinned mesh bones.
@@ -150,6 +190,8 @@ export const SkinnedMesh = React.forwardRef<
     message.props.skin_weights?.buffer,
     message.props.bone_wxyzs.buffer,
     message.props.bone_positions.buffer,
+    message.props.uv?.buffer,
+    message.props.normals?.buffer,
   ]);
 
   // Handle initialization and cleanup.
