@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
   useContext,
+  useSyncExternalStore,
 } from "react";
 import { TimelineMessage } from "./WebsocketMessages";
 import { ViewerContext } from "./ViewerContext";
@@ -51,6 +52,10 @@ import {
   interactionReducer,
 } from "./timeline/interactions";
 import { formatSeconds, frameSeconds } from "./timeline/time";
+import { CameraTimelineToolbar, CameraTimelineTrack } from "./CameraTimeline";
+import { getCameraStore } from "./cameraStore";
+import type { CameraStoreState } from "./cameraStore";
+import type { TimelineTheme } from "./timeline/styles";
 import {
   parseStudioActionUuid,
   studioActionMessage,
@@ -80,6 +85,46 @@ const DEFAULT_KEYFRAME_COLOR: [number, number, number] = [219, 148, 86];
 const OUT_OF_RANGE_CONSTRAINT_COLOR: [number, number, number] = [140, 140, 140];
 const OUT_OF_RANGE_CONSTRAINT_OPACITY = 0.1;
 const SCRUB_RECONCILE_MS = 450;
+const EMPTY_CAMERA_STATE: CameraStoreState = {
+  received: false, project_id: "", revision: 0, take_id: null, frame: 0,
+  length: 0, fps: 30, cameras: [], cuts: [], mode: "free",
+  active_camera_id: null, selected_camera_id: null, busy: false, error: null,
+};
+const subscribeToNothing = () => () => {};
+const getEmptyCameraState = () => EMPTY_CAMERA_STATE;
+
+function drawTimelineLabelOverlay(
+  ctx: CanvasRenderingContext2D,
+  coords: TimelineCoordinates,
+  tracks: TimelineTrack[],
+  hasPrompts: boolean,
+  cameraTrackVisible: boolean,
+  width: number,
+  height: number,
+  theme: TimelineTheme,
+) {
+  if (!cameraTrackVisible) {
+    drawLabelOverlay(ctx, coords, tracks, hasPrompts, width, height, theme);
+    return;
+  }
+  drawLabelOverlay(ctx, coords, [], hasPrompts, width, height, theme);
+  let y = FRAME_LABELS_HEIGHT + TRACK_HEIGHT * 2;
+  for (const track of tracks) {
+    const trackHeight = TRACK_HEIGHT * (track.height_scale || 1);
+    ctx.fillStyle = theme.trackLabelColor;
+    ctx.font = "11px Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(track.name, TRACK_LABEL_WIDTH - 10, y + trackHeight / 2);
+    ctx.strokeStyle = theme.trackSeparatorColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(TRACK_LABEL_WIDTH, y);
+    ctx.stroke();
+    y += trackHeight;
+  }
+}
 
 function getIntervalSegments(
   interval: { start_frame: number; end_frame: number; opacity?: number },
@@ -227,6 +272,20 @@ export function Timeline({
   const viewer = useContext(ViewerContext);
   const darkMode = viewer?.useGui((state) => state.theme.dark_mode) ?? true;
   const theme = darkMode ? DARK_THEME : LIGHT_THEME;
+  const cameraStore = useMemo(() => viewer ? getCameraStore(viewer) : null, [viewer]);
+  const cameraState = useSyncExternalStore(
+    cameraStore?.subscribe ?? subscribeToNothing,
+    cameraStore?.getState ?? getEmptyCameraState,
+    cameraStore?.getState ?? getEmptyCameraState,
+  );
+  const cameraTrackVisible = cameraState.received;
+  const [selectedCameraCutId, setSelectedCameraCutId] = useState<string | null>(null);
+  useEffect(() => setSelectedCameraCutId(null), [cameraState.project_id, cameraState.take_id]);
+  useEffect(() => {
+    if (selectedCameraCutId && !cameraState.cuts.some((cut) => cut.id === selectedCameraCutId)) {
+      setSelectedCameraCutId(null);
+    }
+  }, [cameraState.cuts, selectedCameraCutId]);
 
   const prompts = useMemo(
     () => timelineState?.prompts ?? [],
@@ -822,6 +881,7 @@ export function Timeline({
     
     // Add prompt track height (always shown)
     y += TRACK_HEIGHT;
+    if (cameraTrackVisible) y += TRACK_HEIGHT;
     
     // Add heights of all tracks before this one
     for (let i = 0; i < trackIndex; i++) {
@@ -829,9 +889,9 @@ export function Timeline({
     }
     
     return y;
-  }, [timelineState, zoomLevel, panOffset]);
+  }, [timelineState, zoomLevel, panOffset, cameraTrackVisible]);
 
-  const getTrackFromY = useCallback((y: number): { type: 'header' | 'prompt' | 'track', trackIndex?: number } => {
+  const getTrackFromY = useCallback((y: number): { type: 'header' | 'prompt' | 'camera' | 'track', trackIndex?: number } => {
     if (!timelineState) return { type: 'header' };
     
     if (y < FRAME_LABELS_HEIGHT) {
@@ -845,6 +905,10 @@ export function Timeline({
       return { type: 'prompt' };
     }
     currentY += TRACK_HEIGHT;
+    if (cameraTrackVisible && y >= currentY && y < currentY + TRACK_HEIGHT) {
+      return { type: 'camera' };
+    }
+    if (cameraTrackVisible) currentY += TRACK_HEIGHT;
     
     // Check each track by accumulating heights
     for (let i = 0; i < timelineState.tracks.length; i++) {
@@ -856,7 +920,7 @@ export function Timeline({
     }
     
     return { type: 'header' };
-  }, [timelineState, zoomLevel, panOffset]);
+  }, [timelineState, zoomLevel, panOffset, cameraTrackVisible]);
 
   // Helper: Find keyframe at position
   const findKeyframeAtPosition = useCallback((x: number, y: number): TimelineKeyframe | null => {
@@ -1933,7 +1997,7 @@ export function Timeline({
     e.preventDefault(); // Prevent default context menu
   }, []);
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLElement>) => {
     if (!timelineState) return;
     
     const { start_frame } = timelineState;
@@ -2408,6 +2472,7 @@ export function Timeline({
       });
     
     currentTrackY += TRACK_HEIGHT;
+    if (cameraTrackVisible) currentTrackY += TRACK_HEIGHT;
 
     // Draw keyframe tracks
     tracks.forEach((track: TimelineTrack) => {
@@ -2494,7 +2559,7 @@ export function Timeline({
     });
     
     // Draw label overlay (background over label area and redraw labels/frame numbers)
-    drawLabelOverlay(bgCtx, coords, tracks, prompts.length > 0, width, height, theme);
+    drawTimelineLabelOverlay(bgCtx, coords, tracks, prompts.length > 0, cameraTrackVisible, width, height, theme);
 
     // Top separator line  
     bgCtx.strokeStyle = theme.topBorderColor;
@@ -2523,6 +2588,7 @@ export function Timeline({
     panOffset, // Redraw on pan change
     timelineState?.fps, // Redraw seconds labels when fps changes
     darkMode, // Redraw on theme change
+    cameraTrackVisible,
   ]);
   
   // Track when background was last updated (use state so changes trigger re-renders)
@@ -2595,7 +2661,7 @@ export function Timeline({
     ctx.restore();
     
     // Draw label overlay (background over label area and redraw labels/frame numbers)
-    drawLabelOverlay(ctx, coords, tracks, prompts.length > 0, width, height, theme);
+    drawTimelineLabelOverlay(ctx, coords, tracks, prompts.length > 0, cameraTrackVisible, width, height, theme);
     
     // Extract coordinates for interactive element drawing
     const { timelineStartX, viewStartFrame, pixelRange } = coords;
@@ -2828,6 +2894,7 @@ export function Timeline({
         let trackY = FRAME_LABELS_HEIGHT;
         // Prompt track is always shown
         trackY += TRACK_HEIGHT;
+        if (cameraTrackVisible) trackY += TRACK_HEIGHT;
         for (let i = 0; i < trackIndex; i++) {
           trackY += TRACK_HEIGHT * (timelineState.tracks[i].height_scale || 1.0);
         }
@@ -3024,6 +3091,7 @@ export function Timeline({
     zoomLevel, // Force redraw on zoom change
     panOffset, // Force redraw on pan change
     darkMode, // Force redraw on theme change
+    cameraTrackVisible,
   ]);
 
   if (!timelineState || !timelineState.enabled) {
@@ -3034,6 +3102,7 @@ export function Timeline({
   let tracksHeight = 0;
   // Prompts row is always shown
   tracksHeight += TRACK_HEIGHT;
+  if (cameraTrackVisible) tracksHeight += TRACK_HEIGHT;
   for (const track of timelineState.tracks) {
     tracksHeight += TRACK_HEIGHT * (track.height_scale || 1.0);
   }
@@ -3053,6 +3122,9 @@ export function Timeline({
     : 0;
   const lastStudioPrompt = studioActions[studioActions.length - 1]?.prompt;
   const studioCommandsEnabled = Boolean(studioActions[0]?.action?.commandUuid);
+  const cameraCoords = cameraTrackVisible && canvasSize.width > 0
+    ? calculateTimelineCoordinates(canvasSize.width, timelineState, zoomLevel, panOffset)
+    : null;
   const studioButtonStyle: React.CSSProperties = {
     border: `1px solid ${darkMode ? "#526078" : "#b9c6d6"}`,
     borderRadius: 5,
@@ -3118,8 +3190,16 @@ export function Timeline({
           onClick={() => sendStudioAction(lastStudioPrompt, "insert_after")}>Add to end</button>}
       </div>
     )}
+    {viewer && cameraTrackVisible && <CameraTimelineToolbar
+      viewer={viewer}
+      state={cameraState}
+      darkMode={darkMode}
+      selectedCutId={selectedCameraCutId}
+      onSelectCut={setSelectedCameraCutId}
+    />}
     <div
       ref={containerRef}
+      onWheel={handleWheel}
       style={{
         position: "relative",
         width: "100%",
@@ -3147,7 +3227,6 @@ export function Timeline({
         }}
         onContextMenu={handleContextMenu}
         onDoubleClick={handleDoubleClick}
-        onWheel={handleWheel}
         style={{
           width: "100%",
           height: "100%",
@@ -3169,6 +3248,15 @@ export function Timeline({
           display: "block",
         }}
       />
+      {viewer && cameraCoords && <CameraTimelineTrack
+        viewer={viewer}
+        state={cameraState}
+        darkMode={darkMode}
+        selectedCutId={selectedCameraCutId}
+        onSelectCut={setSelectedCameraCutId}
+        coords={cameraCoords}
+        width={canvasSize.width}
+      />}
       {studioCoords && studioActions.map(({ prompt, action }) => {
         if (!action?.commandUuid) return null;
         const left = studioCoords.timelineStartX + (prompt.start_frame - studioCoords.viewStartFrame) * studioCoords.pixelRange;

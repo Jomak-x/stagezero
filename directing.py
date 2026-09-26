@@ -7,6 +7,8 @@ import numpy as np
 from live_motion import MotionSession, validate_result
 from takes import Take, encode_project, decode_project, validate_take, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
 from duration_planning import CHUNK_FRAMES, plan_duration
+from camera_model import (copy_camera_cuts, validate_camera,
+                          validate_camera_cuts, validate_cameras)
 
 
 class DirectorSession(MotionSession):
@@ -22,11 +24,157 @@ class DirectorSession(MotionSession):
         self.project_status = ''
         self.project_revision = 0
         self.action_edit_revision = 0
+        self.cameras = []
+        self.camera_project_id = str(uuid.uuid4())
         self.playback_speed = 1.0
         self.loop_playback = False
         self._clock_revision = -1
         self.scene = {'gate': {'position': [0., 0., 1.5], 'radius': .55, 'enabled': True}}
         super().__init__(*args, **kwargs)
+
+    def _camera_changed(self, status):
+        self.project_revision += 1
+        self.project_status = 'Unsaved changes · Save project stores cameras and every take'
+        self.status = status
+
+    def _camera(self, camera_id):
+        camera = next((camera for camera in self.cameras if camera['id'] == camera_id), None)
+        if camera is None:
+            raise ValueError('Camera no longer exists')
+        return camera
+
+    def _new_camera_name(self, base='Camera'):
+        names = {camera['name'] for camera in self.cameras}
+        number = 1
+        while True:
+            suffix = f' {number}'
+            name = base[:80 - len(suffix)].rstrip() + suffix
+            if name not in names:
+                return name
+            number += 1
+
+    def add_camera(self, position, wxyz, fov):
+        with self.lock:
+            camera = validate_camera(dict(id=str(uuid.uuid4()), name=self._new_camera_name(),
+                                          position=position, wxyz=wxyz, fov=fov))
+            cameras = validate_cameras(self.cameras + [camera])
+            self.cameras = cameras
+            self._camera_changed(f'Added camera · {camera["name"]}')
+            return validate_camera(camera)
+
+    def update_camera(self, camera_id, **fields):
+        with self.lock:
+            current = self._camera(camera_id)
+            if set(fields) - {'name', 'position', 'wxyz', 'fov'}:
+                raise ValueError('Invalid camera fields')
+            camera = validate_camera({**current, **fields})
+            if camera != current:
+                self.cameras = [camera if item['id'] == camera_id else item for item in self.cameras]
+                self._camera_changed(f'Updated camera · {camera["name"]}')
+            return validate_camera(camera)
+
+    def duplicate_camera(self, camera_id):
+        with self.lock:
+            source = self._camera(camera_id)
+            camera = validate_camera(dict(source, id=str(uuid.uuid4()),
+                                          name=self._new_camera_name(source['name'] + ' copy')))
+            self.cameras = validate_cameras(self.cameras + [camera])
+            self._camera_changed(f'Duplicated camera · {camera["name"]}')
+            return validate_camera(camera)
+
+    def remove_camera(self, camera_id):
+        with self.lock:
+            camera = self._camera(camera_id)
+            def uses_camera(take):
+                return any(cut['camera_id'] == camera_id for cut in take.camera_cuts)
+            usages = [f'take “{name}”' for name in dict.fromkeys(
+                take.name for take in self.takes.values() if uses_camera(take))]
+            guidance = ['Change or clear those camera cuts first.'] if usages else []
+            removed = self._removed_take[1] if self._removed_take is not None else None
+            if removed is not None and uses_camera(removed):
+                usages.append(f'removed take “{removed.name}”')
+                guidance.append('Restore the removed take with Undo to change or clear its cuts.')
+            undo = self._undo_action_edit
+            # A superseded action snapshot can never be restored, unless its
+            # edited take is itself waiting in the take-removal Undo slot.
+            if (undo is not None and (self.takes.get(undo[1].id) is undo[1] or removed is undo[1])
+                    and uses_camera(undo[0])):
+                usages.append(f'action-edit Undo snapshot for “{undo[0].name}”')
+                guidance.append('Undo the action edit to change or clear that snapshot’s cuts.')
+            if usages:
+                raise ValueError('Camera is used by ' + ', '.join(usages) + '. ' + ' '.join(guidance))
+            self.cameras = [item for item in self.cameras if item['id'] != camera_id]
+            self._camera_changed(f'Deleted camera · {camera["name"]}')
+
+    def _camera_cut_take(self, take_id):
+        if self.busy:
+            raise ValueError('Wait for generation to finish before editing camera cuts')
+        take = self.takes.get(take_id) if isinstance(take_id, str) else None
+        if take is None:
+            raise ValueError('Select a saved take before editing camera cuts')
+        return take
+
+    def _set_camera_cuts(self, take, cuts, status):
+        cuts = validate_camera_cuts(cuts, len(take.positions), {camera['id'] for camera in self.cameras})
+        if cuts != take.camera_cuts:
+            take.camera_cuts = cuts
+            # A later cut edit supersedes the action snapshot, as a later rename does.
+            if self._undo_action_edit is not None and self._undo_action_edit[1] is take:
+                self._undo_action_edit = None
+            self._camera_changed(status)
+
+    def add_camera_cut(self, take_id, frame, camera_id):
+        with self.lock:
+            take = self._camera_cut_take(take_id)
+            self._camera(camera_id)
+            if type(frame) is not int or not 0 <= frame < len(take.positions):
+                raise ValueError('Camera cut frame must be within the take')
+            cuts = copy_camera_cuts(take.camera_cuts, len(take.positions))
+            cut = next((item for item in cuts if item['frame'] == frame), None)
+            if cut is None:
+                if not cuts and frame != 0:
+                    cuts.append(dict(id=str(uuid.uuid4()), frame=0, camera_id=camera_id))
+                cut = dict(id=str(uuid.uuid4()), frame=frame, camera_id=camera_id)
+                cuts.append(cut)
+            else:
+                cut['camera_id'] = camera_id
+            self._set_camera_cuts(take, sorted(cuts, key=lambda item: item['frame']), 'Updated camera cuts')
+            return dict(cut)
+
+    def update_camera_cut(self, take_id, cut_id, *, frame=None, camera_id=None):
+        with self.lock:
+            take = self._camera_cut_take(take_id)
+            current = next((cut for cut in take.camera_cuts if cut['id'] == cut_id), None)
+            if current is None:
+                raise ValueError('Camera cut no longer exists')
+            frame = current['frame'] if frame is None else frame
+            camera_id = current['camera_id'] if camera_id is None else camera_id
+            self._camera(camera_id)
+            if type(frame) is not int or not 0 <= frame < len(take.positions):
+                raise ValueError('Camera cut frame must be within the take')
+            if current['frame'] == 0 and frame != 0:
+                raise ValueError('The first camera cut must remain at frame 0')
+            updated = dict(current, frame=frame, camera_id=camera_id)
+            cuts = [dict(cut) for cut in take.camera_cuts
+                    if cut['id'] != cut_id and cut['frame'] != frame] + [updated]
+            self._set_camera_cuts(take, sorted(cuts, key=lambda item: item['frame']), 'Updated camera cut')
+            return dict(updated)
+
+    def remove_camera_cut(self, take_id, cut_id):
+        with self.lock:
+            take = self._camera_cut_take(take_id)
+            cut = next((cut for cut in take.camera_cuts if cut['id'] == cut_id), None)
+            if cut is None:
+                raise ValueError('Camera cut no longer exists')
+            if cut['frame'] == 0:
+                raise ValueError('The first camera cut must remain at frame 0; use Clear cuts to remove the sequence')
+            self._set_camera_cuts(take, [dict(item) for item in take.camera_cuts if item['id'] != cut_id],
+                                  'Deleted camera cut')
+
+    def clear_camera_cuts(self, take_id):
+        with self.lock:
+            take = self._camera_cut_take(take_id)
+            self._set_camera_cuts(take, [], 'Cleared camera cuts')
 
     def set_mode(self, mode):
         with self.lock:
@@ -251,7 +399,8 @@ class DirectorSession(MotionSession):
         segments, events = source.prefix(stop)
         copied = [getattr(source, key)[:stop].copy() for key in ('positions', 'rotations', 'motion')]
         new = Take(str(uuid.uuid4()), self._copy_name(source, suffix), *copied,
-                   segments=segments, parent=source.id, branch_frame=stop - 1, events=events)
+                   segments=segments, parent=source.id, branch_frame=stop - 1, events=events,
+                   camera_cuts=copy_camera_cuts(source.camera_cuts, stop))
         self.takes[new.id] = new
         self._select(new.id, min(self.frame, stop - 1))
         self.project_revision += 1
@@ -610,7 +759,8 @@ class DirectorSession(MotionSession):
             inherited_prefix_changed = source.branch_frame is not None and stop <= source.branch_frame
             edited = Take(source.id, source.name, *arrays, segments=segments,
                           parent=None if inherited_prefix_changed else source.parent,
-                          branch_frame=None if inherited_prefix_changed else source.branch_frame, events=events)
+                          branch_frame=None if inherited_prefix_changed else source.branch_frame, events=events,
+                          camera_cuts=copy_camera_cuts(source.camera_cuts, len(arrays[0])))
             self._record_gate_events(edited)
             validate_take(edited)
             with self.lock:
@@ -660,7 +810,8 @@ class DirectorSession(MotionSession):
         name = self._new_take_name(branch) if t is None or branch else t.name
         new = Take(take_id, name, *arrays, segments=segments,
                    parent=t.id if branch and stop else (t.parent if t and not branch else None),
-                   branch_frame=stop - 1 if branch and stop else (t.branch_frame if t and not branch else None), events=events)
+                   branch_frame=stop - 1 if branch and stop else (t.branch_frame if t and not branch else None), events=events,
+                   camera_cuts=[] if t is None else copy_camera_cuts(t.camera_cuts, len(arrays[0])))
         self.takes[take_id] = new
         self.active_take = take_id
         self.positions, self.rotations, self.motion = arrays
@@ -693,7 +844,7 @@ class DirectorSession(MotionSession):
         with self.lock:
             active = self.active_take or next(iter(self.takes), None)
             frame = self.frame if self.mode == 'Live ARDY' and self.active_take else 0
-            data = encode_project(self.takes, active, frame, self.scene)
+            data = encode_project(self.takes, active, frame, self.scene, self.cameras)
             saved_revision = self.project_revision
         folder = Path(directory)
         folder.mkdir(parents=True, exist_ok=True)
@@ -717,6 +868,8 @@ class DirectorSession(MotionSession):
             backup = self.save_project(directory, 'automatic-backup')[0] if self.project_revision else None
             self._invalidate()
             self.takes = {}
+            self.cameras = []
+            self.camera_project_id = str(uuid.uuid4())
             self._removed_take = None
             self._undo_action_edit = None
             self.project_revision += 1
@@ -730,7 +883,7 @@ class DirectorSession(MotionSession):
             self.project_status = f'Previous project backed up: {backup.name}' if backup else 'New project'
 
     def load_project(self, data):
-        takes, active, frame, scene = decode_project(data)
+        takes, active, frame, scene, cameras = decode_project(data, include_cameras=True)
         gate = scene.get('gate')
         if not isinstance(gate, dict) or not isinstance(gate.get('enabled'), bool):
             raise ValueError('Invalid gate state')
@@ -740,6 +893,8 @@ class DirectorSession(MotionSession):
         with self.lock:
             self._invalidate()
             self.takes, self.scene = takes, scene
+            self.cameras = cameras
+            self.camera_project_id = str(uuid.uuid4())
             self._removed_take = None
             self._undo_action_edit = None
             self.edit_context = None

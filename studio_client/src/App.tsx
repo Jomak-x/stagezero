@@ -56,6 +56,8 @@ import { ArrowKeyOverlay } from "./ArrowKeyOverlay";
 import { BatchedLabelManager } from "./BatchedLabelManager";
 import { Timeline } from "./Timeline";
 import { WelcomeScreen } from "./WelcomeScreen";
+import { CameraScene } from "./CameraScene";
+import { getCameraStore } from "./cameraStore";
 
 // ======= Utility functions =======
 
@@ -1190,7 +1192,8 @@ function ViewerCanvas({ children }: { children: React.ReactNode }) {
     const pointerInfo = mutable.current.scenePointerInfo;
 
     // Re-enable camera controls.
-    mutable.current.cameraControl!.enabled = true;
+    mutable.current.cameraControl!.enabled =
+      getCameraStore(viewer).getState().mode === "free";
     if (pointerInfo.enabled === false || !pointerInfo.isDragging) return;
 
     const ctx = mutable.current.canvas2d!.getContext("2d")!;
@@ -1219,6 +1222,7 @@ function ViewerCanvas({ children }: { children: React.ReactNode }) {
           <BatchedLabelManager>
             <SceneNodeThreeObject name="" />
           </BatchedLabelManager>
+          <CameraScene />
         </SplatRenderContext>
         <DefaultLights />
       </>

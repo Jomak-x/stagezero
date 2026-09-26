@@ -26,6 +26,8 @@ import { applyRootPoseImmediately, computeT_threeworld_world } from "./WorldTran
 import { rootNodeTemplate } from "./SceneTreeState";
 import { GaussianSplatsContext } from "./Splatting/GaussianSplatsHelpers";
 import { publishActorGlbControl } from "./mesh/ActorGlbProtocol";
+import { applyCameraState } from "./cameraStore";
+import { setServerCameraTarget } from "./serverCamera";
 
 /** Returns a handler for all incoming messages. */
 function useMessageHandler() {
@@ -84,6 +86,10 @@ function useMessageHandler() {
 
   // Return message handler.
   return (message: Message) => {
+    if (message.type === "CameraStudioStateMessage") {
+      applyCameraState(viewer, message);
+      return;
+    }
     if (isGuiComponentMessage(message)) {
       addGui(message);
       return;
@@ -282,7 +288,10 @@ function useMessageHandler() {
           message.look_at[2],
         );
         target.applyMatrix4(T_threeworld_world);
-        cameraControls.setTarget(target.x, target.y, target.z, false);
+        // setTarget clamps polar angles against the previous up direction.
+        // Server cuts can change up in this same batch (e.g. a top-down shot),
+        // so preserve the exact endpoints until that final orientation arrives.
+        setServerCameraTarget(cameraControls, target);
         return;
       }
       case "SetCameraUpDirectionMessage": {

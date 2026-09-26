@@ -5,11 +5,13 @@ import json
 import zipfile
 import numpy as np
 from live_motion import MODEL
+from camera_model import validate_cameras, validate_camera_cuts
 
 MAX_FRAMES = 15000  # Ten minutes per take at native 25 fps.
 MAX_TOTAL_FRAMES = 30000
 MAX_TAKES = 12
 MAX_ARCHIVE_BYTES = 220_000_000
+MAX_METADATA_CHARS = 1_000_000
 
 
 @dataclass
@@ -23,6 +25,7 @@ class Take:
     parent: str | None = None
     branch_frame: int | None = None
     events: list = field(default_factory=list)
+    camera_cuts: list = field(default_factory=list)
 
     def prefix(self, stop):
         """A copy of all metadata before an exclusive frame boundary."""
@@ -54,6 +57,7 @@ def validate_take(take):
     for e in take.events:
         if not isinstance(e, dict) or e.get('type') != 'gate_open' or type(e.get('frame')) is not int or not 0 <= e['frame'] < n:
             raise ValueError('Invalid scene event')
+    validate_camera_cuts(take.camera_cuts, n)
 
 
 def validate_provenance(takes):
@@ -75,7 +79,9 @@ def validate_provenance(takes):
             current = takes[current.parent]
 
 
-def encode_project(takes, active, frame, scene):
+def encode_project(takes, active, frame, scene, cameras=None):
+    cameras = validate_cameras([] if cameras is None else cameras)
+    camera_ids = {camera['id'] for camera in cameras}
     if not 0 <= len(takes) <= MAX_TAKES:
         raise ValueError('Invalid take count')
     if takes:
@@ -88,20 +94,26 @@ def encode_project(takes, active, frame, scene):
     data, items = {}, []
     for i, t in enumerate(takes.values()):
         validate_take(t)
+        cuts = validate_camera_cuts(t.camera_cuts, len(t.positions), camera_ids)
         key = f't{i}'
         for field_name in ('positions', 'rotations', 'motion'):
             data[key + '_' + field_name] = getattr(t, field_name)
         items.append(dict(key=key, id=t.id, name=t.name, segments=t.segments,
-                          parent=t.parent, branch_frame=t.branch_frame, events=t.events))
+                          parent=t.parent, branch_frame=t.branch_frame, events=t.events,
+                          camera_cuts=cuts))
     validate_provenance(takes)
-    manifest = dict(version=1, model=MODEL, fps=25, active=active, frame=int(frame), scene=scene, takes=items)
-    data['manifest'] = np.array(json.dumps(manifest, allow_nan=False))
+    manifest = dict(version=2, model=MODEL, fps=25, active=active, frame=int(frame),
+                    scene=scene, cameras=cameras, takes=items)
+    raw = json.dumps(manifest, allow_nan=False)
+    if len(raw) > MAX_METADATA_CHARS:
+        raise ValueError('Project metadata is too large')
+    data['manifest'] = np.array(raw)
     out = io.BytesIO()
     np.savez_compressed(out, **data)
     return out.getvalue()
 
 
-def decode_project(content):
+def decode_project(content, *, include_cameras=False):
     """Validate before replacing any live state. Never unpickle or extract paths."""
     if len(content) > MAX_ARCHIVE_BYTES:
         raise ValueError('Project file is too large')
@@ -113,11 +125,13 @@ def decode_project(content):
             raise ValueError('Duplicate project entries')
     with np.load(io.BytesIO(content), allow_pickle=False) as data:
         raw = str(data['manifest'])
-        if len(raw) > 1_000_000:
+        if len(raw) > MAX_METADATA_CHARS:
             raise ValueError('Project metadata is too large')
         doc = json.loads(raw)
-        if doc.get('version') != 1 or doc.get('model') != MODEL or doc.get('fps') != 25:
+        if not isinstance(doc, dict) or type(doc.get('version')) is not int or doc['version'] not in (1, 2) or doc.get('model') != MODEL or doc.get('fps') != 25:
             raise ValueError('Unsupported project version or skeleton')
+        cameras = validate_cameras(doc.get('cameras') if doc['version'] == 2 else [])
+        camera_ids = {camera['id'] for camera in cameras}
         items = doc.get('takes')
         if not isinstance(items, list) or not 0 <= len(items) <= MAX_TAKES:
             raise ValueError('Invalid take count')
@@ -126,8 +140,11 @@ def decode_project(content):
             if item['key'] != f't{i}' or item['id'] in takes:
                 raise ValueError('Invalid take identifiers')
             arrays = [data[f't{i}_{name}'].copy() for name in ('positions', 'rotations', 'motion')]
-            t = Take(item['id'], item['name'], *arrays, item['segments'], item.get('parent'), item.get('branch_frame'), item.get('events', []))
+            cuts = item.get('camera_cuts') if doc['version'] == 2 else []
+            t = Take(item['id'], item['name'], *arrays, item['segments'], item.get('parent'),
+                     item.get('branch_frame'), item.get('events', []), cuts)
             validate_take(t)
+            t.camera_cuts = validate_camera_cuts(t.camera_cuts, len(t.positions), camera_ids)
             total += len(t.positions)
             if total > MAX_TOTAL_FRAMES:
                 raise ValueError('Project exceeds the supported motion budget')
@@ -142,4 +159,5 @@ def decode_project(content):
         scene = doc.get('scene', {})
         if not isinstance(scene, dict):
             raise ValueError('Invalid scene')
-        return takes, active, frame, scene
+        result = (takes, active, frame, scene)
+        return (*result, cameras) if include_cameras else result

@@ -16,6 +16,7 @@ from object_scene import ObjectSceneLayer
 from object_controls import add_object_controls
 from studio_server import create_studio_server
 from studio_camera import StudioCamera
+from studio_camera_protocol import CameraStudioController
 from studio_timeline import StudioTimeline
 from studio_ui import StudioUI, section
 from character_controls import CharacterControls
@@ -91,6 +92,7 @@ def main():
     def actor_root():
         return characters.actor_root()
     camera = StudioCamera(server, actor_root)
+    camera_studio = CameraStudioController(server, session, camera)
     @server.on_client_connect
     def connected(client):
         client.camera.near = .05
@@ -196,6 +198,7 @@ def main():
                         camera.update(root)
                     previous = key
                     previous_character = characters.revision
+                camera_studio.update()
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                     request_id,submitted = session.needs_ack
                     session.needs_ack = None

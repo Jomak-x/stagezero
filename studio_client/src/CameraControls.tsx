@@ -18,6 +18,7 @@ import {
   walkTranslation,
   wheelDollyDistance,
 } from "./cameraNavigation";
+import { getCameraStore } from "./cameraStore";
 
 type NavigationMode = "Pan" | "Orbit" | "Look";
 
@@ -172,12 +173,14 @@ function CrosshairVisual({
 
 function OrbitOriginTool({
   forceShow,
+  locked,
   pivotRef,
   onPivotChange,
   update,
   crosshairVisible,
 }: {
   forceShow: boolean;
+  locked: boolean;
   pivotRef: React.RefObject<THREE.Group>;
   onPivotChange: (matrix: THREE.Matrix4) => void;
   update: () => void;
@@ -192,7 +195,7 @@ function OrbitOriginTool({
   );
   React.useEffect(update, [showOrbitOriginTool]);
 
-  const show = showOrbitOriginTool || forceShow;
+  const show = !locked && (showOrbitOriginTool || forceShow);
   return (
     <PivotControls
       ref={pivotRef}
@@ -220,7 +223,7 @@ function OrbitOriginTool({
         visible={show}
       />
       {/* Crosshair visualization at look-at point */}
-      <CrosshairVisual visible={enableOrbitCrosshair && crosshairVisible} />
+      <CrosshairVisual visible={!locked && enableOrbitCrosshair && crosshairVisible} />
     </PivotControls>
   );
 }
@@ -228,6 +231,8 @@ function OrbitOriginTool({
 export function SynchronizedCameraControls() {
   const viewer = useContext(ViewerContext)!;
   const camera = useThree((state) => state.camera as PerspectiveCamera);
+  const cameraStore = React.useMemo(() => getCameraStore(viewer), [viewer.mutable]);
+  const cameraLocked = cameraStore((state) => state.mode !== "free");
 
   const sendCameraThrottled = useThrottledMessageSender(20).send;
 
@@ -277,11 +282,20 @@ export function SynchronizedCameraControls() {
   const [cameraAnimation, setCameraAnimation] =
     useState<CameraAnimation | null>(null);
 
+  React.useEffect(() => {
+    if (!cameraLocked) return;
+    heldKeysRef.current.clear();
+    pointerRef.current = null;
+    setKeyboardCrosshairCounter(0);
+    setPointerInteractionActive(false);
+    setCameraAnimation(null);
+  }, [cameraLocked]);
+
   // Animation parameters.
   const ANIMATION_DURATION = 0.5; // seconds
 
   useFrame((state) => {
-    if (cameraAnimation && viewerMutable.cameraControl) {
+    if (!cameraLocked && cameraAnimation && viewerMutable.cameraControl) {
       const cameraControls = viewerMutable.cameraControl;
       const camera = cameraControls.camera;
 
@@ -338,6 +352,7 @@ export function SynchronizedCameraControls() {
   const { clock } = useThree();
 
   const updateCameraLookAtAndUpFromPivotControl = (matrix: THREE.Matrix4) => {
+    if (cameraLocked) return;
     if (!viewerMutable.cameraControl) return;
 
     const targetPosition = new THREE.Vector3();
@@ -405,6 +420,7 @@ export function SynchronizedCameraControls() {
   };
 
   viewerMutable.resetCameraView = () => {
+    if (getCameraStore(viewer).getState().mode !== "free") return;
     if (!initialCameraRef.current || !viewerMutable.cameraControl) return;
     camera.up.set(
       initialCameraRef.current.camera.up.x,
@@ -651,6 +667,7 @@ export function SynchronizedCameraControls() {
     controls.disconnect();
 
     const onPointerDown = (event: PointerEvent) => {
+      if (cameraLocked) return;
       if (event.pointerType === "touch" || ![0, 1, 2].includes(event.button)) return;
       canvas.focus({ preventScroll: true });
       if (viewerMutable.scenePointerInfo.enabled !== false) return;
@@ -667,6 +684,7 @@ export function SynchronizedCameraControls() {
       if (event.button !== 0) event.preventDefault();
     };
     const onPointerMove = (event: PointerEvent) => {
+      if (cameraLocked) return;
       const gesture = pointerRef.current;
       if (!gesture || event.pointerId !== gesture.id || !controls.enabled) return;
       if (viewerMutable.transformControlsDraggingNames.size > 0 || viewerMutable.scenePointerInfo.enabled !== false) {
@@ -711,6 +729,7 @@ export function SynchronizedCameraControls() {
       setPointerInteractionActive(false);
     };
     const onWheel = (event: WheelEvent) => {
+      if (cameraLocked) { event.preventDefault(); return; }
       if (!controls.enabled) return;
       event.preventDefault();
       alignToWorldUp();
@@ -749,11 +768,12 @@ export function SynchronizedCameraControls() {
       pointerRef.current = null;
       setPointerInteractionActive(false);
     };
-  }, [alignToWorldUp, camera, canvasElement, navigationMode, translateCamera, viewerMutable]);
+  }, [alignToWorldUp, camera, cameraLocked, canvasElement, navigationMode, translateCamera, viewerMutable]);
 
   React.useEffect(() => {
     const canvas = canvasElement;
     const onKeyDown = (event: KeyboardEvent) => {
+      if (cameraLocked) return;
       if (event.ctrlKey || event.metaKey || event.altKey) {
         heldKeysRef.current.clear();
         setKeyboardCrosshairCounter(0);
@@ -794,9 +814,10 @@ export function SynchronizedCameraControls() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       onBlur();
     };
-  }, [canvasElement, enableArrowKeys]);
+  }, [cameraLocked, canvasElement, enableArrowKeys]);
 
   useFrame((_, delta) => {
+    if (cameraLocked) return;
     const keys = heldKeysRef.current;
     const controls = viewerMutable.cameraControl;
     if (keys.size === 0 || !controls || !controls.enabled) return;
@@ -822,6 +843,7 @@ export function SynchronizedCameraControls() {
       <CameraControls
         ref={(controls) => (viewerMutable.cameraControl = controls)}
         minDistance={0.01}
+        enabled={!cameraLocked}
         minPolarAngle={0.06}
         maxPolarAngle={Math.PI - 0.06}
         dollySpeed={0.3}
@@ -836,9 +858,10 @@ export function SynchronizedCameraControls() {
         }}
         makeDefault
       />
-      <NavigationOverlay canvas={canvasElement} mode={navigationMode} setMode={setNavigationMode} />
+      {!cameraLocked && <NavigationOverlay canvas={canvasElement} mode={navigationMode} setMode={setNavigationMode} />}
       <OrbitOriginTool
         forceShow={forceOrbitOriginTool}
+        locked={cameraLocked}
         pivotRef={pivotRef}
         onPivotChange={(matrix) => {
           updateCameraLookAtAndUpFromPivotControl(matrix);
