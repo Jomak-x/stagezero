@@ -25,6 +25,7 @@ from realtime_client import RealtimeClient
 from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
 from studio_core_renderer import StudioCoreRenderer
+from studio_paired_session import PairedStudioSession
 
 
 MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
@@ -136,20 +137,31 @@ def main():
     core_client = (RealtimeClient(args.core_backend_url, token_path.read_text())
                    if token_path.is_file() and token_path.read_text().strip() else None)
     core = CoreStudioSession(core_client)
+    paired = PairedStudioSession(core_client)
     core_renderer = StudioCoreRenderer(server, name_prefix="/core-cast")
+    paired_renderer = StudioCoreRenderer(server, name_prefix="/paired-cast", paired_retarget=True)
     core_ui = None
     core_requested = False
+    paired_requested = False
     last_core_clip = None
+    last_paired_clip = None
     last_main_scene = session.scene_document()
     last_main_scene_revision = session.project_revision
     core_document = core.scene_document
     core_document_epoch = None
+    paired_document = paired.scene_document
+    paired_document_revision = None
 
     def activate_core(active):
-        nonlocal core_requested
+        nonlocal core_requested, paired_requested
         with session.lock:
             if active and session.busy:
                 raise ValueError('Finish or cancel the current take generation before switching modes.')
+            if active and paired_requested:
+                if paired.snapshot()['busy']:
+                    raise ValueError('Finish or cancel paired research generation before switching modes.')
+                paired.deactivate()
+                paired_requested = False
             core_requested = bool(active)
             if active:
                 session.pause()
@@ -158,15 +170,48 @@ def main():
             else:
                 entry = characters.active_entry
                 session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
-        actor_group.visible = not active
+        actor_group.visible = not (core_requested or paired_requested)
         core_renderer.set_visible(active)
+        paired_renderer.set_visible(paired_requested)
+        camera.rebase(actor_root())
+
+    def activate_paired(active):
+        nonlocal core_requested, paired_requested
+        with session.lock:
+            if active and session.busy:
+                raise ValueError('Finish or cancel the current take generation before switching modes.')
+            if active and core_requested:
+                core_state = core.snapshot()
+                if core_state['phase'] in ('generating', 'queued', 'buffering'):
+                    raise ValueError('Finish or cancel Native Core generation before switching modes.')
+                core.deactivate()
+                core_requested = False
+            if active:
+                paired.activate()
+                paired_requested = True
+                session.pause()
+                session.set_character_motion_enabled(False)
+                session.status = 'Joint InterGen research is active; G1 and Native Core motion remain stored.'
+            else:
+                if paired.snapshot()['busy']:
+                    raise ValueError('Cancel paired research generation before returning to G1.')
+                paired.deactivate()
+                paired_requested = False
+                entry = characters.active_entry
+                session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
+        actor_group.visible = not (core_requested or paired_requested)
+        core_renderer.set_visible(core_requested)
+        paired_renderer.set_visible(paired_requested)
         camera.rebase(actor_root())
 
     def build_core_controls(gui):
         nonlocal core_ui
         core_ui = CoreStudioControls(gui, core, session, on_active=activate_core,
-                                    project_folder=ROOT / '.runtime/core-projects')
+                                    project_folder=ROOT / '.runtime/core-projects',
+                                    paired_session=paired, on_paired_active=activate_paired)
     def actor_root():
+        if paired_requested and paired.snapshot()['total_frames']:
+            return paired_renderer.actor_root()
         if core_requested and core.snapshot()['total_frames']:
             return core_renderer.actor_root()
         return characters.actor_root()
@@ -190,7 +235,8 @@ def main():
     def update_studio_surfaces():
         nonlocal surface_state
         visibility = studio_surface_visibility(
-            (core_document if core_requested else session.scene).get('objects', []),
+            (paired_document if paired_requested else core_document if core_requested
+             else session.scene).get('objects', []),
             show_grid=bool(gate_ui['grid'].value),
             show_platform=bool(gate_ui['stage'].value),
         )
@@ -242,24 +288,26 @@ def main():
         edit_gate(gizmo.position)
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
-                  characters.build_gui, core_session=core, core_controls=build_core_controls)
+                  characters.build_gui, core_session=core, paired_session=paired,
+                  core_controls=build_core_controls)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
-                              core_session=core)
+                              core_session=core, paired_session=paired)
 
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
             return
-        if core_requested:
-            state = core.snapshot()
+        if core_requested or paired_requested:
+            motion = paired if paired_requested else core
+            state = motion.snapshot()
             if state['total_frames']:
                 if event.key == ' ':
-                    core.pause() if state['playing'] else core.play()
+                    motion.pause() if state['playing'] else motion.play()
                 elif event.key in ('ArrowLeft', 'ArrowRight'):
                     step = (20 if event.shift_key else 1) * (-1 if event.key == 'ArrowLeft' else 1)
-                    core.seek(max(0, min(state['total_frames']-1, state['frame']+step)))
-                elif event.key == 'Home': core.seek(0)
-                elif event.key == 'End': core.seek(state['total_frames']-1)
+                    motion.seek(max(0, min(state['total_frames']-1, state['frame']+step)))
+                elif event.key == 'Home': motion.seek(0)
+                elif event.key == 'End': motion.seek(state['total_frames']-1)
             return
         with session.lock:
             if not session.character_motion_enabled or session.busy or session.kind not in ('recorded', 'generated'):
@@ -295,7 +343,7 @@ def main():
         while True:
             key = session.tick()
             characters.tick(key)
-            if core_requested:
+            if core_requested or paired_requested:
                 session.set_character_motion_enabled(False)
                 session.pause()
             if session.project_revision != last_main_scene_revision:
@@ -305,19 +353,31 @@ def main():
                     last_main_scene = current_main_scene
                 last_main_scene_revision = session.project_revision
             core_state = core.tick()
+            paired_state = paired.tick()
             if core_state['epoch'] != core_document_epoch:
                 core_document = core.scene_document
                 core_document_epoch = core_state['epoch']
+            if paired_state['revision'] != paired_document_revision:
+                paired_document = paired.scene_document
+                paired_document_revision = paired_state['revision']
             core_key = (core_state.get('epoch'), core_state['revision'], core_state['total_frames'])
+            paired_key = (paired_state.get('epoch'), paired_state['revision'], paired_state['total_frames'])
             if core_requested and core_state['total_frames']:
                 if core_key != last_core_clip:
                     core_renderer.set_clip(core.timeline_clip())
                     last_core_clip = core_key
                 core_renderer.tick(core_state['frame'])
             core_renderer.set_visible(core_requested and bool(core_state['total_frames']))
-            actor_group.visible = not core_requested
+            if paired_requested and paired_state['total_frames']:
+                if paired_key != last_paired_clip:
+                    paired_renderer.set_clip(paired.timeline_clip())
+                    last_paired_clip = paired_key
+                paired_renderer.tick(paired_state['frame'])
+            paired_renderer.set_visible(paired_requested and bool(paired_state['total_frames']))
+            actor_group.visible = not (core_requested or paired_requested)
             rendered_root = actor_root()
-            if core_requested and core_state['total_frames']:
+            if ((core_requested and core_state['total_frames']) or
+                    (paired_requested and paired_state['total_frames'])):
                 camera.update(rendered_root)
             character_changed = characters.revision != previous_character
             pose_changed = key != previous or character_changed
@@ -338,7 +398,7 @@ def main():
                         previous = key
                         previous_character = characters.revision
                 previous_fallback_needed = fallback_needed
-                if not core_requested:
+                if not (core_requested or paired_requested):
                     camera_studio.update()
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                     request_id,submitted = session.needs_ack
@@ -346,38 +406,41 @@ def main():
                     server.flush()
                     render_thread = threading.Thread(target=acknowledge,args=(next(iter(server.get_clients().values())),request_id,submitted),daemon=True)
                     render_thread.start()
-                object_key = (key, session.project_revision, core_requested,
-                              core_key, core_state['frame'] if core_requested else 0)
+                object_key = (key, session.project_revision, core_requested, paired_requested,
+                              core_key, paired_key,
+                              core_state['frame'] if core_requested else
+                              paired_state['frame'] if paired_requested else 0)
                 if object_key != previous_objects:
-                    if core_requested:
-                        doc = core_document
+                    if core_requested or paired_requested:
+                        doc = paired_document if paired_requested else core_document
+                        display_frame = paired_state['frame'] if paired_requested else core_state['frame']
                         objects = doc.get('objects', [])
-                        # Native navigation uses the saved authored geometry.
-                        # G1 proximity/pickup effects remain in the G1 mode; do
-                        # not move props underneath a committed Core route.
+                        # Native and paired archives retain a scene snapshot for
+                        # playback. InterGen did not condition its generation on
+                        # these objects; the UI labels it a backdrop.
                         states = [{'id': o['id'], 'position': o['position'],
                                    'color': o['color'], 'active': False} for o in objects]
                         object_layer.update(objects, {'objects': states,
                             'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
                             'lighting': doc.get('lighting', 'neutral'),
-                            'seconds': core_state['frame']/20.})
+                            'seconds': display_frame/20.})
                     else:
                         object_layer.update(session.scene.get('objects', []), session.object_states())
                     update_studio_surfaces()
                     previous_objects = object_key
                 gate = session.scene['gate']
                 gate_open = session.gate_open()
-                scene_key = (core_requested, tuple(gate['position']),gate['radius'],gate['enabled'],gate_open,gate_ui['edit'].value)
+                scene_key = (core_requested, paired_requested, tuple(gate['position']),gate['radius'],gate['enabled'],gate_open,gate_ui['edit'].value)
                 if scene_key != last_scene:
                     for i,post in enumerate(gate_posts):
                         post.position = (gate['position'][0]+(-.84 if i==0 else .84),.825,gate['position'][2])
-                        post.visible = gate['enabled'] and not core_requested
+                        post.visible = gate['enabled'] and not (core_requested or paired_requested)
                     gate_panel.position = (gate['position'][0],2.4 if gate_open else .725,gate['position'][2])
-                    gate_panel.visible = gate['enabled'] and not core_requested
+                    gate_panel.visible = gate['enabled'] and not (core_requested or paired_requested)
                     gate_zone.position = (gate['position'][0],.004,gate['position'][2])
                     gate_zone.vertices = np.asarray(zone_mesh.vertices*np.array([gate['radius'],1.,gate['radius']]),dtype=np.float32)
-                    gate_zone.visible = gate['enabled'] and not core_requested
-                    gizmo.visible = gate['enabled'] and gate_ui['edit'].value and not core_requested
+                    gate_zone.visible = gate['enabled'] and not (core_requested or paired_requested)
+                    gizmo.visible = gate['enabled'] and gate_ui['edit'].value and not (core_requested or paired_requested)
                     gizmo.position = (gate['position'][0],0.,gate['position'][2])
                     gate_ui['enabled'].value = gate['enabled']
                     gate_ui['x'].value,gate_ui['z'].value = gate['position'][0],gate['position'][2]
@@ -397,7 +460,9 @@ def main():
     except KeyboardInterrupt:
         session.reset()
         core.close()
+        paired.close()
         core_renderer.remove()
+        paired_renderer.remove()
         characters.close()
         server.stop()
 

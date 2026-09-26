@@ -17,6 +17,14 @@ from core_choreography import choreography_preset, validate_plan
 from studio_interaction_scene import adapt_studio_scene, recommend_placements
 
 MAX_STUDIO_ARCHIVE_BYTES = 64_000_000
+MAX_PAIR_ARCHIVE_BYTES = 8_000_000
+PAIR_EXAMPLE_PROMPT = ("Two people perform a choreographed martial arts exchange: sidestep dodge, "
+                       "forearm block, controlled push, then step apart.")
+PAIR_IDEAS = {
+    "Close exchange": (PAIR_EXAMPLE_PROMPT, 42, "6 seconds"),
+    "Partner dance": ("Two people hold hands and dance together, stepping sideways and turning around each other.",
+                      7302, "6 seconds"),
+}
 
 
 EXAMPLES = {
@@ -44,11 +52,15 @@ TOGETHER_PRESETS = {
 class CoreStudioControls:
     """Build and refresh the optional native Core panel inside Motion."""
 
-    def __init__(self, gui, core_session, studio_session, *, on_active, project_folder):
+    def __init__(self, gui, core_session, studio_session, *, on_active, project_folder,
+                 paired_session=None, on_paired_active=None):
         self.core = core_session
+        self.paired = paired_session
+        self.on_paired_active = on_paired_active
         self.studio = studio_session
         self.on_active = on_active
         self.folder = Path(project_folder)
+        self.pair_folder = self.folder.parent / "paired-research"
         self._target_ids = {}
         self._target_actions = {}
         self._target_cache_key = None
@@ -57,6 +69,9 @@ class CoreStudioControls:
         self._last_actor_count = None
         self._saved_map = {}
         self._saved_checked_at = 0.0
+        self._pair_saved_map = {}
+        self._pair_saved_checked_at = 0.0
+        self._pair_notice = ""
         self._together_plan = None
         self._together_key = None
         self._ai_pending = False
@@ -87,6 +102,27 @@ class CoreStudioControls:
                 self.together_plan_ai = gui.add_button("Plan shared scene with AI", color="gray")
                 self.together_preview = gui.add_markdown("Choose a preset or describe a shared scene for AI planning.")
                 self.together_generate = gui.add_button("Generate shared sequence")
+                if self.paired is not None:
+                    with gui.add_folder("Joint pair · InterGen research", expand_by_default=False):
+                        gui.add_markdown("Experimental joint generation · InterGen research model (CC BY-NC-SA 4.0). The scene is a playback backdrop, not a generation constraint. Contact is not verified. Saved clips are separate from Native Core projects and G1 takes.")
+                        self.pair_idea = gui.add_dropdown("Joint pair idea", tuple(PAIR_IDEAS), initial_value="Close exchange")
+                        self.pair_example = gui.add_button("Use pair idea", color="gray")
+                        self.pair_prompt = gui.add_text("Joint pair prompt", initial_value=PAIR_EXAMPLE_PROMPT, multiline=True)
+                        self.pair_seed = gui.add_text("Pair seed", initial_value="42")
+                        self.pair_length = gui.add_dropdown("Pair length", ("2 seconds", "4 seconds", "6 seconds"), initial_value="6 seconds")
+                        self.pair_generate = gui.add_button("Generate joint pair · research")
+                        self.pair_status = gui.add_markdown("No paired research clip yet.")
+                        self.pair_view = gui.add_button("View paired research", color="gray")
+                        self.pair_back = gui.add_button("Return to G1", color="gray")
+                        self.pair_play = gui.add_button("Play paired clip", color="gray")
+                        self.pair_pause = gui.add_button("Pause paired clip", color="gray")
+                        self.pair_restart = gui.add_button("Restart paired clip", color="gray")
+                        self.pair_cancel = gui.add_button("Cancel paired generation", color="gray")
+                        with gui.add_folder("Paired research archives", expand_by_default=False):
+                            self.pair_save = gui.add_button("Save paired research clip + download", color="gray")
+                            self.pair_saved = gui.add_dropdown("Saved paired research clips", ("No paired research clips",))
+                            self.pair_open = gui.add_button("Open paired research clip", color="gray")
+                            self.pair_upload = gui.add_upload_button("Open paired research archive file", mime_type=".npz")
             self.play = gui.add_button("Play", color="gray")
             self.pause = gui.add_button("Pause", color="gray")
             self.restart = gui.add_button("Restart", color="gray")
@@ -201,6 +237,43 @@ class CoreStudioControls:
         if self.saved.value not in options:
             self._set(self.saved, "value", options[0])
 
+    def refresh_pair_saved(self, *, force=False):
+        if self.paired is None:
+            return
+        now = time.monotonic()
+        if not force and now - self._pair_saved_checked_at < 1.0:
+            return
+        self._pair_saved_checked_at = now
+        root = self.pair_folder.resolve()
+        candidates = []
+        try:
+            for path in self.pair_folder.glob("*.paired.stagezero.npz"):
+                try:
+                    if path.is_symlink() or path.resolve().parent != root or not path.is_file():
+                        continue
+                    info = path.stat()
+                    if 0 < info.st_size <= MAX_PAIR_ARCHIVE_BYTES:
+                        candidates.append((info.st_mtime_ns, path.name, path))
+                except OSError:
+                    continue
+        except OSError:
+            candidates = []
+        candidates.sort(reverse=True)
+        self._pair_saved_map = {name: path for _, name, path in candidates[:100]}
+        options = tuple(self._pair_saved_map) or ("No paired research clips",)
+        self._set(self.pair_saved, "options", options)
+        if self.pair_saved.value not in options:
+            self._set(self.pair_saved, "value", options[0])
+
+    def _open_pair_bytes(self, content):
+        if not isinstance(content, bytes) or not 0 < len(content) <= MAX_PAIR_ARCHIVE_BYTES:
+            raise ValueError("Choose a paired research archive under 8 MB.")
+        if self.paired.snapshot().get("busy"):
+            raise ValueError("Cancel paired generation before opening another clip.")
+        self.paired.load(content)
+        self.on_paired_active(True)
+        self._pair_notice = "Opened paired InterGen research clip."
+
     def _open_bytes(self, content):
         if not isinstance(content, bytes) or len(content) > MAX_STUDIO_ARCHIVE_BYTES:
             raise ValueError("Choose an exact Core project under 64 MB.")
@@ -234,6 +307,14 @@ class CoreStudioControls:
             action()
         except Exception as exc:
             self._notice = str(exc)[:240]
+        self.tick()
+
+    def _run_pair(self, action):
+        self._pair_notice = ""
+        try:
+            action()
+        except Exception as exc:
+            self._pair_notice = str(exc)[:240]
         self.tick()
 
     def _together_state(self, snapshot=None):
@@ -547,10 +628,98 @@ class CoreStudioControls:
                     raise
             self._run(action)
 
+        if self.paired is not None:
+            @self.pair_example.on_click
+            def pair_example_clicked(_):
+                prompt, seed, length = PAIR_IDEAS[self.pair_idea.value]
+                self._set(self.pair_prompt, "value", prompt)
+                self._set(self.pair_seed, "value", str(seed))
+                self._set(self.pair_length, "value", length)
+
+            @self.pair_generate.on_click
+            def pair_generate_clicked(_):
+                def action():
+                    prompt = self.pair_prompt.value.strip()
+                    if not 1 <= len(prompt) <= 500:
+                        raise ValueError("Describe a joint pair in 1–500 characters.")
+                    try:
+                        seed = int(self.pair_seed.value)
+                    except (TypeError, ValueError):
+                        raise ValueError("Pair seed must be an integer from 0 to 4294967295.") from None
+                    if not 0 <= seed < 2**32:
+                        raise ValueError("Pair seed must be an integer from 0 to 4294967295.")
+                    frames = {"2 seconds": 40, "4 seconds": 80, "6 seconds": 120}[self.pair_length.value]
+                    self.on_paired_active(True)
+                    self.paired.generate(prompt, seed, frames=frames,
+                                         scene_document=self._scene_document())
+                    self._pair_notice = "Joint InterGen research job submitted. Existing motion remains saved."
+                self._run_pair(action)
+
+            @self.pair_view.on_click
+            def pair_view_clicked(_):
+                self._run_pair(lambda: self.on_paired_active(True))
+
+            @self.pair_back.on_click
+            def pair_back_clicked(_):
+                self._run_pair(lambda: self.on_paired_active(False))
+
+            @self.pair_play.on_click
+            def pair_play_clicked(_):
+                self._run_pair(self.paired.play)
+
+            @self.pair_pause.on_click
+            def pair_pause_clicked(_):
+                self._run_pair(self.paired.pause)
+
+            @self.pair_restart.on_click
+            def pair_restart_clicked(_):
+                self._run_pair(self.paired.restart)
+
+            @self.pair_cancel.on_click
+            def pair_cancel_clicked(_):
+                self._run_pair(self.paired.cancel)
+
+            @self.pair_save.on_click
+            def pair_save_clicked(event):
+                def action():
+                    data = self.paired.save()
+                    self.pair_folder.mkdir(parents=True, exist_ok=True)
+                    path = self.pair_folder / f"paired-{time.time_ns()}.paired.stagezero.npz"
+                    temporary = path.with_suffix(".tmp")
+                    try:
+                        temporary.write_bytes(data)
+                        temporary.replace(path)
+                    finally:
+                        temporary.unlink(missing_ok=True)
+                    if event.client is not None:
+                        event.client.send_file_download(path.name, data)
+                    self.refresh_pair_saved(force=True)
+                    self._set(self.pair_saved, "value", path.name)
+                    self._pair_notice = "Saved separate InterGen research archive."
+                self._run_pair(action)
+
+            @self.pair_open.on_click
+            def pair_open_clicked(_):
+                def action():
+                    path = self._pair_saved_map.get(self.pair_saved.value)
+                    root = self.pair_folder.resolve()
+                    if (path is None or path.name != self.pair_saved.value or path.is_symlink()
+                            or path.resolve().parent != root or not path.is_file()):
+                        raise ValueError("Choose a saved paired research archive from this folder.")
+                    if not 0 < path.stat().st_size <= MAX_PAIR_ARCHIVE_BYTES:
+                        raise ValueError("Paired research archive exceeds the 8 MB limit.")
+                    self._open_pair_bytes(path.read_bytes())
+                self._run_pair(action)
+
+            @self.pair_upload.on_upload
+            def pair_upload_clicked(event):
+                self._run_pair(lambda: self._open_pair_bytes(event.file.content))
+
     def tick(self):
         """Refresh at the studio's existing UI cadence without polling inference."""
         snapshot = self._snapshot()
         self.refresh_saved()
+        self.refresh_pair_saved()
         active = bool(snapshot.get("active"))
         available = bool(snapshot.get("available"))
         ids = tuple(snapshot.get("actor_ids") or ())
@@ -605,6 +774,24 @@ class CoreStudioControls:
             self._set(self.save, "disabled", frames == 0)
             self._set(self.open_saved, "disabled", not bool(self._saved_map))
             self._set(self.example_motion, "visible", bool(snapshot.get("example_available", False)))
+            if self.paired is not None:
+                paired = self.paired.snapshot()
+                pair_frames = int(paired.get("total_frames") or 0)
+                pair_active = bool(paired.get("active"))
+                pair_busy = bool(paired.get("busy"))
+                self._set(self.pair_generate, "disabled", pair_busy or not paired.get("available"))
+                self._set(self.pair_view, "disabled", pair_busy or not pair_frames or pair_active)
+                self._set(self.pair_back, "disabled", pair_busy or not pair_active)
+                self._set(self.pair_play, "disabled", not pair_active or not pair_frames)
+                self._set(self.pair_pause, "disabled", not pair_active or not pair_frames)
+                self._set(self.pair_restart, "disabled", not pair_active or not pair_frames)
+                self._set(self.pair_cancel, "disabled", not pair_busy)
+                self._set(self.pair_save, "disabled", pair_busy or not pair_frames)
+                self._set(self.pair_open, "disabled", pair_busy or not self._pair_saved_map)
+                pair_status = str(paired.get("status") or "No paired research clip yet.")
+                if self._pair_notice:
+                    pair_status = self._pair_notice + " " + pair_status
+                self._set(self.pair_status, "content", self._mdx_text(pair_status))
             status = str(snapshot.get("status") or "Ready.")
             if not available:
                 status = ("Core service unavailable. Saved Core motion and the included example can still play."

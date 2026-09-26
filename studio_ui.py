@@ -68,10 +68,11 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, core_controls=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, core_controls=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.core_session = core_session
+        self.paired_session = paired_session
         self._core_visibility = []
         self._legacy_motion_controls = []
         self.folder = project_folder
@@ -202,10 +203,15 @@ class StudioUI:
         self.bind()
         self.update()
 
+    def _active_motion_session(self):
+        for candidate in (self.paired_session, self.core_session):
+            if candidate is not None and candidate.snapshot()['active']:
+                return candidate
+        return None
+
     def _set(self, handle, property_name, value):
         """Viser setters broadcast to clients, so publish changed properties only."""
-        if (property_name == 'visible' and self.core_session is not None
-                and self.core_session.snapshot()['active']
+        if (property_name == 'visible' and self._active_motion_session() is not None
                 and any(handle is item for item in self._legacy_motion_controls)):
             self._core_visibility = [(h, v) for h, v in self._core_visibility if h is not handle]
             self._core_visibility.append((handle, value))
@@ -511,15 +517,15 @@ class StudioUI:
             transport_command(self.frames.value)
 
         def transport_command(value):
-            if self.core_session is not None and self.core_session.snapshot()['active']:
-                core = self.core_session
-                state = core.snapshot()
-                if value == 'Play': core.play()
-                elif value == 'Pause': core.pause()
-                elif value == 'Start': core.seek(0)
-                elif value == 'End': core.seek(max(0, state['total_frames']-1))
-                elif value == '−1 frame': core.seek(max(0, state['frame']-1))
-                elif value == '+1 frame': core.seek(state['frame']+1)
+            motion = self._active_motion_session()
+            if motion is not None:
+                state = motion.snapshot()
+                if value == 'Play': motion.play()
+                elif value == 'Pause': motion.pause()
+                elif value == 'Start': motion.seek(0)
+                elif value == 'End': motion.seek(max(0, state['total_frames']-1))
+                elif value == '−1 frame': motion.seek(max(0, state['frame']-1))
+                elif value == '+1 frame': motion.seek(state['frame']+1)
                 return
             with s.lock:
                 if not s.character_motion_enabled and value != 'Pause':
@@ -919,7 +925,7 @@ class StudioUI:
     def update(self):
         """Synchronize the sidebar after the viewer advances the session clock."""
         s = self.session
-        if self.core_session is None or not self.core_session.snapshot()['active']:
+        if self._active_motion_session() is None:
             for handle, visible in self._core_visibility:
                 self._set(handle, 'visible', visible)
             self._core_visibility = []
@@ -1038,14 +1044,17 @@ class StudioUI:
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')
 
-            if self.core_session is not None:
-                core = self.core_session.snapshot()
-                if core['active']:
+            motion_session = self._active_motion_session()
+            if motion_session is not None:
+                motion = motion_session.snapshot()
+                if motion['active']:
                     remembered = {id(h) for h, _ in self._core_visibility}
                     for handle in self._legacy_motion_controls:
                         if id(handle) not in remembered:
                             self._core_visibility.append((handle, handle.visible))
                         if handle.visible:
                             handle.visible = False
-                    self._set(self.status, 'content', '<div class="sz-status">Scene direction · '
-                              + escape(str(core['status'])) + '</div>')
+                    label = ('Joint pair · InterGen research · ' if motion_session is self.paired_session
+                             else 'Scene direction · ')
+                    self._set(self.status, 'content', '<div class="sz-status">' + label
+                              + escape(str(motion['status'])) + '</div>')

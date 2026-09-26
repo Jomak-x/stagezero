@@ -26,6 +26,50 @@ class ChoreographyCore(Core):
         self.calls.append(("choreograph", plan))
 
 
+class PairedResearch:
+    def __init__(self):
+        self.active = False
+        self.busy = False
+        self.frames = 0
+        self.calls = []
+
+    def snapshot(self):
+        return {"active": self.active, "available": True, "busy": self.busy,
+                "total_frames": self.frames, "status": "Paired research ready"}
+
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
+
+    def generate(self, prompt, seed, *, frames, scene_document):
+        self.calls.append(("generate", prompt, seed, frames, scene_document))
+        self.busy = True
+
+    def cancel(self):
+        self.calls.append(("cancel",))
+        self.busy = False
+
+    def save(self):
+        self.calls.append(("save",))
+        return b"paired-research-archive"
+
+    def load(self, content):
+        self.calls.append(("load", content))
+        self.active = True
+        self.frames = 120
+
+    def play(self):
+        self.calls.append(("play",))
+
+    def pause(self):
+        self.calls.append(("pause",))
+
+    def restart(self):
+        self.calls.append(("restart",))
+
+
 class TogetherControlsTests(TestCase):
     def setUp(self):
         temp = TemporaryDirectory()
@@ -246,3 +290,57 @@ class TogetherControlsTests(TestCase):
                     break
                 time.sleep(.01)
             self.assertEqual(calls, ["First idea", "Second idea"])
+
+
+class PairedResearchControlsTests(TestCase):
+    def setUp(self):
+        temp = TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.core = ChoreographyCore()
+        self.paired = PairedResearch()
+        self.gui = Gui()
+        self.switches = []
+
+        def switch(active):
+            self.switches.append(active)
+            self.paired.activate() if active else self.paired.deactivate()
+
+        self.controls = CoreStudioControls(
+            self.gui, self.core, Studio(), on_active=lambda _: None,
+            project_folder=Path(temp.name) / "core-projects",
+            paired_session=self.paired, on_paired_active=switch)
+
+    def test_joint_pair_example_and_generation_do_not_touch_native_core(self):
+        self.assertEqual(self.controls.pair_prompt.value,
+                         "Two people perform a choreographed martial arts exchange: sidestep dodge, forearm block, controlled push, then step apart.")
+        self.controls.pair_idea.value = "Partner dance"
+        self.controls.pair_example.click()
+        self.assertIn("hold hands and dance", self.controls.pair_prompt.value)
+        self.assertEqual(self.controls.pair_seed.value, "7302")
+        self.controls.pair_generate.click()
+        self.assertEqual(self.switches, [True])
+        action = self.paired.calls[-1]
+        self.assertEqual(action[:4], ("generate", self.controls.pair_prompt.value, 7302, 120))
+        self.assertEqual(self.core.calls, [])
+        self.assertTrue(self.controls.pair_generate.disabled)
+        self.assertFalse(self.controls.pair_cancel.disabled)
+        self.controls.pair_cancel.click()
+        self.assertEqual(self.paired.calls[-1], ("cancel",))
+
+    def test_paired_archive_is_separate_and_replay_switches_modes(self):
+        self.paired.frames = 120
+        self.paired.active = True
+        self.controls.tick()
+        self.controls.pair_save.click()
+        paths = list(self.controls.pair_folder.glob("*.paired.stagezero.npz"))
+        self.assertEqual(len(paths), 1)
+        self.assertEqual(paths[0].read_bytes(), b"paired-research-archive")
+        self.assertEqual(list(self.controls.folder.glob("*.core.stagezero.npz")), [])
+        self.paired.active = False
+        self.controls.pair_open.click()
+        self.assertEqual(self.paired.calls[-1], ("load", b"paired-research-archive"))
+        self.assertEqual(self.switches[-1], True)
+        self.controls.pair_play.click()
+        self.assertEqual(self.paired.calls[-1], ("play",))
+        self.controls.pair_back.click()
+        self.assertEqual(self.switches[-1], False)

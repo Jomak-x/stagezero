@@ -25,10 +25,11 @@ class StudioTimeline:
     dispatches playhead clicks through ``on_frame_change`` on its own worker.
     """
 
-    def __init__(self, server, session, command_uuid=None, *, core_session=None):
+    def __init__(self, server, session, command_uuid=None, *, core_session=None, paired_session=None):
         self.timeline = server.timeline
         self.session = session
         self.core_session = core_session
+        self.paired_session = paired_session
         self._core_mode = False
         self.command_uuid = command_uuid
         self._layout = None
@@ -38,12 +39,19 @@ class StudioTimeline:
         self.timeline.on_frame_change(self._seek)
         self.update()
 
+    def _active_motion_session(self):
+        for name, candidate in (('paired-research', self.paired_session), ('core', self.core_session)):
+            if candidate is not None and candidate.snapshot()['active']:
+                return name, candidate
+        return None, None
+
     def _seek(self, frame: int) -> None:
-        if self.core_session is not None and self.core_session.snapshot()['active']:
+        _, motion = self._active_motion_session()
+        if motion is not None:
             self._frame = None
-            total = self.core_session.snapshot()['total_frames']
+            total = motion.snapshot()['total_frames']
             if total:
-                self.core_session.seek(max(0, min(int(frame), total-1)))
+                motion.seek(max(0, min(int(frame), total-1)))
             return
         # The native ruler can scroll past the take. DirectorSession.seek()
         # clamps to the actual final frame and pauses playback.
@@ -57,9 +65,10 @@ class StudioTimeline:
 
     def update(self) -> None:
         """Publish only changed layout or playhead values (safe at 10 Hz)."""
-        if self.core_session is not None and self.core_session.snapshot()['active']:
+        mode, motion = self._active_motion_session()
+        if motion is not None:
             self._core_mode = True
-            self._update_core()
+            self._update_core(mode, motion)
             return
         if self._core_mode:
             self._layout = self._frame = self._visible = None
@@ -111,18 +120,18 @@ class StudioTimeline:
             self._frame = None
 
 
-    def _update_core(self):
-        state = self.core_session.snapshot()
+    def _update_core(self, mode, motion):
+        state = motion.snapshot()
         length = state['total_frames']
         segments = tuple((x['start'], x['end'], x['prompt'])
                          for x in state.get('segments', ()))
-        layout = ('core', length, segments)
+        layout = (mode, length, segments)
         if layout != self._layout:
             self.timeline.clear_prompts()
             for index, (start, end, prompt) in enumerate(segments):
                 self.timeline.add_prompt(prompt, start, end,
                     color=SEGMENT_COLORS[index % len(SEGMENT_COLORS)],
-                    uuid=f'core-scene-{index}')
+                    uuid=f'{mode}-scene-{index}')
             self.timeline.set_fps(20.)
             self.timeline.set_zoom_settings(default_num_frames_zoom=max(1, length),
                                              max_frames_zoom=max(1, length))

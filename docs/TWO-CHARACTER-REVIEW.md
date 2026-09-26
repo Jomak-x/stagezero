@@ -1,5 +1,7 @@
 # Two-character choreography review
 
+> User review: REJECTED. Excessive separation and mistimed movement make this unsuitable as convincing interaction. Preserved as failed evidence; superseding experiments are in progress.
+
 The current integrated **Pose duet** preset uses the bounded `pose_duet_v1`
 profile: two independently generated Core actors perform an eight-second staged
 rehearsal with an opening, a kick/duck exchange, reversed roles, and a shared

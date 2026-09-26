@@ -5,6 +5,10 @@ duplication, or G1 actor is involved. Connect a browser to the printed local
 URL so Viser can render the StageZero Studio client, then the script writes a
 20 fps MP4, contact sheets, and a provenance manifest.
 
+Experimental --canonical plus --scene replays paired InterGen research arrays
+retargeted to Core27 at 20 fps, without a native project or ARDY history claim.
+The supplied scene is a backdrop; renderer body fitting may alter contacts.
+
 Example:
     python experiments/capture_core_performance.py \
         --archive review/studio-core/browser-two-actors.core.stagezero.npz \
@@ -14,6 +18,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 from pathlib import Path
@@ -96,7 +101,8 @@ def get_render_with_timeout(client, *, width: int, height: int, timeout: float) 
 
 
 def capture(args: argparse.Namespace) -> dict:
-    archive = args.archive.resolve()
+    research = getattr(args, "canonical", None) is not None
+    archive = (args.canonical if research else args.archive).resolve()
     content = archive.read_bytes()
     if len(content) > 64_000_000:
         raise ValueError("Native Core archive exceeds the Studio's 64 MB limit")
@@ -111,20 +117,33 @@ def capture(args: argparse.Namespace) -> dict:
     if existing:
         raise FileExistsError(f"Capture output already exists: {existing[0]}")
 
-    with CoreStudioSession() as session:
-        state = session.load(content)
-        clip = session.timeline_clip()
-        scene = validate_scene(session.scene_document)
-        if not clip.frames:
-            raise ValueError("Native Core archive has no committed frames")
-        if state.get("scene_changed_since_motion"):
-            raise ValueError("The archived scene changed after motion; capture against the original layout instead")
+    with (nullcontext(None) if research else CoreStudioSession()) as session:
+        if research:
+            from experiments.trial_paired_scene import load_research_clip
+            clip, content = load_research_clip(archive)
+            if args.scene is None or not args.scene.is_file():
+                raise ValueError("Research capture requires an explicit --scene JSON file")
+            if args.scene.stat().st_size > 900_000:
+                raise ValueError("Research capture scene exceeds its size limit")
+            scene = validate_scene(json.loads(args.scene.read_text()))
+            capture_label = "StageZero paired InterGen research capture"
+            button_label = "Start exact research capture"
+        else:
+            state = session.load(content)
+            clip = session.timeline_clip()
+            scene = validate_scene(session.scene_document)
+            if not clip.frames:
+                raise ValueError("Native Core archive has no committed frames")
+            if state.get("scene_changed_since_motion"):
+                raise ValueError("The archived scene changed after motion; capture against the original layout instead")
+            capture_label = "StageZero Core performance capture"
+            button_label = "Start exact Core capture"
         if clip.fps != 20:
-            raise ValueError("Expected the native Core 20 fps timeline")
+            raise ValueError("Expected a canonical 20 fps timeline")
         captured_frames = clip.frames if args.max_frames is None else min(args.max_frames, clip.frames)
 
         server = create_studio_server(host="127.0.0.1", port=args.port,
-                                      label="StageZero Core performance capture")
+                                      label=capture_label)
         try:
             server.gui.configure_theme(dark_mode=True, control_layout="floating",
                                        show_logo=False, show_share_button=False)
@@ -136,7 +155,8 @@ def capture(args: argparse.Namespace) -> dict:
             server.scene.add_box("/floor", color=(20, 28, 38), dimensions=(200, .1, 200),
                                  position=(0, -.07, 0), cast_shadow=False,
                                  visible=not has_authored_ground(scene["objects"]))
-            renderer = StudioCoreRenderer(server, name_prefix="/core-cast")
+            renderer = StudioCoreRenderer(server, name_prefix="/core-cast",
+                                          paired_retarget=bool(getattr(args, "paired_retarget", False)))
             renderer.set_clip(clip)
             renderer.tick(0)
             renderer.set_visible(True)
@@ -151,7 +171,7 @@ def capture(args: argparse.Namespace) -> dict:
             look_at = args.look_at or camera["look_at"]
             if sum((a - b) ** 2 for a, b in zip(position, look_at)) < .01:
                 raise ValueError("Camera position and look-at must differ")
-            start_button = server.gui.add_button("Start exact Core capture")
+            start_button = server.gui.add_button(button_label)
             chosen = {}
             ready = threading.Event()
 
@@ -162,11 +182,11 @@ def capture(args: argparse.Namespace) -> dict:
                     ready.set()
                     start_button.disabled = True
 
-            print(f"CONNECT BROWSER, ENTER STUDIO, THEN CLICK 'Start exact Core capture': http://127.0.0.1:{server.get_port()}", flush=True)
+            print(f"CONNECT BROWSER, ENTER STUDIO, THEN CLICK '{button_label}': http://127.0.0.1:{server.get_port()}", flush=True)
             deadline = time.monotonic() + args.wait_seconds
             while not ready.is_set():
                 if time.monotonic() >= deadline:
-                    raise TimeoutError("No browser clicked Start exact Core capture before --wait-seconds elapsed")
+                    raise TimeoutError(f"No browser clicked {button_label} before --wait-seconds elapsed")
                 time.sleep(.2)
             # This exact client owns the visible Studio canvas; no stale welcome
             # socket or another open tab can receive the render request.
@@ -231,18 +251,13 @@ def capture(args: argparse.Namespace) -> dict:
             scene_bytes = json.dumps(scene, sort_keys=True, separators=(",", ":"),
                                      allow_nan=False).encode()
             manifest = {
-                "capture_kind": ("Native Core archive WebGL excerpt" if captured_frames < clip.frames
-                                 else "Exact native Core archive WebGL replay"),
-                "archive": str(archive), "archive_sha256": hashlib.sha256(content).hexdigest(),
                 "scene_name": scene["name"], "scene_sha256": hashlib.sha256(scene_bytes).hexdigest(),
                 "scene_objects": len(objects), "scene_assets": len(scene.get("assets", [])),
-                "actor_ids": list(clip.actor_ids), "native_fps": 20,
+                "actor_ids": list(clip.actor_ids),
                 "frames": captured_frames, "duration_seconds": captured_frames / 20,
-                "archive_total_frames": clip.frames,
                 "is_excerpt": captured_frames < clip.frames,
                 "positions_sha256": sha256_array(clip.positions),
                 "rotations_sha256": sha256_array(clip.rotations),
-                "native_features_sha256": sha256_array(clip.native_features),
                 "capture_camera": {"position": list(position), "look_at": list(look_at),
                                    "fov_degrees": args.fov},
                 "capture_size": [args.width, args.height],
@@ -255,8 +270,31 @@ def capture(args: argparse.Namespace) -> dict:
                 "contact_sheet_sha256": sha256_file(sheet),
                 "first_frame_sha256": sha256_file(first_frame),
                 "last_frame_sha256": sha256_file(last_frame),
-                "capture_note": "One WebGL render per listed saved native frame in order; no interpolation or inferred contact. Props remain at their archived static positions.",
             }
+            if research:
+                manifest.update({
+                    "capture_kind": "InterGen research retargeted canonical WebGL replay",
+                    "source": "intergen", "research_only": True,
+                    "canonical_clip": str(archive), "canonical_sha256": hashlib.sha256(content).hexdigest(),
+                    "canonical_total_frames": clip.frames, "fps": 20,
+                    "source_format": clip.metadata.get("source_format"),
+                    "clip_metadata": dict(clip.metadata),
+                    "native_features_available": False, "native_core_project": False,
+                    "scene_source": str(args.scene.resolve()), "scene_conditioned": False,
+                    "physical_contact_verified": False,
+                    "rendering_note": "Paired world-wrist preserving fit with common floor translation" if getattr(args, "paired_retarget", False) else "Baseline fitting does not preserve native wrists",
+                    "fitting_provenance": renderer.fitting_provenance,
+                    "capture_note": "One render per listed saved retargeted canonical frame, in order. No extra interpolation. Explicit scene is a rendering backdrop, not a generation constraint. No claim of native ARDY features or preserved physical contact.",
+                })
+            else:
+                manifest.update({
+                    "capture_kind": ("Native Core archive WebGL excerpt" if captured_frames < clip.frames
+                                     else "Exact native Core archive WebGL replay"),
+                    "archive": str(archive), "archive_sha256": hashlib.sha256(content).hexdigest(),
+                    "archive_total_frames": clip.frames, "native_fps": 20,
+                    "native_features_sha256": sha256_array(clip.native_features),
+                    "capture_note": "One WebGL render per listed saved native frame in order; no interpolation or inferred contact. Props remain at their archived static positions.",
+                })
             manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
             print(f"CAPTURE COMPLETE: {video}", flush=True)
             return manifest
@@ -266,7 +304,12 @@ def capture(args: argparse.Namespace) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--archive", type=Path, required=True, help="Saved .core.stagezero.npz")
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--archive", type=Path, help="Saved .core.stagezero.npz (native default)")
+    inputs.add_argument("--canonical", type=Path,
+                        help="Experimental .intergen.canonical.npz from trial_paired_scene.py")
+    parser.add_argument("--scene", type=Path, help="Explicit scene JSON required only with --canonical")
+    parser.add_argument("--paired-retarget", action="store_true", help="Preserve paired world wrists and a common floor translation")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--port", type=int, default=24892)
     parser.add_argument("--width", type=int, default=1280)
@@ -295,8 +338,15 @@ def main() -> None:
         parser.error("--max-frames must be positive")
     if not 1 <= args.fov <= 120:
         parser.error("--fov must be 1–120 degrees")
-    if not args.archive.is_file():
-        parser.error(f"Archive does not exist: {args.archive}")
+    if args.paired_retarget and args.canonical is None:
+        parser.error("--paired-retarget requires --canonical")
+    source = args.canonical if args.canonical is not None else args.archive
+    if not source.is_file():
+        parser.error(f"Motion input does not exist: {source}")
+    if args.canonical is not None and (args.scene is None or not args.scene.is_file()):
+        parser.error("--canonical requires an existing --scene JSON file")
+    if args.archive is not None and args.scene is not None:
+        parser.error("Native --archive uses its saved scene; --scene is only for research --canonical")
     capture(args)
 
 
