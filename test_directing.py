@@ -261,6 +261,24 @@ class ActionEditingTests(unittest.TestCase):
         self.session.pause()
         return self.session.takes[self.session.active_take]
 
+    def test_static_character_blocks_action_edit_until_motion_is_enabled(self):
+        before = self.generate('first')
+        self.backend.calls.clear()
+        self.session.set_character_motion_enabled(False)
+        revision = self.session.action_edit_revision
+        for operation in ('replace', 'insert_before', 'insert_after'):
+            with self.subTest(operation=operation):
+                self.assertFalse(self.session.submit_action_edit('changed', 0, operation))
+                self.assertFalse(self.session.busy)
+                self.assertIs(self.session.takes[before.id], before)
+                self.assertEqual(self.session.action_edit_revision, revision)
+        self.assertEqual(self.backend.calls, [])
+        self.session.set_character_motion_enabled(True)
+        self.assertTrue(self.session.submit_action_edit('changed', 0, 'replace'))
+        wait_until(lambda: not self.session.busy)
+        self.assertEqual([prompt for prompt, _ in self.backend.calls], ['changed'])
+        self.assertEqual(self.session.takes[before.id].segments[0]['prompt'], 'changed')
+
     def sequence(self):
         original = self.generate('first')
         self.session.seek(len(original.positions) - 1)

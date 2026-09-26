@@ -1,0 +1,210 @@
+"""Test accepted uploads through Viser's actual transfer callbacks."""
+
+import asyncio
+from collections import defaultdict
+from types import SimpleNamespace
+import threading
+import unittest
+
+import msgspec
+from viser import _messages
+from viser._gui_api import GuiApi
+from viser._viser import ViserServer
+
+from bounded_upload import ScopedUploadLimits, UploadRejectedMessage
+
+
+class _Interface:
+    def __init__(self):
+        self.handlers = defaultdict(list)
+        self.sent = []
+
+    def register_handler(self, cls, callback):
+        self.handlers[cls].append(callback)
+
+    def unregister_handler(self, cls, callback):
+        self.handlers[cls].remove(callback)
+
+    def queue_message(self, message):
+        self.sent.append(message)
+
+    def dispatch(self, client_id, message):
+        for callback in tuple(self.handlers[type(message)]):
+            callback(client_id, message)
+
+
+def _start(component, transfer, size, parts=1):
+    return _messages.FileTransferStartUpload(component, transfer, "character.glb", "model/gltf-binary", parts, size)
+
+
+def _part(component, transfer, index, content):
+    return _messages.FileTransferPart(component, transfer, index, content)
+
+
+class ScopedUploadLimitsTest(unittest.TestCase):
+    def test_rejection_message_round_trips_through_viser_codec(self):
+        message = UploadRejectedMessage("glb", "transfer", "Too large")
+        encoded = msgspec.msgpack.encode(message.as_serializable_dict())
+        self.assertEqual(_messages.Message.deserialize(encoded), message)
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        self.interface = _Interface()
+        self.rejections = defaultdict(list)
+        self.server = object.__new__(ViserServer)
+        self.server._connected_clients = {
+            client_id: SimpleNamespace(
+                client_id=client_id,
+                _websock_connection=SimpleNamespace(
+                    queue_message=self.rejections[client_id].append
+                ),
+            )
+            for client_id in (1, 2)
+        }
+        self.server._client_lock = threading.Lock()
+        self.server._client_disconnect_cb = []
+        self.gui = object.__new__(GuiApi)
+        self.gui._owner = self.server
+        self.gui._event_loop = self.loop
+        self.gui._websock_interface = self.interface
+        self.gui._gui_input_handle_from_uuid = {}
+        self.gui._current_file_upload_states = {}
+        self.server.gui = self.gui
+        self.interface.register_handler(_messages.FileTransferStartUpload, self.gui._handle_file_transfer_start)
+        self.interface.register_handler(_messages.FileTransferPart, self.gui._handle_file_transfer_part)
+        self.completed = []
+        self.limits = None
+
+    def tearDown(self):
+        if self.limits is not None:
+            self.limits.close()
+        self.loop.run_until_complete(asyncio.sleep(0))
+        self.loop.close()
+
+    def control(self, component_id):
+        async def on_upload(event):
+            self.completed.append((component_id, event.client_id, event.target._impl.value.content))
+
+        handle = SimpleNamespace(_impl=SimpleNamespace(uuid=component_id, value=None, update_cb=[on_upload]))
+        self.gui._gui_input_handle_from_uuid[component_id] = handle
+        return handle
+
+    def guard(self, handle, errors, *, max_bytes=100_000, **kwargs):
+        self.limits = ScopedUploadLimits(self.server, **kwargs)
+        self.limits.register(handle, max_bytes=max_bytes, on_error=errors.append)
+
+    def drain(self):
+        self.loop.run_until_complete(asyncio.sleep(0))
+
+    def test_guarded_upload_reaches_viser_once_and_other_control_is_unchanged(self):
+        errors = []
+        self.guard(self.control("glb"), errors)
+        self.control("project")
+        self.interface.dispatch(1, _start("project", "ordinary", 4))
+        self.interface.dispatch(1, _part("project", "ordinary", 0, b"data"))
+        self.interface.dispatch(1, _start("glb", "guarded", 65_537, parts=2))
+        self.interface.dispatch(1, _part("glb", "guarded", 1, b"z"))
+        self.interface.dispatch(1, _part("glb", "guarded", 0, b"a" * 65_536))
+        self.drain()
+        self.assertEqual(self.completed, [("project", 1, b"data"), ("glb", 1, b"a" * 65_536 + b"z")])
+        self.assertEqual(errors, [])
+        self.assertEqual(self.gui._current_file_upload_states, {})
+
+    def test_oversized_or_malformed_start_never_reaches_native_buffer(self):
+        errors = []
+        self.guard(self.control("glb"), errors)
+        self.interface.dispatch(1, _start("glb", "oversize", 100_001))
+        self.interface.dispatch(1, _part("glb", "oversize", 0, b"ignored"))
+        self.interface.dispatch(1, _start("glb", "many-parts", 65_537, parts=200))
+        self.interface.dispatch(1, _start("glb", "empty", 0, parts=0))
+        self.assertEqual(self.gui._current_file_upload_states, {})
+        self.assertEqual(self.completed, [])
+        self.assertEqual(len(errors), 3)
+        self.assertEqual([m.transfer_uuid for m in self.rejections[1]],
+                         ["oversize", "many-parts", "empty"])
+        self.assertEqual(self.rejections[2], [])
+
+    def test_invalid_parts_abort_and_release_native_buffer(self):
+        for bad_part in (
+            _part("glb", "x", 0, b"duplicate"),
+            _part("glb", "x", 2, b"out-of-range"),
+            _part("glb", "x", 1, b"b" * (512 * 1024 + 1)),
+            _part("glb", "x", 1, []),
+        ):
+            with self.subTest(index=bad_part.part_index, size=len(bad_part.content)):
+                errors = []
+                self.guard(self.control("glb"), errors, max_bytes=700_000)
+                self.interface.dispatch(1, _start("glb", "x", 600_000, parts=2))
+                self.interface.dispatch(1, _part("glb", "x", 0, b"a" * 100_000))
+                self.interface.dispatch(1, bad_part)
+                self.assertNotIn("x", self.gui._current_file_upload_states)
+                self.assertEqual(self.completed, [])
+                self.assertEqual(len(errors), 1)
+                self.limits.close()
+                self.limits = None
+
+    def test_foreign_client_and_component_cannot_modify_guarded_transfer(self):
+        errors = []
+        self.guard(self.control("glb"), errors)
+        self.control("project")
+        self.interface.dispatch(1, _start("glb", "x", 4))
+        self.interface.dispatch(2, _part("glb", "x", 0, b"evil"))
+        self.interface.dispatch(1, _part("project", "x", 0, b"evil"))
+        self.interface.dispatch(2, _start("project", "x", 4))
+        self.interface.dispatch(1, _part("glb", "x", 0, b"good"))
+        self.drain()
+        self.assertEqual(self.completed, [("glb", 1, b"good")])
+        self.assertEqual(errors, [])
+        self.assertEqual(self.rejections[1], [])
+        self.assertEqual(self.rejections[2], [])
+
+    def test_budget_timeout_and_disconnect_release_pending_uploads(self):
+        now = [0.0]
+        errors = []
+        self.guard(self.control("glb"), errors, max_bytes=150_000,
+                   max_total_bytes=150_000, timeout_seconds=10, clock=lambda: now[0])
+        self.interface.dispatch(1, _start("glb", "first", 100_000))
+        self.interface.dispatch(2, _start("glb", "over-budget", 60_000))
+        self.assertEqual(set(self.gui._current_file_upload_states), {"first"})
+        self.assertEqual(len(errors), 1)
+        self.assertEqual([m.transfer_uuid for m in self.rejections[2]], ["over-budget"])
+        now[0] = 11
+        self.limits.poll()
+        self.assertEqual(self.gui._current_file_upload_states, {})
+        self.assertEqual(len(errors), 2)
+        self.assertEqual([m.transfer_uuid for m in self.rejections[1]], ["first"])
+        self.interface.dispatch(2, _start("glb", "after-timeout", 70_000, parts=2))
+        self.interface.dispatch(2, _part("glb", "after-timeout", 0, b"b" * 20))
+        self.assertIn("after-timeout", self.gui._current_file_upload_states)
+        self.limits._on_disconnect(self.server._connected_clients[2])
+        self.assertEqual(self.gui._current_file_upload_states, {})
+        self.interface.dispatch(1, _start("glb", "again", 4))
+        self.interface.dispatch(1, _part("glb", "again", 0, b"good"))
+        self.drain()
+        self.assertEqual(self.completed, [("glb", 1, b"good")])
+
+    def test_active_transfer_limit_rejects_then_recovers(self):
+        errors = []
+        self.guard(self.control("glb"), errors, max_bytes=200_000,
+                   max_active_transfers=2, max_total_bytes=400_000)
+        self.interface.dispatch(1, _start("glb", "one", 100_000, parts=2))
+        self.interface.dispatch(2, _start("glb", "two", 100_000, parts=2))
+        self.interface.dispatch(1, _start("glb", "three", 100_000, parts=2))
+        self.assertEqual(set(self.gui._current_file_upload_states), {"one", "two"})
+        self.assertEqual([m.transfer_uuid for m in self.rejections[1]], ["three"])
+        self.assertEqual(len(errors), 1)
+        self.limits._on_disconnect(self.server._connected_clients[2])
+        self.interface.dispatch(1, _start("glb", "retry", 100_000, parts=2))
+        self.assertEqual(set(self.gui._current_file_upload_states), {"one", "retry"})
+
+    def test_close_restores_native_handlers(self):
+        self.control("project")
+        self.limits = ScopedUploadLimits(self.server)
+        self.limits.close()
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferStartUpload]), 1)
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferPart]), 1)
+        self.assertEqual(self.server._client_disconnect_cb, [])
+        self.interface.dispatch(1, _start("project", "ordinary", 4))
+        self.interface.dispatch(1, _part("project", "ordinary", 0, b"data"))
+        self.drain()
+        self.assertEqual(self.completed, [("project", 1, b"data")])

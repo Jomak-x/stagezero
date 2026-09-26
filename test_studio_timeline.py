@@ -12,6 +12,7 @@ class FakeTimeline:
         self.calls = []
         self.on_scrub = None
         self.end_frame = 0
+        self.current_frame = 0
 
     def __getattr__(self, method):
         def call(*args, **kwargs):
@@ -22,6 +23,8 @@ class FakeTimeline:
                 self.end_frame = max(self.end_frame, kwargs["max_frames_zoom"])
             elif method == "set_frame_range":
                 self.end_frame = args[1]
+            elif method == "set_current_frame":
+                self.current_frame = args[0]
         return call
 
 
@@ -39,6 +42,7 @@ class FakeSession:
         ])}
         self.playing = True
         self.busy = False
+        self.character_motion_enabled = True
 
     def seek(self, frame):
         self.frame = max(0, min(frame, len(self.positions) - 1))
@@ -99,6 +103,31 @@ class StudioTimelineTest(unittest.TestCase):
             "stagezero-segment-0", "stagezero-segment-1",
         ])
 
+    def test_static_preview_disables_actions_and_preserves_playhead_until_restored(self):
+        timeline = FakeTimeline()
+        adapter = StudioTimeline(SimpleNamespace(timeline=timeline), self.session, "command-control")
+        self.session.frame = 25
+        self.session.playing = False
+        self.session.character_motion_enabled = False
+        adapter.update()
+        prompts = [c for c in timeline.calls if c[0] == "add_prompt"][-2:]
+        self.assertEqual([c[2]["uuid"] for c in prompts], [
+            "stagezero|one|0|", "stagezero|one|1|",
+        ])
+        # Viser publishes an optimistic ruler position before its callback.
+        timeline.current_frame = 80
+        timeline.on_scrub(80)
+        self.assertEqual(self.session.frame, 25)
+        self.assertEqual(self.session.active_take, "one")
+        adapter.update()
+        self.assertEqual(timeline.current_frame, 25)
+        self.session.character_motion_enabled = True
+        adapter.update()
+        prompts = [c for c in timeline.calls if c[0] == "add_prompt"][-2:]
+        self.assertEqual(prompts[0][2]["uuid"], "stagezero|one|0|command-control")
+        timeline.on_scrub(80)
+        self.assertEqual(self.session.frame, 80)
+
     def test_ruler_fits_the_exact_take_length(self):
         zoom = [c for c in self.timeline.calls if c[0] == "set_zoom_settings"][-1]
         self.assertEqual(zoom[2], {"default_num_frames_zoom": 100, "max_frames_zoom": 100})
@@ -116,9 +145,12 @@ class StudioTimelineTest(unittest.TestCase):
 
     def test_scrubbing_does_not_cancel_generation(self):
         self.session.busy = True
+        self.timeline.current_frame = 40
         self.timeline.on_scrub(40)
         self.assertEqual(self.session.frame, 0)
         self.assertTrue(self.session.busy)
+        self.adapter.update()
+        self.assertEqual(self.timeline.current_frame, 0)
 
     def test_reference_pose_hides_timeline_and_ignores_scrubs(self):
         self.session.kind = "reference"

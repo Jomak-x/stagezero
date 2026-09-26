@@ -25,6 +25,7 @@ import { IconCheck, IconDownload } from "@tabler/icons-react";
 import { applyRootPoseImmediately, computeT_threeworld_world } from "./WorldTransformUtils";
 import { rootNodeTemplate } from "./SceneTreeState";
 import { GaussianSplatsContext } from "./Splatting/GaussianSplatsHelpers";
+import { publishActorGlbControl } from "./mesh/ActorGlbProtocol";
 
 /** Returns a handler for all incoming messages. */
 function useMessageHandler() {
@@ -44,6 +45,7 @@ function useMessageHandler() {
   const removeGui = viewer.useGui((state) => state.removeGui);
   const updateGuiProps = viewer.useGui((state) => state.updateGuiProps);
   const updateUploadState = viewer.useGui((state) => state.updateUploadState);
+  const rejectUpload = viewer.useGui((state) => state.rejectUpload);
   const setTimeline = viewer.useGui((state) => state.setTimeline);
   const setArrowKeyOverlay = viewer.useGui((state) => state.setArrowKeyOverlay);
 
@@ -133,6 +135,11 @@ function useMessageHandler() {
     }
 
     switch (message.type) {
+      case "ActorGlbCommandMessage":
+      case "ActorGlbPoseMessage": {
+        publishActorGlbControl(message);
+        return;
+      }
       case "SceneNodeUpdateMessage": {
         updateSceneNode(message.name, message.updates);
         return;
@@ -497,11 +504,31 @@ function useMessageHandler() {
         return;
       }
       case "FileTransferPartAck": {
-        updateUploadState({
-          componentId: message.source_component_uuid!,
-          uploadedBytes: message.transferred_bytes,
-          totalBytes: message.total_bytes,
-        });
+        const componentId = message.source_component_uuid;
+        if (
+          componentId !== null &&
+          viewer.useGui.getState().uploadsInProgress[componentId]?.notificationId ===
+            `upload-${message.transfer_uuid}`
+        ) {
+          updateUploadState({
+            componentId,
+            uploadedBytes: message.transferred_bytes,
+            totalBytes: message.total_bytes,
+          });
+        }
+        return;
+      }
+      case "UploadRejectedMessage": {
+        const notificationId = `upload-${message.transfer_uuid}`;
+        if (rejectUpload(message.control_uuid, notificationId)) {
+          notifications.hide(notificationId);
+          notifications.show({
+            id: `upload-rejected-${message.transfer_uuid}`,
+            color: "red",
+            title: "Upload rejected",
+            message: message.error,
+          });
+        }
         return;
       }
       default: {

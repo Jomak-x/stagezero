@@ -1,5 +1,6 @@
 """StageZero motion studio: direct, review, edit, and navigate stored performances."""
 import argparse
+from pathlib import Path
 import time
 import threading
 import numpy as np
@@ -17,21 +18,55 @@ from studio_server import create_studio_server
 from studio_camera import StudioCamera
 from studio_timeline import StudioTimeline
 from studio_ui import StudioUI, section
+from character_controls import CharacterControls
 
 
-def main():
+MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
+
+
+def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=2336)
     parser.add_argument('--project', type=str, help='Open a saved project at startup')
     parser.add_argument('--objects', type=str, help='Load a generated object scene JSON')
+    parser.add_argument('--characters', type=Path, default=ROOT / '.runtime/characters', help='Private imported GLB library')
+    parser.add_argument('--glb', type=Path, help='Open a local GLB on first browser connection')
+    parser.add_argument('--environment', choices=('studio', 'warehouse', 'none'), default='studio',
+                        help='Reflection lighting for PBR character materials')
+    parser.add_argument('--recording', type=Path, default=ROOT / 'assets/recorded_g1.csv',
+                        help='Private recorded G1 motion CSV')
+    parser.add_argument('--token-path', type=Path, default=ROOT / '.runtime/api-token',
+                        help='Private Live ARDY bearer token file')
+    parser.add_argument('--backend-url', default='http://127.0.0.1:8765',
+                        help='Live ARDY backend URL')
+    return parser
+
+
+def load_startup_glb(parser, controls, path):
+    if path is None:
+        return
+    try:
+        # Bound the read even if a local file changes after startup begins.
+        with path.open('rb') as source:
+            data = source.read(MAX_STARTUP_GLB_BYTES + 1)
+        if len(data) > MAX_STARTUP_GLB_BYTES:
+            raise ValueError('GLB exceeds the 32 MiB import limit')
+        asset_id = controls.add_file(data, path.name)
+    except (OSError, ValueError) as exc:
+        parser.error(f'Cannot load startup GLB: {exc}')
+    controls.set_initial_asset(asset_id)
+
+
+def main():
+    parser = build_parser()
     args = parser.parse_args()
     torch.set_num_threads(2)
-    skeleton, positions, rotations = load_recording(ROOT / 'assets/recorded_g1.csv')
+    skeleton, positions, rotations = load_recording(args.recording)
     server = create_studio_server(host='127.0.0.1', port=args.port, label='StageZero Studio', enable_camera_keyboard_controls=False)
     server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False, brand_color=(126, 224, 195))
     server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
-    server.scene.configure_environment_map(None)
+    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
     server.scene.configure_default_lights(enabled=True, cast_shadow=True)
     server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
     server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
@@ -43,24 +78,25 @@ def main():
     if not character.g1_mesh_rig.mesh_handles:
         raise RuntimeError('Supplied G1 meshes are missing; cannot show the preview')
     for mesh in character.g1_mesh_rig.mesh_handles: mesh.color = (206, 226, 233)
-    backend = Backend(ROOT / '.runtime/api-token')
+    backend = Backend(args.token_path, args.backend_url)
     session = DirectorSession(backend, positions.numpy(), rotations.numpy(), ROOT / 'review/live-metrics.jsonl')
+    characters = CharacterControls(server, session, skeleton, args.characters)
+    load_startup_glb(parser, characters, args.glb)
     if args.project:
-        from pathlib import Path
         session.load_project(Path(args.project).read_bytes())
     if args.objects:
         session.load_objects(args.objects)
     object_layer = ObjectSceneLayer(server)
     previous_objects = None
     def actor_root():
-        with session.lock:
-            return session.positions[session.frame, 0].copy()
+        return characters.actor_root()
     camera = StudioCamera(server, actor_root)
     @server.on_client_connect
     def connected(client):
         client.camera.near = .05
         client.camera.far = 250.
         camera.reset(client)
+        characters.on_client_connect(client)
 
     gate_posts = [server.scene.add_box(f'/gate/post{i}', dimensions=(.055,1.65,.08), color=(83,113,131)) for i in range(2)]
     gate_panel = server.scene.add_box('/gate/panel', dimensions=(1.6,1.25,.04), color=(65,147,138), opacity=.28)
@@ -107,7 +143,7 @@ def main():
     def move_gate(_):
         edit_gate(gizmo.position)
 
-    ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls)
+    ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls, characters.build_gui)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid)
 
     @server.scene.on_keyboard_event('keydown')
@@ -115,7 +151,7 @@ def main():
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
             return
         with session.lock:
-            if session.busy or session.kind not in ('recorded', 'generated'):
+            if not session.character_motion_enabled or session.busy or session.kind not in ('recorded', 'generated'):
                 return
             if event.key == ' ':
                 session.pause() if session.playing else session.play()
@@ -127,6 +163,7 @@ def main():
             elif event.key == 'End':
                 session.seek(len(session.positions) - 1)
     previous = None
+    previous_character = -1
     last_scene = None
     render_thread = None
     last_ui = 0.
@@ -145,16 +182,20 @@ def main():
     try:
         while True:
             key = session.tick()
-            pose_changed = key != previous
+            characters.tick(key)
+            rendered_root = characters.actor_root()
+            character_changed = characters.revision != previous_character
+            pose_changed = key != previous or character_changed
             with session.lock:
-                if key != previous:
+                if pose_changed:
                     with server.atomic():
                         character.set_pose(torch.from_numpy(session.positions[session.frame]),torch.from_numpy(session.rotations[session.frame]))
-                        root = session.positions[session.frame,0].copy()
-                        if previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
+                        root = rendered_root
+                        if character_changed or previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
                             camera.rebase(root)
                         camera.update(root)
                     previous = key
+                    previous_character = characters.revision
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                     request_id,submitted = session.needs_ack
                     session.needs_ack = None
@@ -192,6 +233,7 @@ def main():
             time.sleep(1/60)
     except KeyboardInterrupt:
         session.reset()
+        characters.close()
         server.stop()
 
 

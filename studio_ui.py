@@ -59,7 +59,7 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None):
         self.server, self.session, self.camera = server, session, camera
         self.folder = project_folder
         self.folder.mkdir(parents=True, exist_ok=True)
@@ -143,6 +143,9 @@ class StudioUI:
             self.loop = gui.add_checkbox('Loop playback', initial_value=False)
         with self.tabs.add_tab('Scene'):
             scene_controls(gui)
+        if character_controls is not None:
+            with self.tabs.add_tab('Character'):
+                character_controls(gui)
         with self.tabs.add_tab('View'):
             section(gui, 'Camera')
             camera.build_gui(gui)
@@ -162,6 +165,7 @@ class StudioUI:
                 self.mode = gui.add_dropdown('Source', ('Recorded preview', 'Live ARDY'), initial_value=session.mode)
                 gui.add_html('<div class="sz-note">Recorded preview is the included example. Generating or selecting a take switches to your live project automatically.</div>')
             gui.add_markdown('[ARDY G1 model](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon52) · [Recorded motion source](https://huggingface.co/datasets/bones-studio/seed)')
+        self.guide_tab_index = 6 if character_controls is not None else 5
         with self.tabs.add_tab('Guide'):
             gui.add_html(GUIDE_HTML)
             self.guide_new_take = gui.add_button('Start a new take', color='green')
@@ -264,7 +268,7 @@ class StudioUI:
                   f'<div class="sz-preview invalid">{escape(error)}</div>' if error else '')
         self._set(self.save_action, 'label', 'Saving action…' if busy else
                   'Save action' if operation == 'replace' else 'Add action')
-        self._set(self.save_action, 'disabled', busy or error is not None)
+        self._set(self.save_action, 'disabled', busy or not self.session.character_motion_enabled or error is not None)
         self._set(self.action_prompt, 'disabled', busy)
         self._set(self.action_duration, 'disabled', busy)
         self._set(self.cancel_action, 'disabled', busy)
@@ -357,7 +361,7 @@ class StudioUI:
         self._set(self.duration_preview, 'content', preview)
         self._set(self.duration_preview, 'visible', self._valid_prompt(self.prompt.value) and show_form)
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
-        disabled = busy or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
+        disabled = busy or not self.session.character_motion_enabled or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
         self._set(self.generate, 'disabled', disabled)
         self._set(self.generate, 'label', 'Generating…' if busy else 'Take limit reached' if at_limit else 'Generate motion')
 
@@ -391,7 +395,7 @@ class StudioUI:
             if self.quick_actions.value == 'New take':
                 begin_new_take(e.client)
             elif self.quick_actions.value == 'Guide':
-                navigate_tab(self.tabs, 5, e.client)
+                navigate_tab(self.tabs, self.guide_tab_index, e.client)
 
         @self.guide_new_take.on_click
         def guide_new_take(e):
@@ -415,6 +419,8 @@ class StudioUI:
 
         def transport_command(value):
             with s.lock:
+                if not s.character_motion_enabled and value != 'Pause':
+                    return
                 if s.busy and value not in ('Play', 'Pause'):
                     return
                 if s.kind == 'reference' and value not in ('Play', 'Pause'):
@@ -429,7 +435,7 @@ class StudioUI:
         @self.seek_go.on_click
         def seek_time(_):
             with s.lock:
-                if s.busy or s.kind == 'reference':
+                if not s.character_motion_enabled or s.busy or s.kind == 'reference':
                     return
                 try:
                     seconds = float(self.seek_time.value)
@@ -472,6 +478,8 @@ class StudioUI:
                 take = s.takes.get(s.active_take)
                 if take is None or take.id != take_id or not 0 <= index < len(take.segments):
                     return
+                if not s.character_motion_enabled and operation != 'pause':
+                    return
                 if operation in ('start', 'play', 'pause'):
                     if s.busy and operation != 'pause':
                         return
@@ -506,7 +514,7 @@ class StudioUI:
             with s.lock:
                 edit = self.action_edit
                 take = s.takes.get(s.active_take)
-                if (s.busy or edit is None or take is None or take.id != edit[0] or
+                if (not s.character_motion_enabled or s.busy or edit is None or take is None or take.id != edit[0] or
                         edit[1] >= len(take.segments) or not self._valid_prompt(self.action_prompt.value)):
                     return
                 seconds, error = self._action_duration_value()
@@ -593,7 +601,7 @@ class StudioUI:
         @self.generate.on_click
         def generate(_):
             with s.lock:
-                if s.busy or not self._valid_prompt(self.prompt.value):
+                if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
                     return
                 take = s.takes.get(s.active_take)
                 plan, error = self._generation_plan(take)
@@ -784,6 +792,9 @@ class StudioUI:
         s = self.session
         with s.lock:
             live = s.mode == 'Live ARDY'
+            # Viser button groups cannot be disabled; static previews hide
+            # motion controls while their callbacks remain guarded as well.
+            self._set(self.frames, 'visible', s.character_motion_enabled)
             take = s.takes.get(s.active_take)
             has_clip = s.kind in ('recorded', 'generated')
             last_frame = len(s.positions)-1
@@ -799,8 +810,8 @@ class StudioUI:
             # Playback and clock live in the bottom timeline toolbar.
             self._set(self.playhead, 'visible', False)
             self._set(self.transport, 'visible', False)
-            self._set(self.seek_go, 'disabled', not has_clip or s.busy)
-            self._set(self.seek_time, 'disabled', not has_clip or s.busy)
+            self._set(self.seek_go, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
+            self._set(self.seek_time, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.mode, 'disabled', s.busy)
             self._set(self.prompt, 'disabled', s.busy)
             self._set(self.guide_new_take, 'disabled', s.busy or len(s.takes) >= MAX_TAKES)

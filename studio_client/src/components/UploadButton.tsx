@@ -10,6 +10,11 @@ import { notifications } from "@mantine/notifications";
 import { htmlIconWrapper } from "./ComponentStyles.css";
 import { toMantineColor } from "./colorUtils";
 
+const scopedUploadLimits: Record<string, { extension: string; maxBytes: number }> = {
+  "Load GLB": { extension: ".glb", maxBytes: 32 * 1024 * 1024 },
+  "Load rig mapping": { extension: ".json", maxBytes: 1 * 1024 * 1024 },
+};
+
 export default function UploadButtonComponent({
   uuid,
   props: { disabled, mime_type, color, _icon_html: icon_html, label },
@@ -20,6 +25,7 @@ export default function UploadButtonComponent({
   const { isUploading, upload } = useFileUpload({
     viewer,
     componentUuid: uuid,
+    label,
   });
 
   return (
@@ -33,7 +39,7 @@ export default function UploadButtonComponent({
         ref={fileUploadRef}
         onChange={(e) => {
           const input = e.target as HTMLInputElement;
-          if (!input.files) return;
+          if (!input.files?.[0]) return;
           upload(input.files[0]);
         }}
       />
@@ -67,9 +73,11 @@ export default function UploadButtonComponent({
 function useFileUpload({
   viewer,
   componentUuid,
+  label,
 }: {
   componentUuid: string;
   viewer: ViewerContextContents;
+  label: string;
 }) {
   const updateUploadState = viewer.useGui((state) => state.updateUploadState);
   const uploadState = viewer.useGui(
@@ -133,6 +141,23 @@ function useFileUpload({
     uploadState.uploadedBytes < uploadState.totalBytes;
 
   async function upload(file: File) {
+    const limit = scopedUploadLimits[label];
+    if (limit !== undefined) {
+      const maxMiB = limit.maxBytes / (1024 * 1024);
+      if (
+        !file.name.toLowerCase().endsWith(limit.extension) ||
+        file.size === 0 ||
+        file.size > limit.maxBytes
+      ) {
+        notifications.show({
+          color: "red",
+          title: "Upload rejected",
+          message: `Choose a non-empty ${limit.extension} file up to ${maxMiB} MiB.`,
+        });
+        return;
+      }
+    }
+
     // Get viewer mutable once
     const viewerMutable = viewer.mutable.current;
 

@@ -20,6 +20,46 @@ export interface GlbMessage {
   name: string;
   props: {'glb_data': Uint8Array<ArrayBuffer>, 'scale': number, 'cast_shadow': boolean, 'receive_shadow': (boolean | number)};
 }
+/** StageZero actor protocol. Unlike ordinary GlbMessage, this GLB is driven by
+ * revisioned node-local poses and never starts embedded animation clips. */
+export interface ActorGlbLoadMessage {
+  type: "ActorGlbLoadMessage";
+  name: string;
+  asset_id: string;
+  revision: number;
+  glb_data: Uint8Array<ArrayBuffer>;
+  scale: number;
+  fallback_name: string;
+  required_nodes: number[];
+  cast_shadow: boolean;
+  receive_shadow: boolean;
+  props: Record<string, unknown>;
+}
+export interface ActorGlbPoseMessage {
+  type: "ActorGlbPoseMessage";
+  revision: number;
+  node_indices: Uint8Array<ArrayBuffer>;
+  local_matrices: Uint8Array<ArrayBuffer>;
+}
+export interface ActorGlbCommandMessage {
+  type: "ActorGlbCommandMessage";
+  revision: number;
+  action: "commit" | "reject" | "g1";
+}
+export interface ActorGlbStatusMessage {
+  type: "ActorGlbStatusMessage";
+  asset_id: string;
+  revision: number;
+  status: "loaded" | "error";
+  error: string | null;
+}
+/** Scoped server rejection for one upload control and transfer. */
+export interface UploadRejectedMessage {
+  type: "UploadRejectedMessage";
+  control_uuid: string;
+  transfer_uuid: string;
+  error: string;
+}
 /** Coordinate frame message.
  *
  * (automatically generated)
@@ -1127,6 +1167,11 @@ export interface TimelinePromptMergeMessage {
 export type Message = 
   | CameraFrustumMessage
   | GlbMessage
+  | ActorGlbLoadMessage
+  | ActorGlbPoseMessage
+  | ActorGlbCommandMessage
+  | ActorGlbStatusMessage
+  | UploadRejectedMessage
   | FrameMessage
   | BatchedAxesMessage
   | GridMessage
@@ -1239,6 +1284,7 @@ export type Message =
 export type SceneNodeMessage = 
   | CameraFrustumMessage
   | GlbMessage
+  | ActorGlbLoadMessage
   | FrameMessage
   | BatchedAxesMessage
   | GridMessage
@@ -1285,7 +1331,7 @@ export type GuiComponentMessage =
   | GuiTextMessage
   | GuiDropdownMessage
   | GuiButtonGroupMessage;
-const typeSetSceneNodeMessage = new Set(['CameraFrustumMessage', 'GlbMessage', 'FrameMessage', 'BatchedAxesMessage', 'GridMessage', 'LabelMessage', 'Gui3DMessage', 'PointCloudMessage', 'DirectionalLightMessage', 'AmbientLightMessage', 'HemisphereLightMessage', 'PointLightMessage', 'RectAreaLightMessage', 'SpotLightMessage', 'MeshMessage', 'BoxMessage', 'IcosphereMessage', 'SkinnedMeshMessage', 'BatchedMeshesMessage', 'BatchedGlbMessage', 'TransformControlsMessage', 'ImageMessage', 'LineSegmentsMessage', 'CatmullRomSplineMessage', 'CubicBezierSplineMessage', 'GaussianSplatsMessage']);export function isSceneNodeMessage(message: Message): message is SceneNodeMessage {
+const typeSetSceneNodeMessage = new Set(['CameraFrustumMessage', 'GlbMessage', 'ActorGlbLoadMessage', 'FrameMessage', 'BatchedAxesMessage', 'GridMessage', 'LabelMessage', 'Gui3DMessage', 'PointCloudMessage', 'DirectionalLightMessage', 'AmbientLightMessage', 'HemisphereLightMessage', 'PointLightMessage', 'RectAreaLightMessage', 'SpotLightMessage', 'MeshMessage', 'BoxMessage', 'IcosphereMessage', 'SkinnedMeshMessage', 'BatchedMeshesMessage', 'BatchedGlbMessage', 'TransformControlsMessage', 'ImageMessage', 'LineSegmentsMessage', 'CatmullRomSplineMessage', 'CubicBezierSplineMessage', 'GaussianSplatsMessage']);export function isSceneNodeMessage(message: Message): message is SceneNodeMessage {
     return typeSetSceneNodeMessage.has(message.type);
 }
 const typeSetGuiComponentMessage = new Set(['GuiFolderMessage', 'GuiMarkdownMessage', 'GuiHtmlMessage', 'GuiProgressBarMessage', 'GuiPlotlyMessage', 'GuiUplotMessage', 'GuiImageMessage', 'GuiTabGroupMessage', 'GuiButtonMessage', 'GuiUploadButtonMessage', 'GuiSliderMessage', 'GuiMultiSliderMessage', 'GuiNumberMessage', 'GuiRgbMessage', 'GuiRgbaMessage', 'GuiCheckboxMessage', 'GuiVector2Message', 'GuiVector3Message', 'GuiTextMessage', 'GuiDropdownMessage', 'GuiButtonGroupMessage']);export function isGuiComponentMessage(message: Message): message is GuiComponentMessage {

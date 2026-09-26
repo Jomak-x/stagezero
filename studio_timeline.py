@@ -40,11 +40,12 @@ class StudioTimeline:
         # The native ruler can scroll past the take. DirectorSession.seek()
         # clamps to the actual final frame and pauses playback.
         with self.session.lock:
-            if self.session.kind in ("recorded", "generated") and not self.session.busy:
+            # Viser broadcasts the requested ruler position before this callback.
+            # Republish the authoritative frame even when the scrub is rejected.
+            self._frame = None
+            if (self.session.character_motion_enabled and
+                    self.session.kind in ("recorded", "generated") and not self.session.busy):
                 self.session.seek(frame)
-                # The browser ruler can request a frame beyond the clip, so
-                # publish the clamped position even if it matches our cache.
-                self._frame = None
 
     def update(self) -> None:
         """Publish only changed layout or playhead values (safe at 10 Hz)."""
@@ -60,7 +61,8 @@ class StudioTimeline:
                 (int(s["start"]), int(s["end"]), str(s["prompt"]))
                 for s in (take.segments if take is not None else ())
             )
-            command_uuid = self.command_uuid if not self.session.busy else None
+            command_uuid = (self.command_uuid if self.session.character_motion_enabled
+                            and not self.session.busy else None)
             layout = (kind, take_id, length, fps, segments, command_uuid)
 
         if layout != self._layout:

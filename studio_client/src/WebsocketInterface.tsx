@@ -5,6 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { ViewerContext } from "./ViewerContext";
 import { syncSearchParamServer } from "./SearchParamsUtils";
 import { WsWorkerIncoming, WsWorkerOutgoing } from "./WebsocketServerWorker";
+import { resetActorGlbProtocol } from "./mesh/ActorGlbProtocol";
 
 /** Component for handling websocket connections. */
 export function WebsocketMessageProducer() {
@@ -22,6 +23,7 @@ export function WebsocketMessageProducer() {
     worker.onmessage = (event) => {
       const data: WsWorkerOutgoing = event.data;
       if (data.type === "connected") {
+        resetActorGlbProtocol();
         resetGui();
         resetScene();
         viewer.useGui.setState({ websocketConnected: true });

@@ -75,9 +75,9 @@ class Gui:
         self.handles = []
         self.tab_labels = []
 
-    def _handle(self, **values):
+    def _handle(self, handle_type=Handle, **values):
         values.setdefault('visible', True)
-        handle = Handle(**values)
+        handle = handle_type(**values)
         self.handles.append(handle)
         return handle
 
@@ -88,9 +88,8 @@ class Gui:
         return self._handle(content=content)
 
     def add_button_group(self, label, options):
-        handle = ButtonGroupHandle(label=label, options=options, value=options[0], visible=True)
-        self.handles.append(handle)
-        return handle
+        return self._handle(handle_type=ButtonGroupHandle, label=label,
+                            options=options, value=options[0], disabled=False)
 
     def add_text(self, label, initial_value='', **kwargs):
         return self._handle(label=label, value=initial_value, disabled=False)
@@ -179,6 +178,107 @@ class StudioUITests(unittest.TestCase):
         self.ui.seek_go.click()
         self.assertEqual(self.session.frame, 119)
         self.assertIn('2.00 s', self.session.status)
+
+    def test_static_character_hides_motion_groups_then_restores_selected_take(self):
+        take = self._seed_take(100)
+        self.ui.edit_action.edit(EXTEND)
+        self.session.seek(25)
+        self.ui.update()
+        source_positions = self.session.positions
+        self.assertIsInstance(self.ui.transport, ButtonGroupHandle)
+        self.assertIsInstance(self.ui.frames, ButtonGroupHandle)
+        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.frames.visible)
+
+        self.ui.transport.writes.clear()
+        self.ui.frames.writes.clear()
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.assertFalse(self.ui.frames.visible)
+        self.assertTrue(self.ui.generate.disabled)
+        self.assertEqual(self.ui.transport.writes, [])
+        self.assertEqual(self.ui.frames.writes, [('visible', False)])
+        self.assertEqual(self.session.active_take, take.id)
+        self.assertIs(self.session.takes[take.id], take)
+        self.assertIs(self.session.positions, source_positions)
+        self.assertEqual(self.session.frame, 25)
+
+        # Delayed clicks from a hidden browser control must not move the clip.
+        self.ui.transport.click('Play')
+        self.ui.frames.click('End')
+        self.assertFalse(self.session.playing)
+        self.assertEqual(self.session.frame, 25)
+
+        self.session.set_character_motion_enabled(True)
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.frames.visible)
+        self.assertFalse(self.ui.generate.disabled)
+        self.assertEqual(self.session.active_take, take.id)
+        self.assertIs(self.session.positions, source_positions)
+        self.assertEqual(self.session.frame, 25)
+        self.ui.transport.click('Play')
+        self.assertTrue(self.session.playing)
+        self.ui.transport.click('Pause')
+        self.ui.frames.click('+1 frame')
+        self.assertEqual(self.session.frame, 26)
+
+    def test_static_character_blocks_timeline_transport_and_action_generation(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'open-editor')
+        self.ui.action_prompt.edit('Wave gently')
+        self.session.seek(25)
+        source_positions = self.session.positions
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertTrue(self.ui.save_action.disabled)
+        self.assertTrue(self.ui.seek_go.disabled)
+
+        # Delayed clicks must not bypass static preview restrictions, including
+        # the new timeline route and an editor opened before the model changed.
+        self._timeline_edit(take.id, 0, 'play', 'static-play')
+        self._timeline_edit(take.id, 0, 'start', 'static-start')
+        self._timeline_edit(take.id, 1, 'replace', 'static-edit')
+        self.ui.seek_time.value = '3.00'
+        self.ui.seek_go.click()
+        self.assertFalse(self.session.playing)
+        self.assertEqual(self.session.frame, 25)
+        self.assertEqual(self.ui.action_edit, (take.id, 0, 'replace'))
+        with patch.object(self.session, 'submit_action_edit', autospec=True, return_value=True) as submit:
+            self.ui.save_action.click()
+            submit.assert_not_called()
+            self.session.set_character_motion_enabled(True)
+            self.ui.update()
+            self.assertFalse(self.ui.save_action.disabled)
+            self.assertFalse(self.ui.seek_go.disabled)
+            self.assertEqual(self.session.active_take, take.id)
+            self.assertIs(self.session.positions, source_positions)
+            self.assertEqual(self.session.frame, 25)
+            self.ui.save_action.click()
+            submit.assert_called_once_with('Wave gently', 0, 'replace', seconds=2.0)
+
+        self._timeline_edit(take.id, 0, 'play', 'animated-play')
+        self.assertTrue(self.session.playing)
+        self._timeline_edit(take.id, 0, 'pause', 'animated-pause')
+        self.assertFalse(self.session.playing)
+
+    def test_character_controls_preserve_tabs_and_guide_navigation(self):
+        gui = Gui()
+        character_guis = []
+        camera = SimpleNamespace(build_gui=lambda gui: None)
+        ui = StudioUI(SimpleNamespace(gui=gui), self.session, camera,
+                      Path(self.temp.name), lambda gui: None,
+                      character_controls=character_guis.append)
+        self.assertEqual(character_guis, [gui])
+        self.assertEqual(gui.tab_labels,
+                         ['Motion', 'Takes', 'Scene', 'Character', 'View', 'Project', 'Guide'])
+        with patch('studio_ui.navigate_tab') as navigate:
+            ui.quick_actions.click('Guide')
+            ui.guide_browse_takes.click()
+            ui.guide_scene.click()
+            self.assertEqual([gui.tab_labels[call.args[1]] for call in navigate.call_args_list],
+                             ['Guide', 'Takes', 'Scene'])
 
     def test_create_switches_to_live_and_requires_valid_prompt(self):
         self.assertEqual(self.ui.edit_action.value, CREATE)

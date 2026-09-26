@@ -55,6 +55,7 @@ interface GuiActions {
       | GuiState["uploadsInProgress"][string]
     ) & { componentId: string },
   ) => void;
+  rejectUpload: (componentId: string, notificationId: string) => boolean;
   setTimeline: (timeline: TimelineMessage) => void;
   setArrowKeyOverlay: (overlay: ArrowKeyOverlayMessage) => void;
 }
@@ -182,6 +183,16 @@ export function useGuiState(initialServer: string) {
               ...rest,
             };
           }),
+        rejectUpload: (componentId, notificationId) => {
+          let matched = false;
+          set((globalState) => {
+            if (globalState.uploadsInProgress[componentId]?.notificationId === notificationId) {
+              delete globalState.uploadsInProgress[componentId];
+              matched = true;
+            }
+          });
+          return matched;
+        },
         updateGuiProps: (id, updates) => {
           set((state) => {
             const config = state.guiConfigFromUuid[id];
