@@ -1,0 +1,146 @@
+{
+  "run_id": "20260926-062105-a81b85",
+  "source_scene_sha256": "a478cbf6c51cba6ddd22e75fecc24203f1725f51c50bb2eadf6ccc5b886dac00",
+  "recorded_report_sha256": "3c5d7452888702c05380019a9c783ed373d66f4511624f1be8280e58530d577e",
+  "method": "Official CoreSkin skinned from exact logged world joint poses; nearest surfaces on exact generated city triangles. Positive whole-body min-Y minus building max-Y proves no triangle intersection for that frame and building. AABB proxy spheres are reported alongside; final roof contact is intentionally separate.",
+  "cases": [
+    {
+      "frame": 2100,
+      "time_seconds": 34.9999999999993,
+      "phase": "swing",
+      "actor": "mj",
+      "building": "city-4",
+      "reason": "sustained pre-pickup rooftop stance",
+      "proxy": {
+        "segment": 22,
+        "sample_point": [
+          -6.61,
+          7.257833655581399,
+          -4.224000028351432
+        ],
+        "radius_m": 0.065,
+        "aabb_overlap_m": 0.007166344418601478
+      },
+      "source_mesh_at_proxy_sample": {
+        "triangle_distance_m": 0.07783363703773105,
+        "sphere_surface_clearance_m": 0.01283363703773105,
+        "closest_triangle": 378,
+        "closest_point": [
+          -6.61,
+          7.180000018543668,
+          -4.224000028351432
+        ]
+      },
+      "core_skin_vs_source_mesh": {
+        "checked_nearby_vertices": 1779,
+        "nearest_vertex_id": 3425,
+        "nearest_vertex": [
+          -6.8757643699646,
+          7.23953914642334,
+          -4.1433424949646
+        ],
+        "nearest_triangle": 379,
+        "nearest_point": [
+          -6.8757643699646,
+          7.180000018543668,
+          -4.1433424949646
+        ],
+        "vertex_surface_clearance_m": 0.05953912787967219,
+        "all_body_vertices_above_all_building_vertices_m": 0.039539146423339666,
+        "triangle_intersection_impossible_by_vertical_separation": true
+      }
+    },
+    {
+      "frame": 2173,
+      "time_seconds": 36.216666666665894,
+      "phase": "pickup",
+      "actor": "mj",
+      "building": "city-4",
+      "reason": "worst localized city-4 proxy overlap",
+      "proxy": {
+        "segment": 22,
+        "sample_point": [
+          -6.6983165222019645,
+          7.257833655581398,
+          -4.267838017414292
+        ],
+        "radius_m": 0.065,
+        "aabb_overlap_m": 0.007166344418602366
+      },
+      "source_mesh_at_proxy_sample": {
+        "triangle_distance_m": 0.07783363703773016,
+        "sphere_surface_clearance_m": 0.012833637037730161,
+        "closest_triangle": 378,
+        "closest_point": [
+          -6.6983165222019645,
+          7.180000018543668,
+          -4.267838017414292
+        ]
+      },
+      "core_skin_vs_source_mesh": {
+        "checked_nearby_vertices": 1764,
+        "nearest_vertex_id": 3425,
+        "nearest_vertex": [
+          -6.892877578735352,
+          7.23953914642334,
+          -4.069640636444092
+        ],
+        "nearest_triangle": 379,
+        "nearest_point": [
+          -6.892877578735352,
+          7.180000018543668,
+          -4.069640636444092
+        ],
+        "vertex_surface_clearance_m": 0.05953912787967219,
+        "all_body_vertices_above_all_building_vertices_m": 0.039539146423339666,
+        "triangle_intersection_impossible_by_vertical_separation": true
+      }
+    },
+    {
+      "frame": 5278,
+      "time_seconds": 87.96666666666296,
+      "phase": "landing",
+      "actor": "spider",
+      "building": "city-10",
+      "reason": "worst localized full-body proxy overlap",
+      "proxy": {
+        "segment": 22,
+        "sample_point": [
+          3.4465864121450416,
+          9.139846437347748,
+          -18.197516426221178
+        ],
+        "radius_m": 0.065,
+        "aabb_overlap_m": 0.025153562652251937
+      },
+      "source_mesh_at_proxy_sample": {
+        "triangle_distance_m": 0.11075532150542067,
+        "sphere_surface_clearance_m": 0.045755321505420665,
+        "closest_triangle": 246,
+        "closest_point": [
+          3.4465864121450416,
+          9.029091115842327,
+          -18.197516426221178
+        ]
+      },
+      "core_skin_vs_source_mesh": {
+        "checked_nearby_vertices": 1748,
+        "nearest_vertex_id": 6456,
+        "nearest_vertex": [
+          3.4691615104675293,
+          9.123287200927734,
+          -18.181047439575195
+        ],
+        "nearest_triangle": 246,
+        "nearest_point": [
+          3.469161510467529,
+          9.029091115842327,
+          -18.181047439575195
+        ],
+        "vertex_surface_clearance_m": 0.09419608508540733,
+        "all_body_vertices_above_all_building_vertices_m": 0.0232870600440247,
+        "triangle_intersection_impossible_by_vertical_separation": true
+      }
+    }
+  ]
+}
