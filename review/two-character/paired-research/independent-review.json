@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "subject": "paired-exchange-42 InterGen research canonical clip",
+  "review_scope": "Independent review of 24-frame contact sheets from full 120-frame WebGL captures, plus every saved canonical joint frame; the main agent must watch the full video for final visual verification.",
+  "decision": "Conditional research demonstration only; do not present as native Core, verified contact, or a finished martial-arts performance.",
+  "canonical_archive": "review/two-character/paired-research/paired-exchange-42.intergen.canonical.npz",
+  "canonical_sha256": "f9fa870e2f8ba58b1e49c4a1b2a8c325a5a783360957e321300b5b1dfb3b9434",
+  "preferred_capture": "review/two-character/paired-research/exchange-corrected-capture/performance.mp4",
+  "preferred_capture_sha256": "f065a0e4ec8948880ad96bdd0741f727570fd12a9b2e7a8e1e1065efa1b2a589",
+  "visual_findings": {
+    "exchange": "Corrected capture shows two performers in close partner range, a mutual arm exchange around 1.5\u20133.9 s, and a coordinated step apart. This is materially more connected than the earlier far-apart duet. The motion reads as a compact block/shove or scuffle; a separate sidestep dodge and decisive controlled push are not clearly readable.",
+    "timing_observable_in_sampled_frames": [
+      "0.0\u20131.3 s: near each other with guarded or preparatory arm movements; little dramatic action.",
+      "1.55\u20133.9 s: approach, crossed forearms, close block/shove-like partner exchange; apparent proximity varies and no stable hand-to-hand hold is visible.",
+      "4.15\u20135.95 s: disengage and widen their spacing; blue actor ends leaning with bent arms, a weak final pose."
+    ],
+    "render_fitting_comparison": "The first paired retarget capture visibly raised/bent arms unnaturally at rest. The corrected capture's shared root-height adjustment resolves that specific regression while preserving the same underlying canonical motion. The baseline fitting shows more natural rest but does not preserve native world wrists.",
+    "body_overlap": "Torso centers remain separate in joint data; a hand/forearm joint-center pair reaches 0.017 m at frame 61, so limb mesh intersection remains possible. The sheet cannot establish collision-free mesh contact.",
+    "feet_and_scene": "Actors remain on the generated city street backdrop in sampled frames. Some light foot lift or sliding is visually plausible; no foot-plant or mesh-ground claim follows from this review. The city is a rendering backdrop, not scene-conditioned generation.",
+    "high_five_baseline": "Reject as high-five preset: sampled frames show approach and prolonged low hand/forearm meeting, without a crisp overhead palm strike and release.",
+    "dance_paired": "Corrected capture preserves a recognizable shared hold and turn around 2.8\u20134.0 s without the earlier root-height wrist regression. The first roughly two seconds remain static with palms raised; the result is a small partnered turn, not a rich dance sequence."
+  },
+  "canonical_measurements": {
+    "fps": 20,
+    "frames": 120,
+    "duration_s": 6.0,
+    "root_planar_gap_m": {
+      "min": 0.635,
+      "median": 0.836,
+      "max": 1.822,
+      "min_frame": 59,
+      "frames_under_1m": 82
+    },
+    "torso_joint_center_gap_m": {
+      "joint_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "min": 0.467,
+      "median": 0.744,
+      "frames_under_0_35m": 0
+    },
+    "all_joint_center_gap_m": {
+      "min": 0.017,
+      "min_frame": 61,
+      "nearest_pair": "actor 1 RightHand to actor 2 LeftForeArm",
+      "interpretation": "A joint-center proxy, not a mesh collision test."
+    },
+    "closest_cross_wrist_gap_m": {
+      "min": 0.111,
+      "frame": 66,
+      "time_s": 3.3,
+      "frames_under_0_15m": 2,
+      "interpretation": "No sustained hand contact or explicit contact timing."
+    },
+    "all_joint_max_displacement_per_20fps_step_m": {
+      "median": 0.12,
+      "p95": 0.242,
+      "max": 0.27,
+      "max_arrival_frame": 90,
+      "arrival_frame_40": 0.194,
+      "arrival_frame_80": 0.123
+    },
+    "root_max_displacement_per_20fps_step_m": {
+      "median": 0.018,
+      "p95": 0.073,
+      "max": 0.101
+    },
+    "old_spaced_duet_comparison": {
+      "archive": "review/two-character/pose-duet-spaced-6201.core.stagezero.npz",
+      "root_gap_min_m": 1.644,
+      "root_gap_median_m": 1.941,
+      "root_gap_max_m": 2.25,
+      "all_joint_max_step_p95_m": 0.405,
+      "all_joint_max_step_max_m": 0.568,
+      "duration_s": 8.0
+    },
+    "interpretation": "The new paired sample is substantially closer and has smaller frame-to-frame joint jumps. These values support continuity and proximity, not semantic quality or physical interaction."
+  },
+  "retarget_provenance": {
+    "source": "InterGen paired research model, CC BY-NC-SA 4.0 checkpoint; service retargeted SMPL22 at 30 fps to Core27 at 20 fps.",
+    "native_core_project": false,
+    "physical_contact_verified": false,
+    "scene_conditioned": false,
+    "corrected_capture_wrist_target_error_max_m": 1.0567982933196163e-08,
+    "rendered_closest_cross_wrist_m": 0.1113361194729805,
+    "qualification": "Wrist fitting accurately retains the source gap; it does not close that gap or enforce hand contact, foot locks, or mesh collision avoidance."
+  },
+  "next_review_gate": "Main agent watches full corrected video, especially frames 25\u201380 and 85\u2013119, and decides whether the short block/shove exchange is a useful labeled research preset. Reject any claim that it satisfies the full dodge\u2013block\u2013push prompt or can be shipped as the native motion workflow.",
+  "additional_trial": {
+    "name": "paired-boxing-7303",
+    "archive": "review/two-character/paired-research/paired-boxing-7303.intergen.canonical.npz",
+    "capture": "review/two-character/paired-research/boxing-corrected-capture/performance.mp4",
+    "decision": "Reject full 6-second clip as a default preset because the ending intersects the actors. Its earlier punches/ducks are a stronger action direction than the exchange.",
+    "sampled_visual_timing": [
+      "0\u20131.3 s: broad punching/guarding gestures, with blue ducking around 0.8\u20131.1 s; some actions read as independent rather than clearly causally linked.",
+      "1.55\u20132.35 s: green passes in front of blue. This apparent screen overlap is mostly camera occlusion rather than torso-centerline collision in the saved joints.",
+      "2.85\u20133.35 s: blue ducks low as green crosses close; readable second evasion but body clearance is borderline.",
+      "5.4\u20135.95 s: performers converge and finish visibly interpenetrating back to back; fails full-sequence acceptance."
+    ],
+    "canonical_measurements": {
+      "frames": 120,
+      "fps": 20,
+      "duration_s": 6,
+      "root_planar_gap_m": {
+        "min": 0.247,
+        "median": 0.968,
+        "max": 1.532,
+        "min_frame": 116,
+        "frames_under_0_35m": 5
+      },
+      "torso_joint_center_gap_m": {
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "min": 0.212,
+        "median": 0.82,
+        "min_frame": 115,
+        "frames_under_0_35m": 13
+      },
+      "f36_to_f47_torso_gap_m": {
+        "f36": 0.526,
+        "f38": 0.484,
+        "f41": 0.469,
+        "f44": 0.638,
+        "f47": 0.773
+      },
+      "second_duck_torso_gap_m": {
+        "f57": 0.408,
+        "f62": 0.355
+      },
+      "ending_torso_gap_m": {
+        "f114": 0.214,
+        "f119": 0.307
+      },
+      "all_joint_center_gap_m": {
+        "min": 0.029,
+        "min_frame": 113,
+        "interpretation": "Joint centers are only a proxy, but high-resolution last frame independently shows body intersection."
+      },
+      "all_joint_max_displacement_per_20fps_step_m": {
+        "median": 0.158,
+        "p95": 0.251,
+        "max": 0.275,
+        "arrival_frame_40": 0.141,
+        "arrival_frame_80": 0.089
+      }
+    },
+    "recommendation": "Keep as failed full-trial provenance. A separately labeled early excerpt could be useful for research review, but the source is still the full generated sequence and no corrected partner-collision result has been demonstrated."
+  },
+  "boxing_7304_trial": {
+    "archive": "review/two-character/paired-research/paired-boxing-7304.intergen.canonical.npz",
+    "capture": "review/two-character/paired-research/boxing-7304-capture/performance.mp4",
+    "video_sha256": "7dad1da1baffc86d079f70f22d5e85d7d424b3539804077d358552fbcb7f3c01",
+    "decision": "Reject as a convincing full boxing default. It passes the specified torso joint-center spacing screen that boxing-7303 failed, but the latter half loses two-person action readability.",
+    "sampled_visual_findings": [
+      "0.5\u20132.4 s: facing sparring, ducking, and crossing arm motion are visible; some action is plausible but no exact punch-contact timing is established.",
+      "2.6\u20133.9 s: one actor turns and crosses in front of the other, with long camera occlusion; the requested role switch is not clearly readable.",
+      "5.45\u20135.95 s: they converge again; the last frame shows heads nearly touching and little posed resolution. It does not have the gross torso intersection seen in boxing-7303."
+    ],
+    "canonical_measurements": {
+      "fps": 20,
+      "frames": 120,
+      "duration_s": 6,
+      "root_planar_gap_m": {
+        "min": 0.593,
+        "median": 1.14,
+        "max": 1.494,
+        "min_frame": 100,
+        "frames_under_0_35m": 0
+      },
+      "torso_joint_center_gap_m": {
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "min": 0.511,
+        "median": 1.025,
+        "min_frame": 119,
+        "frames_under_0_35m": 0
+      },
+      "all_joint_center_gap_m": {
+        "min": 0.038,
+        "min_frame": 94,
+        "interpretation": "Limb proximity remains; no mesh collision verification."
+      },
+      "all_joint_max_displacement_per_20fps_step_m": {
+        "median": 0.156,
+        "p95": 0.269,
+        "max": 0.386,
+        "arrival_frame_40": 0.064,
+        "arrival_frame_80": 0.205
+      }
+    },
+    "comparison": "Better gross body clearance than boxing-7303, less coherent partner exchange than exchange-42 corrected. The original 7303 failure remains documented in additional_trial."
+  }
+}

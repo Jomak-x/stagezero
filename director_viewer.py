@@ -31,6 +31,12 @@ from studio_paired_session import PairedStudioSession
 MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
 
 
+def native_core_has_pending_work(snapshot):
+    """A playing phase can still have queued or in-flight native work."""
+    return (snapshot.get('inflight_request_id') is not None or
+            bool(snapshot.get('queued_stages')))
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=2336)
@@ -182,12 +188,19 @@ def main():
                 raise ValueError('Finish or cancel the current take generation before switching modes.')
             if active and core_requested:
                 core_state = core.snapshot()
-                if core_state['phase'] in ('generating', 'queued', 'buffering'):
+                if native_core_has_pending_work(core_state):
                     raise ValueError('Finish or cancel Native Core generation before switching modes.')
-                core.deactivate()
-                core_requested = False
             if active:
+                was_paired_active = bool(paired.snapshot()['active'])
                 paired.activate()
+                try:
+                    if core_requested:
+                        core.deactivate()
+                        core_requested = False
+                except Exception:
+                    if not was_paired_active:
+                        paired.deactivate()
+                    raise
                 paired_requested = True
                 session.pause()
                 session.set_character_motion_enabled(False)

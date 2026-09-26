@@ -101,8 +101,9 @@ def get_render_with_timeout(client, *, width: int, height: int, timeout: float) 
 
 
 def capture(args: argparse.Namespace) -> dict:
-    research = getattr(args, "canonical", None) is not None
-    archive = (args.canonical if research else args.archive).resolve()
+    paired_project = getattr(args, "paired_project", None)
+    research = paired_project is not None or getattr(args, "canonical", None) is not None
+    archive = (paired_project or (args.canonical if research else args.archive)).resolve()
     content = archive.read_bytes()
     if len(content) > 64_000_000:
         raise ValueError("Native Core archive exceeds the Studio's 64 MB limit")
@@ -119,13 +120,17 @@ def capture(args: argparse.Namespace) -> dict:
 
     with (nullcontext(None) if research else CoreStudioSession()) as session:
         if research:
-            from experiments.trial_paired_scene import load_research_clip
-            clip, content = load_research_clip(archive)
-            if args.scene is None or not args.scene.is_file():
-                raise ValueError("Research capture requires an explicit --scene JSON file")
-            if args.scene.stat().st_size > 900_000:
-                raise ValueError("Research capture scene exceeds its size limit")
-            scene = validate_scene(json.loads(args.scene.read_text()))
+            if paired_project is not None:
+                from paired_scene import decode_project
+                clip, scene, _ = decode_project(content)
+            else:
+                from experiments.trial_paired_scene import load_research_clip
+                clip, content = load_research_clip(archive)
+                if args.scene is None or not args.scene.is_file():
+                    raise ValueError("Research capture requires an explicit --scene JSON file")
+                if args.scene.stat().st_size > 900_000:
+                    raise ValueError("Research capture scene exceeds its size limit")
+                scene = validate_scene(json.loads(args.scene.read_text()))
             capture_label = "StageZero paired InterGen research capture"
             button_label = "Start exact research capture"
         else:
@@ -280,7 +285,7 @@ def capture(args: argparse.Namespace) -> dict:
                     "source_format": clip.metadata.get("source_format"),
                     "clip_metadata": dict(clip.metadata),
                     "native_features_available": False, "native_core_project": False,
-                    "scene_source": str(args.scene.resolve()), "scene_conditioned": False,
+                    "scene_source": "saved paired project" if paired_project else str(args.scene.resolve()), "scene_conditioned": False,
                     "physical_contact_verified": False,
                     "rendering_note": "Paired world-wrist preserving fit with common floor translation" if getattr(args, "paired_retarget", False) else "Baseline fitting does not preserve native wrists",
                     "fitting_provenance": renderer.fitting_provenance,
@@ -306,6 +311,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     inputs = parser.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--archive", type=Path, help="Saved .core.stagezero.npz (native default)")
+    inputs.add_argument("--paired-project", type=Path, help="Saved separate paired research project from Studio")
     inputs.add_argument("--canonical", type=Path,
                         help="Experimental .intergen.canonical.npz from trial_paired_scene.py")
     parser.add_argument("--scene", type=Path, help="Explicit scene JSON required only with --canonical")
@@ -338,14 +344,14 @@ def main() -> None:
         parser.error("--max-frames must be positive")
     if not 1 <= args.fov <= 120:
         parser.error("--fov must be 1–120 degrees")
-    if args.paired_retarget and args.canonical is None:
-        parser.error("--paired-retarget requires --canonical")
-    source = args.canonical if args.canonical is not None else args.archive
+    if args.paired_retarget and args.canonical is None and args.paired_project is None:
+        parser.error("--paired-retarget requires research motion")
+    source = args.paired_project or args.canonical or args.archive
     if not source.is_file():
         parser.error(f"Motion input does not exist: {source}")
     if args.canonical is not None and (args.scene is None or not args.scene.is_file()):
         parser.error("--canonical requires an existing --scene JSON file")
-    if args.archive is not None and args.scene is not None:
+    if (args.archive is not None or args.paired_project is not None) and args.scene is not None:
         parser.error("Native --archive uses its saved scene; --scene is only for research --canonical")
     capture(args)
 

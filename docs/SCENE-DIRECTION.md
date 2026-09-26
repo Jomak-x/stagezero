@@ -220,3 +220,8 @@ The integrated **Together · experimental** controls now include a reviewed
 [two-character review](TWO-CHARACTER-REVIEW.md) for the complete selected video,
 UI steps, reproduction commands, 730-test verification, measured timing and
 clearance, preserved rejected trials, and remaining transition/foot-slide limits.
+
+
+## Separate joint-pair research workflow
+
+The independent Core duet was rejected in user review for spacing and timing. A separate opt-in joint-model workflow now sits under Together, with separate paired archives and playback; it does not change the native Core contract above. See [Joint two-character performance review](TWO-CHARACTER-PAIRED.md) for the replacement, videos, rejected trials and reproduction commands.

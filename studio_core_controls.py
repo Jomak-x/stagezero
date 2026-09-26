@@ -14,6 +14,7 @@ import threading
 import time
 
 from core_choreography import choreography_preset, validate_plan
+from paired_scene import decode_project as decode_paired_project
 from studio_interaction_scene import adapt_studio_scene, recommend_placements
 
 MAX_STUDIO_ARCHIVE_BYTES = 64_000_000
@@ -91,38 +92,38 @@ class CoreStudioControls:
             self.actor_two = gui.add_text("Actor 2 direction", initial_value=EXAMPLES["Dance"][1], multiline=True)
             self.duration = gui.add_dropdown("Length", tuple(DURATIONS), initial_value="6 seconds")
             self.generate = gui.add_button("Generate / redirect")
-            with gui.add_folder("Together · experimental", expand_by_default=False):
-                gui.add_markdown("Two actors required. A new performance places them at least 2.25 m apart. Shared beats coordinate timing and directions; physical interaction quality is still experimental.")
-                self.together_start = gui.add_button("New two-person performance", color="gray")
-                self.together_preset = gui.add_dropdown("Shared preset", tuple(TOGETHER_PRESETS),
-                                                        initial_value="Pose duet")
-                self.together_swap = gui.add_checkbox("Swap actor roles", initial_value=False)
-                self.together_preview_preset = gui.add_button("Preview shared preset", color="gray")
-                self.together_direction = gui.add_text("Shared direction for AI", initial_value="", multiline=True)
-                self.together_plan_ai = gui.add_button("Plan shared scene with AI", color="gray")
-                self.together_preview = gui.add_markdown("Choose a preset or describe a shared scene for AI planning.")
-                self.together_generate = gui.add_button("Generate shared sequence")
+            with gui.add_folder("Together · experimental", expand_by_default=True):
                 if self.paired is not None:
-                    with gui.add_folder("Joint pair · InterGen research", expand_by_default=False):
-                        gui.add_markdown("Experimental joint generation · InterGen research model (CC BY-NC-SA 4.0). The scene is a playback backdrop, not a generation constraint. Contact is not verified. Saved clips are separate from Native Core projects and G1 takes.")
-                        self.pair_idea = gui.add_dropdown("Joint pair idea", tuple(PAIR_IDEAS), initial_value="Close exchange")
-                        self.pair_example = gui.add_button("Use pair idea", color="gray")
-                        self.pair_prompt = gui.add_text("Joint pair prompt", initial_value=PAIR_EXAMPLE_PROMPT, multiline=True)
-                        self.pair_seed = gui.add_text("Pair seed", initial_value="42")
-                        self.pair_length = gui.add_dropdown("Pair length", ("2 seconds", "4 seconds", "6 seconds"), initial_value="6 seconds")
-                        self.pair_generate = gui.add_button("Generate joint pair · research")
-                        self.pair_status = gui.add_markdown("No paired research clip yet.")
-                        self.pair_view = gui.add_button("View paired research", color="gray")
-                        self.pair_back = gui.add_button("Return to G1", color="gray")
-                        self.pair_play = gui.add_button("Play paired clip", color="gray")
-                        self.pair_pause = gui.add_button("Pause paired clip", color="gray")
-                        self.pair_restart = gui.add_button("Restart paired clip", color="gray")
-                        self.pair_cancel = gui.add_button("Cancel paired generation", color="gray")
-                        with gui.add_folder("Paired research archives", expand_by_default=False):
-                            self.pair_save = gui.add_button("Save paired research clip + download", color="gray")
-                            self.pair_saved = gui.add_dropdown("Saved paired research clips", ("No paired research clips",))
-                            self.pair_open = gui.add_button("Open paired research clip", color="gray")
-                            self.pair_upload = gui.add_upload_button("Open paired research archive file", mime_type=".npz")
+                    gui.add_markdown("Joint pair · InterGen research model (CC BY-NC-SA 4.0). The scene is a playback backdrop, not a generation constraint. Physical contact is not verified. Clips stay separate from Native Core projects and G1 takes.")
+                    self.pair_idea = gui.add_dropdown("Joint pair idea", tuple(PAIR_IDEAS), initial_value="Close exchange")
+                    self.pair_example = gui.add_button("Use pair idea", color="gray")
+                    self.pair_prompt = gui.add_text("Joint pair prompt", initial_value=PAIR_EXAMPLE_PROMPT, multiline=True)
+                    self.pair_seed = gui.add_text("Pair seed", initial_value="42")
+                    self.pair_length = gui.add_dropdown("Pair length", ("2 seconds", "4 seconds", "6 seconds"), initial_value="6 seconds")
+                    self.pair_generate = gui.add_button("Generate joint pair · research")
+                    self.pair_status = gui.add_markdown("No paired research clip yet.")
+                    self.pair_view = gui.add_button("View paired research", color="gray")
+                    self.pair_back = gui.add_button("Return to G1", color="gray")
+                    self.pair_play = gui.add_button("Play paired clip", color="gray")
+                    self.pair_pause = gui.add_button("Pause paired clip", color="gray")
+                    self.pair_restart = gui.add_button("Restart paired clip", color="gray")
+                    self.pair_cancel = gui.add_button("Cancel paired generation", color="gray")
+                    with gui.add_folder("Paired research archives", expand_by_default=False):
+                        self.pair_save = gui.add_button("Save paired research clip + download", color="gray")
+                        self.pair_saved = gui.add_dropdown("Saved paired research clips", ("No paired research clips",))
+                        self.pair_open = gui.add_button("Open paired research clip", color="gray")
+                        self.pair_upload = gui.add_upload_button("Open paired research archive file", mime_type=".npz")
+                with gui.add_folder("Independent Core cues · legacy experiment", expand_by_default=False):
+                    gui.add_markdown("Two Native Core actors are generated independently on a shared beat clock. A new cast starts at least 2.25 m apart; partner contact is not verified.")
+                    self.together_start = gui.add_button("New two-person performance", color="gray")
+                    self.together_preset = gui.add_dropdown("Shared cue preset", tuple(TOGETHER_PRESETS),
+                                                            initial_value="Dance and answer")
+                    self.together_swap = gui.add_checkbox("Swap actor roles", initial_value=False)
+                    self.together_preview_preset = gui.add_button("Preview shared cue preset", color="gray")
+                    self.together_direction = gui.add_text("Shared direction for AI", initial_value="", multiline=True)
+                    self.together_plan_ai = gui.add_button("Plan shared cues with AI", color="gray")
+                    self.together_preview = gui.add_markdown("Choose a cue preset or describe a shared scene for AI planning.")
+                    self.together_generate = gui.add_button("Generate independent Core sequence")
             self.play = gui.add_button("Play", color="gray")
             self.pause = gui.add_button("Pause", color="gray")
             self.restart = gui.add_button("Restart", color="gray")
@@ -270,8 +271,20 @@ class CoreStudioControls:
             raise ValueError("Choose a paired research archive under 8 MB.")
         if self.paired.snapshot().get("busy"):
             raise ValueError("Cancel paired generation before opening another clip.")
-        self.paired.load(content)
+        # Validate first, then pass the G1/Core switch guard before changing
+        # the paired clip. A rejected switch must preserve every active view.
+        decode_paired_project(content)
+        was_paired_active = bool(self.paired.snapshot().get("active"))
+        was_core_active = bool(self._snapshot().get("active"))
         self.on_paired_active(True)
+        try:
+            self.paired.load(content)
+        except Exception:
+            if not was_paired_active:
+                self.on_paired_active(False)
+                if was_core_active:
+                    self._activate()
+            raise
         self._pair_notice = "Opened paired InterGen research clip."
 
     def _open_bytes(self, content):

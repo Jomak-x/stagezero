@@ -11,6 +11,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from core_choreography import choreography_preset
+from director_viewer import native_core_has_pending_work
 from studio_core_controls import CoreStudioControls
 from studio_interaction_scene import recommend_placements
 from test_studio_core_controls import Core, Gui, Studio
@@ -86,7 +87,7 @@ class TogetherControlsTests(TestCase):
         self.controls.start.click()
 
     def test_two_actors_required_and_generation_is_explicit(self):
-        self.assertEqual(self.controls.together_preset.value, "Pose duet")
+        self.assertEqual(self.controls.together_preset.value, "Dance and answer")
         self.controls.enabled.edit(True, client=object())
         self.assertTrue(self.controls.together_preview_preset.disabled)
         self.assertTrue(self.controls.together_generate.disabled)
@@ -104,6 +105,7 @@ class TogetherControlsTests(TestCase):
         self.assertEqual(submitted[1]["name"], "feint_dodge")
 
     def test_new_performance_backs_up_motion_and_faces_partners(self):
+        self.controls.together_preset.value = "Pose duet"
         self.controls.enabled.edit(True, client=object())
         self.core.total_frames = 40
         self.controls.tick()
@@ -166,7 +168,7 @@ class TogetherControlsTests(TestCase):
         swapped = self.controls._together_plan
         self.assertEqual(swapped["beats"][1]["actor_prompts"]["actor_1"],
                          original["beats"][1]["actor_prompts"]["actor_2"])
-        self.controls.together_preset.edit("Dance and answer", client=object())
+        self.controls.together_preset.edit("Surprise and celebrate", client=object())
         self.assertTrue(self.controls.together_generate.disabled)
 
     def test_preview_uses_valid_literal_mdx_for_model_text(self):
@@ -311,6 +313,11 @@ class PairedResearchControlsTests(TestCase):
             paired_session=self.paired, on_paired_active=switch)
 
     def test_joint_pair_example_and_generation_do_not_touch_native_core(self):
+        labels = list(self.gui.labels)
+        self.assertLess(labels.index("Joint pair idea"),
+                        labels.index("Independent Core cues · legacy experiment"))
+        self.assertFalse(self.gui.labels["Independent Core cues · legacy experiment"].expanded)
+        self.assertTrue(self.gui.labels["Together · experimental"].expanded)
         self.assertEqual(self.controls.pair_prompt.value,
                          "Two people perform a choreographed martial arts exchange: sidestep dodge, forearm block, controlled push, then step apart.")
         self.controls.pair_idea.value = "Partner dance"
@@ -337,10 +344,51 @@ class PairedResearchControlsTests(TestCase):
         self.assertEqual(paths[0].read_bytes(), b"paired-research-archive")
         self.assertEqual(list(self.controls.folder.glob("*.core.stagezero.npz")), [])
         self.paired.active = False
-        self.controls.pair_open.click()
+        with patch("studio_core_controls.decode_paired_project"):
+            self.controls.pair_open.click()
         self.assertEqual(self.paired.calls[-1], ("load", b"paired-research-archive"))
         self.assertEqual(self.switches[-1], True)
         self.controls.pair_play.click()
         self.assertEqual(self.paired.calls[-1], ("play",))
         self.controls.pair_back.click()
         self.assertEqual(self.switches[-1], False)
+
+    def test_rejected_mode_switch_does_not_load_or_activate_research_archive(self):
+        self.core.active = True
+        self.core.initialized = True
+        self.core.actor_ids = ("actor_1", "actor_2")
+        before = self.paired.snapshot()
+        self.controls.on_paired_active = lambda _: (_ for _ in ()).throw(ValueError("G1 is busy"))
+        with patch("studio_core_controls.decode_paired_project"):
+            with self.assertRaisesRegex(ValueError, "G1 is busy"):
+                self.controls._open_pair_bytes(b"paired-research-archive")
+        self.assertEqual(self.paired.snapshot(), before)
+        self.assertEqual(self.paired.calls, [])
+        self.assertTrue(self.core.active)
+
+    def test_failed_load_after_switch_rolls_back_to_previous_native_mode(self):
+        self.core.active = True
+        self.core.initialized = True
+        self.core.actor_ids = ("actor_1", "actor_2")
+
+        def fail_load(_):
+            raise ValueError("Archive could not load")
+
+        self.paired.load = fail_load
+        with patch("studio_core_controls.decode_paired_project"):
+            with self.assertRaisesRegex(ValueError, "Archive could not load"):
+                self.controls._open_pair_bytes(b"paired-research-archive")
+        self.assertEqual(self.switches, [True, False])
+        self.assertFalse(self.paired.active)
+        self.assertTrue(self.core.active)
+
+    def test_native_playing_phase_with_pending_request_blocks_pair_switch(self):
+        self.assertTrue(native_core_has_pending_work({"phase": "playing",
+                                                      "inflight_request_id": "native-1",
+                                                      "queued_stages": 0}))
+        self.assertTrue(native_core_has_pending_work({"phase": "playing",
+                                                      "inflight_request_id": None,
+                                                      "queued_stages": 2}))
+        self.assertFalse(native_core_has_pending_work({"phase": "playing",
+                                                       "inflight_request_id": None,
+                                                       "queued_stages": 0}))

@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "name": "paired-boxing-7303",
+  "status": "complete",
+  "source": "intergen",
+  "research_only": true,
+  "artifact_kind": "paired_intergen_research_canonical",
+  "request": {
+    "request_id": "paired-trial-a4f2679a454541dc8c027d11bd3d99cb",
+    "stage_kind": "paired",
+    "frames": 120,
+    "prompt": "One person throws punches while the other person blocks and dodges, then they switch roles.",
+    "actor_ids": [
+      "actor_1",
+      "actor_2"
+    ],
+    "seed": 7303,
+    "pair_sequence_id": "paired-sequence-a4f2679a454541dc8c027d11bd3d99cb",
+    "source_start_frame": 0,
+    "source_total_frames": 120
+  },
+  "service_url": "http://127.0.0.1:8769",
+  "max_gpu_jobs": 1,
+  "submitted_jobs": 1,
+  "license": "CC BY-NC-SA 4.0 (InterGen research checkpoint)",
+  "native_core_project": false,
+  "physical_contact_verified": false,
+  "scene_conditioned": false,
+  "visual_review": "pending",
+  "health": {
+    "ready": true,
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "joints": 27,
+    "horizon": 40,
+    "pair_research_enabled": true,
+    "queue_depth": 0
+  },
+  "first_complete_chunk_seconds": 2.2643423750123475,
+  "service_result": {
+    "request_id": "paired-trial-a4f2679a454541dc8c027d11bd3d99cb",
+    "stage_kind": "paired",
+    "status": "complete",
+    "produced_chunks": 3,
+    "total_chunks": 3,
+    "available_chunks": [
+      0,
+      1,
+      2
+    ],
+    "submitted_at": 1393324.455033324,
+    "started_at": 1393324.455174305,
+    "finished_at": 1393325.900550995,
+    "error": null,
+    "metadata": {
+      "model": "InterGen",
+      "research_only": true,
+      "license": "CC BY-NC-SA 4.0",
+      "source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+      "generation_seconds": 1.4453376890160143,
+      "bridge": {
+        "method": "SMPL22_named_mapping_shared_scale_limb_IK_local_SO3_FK_v1",
+        "source_fps": 30.0,
+        "fps": 20.0,
+        "source_frames": 180,
+        "frames": 120,
+        "common_scale": 1.1730507010720006,
+        "scale_method": "pooled median bilateral upper/lower arm/leg lengths, least-squares common scale",
+        "placement": {
+          "rotation": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "translation_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shared_by_both_actors": true
+        },
+        "skeleton": "core27",
+        "joint_names": [
+          "Hips",
+          "Spine",
+          "Spine1",
+          "Spine2",
+          "Spine3",
+          "Neck",
+          "Head",
+          "RightShoulder",
+          "RightArm",
+          "RightForeArm",
+          "RightHand",
+          "RightHandEnd",
+          "RightHandThumb1",
+          "LeftShoulder",
+          "LeftArm",
+          "LeftForeArm",
+          "LeftHand",
+          "LeftHandEnd",
+          "LeftHandThumb1",
+          "RightUpLeg",
+          "RightLeg",
+          "RightFoot",
+          "RightToeBase",
+          "LeftUpLeg",
+          "LeftLeg",
+          "LeftFoot",
+          "LeftToeBase"
+        ],
+        "source_joint_names": [
+          "pelvis",
+          "left_hip",
+          "right_hip",
+          "spine1",
+          "left_knee",
+          "right_knee",
+          "spine2",
+          "left_ankle",
+          "right_ankle",
+          "spine3",
+          "left_foot",
+          "right_foot",
+          "neck",
+          "left_collar",
+          "right_collar",
+          "head",
+          "left_shoulder",
+          "right_shoulder",
+          "left_elbow",
+          "right_elbow",
+          "left_wrist",
+          "right_wrist"
+        ],
+        "joint_mapping": {
+          "Hips": "pelvis",
+          "Spine3": "spine3",
+          "Neck": "neck",
+          "Head": "head",
+          "LeftShoulder": "left_collar",
+          "LeftArm": "left_shoulder",
+          "LeftForeArm": "left_elbow",
+          "LeftHand": "left_wrist",
+          "LeftUpLeg": "left_hip",
+          "LeftLeg": "left_knee",
+          "LeftFoot": "left_ankle",
+          "LeftToeBase": "left_foot",
+          "RightShoulder": "right_collar",
+          "RightArm": "right_shoulder",
+          "RightForeArm": "right_elbow",
+          "RightHand": "right_wrist",
+          "RightUpLeg": "right_hip",
+          "RightLeg": "right_knee",
+          "RightFoot": "right_ankle",
+          "RightToeBase": "right_foot"
+        },
+        "metrics": {
+          "wrist_target_error": {
+            "mean_m": 0.014945249648225674,
+            "p95_m": 0.08380657339382688,
+            "max_m": 0.10792311443465684
+          },
+          "foot_target_error": {
+            "mean_m": 0.02262810315038964,
+            "p95_m": 0.05281370454525601,
+            "max_m": 0.08419890187452835
+          },
+          "pair_wrist_distance_drift": {
+            "mean_m": 0.00980636258442819,
+            "p95_m": 0.057550040864486375,
+            "max_m": 0.09215154315674123
+          },
+          "source_close_wrist_threshold_m": 0.12,
+          "source_close_wrist_pair_samples": 5,
+          "close_wrist_distance_drift": {
+            "mean_m": 0.001237992006050334,
+            "p95_m": 0.0033512255752018243,
+            "max_m": 0.0035765185160247653
+          },
+          "retarget_close_wrist_distance": {
+            "mean_m": 0.0871483553148128,
+            "p95_m": 0.10274499858878952,
+            "max_m": 0.10352475327852217
+          },
+          "bone_length_error": {
+            "mean_m": 2.493773243772477e-08,
+            "p95_m": 7.228506842538173e-08,
+            "max_m": 1.263224432002108e-07
+          },
+          "root_shared_transform_max_error_m": 5.928994695203471e-08,
+          "pair_root_vector_max_error_m": 8.697116160583107e-08,
+          "source_planted_foot_samples": 234,
+          "source_planted_definition": "source foot y < 0.15m and planar speed < 0.10m/s after shared scale",
+          "source_planted_foot_speed_mean_mps": 0.06506446533784509,
+          "retarget_planted_foot_speed_mean_mps": 0.08106174574799987,
+          "retarget_planted_foot_speed_p95_mps": 0.14890034882287526,
+          "minimum_foot_y_m": 0.005032544489949942
+        },
+        "limitations": [
+          "Position-only input cannot identify axial twist, palm normals, or finger articulation.",
+          "Core hand ends/thumbs inherit forearm orientation; source supplies wrists only.",
+          "Fixed target proportions and unreachable endpoints may change contact distances.",
+          "No actor-specific root correction, floor snapping, contact locking, or mesh collision solve.",
+          "SO3 interpolation preserves bone lengths; it does not low-pass filter source jitter."
+        ]
+      },
+      "frames": 120,
+      "fps": 20,
+      "pair_sequence_id": "paired-sequence-a4f2679a454541dc8c027d11bd3d99cb",
+      "source_start_frame": 0,
+      "source_total_frames": 120,
+      "cache_reused": false
+    }
+  },
+  "elapsed_seconds": 3.172825375018874,
+  "canonical_clip": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/review/two-character/paired-research/paired-boxing-7303.intergen.canonical.npz",
+  "frames": 120,
+  "fps": 20,
+  "duration_seconds": 6.0,
+  "canonical_sha256": "3b748969d6ec96d8c4e11f6e3b47013790252cb70798ceaf12f3cbd5d21d670d",
+  "exact_save_load": true,
+  "partial_output": false
+}
