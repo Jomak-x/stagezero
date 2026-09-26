@@ -106,3 +106,13 @@ Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating tha
 ```
 
 See `review/MILESTONE-2.md` for measurements, visual evidence, and limitations. Glasses and multiple actors are not started and require review approval.
+
+## Scene generation
+
+The studio's **Scene → Scene generator** composes 16 procedural prop types,
+six animated effects, five lighting palettes and five complete starter sets.
+Use instant offline recipes, the connected Neon AI gateway, or an optional local
+Ollama model. Move/duplicate props and import/export standalone scene JSON.
+See [scene generation and setup](docs/OBJECTS.md) for examples, the UI-independent
+integration API and current contact limitations. Reusable examples live in
+`examples/scenes/`; `ai-observatory.json` was generated through Neon.

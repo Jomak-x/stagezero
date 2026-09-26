@@ -1,5 +1,5 @@
-"""Single-actor directing workflow; previous viewers remain available."""
-import json
+"""StageZero motion studio: direct, review, edit, and navigate stored performances."""
+import argparse
 import time
 import threading
 import numpy as np
@@ -10,316 +10,190 @@ from PIL import Image
 from preview import ROOT, load_recording
 from ardy.viz.viser_utils import Character
 from live_motion import Backend
-from directing import DirectorSession
+from object_directing import ObjectDirectorSession as DirectorSession
+from object_scene import ObjectSceneLayer
+from object_controls import add_object_controls
+from studio_server import create_studio_server
+from studio_camera import StudioCamera
+from studio_timeline import StudioTimeline
+from studio_ui import StudioUI, section
+
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--port', type=int, default=2336)
+    parser.add_argument('--project', type=str, help='Open a saved project at startup')
+    parser.add_argument('--objects', type=str, help='Load a generated object scene JSON')
+    args = parser.parse_args()
     torch.set_num_threads(2)
-    skeleton, positions, rotations = load_recording(ROOT / "assets/recorded_g1.csv")
-    server = viser.ViserServer(host="127.0.0.1", port=2336, label="StageZero")
-    server.gui.configure_theme(dark_mode=True, control_layout="floating", control_width="medium", show_logo=False, show_share_button=False, brand_color=(72, 202, 183))
-    server.scene.set_up_direction("+y")
+    skeleton, positions, rotations = load_recording(ROOT / 'assets/recorded_g1.csv')
+    server = create_studio_server(host='127.0.0.1', port=args.port, label='StageZero Studio', enable_camera_keyboard_controls=False)
+    server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False, brand_color=(126, 224, 195))
+    server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
     server.scene.configure_environment_map(None)
     server.scene.configure_default_lights(enabled=True, cast_shadow=True)
-    server.scene.add_light_ambient("/fill", color=(191, 215, 239), intensity=0.45)
-    # A quiet floor and low circular platform give scale without distracting scenery.
-    server.scene.add_box("/floor", color=(24, 31, 42), dimensions=(200, 0.1, 200), position=(0, -0.051, 0), cast_shadow=False)
-    stage = trimesh.creation.cylinder(radius=2.0, height=0.12, sections=96)
-    stage.apply_transform(trimesh.transformations.rotation_matrix(-np.pi / 2, (1, 0, 0)))
-    server.scene.add_mesh_simple("/stage", vertices=stage.vertices, faces=stage.faces, color=(68, 83, 99), position=(0, -0.06, 0), flat_shading=False)
-    character = Character("actor", server, skeleton, create_skeleton_mesh=False, create_skinned_mesh=True, mesh_mode="g1_stl", show_foot_contacts=False)
+    server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
+    server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
+    grid = server.scene.add_grid('/ground-grid', plane='xz', width=200, height=200, cell_size=.5, section_size=2., cell_color=(44, 57, 70), section_color=(68, 87, 100), position=(0, .008, 0), fade_distance=30., fade_strength=2., shadow_opacity=0.)
+    stage = trimesh.creation.cylinder(radius=2., height=.035, sections=96)
+    stage.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2, (1,0,0)))
+    platform = server.scene.add_mesh_simple('/stage', vertices=stage.vertices, faces=stage.faces, color=(37, 52, 65), position=(0,-.0175,0), flat_shading=False)
+    character = Character('actor', server, skeleton, create_skeleton_mesh=False, create_skinned_mesh=True, mesh_mode='g1_stl', show_foot_contacts=False)
     if not character.g1_mesh_rig.mesh_handles:
-        raise RuntimeError("Supplied G1 meshes are missing; cannot show the preview")
-    for mesh in character.g1_mesh_rig.mesh_handles:
-        mesh.color = (202, 219, 222)
-    backend = Backend(ROOT / ".runtime/api-token")
-    session = DirectorSession(backend, positions.numpy(), rotations.numpy(), ROOT / "review/live-metrics.jsonl")
-    previous_root = None
-    center = positions[:, 0].mean(0).numpy()
-    camera_target = (float(center[0]), 0.75, float(center[2]))
-    camera_position = (float(center[0]) + 4.0, 2.0, float(center[2]) + 3.4)
-
-    def reset_camera(client):
-        root = session.positions[session.frame, 0].copy() if session.kind == "generated" else np.zeros(3)
-        root[1] = 0
-        client.camera.position = np.asarray(camera_position) + root
-        client.camera.look_at = np.asarray(camera_target) + root
-        client.camera.up_direction = (0, 1, 0)
-        client.camera.fov = np.deg2rad(38)
-
+        raise RuntimeError('Supplied G1 meshes are missing; cannot show the preview')
+    for mesh in character.g1_mesh_rig.mesh_handles: mesh.color = (206, 226, 233)
+    backend = Backend(ROOT / '.runtime/api-token')
+    session = DirectorSession(backend, positions.numpy(), rotations.numpy(), ROOT / 'review/live-metrics.jsonl')
+    if args.project:
+        from pathlib import Path
+        session.load_project(Path(args.project).read_bytes())
+    if args.objects:
+        session.load_objects(args.objects)
+    object_layer = ObjectSceneLayer(server)
+    previous_objects = None
+    def actor_root():
+        with session.lock:
+            return session.positions[session.frame, 0].copy()
+    camera = StudioCamera(server, actor_root)
     @server.on_client_connect
     def connected(client):
-        reset_camera(client)
+        client.camera.near = .05
+        client.camera.far = 250.
+        camera.reset(client)
 
-    gate_posts = [server.scene.add_box(f"/gate/post{i}", dimensions=(.08, 1.65, .12), color=(83, 113, 131)) for i in range(2)]
-    gate_panel = server.scene.add_box("/gate/panel", dimensions=(1.6, 1.25, .06), color=(65, 147, 138), opacity=.5)
+    gate_posts = [server.scene.add_box(f'/gate/post{i}', dimensions=(.055,1.65,.08), color=(83,113,131)) for i in range(2)]
+    gate_panel = server.scene.add_box('/gate/panel', dimensions=(1.6,1.25,.04), color=(65,147,138), opacity=.28)
     zone_mesh = trimesh.creation.cylinder(radius=1., height=.006, sections=64)
-    zone_mesh.apply_transform(trimesh.transformations.rotation_matrix(-np.pi / 2, (1, 0, 0)))
-    gate_zone = server.scene.add_mesh_simple("/gate/zone", vertices=np.asarray(zone_mesh.vertices, dtype=np.float32), faces=np.asarray(zone_mesh.faces, dtype=np.uint32), color=(53, 156, 141), opacity=.3)
-    gate_radius = None
-    server.gui.add_markdown("# StageZero\n**Direct · Record · Revise**")
-    mode = server.gui.add_dropdown("Motion source", ("Recorded preview", "Live ARDY"), initial_value="Recorded preview")
-    badge = server.gui.add_markdown("")
-    status = server.gui.add_markdown("")
-    instruction = server.gui.add_text("Instruction", initial_value="A person waves with their right hand.", multiline=True)
-    generate = server.gui.add_button("Generate from playhead", icon=viser.Icon.SPARKLES)
-    play = server.gui.add_button("Play / Resume", icon=viser.Icon.PLAYER_PLAY)
-    pause = server.gui.add_button("Pause", icon=viser.Icon.PLAYER_PAUSE)
-    reset = server.gui.add_button("Rewind", icon=viser.Icon.ROTATE_2)
-    new_take = server.gui.add_button("New take")
-    takes = server.gui.add_dropdown("Take", ("No takes yet",), initial_value="No takes yet")
-    scrub = server.gui.add_slider("Playhead (s)", min=0., max=1., step=.04, initial_value=0.)
-    action_label = server.gui.add_markdown("")
-    gate_status = server.gui.add_markdown("")
-    with server.gui.add_folder("Save / Open", expand_by_default=False):
-        project_name = server.gui.add_text("Project name", initial_value="My performance")
-        save = server.gui.add_button("Save project + download")
-        saved = server.gui.add_dropdown("Saved on mini", ("No saved projects",))
-        load_saved = server.gui.add_button("Open selected project")
-        upload = server.gui.add_upload_button("Open project file", mime_type=".npz")
-        clear_project = server.gui.add_button("New project (backs up current)")
-        file_status = server.gui.add_markdown("")
-    follow = server.gui.add_checkbox("Follow actor", initial_value=True)
+    zone_mesh.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2,(1,0,0)))
+    gate_zone = server.scene.add_mesh_simple('/gate/zone', vertices=np.asarray(zone_mesh.vertices,dtype=np.float32), faces=np.asarray(zone_mesh.faces,dtype=np.uint32), color=(53,156,141), opacity=.22)
+    gizmo = server.scene.add_transform_controls('/gate-edit', scale=.7, active_axes=(True,False,True), disable_rotations=True, translation_limits=((-100,100),(0,0),(-100,100)), visible=False)
+    gate_ui = {}
+    def edit_gate(position=None):
+        with session.lock:
+            gate = session.scene['gate']
+            gate.update(enabled=gate_ui['enabled'].value, radius=gate_ui['radius'].value,
+                        position=[gate_ui['x'].value,0.,gate_ui['z'].value] if position is None else [float(position[0]),0.,float(position[2])])
+            for take in session.takes.values():
+                take.events = [e for e in take.events if e['type'] != 'gate_open']
+                session._record_gate_events(take)
+            session.project_revision += 1
+            session.project_status = 'Scene updated · save project to keep changes'
 
-    @follow.on_update
-    def follow_changed(event):
-        nonlocal previous_root
-        if event.client is None or not follow.value:
+    def scene_controls(gui):
+        add_object_controls(gui, session)
+        section(gui, 'Stage & interaction', 'Move the gate in the viewport or enter its floor coordinates.')
+        gate_ui['grid'] = gui.add_checkbox('Show floor grid', initial_value=True)
+        gate_ui['stage'] = gui.add_checkbox('Show platform', initial_value=True)
+        section(gui, 'Activation gate', 'The teal area triggers a recorded gate event when the actor enters it.')
+        gate = session.scene['gate']
+        gate_ui['enabled'] = gui.add_checkbox('Enable gate', initial_value=gate['enabled'])
+        gate_ui['edit'] = gui.add_checkbox('Show move handle', initial_value=False)
+        gate_ui['x'] = gui.add_number('Position X · m', initial_value=float(gate['position'][0]), min=-100.,max=100.,step=.1)
+        gate_ui['z'] = gui.add_number('Position Z · m', initial_value=float(gate['position'][2]), min=-100.,max=100.,step=.1)
+        gate_ui['radius'] = gui.add_slider('Trigger radius', min=.1,max=3.,step=.05,initial_value=gate['radius'])
+        gate_ui['status'] = gui.add_markdown('')
+        gui.add_html('<div class="sz-note">Drag the red or blue handle to move along the floor. This gate is an interaction trigger; it does not constrain generated motion.</div>')
+        for key in ('enabled','x','z','radius'):
+            @gate_ui[key].on_update
+            def changed(e):
+                if e.client is not None: edit_gate()
+        @gate_ui['grid'].on_update
+        def grid_changed(_): grid.visible = gate_ui['grid'].value
+        @gate_ui['stage'].on_update
+        def stage_changed(_): platform.visible = gate_ui['stage'].value
+
+    @gizmo.on_update
+    def move_gate(_):
+        edit_gate(gizmo.position)
+
+    ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls)
+    timeline = StudioTimeline(server, session)
+
+    @server.scene.on_keyboard_event('keydown')
+    def transport_key(event):
+        if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
             return
         with session.lock:
-            if session.kind != "generated":
+            if session.busy or session.kind not in ('recorded', 'generated'):
                 return
-            root = session.positions[session.frame, 0].copy()
-            root[1] = 0
-            if previous_root is None:
-                for client in server.get_clients().values():
-                    reset_camera(client)
-            else:
-                delta = root - previous_root
-                for client in server.get_clients().values():
-                    client.camera.position = np.asarray(client.camera.position) + delta
-            previous_root = root
-
-    with server.gui.add_folder("Performance", expand_by_default=False):
-        performance = server.gui.add_markdown("")
-    server.gui.add_markdown("Drag: orbit · Right-drag: pan · Scroll: zoom\n\nGenerate at the end to extend. Scrub back and generate to create an alternate ending. Rewind preserves your take; New take starts fresh.")
-    server.gui.add_markdown("[ARDY G1 model](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon52) · [Recorded source](https://huggingface.co/datasets/bones-studio/seed)")
-
-    @mode.on_update
-    def mode_changed(event):
-        nonlocal previous_root
-        if event.client is None:
-            return
-        session.set_mode(mode.value)
-        previous_root = None
-        for client in server.get_clients().values():
-            reset_camera(client)
-
-    @instruction.on_update
-    def instruction_changed(_):
-        session.edit_prompt(instruction.value)
-
-    @generate.on_click
-    def generate_clicked(_):
-        session.submit(instruction.value)
-
-    @play.on_click
-    def play_clicked(_):
-        session.play()
-
-    @pause.on_click
-    def pause_clicked(_):
-        session.pause()
-
-    @reset.on_click
-    def reset_clicked(_):
-        nonlocal previous_root
-        session.reset()
-        previous_root = None
-        for client in server.get_clients().values():
-            reset_camera(client)
-
-    project_folder = ROOT / ".runtime/projects"
-    project_folder.mkdir(parents=True, exist_ok=True)
-    take_map = {}
-    saved_map = {}
-
-    def refresh_saved():
-        saved_map.clear()
-        saved_map.update({p.name: p for p in sorted(project_folder.glob("*.stagezero.npz"), key=lambda p: p.stat().st_mtime, reverse=True)})
-        saved.options = tuple(saved_map) or ("No saved projects",)
-        if saved.value not in saved.options:
-            saved.value = saved.options[0]
-
-    refresh_saved()
-
-    @new_take.on_click
-    def begin_take(_):
-        nonlocal previous_root
-        session.new_take()
-        previous_root = None
-        for client in server.get_clients().values():
-            reset_camera(client)
-
-    @takes.on_update
-    def select_take(event):
-        if event.client is not None and takes.value in take_map:
-            session.select_take(take_map[takes.value])
-
-    @scrub.on_update
-    def seek(event):
-        if event.client is not None:
-            session.seek(round(scrub.value * session.fps))
-
-    @save.on_click
-    def save_file(event):
-        try:
-            path, data = session.save_project(project_folder, project_name.value)
-            refresh_saved()
-            saved.value = path.name
-            if event.client is not None:
-                event.client.send_file_download(path.name, data)
-        except Exception as exc:
-            session.project_status = f"Save failed: {exc}"
-
-    def open_data(data):
-        nonlocal previous_root
-        try:
-            session.load_project(data)
-            previous_root = None
-            mode.value = "Live ARDY"
-            for client in server.get_clients().values():
-                reset_camera(client)
-        except Exception as exc:
-            session.project_status = f"Open failed; current takes preserved: {exc}"
-
-    @load_saved.on_click
-    def open_saved(_):
-        path = saved_map.get(saved.value)
-        if path:
-            try:
-                open_data(path.read_bytes())
-            except OSError as exc:
-                session.project_status = f"Open failed: {exc}"
-
-    @upload.on_upload
-    def open_uploaded(_):
-        open_data(upload.value.content)
-
-    @clear_project.on_click
-    def start_project(_):
-        nonlocal previous_root
-        try:
-            session.new_project(project_folder)
-            previous_root = None
-            mode.value = 'Live ARDY'
-            refresh_saved()
-            for client in server.get_clients().values():
-                reset_camera(client)
-        except Exception as exc:
-            session.project_status = f'Backup failed; project retained: {exc}'
-
+            if event.key == ' ':
+                session.pause() if session.playing else session.play()
+            elif event.key in ('ArrowLeft', 'ArrowRight'):
+                step = (round(session.fps) if event.shift_key else 1) * (-1 if event.key == 'ArrowLeft' else 1)
+                session.seek(session.frame + step)
+            elif event.key == 'Home':
+                session.seek(0)
+            elif event.key == 'End':
+                session.seek(len(session.positions) - 1)
     previous = None
-    last_ui = None
+    last_scene = None
     render_thread = None
+    last_ui = 0.
 
     def acknowledge(client, request_id, submitted):
-        # Render completion is an upper bound on visible response, including image return.
-        # Only one render request may be in flight; disconnected clients cannot pile up threads.
         try:
-            image = client.get_render(height=180, width=320)
-            elapsed = time.perf_counter() - submitted
-            session.record_ack(request_id, elapsed)
-            folder = ROOT / "review/generated"
-            folder.mkdir(parents=True, exist_ok=True)
-            Image.fromarray(image).save(folder / f"{request_id}.jpg")
+            image = client.get_render(height=180,width=320)
+            session.record_ack(request_id,time.perf_counter()-submitted)
+            folder = ROOT / 'review/generated'
+            folder.mkdir(parents=True,exist_ok=True)
+            Image.fromarray(image).save(folder / f'{request_id}.jpg')
         except Exception:
-            pass  # Receipt latency remains available if a browser disconnects.
+            pass
 
-    print("StageZero directing viewer: http://127.0.0.1:2336", flush=True)
+    print(f'StageZero studio: http://127.0.0.1:{server.get_port()}',flush=True)
     try:
         while True:
             key = session.tick()
+            pose_changed = key != previous
             with session.lock:
                 if key != previous:
                     with server.atomic():
-                        character.set_pose(torch.from_numpy(session.positions[session.frame]), torch.from_numpy(session.rotations[session.frame]))
-                        root = session.positions[session.frame, 0].copy()
-                        root[1] = 0
-                        if session.kind == "generated":
-                            if follow.value:
-                                if previous_root is not None:
-                                    delta = root - previous_root
-                                    for client in server.get_clients().values():
-                                        client.camera.position = np.asarray(client.camera.position) + delta
-                                        # Viser moves look_at by the same offset in its position setter.
-                                previous_root = root
-                        else:
-                            previous_root = None
+                        character.set_pose(torch.from_numpy(session.positions[session.frame]),torch.from_numpy(session.rotations[session.frame]))
+                        root = session.positions[session.frame,0].copy()
+                        if previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
+                            camera.rebase(root)
+                        camera.update(root)
                     previous = key
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
-                    request_id, submitted = session.needs_ack
+                    request_id,submitted = session.needs_ack
                     session.needs_ack = None
                     server.flush()
-                    client = next(iter(server.get_clients().values()))
-                    render_thread = threading.Thread(target=acknowledge, args=(client, request_id, submitted), daemon=True)
+                    render_thread = threading.Thread(target=acknowledge,args=(next(iter(server.get_clients().values())),request_id,submitted),daemon=True)
                     render_thread.start()
-                live = session.mode == "Live ARDY"
-                take_map = {f"{i + 1}. {t.name} · {len(t.positions) / 25:.1f}s": t.id for i, t in enumerate(session.takes.values())}
-                options = tuple(take_map) or ("No takes yet",)
-                if tuple(takes.options) != options:
-                    takes.options = options
-                selection = next((name for name, tid in take_map.items() if tid == session.active_take), options[0])
-                if takes.value != selection:
-                    takes.value = selection
-                takes.disabled = not live or not session.takes
-                new_take.disabled = not live
-                save.disabled = not session.takes
-                scrub.max = max(.04, (len(session.positions) - 1) / session.fps)
-                scrub.step = 1 / session.fps
-                scrub.value = session.frame / session.fps
-                scrub.disabled = session.kind == "reference"
-                action_label.content = "**Actor: G1** · " + (session.current_action() or "Choose an instruction")
-                file_status.content = session.project_status
+                object_key = (key, session.project_revision)
+                if object_key != previous_objects:
+                    object_layer.update(session.scene.get('objects', []), session.object_states())
+                    previous_objects = object_key
                 gate = session.scene['gate']
-                gate_is_open = session.gate_open()
-                for i, post in enumerate(gate_posts):
-                    post.position = (gate['position'][0] + (-.84 if i == 0 else .84), .825, gate['position'][2])
-                    post.visible = gate['enabled']
-                gate_panel.position = (gate['position'][0], 2.4 if gate_is_open else .725, gate['position'][2])
-                gate_panel.visible = gate['enabled']
-                gate_zone.position = (gate['position'][0], .004, gate['position'][2])
-                if gate_radius != gate['radius']:
-                    gate_zone.vertices = np.asarray(zone_mesh.vertices * np.array([gate['radius'], 1., gate['radius']]), dtype=np.float32)
-                    gate_radius = gate['radius']
-                gate_zone.visible = gate['enabled']
-                gate_status.content = ("Gate: **open**" if gate_is_open else "Gate: closed · opens inside the teal area") if gate['enabled'] else ""
-                instruction.disabled = not live
-                generate.disabled = not live
-                pause.disabled = not (session.playing or session.busy)
-                play.disabled = session.playing or (session.kind == "reference" and not session.busy)
-                if session.kind == "recorded":
-                    label = "**Recorded preview** · not AI generation"
-                elif session.kind == "generated":
-                    label = "**Stored ARDY motion** · 25 fps · not streaming"
-                else:
-                    label = "**Live ARDY** · ready for a new take"
-                action = "Generating" if session.busy else ("Playing" if session.playing else ("Finished" if session.frame == len(session.positions) - 1 else "Paused"))
-                text = f"**{action}** · {session.frame / session.fps:.1f} s\n\n{session.status}"
-                metric_text = ""
-                if session.metrics:
-                    metric_text = f"GPU generation: **{session.metrics['generation_seconds']:.2f} s** · received: **{session.metrics['command_to_received_seconds']:.2f} s**"
-                    if "command_to_browser_render_ack_seconds" in session.metrics:
-                        metric_text += f"\n\nBrowser render acknowledged: **{session.metrics['command_to_browser_render_ack_seconds']:.2f} s**"
-                ui = (label, text, metric_text)
-                if ui != last_ui:
-                    badge.content, status.content, performance.content = ui
-                    last_ui = ui
-            time.sleep(1 / 120)
+                gate_open = session.gate_open()
+                scene_key = (tuple(gate['position']),gate['radius'],gate['enabled'],gate_open,gate_ui['edit'].value)
+                if scene_key != last_scene:
+                    for i,post in enumerate(gate_posts):
+                        post.position = (gate['position'][0]+(-.84 if i==0 else .84),.825,gate['position'][2])
+                        post.visible = gate['enabled']
+                    gate_panel.position = (gate['position'][0],2.4 if gate_open else .725,gate['position'][2])
+                    gate_panel.visible = gate['enabled']
+                    gate_zone.position = (gate['position'][0],.004,gate['position'][2])
+                    gate_zone.vertices = np.asarray(zone_mesh.vertices*np.array([gate['radius'],1.,gate['radius']]),dtype=np.float32)
+                    gate_zone.visible = gate['enabled']
+                    gizmo.visible = gate['enabled'] and gate_ui['edit'].value
+                    gizmo.position = (gate['position'][0],0.,gate['position'][2])
+                    gate_ui['enabled'].value = gate['enabled']
+                    gate_ui['x'].value,gate_ui['z'].value = gate['position'][0],gate['position'][2]
+                    gate_ui['radius'].value = gate['radius']
+                    gate_ui['status'].content = '**Gate open** · actor entered the activation area' if gate_open else '**Gate ready** · waiting for actor' if gate['enabled'] else 'Gate disabled'
+                    last_scene = scene_key
+            if pose_changed or time.monotonic()-last_ui >= .1:
+                with server.atomic():
+                    ui.update()
+                    timeline.update()
+                last_ui = time.monotonic()
+            time.sleep(1/60)
     except KeyboardInterrupt:
         session.reset()
         server.stop()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
