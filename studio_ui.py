@@ -10,6 +10,7 @@ from studio_guide import GUIDE_HTML
 from studio_navigation import navigate_tab
 from prompt_assistant import needs_clarification
 from prompt_assistant_ui import PromptAssistantUI
+from scene_targets import resolve_targets
 from upload_events import install_upload_snapshots
 
 CREATE = 'Create new'
@@ -253,7 +254,7 @@ class StudioUI:
     def _assistant_context(self, action):
         s = self.session
         with s.lock:
-            return (s.active_take, s.project_revision, s.clip_revision,
+            return (s.active_take, s.project_revision, s.clip_revision, s.version,
                     s.character_motion_enabled, s.busy,
                     self._action_context() if action else self._generation_context())
 
@@ -273,7 +274,56 @@ class StudioUI:
             self.update()
             return True
 
-        return PromptAssistantUI(gui, target, lambda: self._assistant_context(action), apply)
+        def generate_validated(text, expected_context, expected_scene, _original,
+                               submission_guard):
+            s = self.session
+            with s.lock:
+                if (s.busy or not s.character_motion_enabled or not target.visible or
+                        target.value != text or not self._valid_prompt(text) or
+                        self._assistant_context(False) != expected_context or
+                        self._assistant_scene_context() != expected_scene):
+                    return False, 'The direction or scene changed. Generation was not started.'
+                take = s.takes.get(s.active_take)
+                plan, error = self._generation_plan(take)
+                if error is not None:
+                    s.status = error
+                    return False, error
+                choice, at_frame, _, duration = plan
+                with submission_guard() as allowed:
+                    if not allowed:
+                        return False, 'Pending generation cancelled.'
+                    if s.mode != 'Live ARDY':
+                        s.set_mode('Live ARDY')
+                        self._set(self.mode, 'value', 'Live ARDY')
+                    s.submit(text,
+                             seconds=None if self.duration_mode.value == AUTO else duration.seconds,
+                             edit_mode={CREATE:'new', EXTEND:'extend', REPLACE:'replace'}[choice],
+                             at_frame=at_frame)
+                started = s.busy
+                if started:
+                    self._generation_request_context = self._generation_context()
+                    self._generation_started_at = time.perf_counter()
+                else:
+                    error = s.status
+            self.update()
+            return (True, '') if started else (False, error)
+
+        return PromptAssistantUI(gui, target, lambda: self._assistant_context(action), apply,
+                                 scene_context=self._assistant_scene_context, auto_apply=True,
+                                 generate=None if action else generate_validated)
+
+    def _assistant_scene_context(self):
+        """Expose scene facts without treating an editor selection as a motion goal."""
+        with self.session.lock:
+            scene = self.session.scene
+            objects = scene.get('objects', [])
+            targets = resolve_targets(scene.get('targets', []), objects)
+            return {
+                'objects': [{key: obj[key] for key in ('id', 'name', 'position') if key in obj}
+                            for obj in objects],
+                'targets': [{key: target[key] for key in ('id', 'name', 'object_id', 'position')}
+                            for target in targets],
+            }
 
     def _action_context(self):
         return (self.action_edit, id(self._action_source), self.session.project_revision,
@@ -451,11 +501,16 @@ class StudioUI:
         self._set(self.duration_preview, 'content', preview)
         self._set(self.duration_preview, 'visible', self._valid_prompt(self.prompt.value) and show_form)
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
-        disabled = busy or not self.session.character_motion_enabled or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
+        assistant_pending = self.prompt_assistant.generation_in_progress()
+        disabled = (busy or assistant_pending or not self.session.character_motion_enabled or
+                    not self._valid_prompt(self.prompt.value) or error is not None or at_limit)
         self._set(self.generate, 'disabled', disabled)
         retry = (self.session.status.startswith('Generation failed') and
                  self._generation_request_context == self._generation_context())
-        self._set(self.generate, 'label', 'Generating…' if busy else 'Take limit reached' if at_limit else
+        self._set(self.generate, 'label', 'Generating…' if busy else
+                  'Improving direction…' if assistant_pending and self.prompt_assistant._request_pending else
+                  'Answer prompt questions' if assistant_pending else
+                  'Take limit reached' if at_limit else
                   'Retry generation' if retry else 'Generate motion')
 
     def refresh_saved(self):
@@ -625,8 +680,12 @@ class StudioUI:
                 if error is not None:
                     s.status = error
                     return
-                if needs_clarification(self.action_prompt.value):
-                    self.action_assistant.clarify()
+                assistant_pending = self.action_assistant.blocks_generation()
+                if (assistant_pending or
+                        needs_clarification(self.action_prompt.value,
+                                            scene_context=self._assistant_scene_context())):
+                    if not assistant_pending:
+                        self.action_assistant.clarify()
                     s.status = 'Clarify the direction in Prompt assistant before updating motion'
                     self.update()
                     return
@@ -714,27 +773,12 @@ class StudioUI:
             with s.lock:
                 if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
                     return
-                if needs_clarification(self.prompt.value):
-                    self.prompt_assistant.clarify()
-                    s.status = 'Clarify the direction in Prompt assistant before generating motion'
-                    self.update()
-                    return
                 take = s.takes.get(s.active_take)
-                plan, error = self._generation_plan(take)
+                _, error = self._generation_plan(take)
                 if error is not None:
                     s.status = error
                     return
-                choice, at_frame, _, duration = plan
-                if s.mode != 'Live ARDY':
-                    s.set_mode('Live ARDY')
-                    self._set(self.mode, 'value', 'Live ARDY')
-                s.submit(self.prompt.value,
-                         seconds=None if self.duration_mode.value == AUTO else duration.seconds,
-                         edit_mode={CREATE:'new', EXTEND:'extend', REPLACE:'replace'}[choice],
-                         at_frame=at_frame)
-                if s.busy:
-                    self._generation_request_context = self._generation_context()
-                    self._generation_started_at = time.perf_counter()
+            self.prompt_assistant.start_generation()
             self.update()
 
         @self.cancel.on_click

@@ -31,12 +31,57 @@ Long actions are generated as multiple 104-frame requests, each receiving the ac
 
 ## Using the assistant
 
-Both the new-motion and action-edit Direction fields include **Prompt assistant**. **Improve prompt** asks the local model to clarify or rewrite the current instruction. Answer the questions using a suggested answer or your own words, press **Continue and refine**, review/edit **Refined direction**, then select **Use prompt**. Applying a suggestion changes only that field; generation still requires its normal button. A bare ambiguous turn command also opens clarification when Generate or Update motion is pressed.
+Press **Generate** once. Studio refines the direction before submitting motion.
+If the direction is materially ambiguous, answer the short question and continue;
+the same Generate operation resumes automatically. The interface shows refinement,
+waiting-for-answer and motion-generation stages. The original and validated
+model-facing directions remain visible for inspection.
 
-The optional AI provider uses the existing local Ollama service at `127.0.0.1:11434` and `STAGEZERO_LOCAL_MODEL` (default `qwen3:4b`). It does not install models or start services. Connection/read timeouts are 3/55 seconds, response size is capped at32KiB, and output must satisfy a bounded structured schema. If AI is unavailable or its output loses explicit angle/side/in-place constraints, the interface shows a warning and offline guidance. This constraint check is deliberately lexical, not a general proof that every natural-language detail survived.
+A clear request such as “Öne doğru bir kere zıpla” must retain forward direction
+and one repetition. “Make a nice big jump” may need a height-versus-travel question;
+“big” never supplies a numeric distance or duration. Missing destinations and
+lateral movement without a direction frame also require clarification. A selected
+prop in the object editor is not automatically a movement destination.
 
-Offline guidance can clarify the known turn meanings; it is labeled separately from AI output. Unknown or unresolved references may still need a user's fuller description. Prompt and take changes invalidate pending suggestions, and the apply callback rechecks the target under the session lock. Multiple question rounds retain question text and answers.
+Duplicate clicks do not create duplicate operations. Editing the direction,
+changing its context or cancelling invalidates pending work. Late responses may
+neither overwrite the new text nor start generation with an old direction.
+Refinement failure preserves the original, shows one error, and never silently
+submits the raw direction. The Generate flow has no separate **Improve prompt**
+button: refinement runs automatically. The action-edit assistant retains its
+manual refinement control.
 
-Validation uses deterministic provider/transport doubles and a private browser preview with offline guidance and no motion backend. It does not spend shared inference capacity or verify the quality of a new real ARDY turnaround.
+## Model connection and failure handling
 
-The completed change passed18 core,8 helper lifecycle, and5 Studio integration tests; the combined focused suite passed90 tests and full unittest discovery passed369. Independent review found no remaining actionable scoped issues. Browser verification confirmed the clarification→180° choice→preview→Use prompt path. The temporary verification process was stopped; running user applications were not restarted.
+The old implementation always called local Ollama, even when the application had a configured text gateway, and caught provider/validation failures as successful offline guidance. For a clear English prompt that guidance could be identical to the input. This concealed model failures and made the button appear ineffective.
+
+The assistant now uses the existing configured text gateway when present, preserving the configured model and credentials. Without a gateway it retains the local Ollama provider. It does not install a model, start a service, change private configuration, or silently switch providers after a failed request. Gateway calls have bounded timeouts and response sizes, carry an explicit JSON contract, and validate output before display. Errors produce a retryable failure rather than an unchanged successful suggestion.
+
+The refiner keeps the original prompt, accumulated answers, question history, and optional scene context separate. Scene context can supply explicit `reference_target`, `street_end_target`, or `direction_reference`, plus resolved named `targets` and scene `objects`. Model-facing text must preserve supplied actions, directions, quantities, units, target and reference information. Deterministic checks reject detected changed or invented constraints; they are conservative checks, not a complete natural-language equivalence proof.
+
+Known clarification questions work without network access. Unsupported-motion explanations must retain the requested action and explain the limitation rather than silently substitute another movement. The assistant does not certify that ARDY can execute a direction, distance, count, or duration precisely; motion execution and its measured validation remain separate.
+
+## Validation
+
+Focused tests cover clear commands, bilingual ambiguity, explicit scene context, answer roundtrips, intent constraints, API failure/retry, concurrent clicks, cancellation, stale replies, motion-mode changes, and both Studio generation entry points. Live UI inspection confirmed that the main Generate flow has no separate Improve prompt button. Real provider-to-motion end-to-end and video acceptance remain unverified because the video task was stopped by the user. Test doubles do not establish real model success.
+
+## Automatic pipeline diagnostics
+
+The automatic pipeline repair is tracked in ADR0007. Its acceptance record lives
+under `scratch/auto-prompt-01a0df25/`. Diagnostics distinguish response format,
+missing or invalid fields, transport failures and semantic constraint rejection.
+Each attempt retains original input, answers, raw provider response, parsed result
+and exact failed validation rule. Malformed response repair uses that rule and has
+a finite attempt ceiling; genuine constraint changes remain failures.
+
+The earlier 2389 failure retained only request inputs and the final generic
+warning. Its exact raw response and reject exception cannot be reconstructed from
+those logs. New observed-provider traces and deterministic old/new validator
+replays must be reported separately from that historical failure.
+
+Enable the standard `prompt_assistant` logger at DEBUG when investigating a
+provider rejection. It emits one `prompt_refinement` JSON record per refinement
+result, including every bounded attempt. The QA runtime additionally persists
+these records beside its request ledger. Treat diagnostic prompts as user data;
+transport headers, credentials and arbitrary transport exception text are not
+included in the trace.
