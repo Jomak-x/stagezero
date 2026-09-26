@@ -48,3 +48,7 @@ an actor, enter an exact object name (for example `Stone gate`), and choose
 constraints along the planned route, keeping the other actor stationary and
 avoiding its planning footprint. The planner does not infer a passage through
 an unknown mesh. Previous committed motion is backed up when replacing a layout.
+
+Replacing a timeline with **Run complete scene** also writes an automatic backup before generation starts. If a complete scene fails, its partial project and report remain available; rerun the preset explicitly. A partially loaded paired action cannot silently fall back to unrelated free motion.
+
+The review instance is reachable on your Tailscale network at http://jakobs-mac-mini.tail5a8376.ts.net:2350/. It depends on this Mac, its private SSH tunnel, and the existing warm Pod worker remaining online. It is not a public hosted deployment. The current checkout is `codex/scene-interaction-lab`; use PR 4 for review before merging into the studio.

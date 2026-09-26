@@ -236,6 +236,13 @@ def main():
         if plan['provenance']['research_pair_model'] and not research.value:
             notice.content = 'This paired scene uses InterGen research motion. Enable the research option to run it.'
             return
+        try:
+            if director.total_frames:
+                args.output.mkdir(parents=True, exist_ok=True)
+                (args.output / f'before-scene-{time.time_ns()}.npz').write_bytes(director.save_project())
+        except Exception as exc:
+            notice.content = 'Could not back up the current timeline: ' + escape(str(exc))
+            return
         scene_active.set()
         free_inference.clear()
         director.pause()

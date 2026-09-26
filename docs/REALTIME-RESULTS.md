@@ -17,7 +17,7 @@ shared rigid transform maps the paired source to both committed actors.
 | Scene | Seed | Duration | Startup | Post-start underrun | Outcome |
 |---|---:|---:|---:|---:|---|
 | Gate, handshake, departure | 42 | 30 s | 2.858 s | 0 s | Passage, hand proximity, release, separation, seams pass |
-| Staged fight, disengagement | 38 | 30 s | 3.870 s | 0 s | Dodge, guard, push reaction, release, seams pass |
+| Staged fight, disengagement | 42 | 30 s | 3.570 s | 0 s | Dodge, guard, push reaction, release, seams pass |
 | Console inspection, departure | 42 | 30 s | 0.727 s | 0 s | Approach clearance, native hand target, seams pass |
 
 Warm Core soak: **25/25 requests succeeded**. First two-second window latency
@@ -30,13 +30,17 @@ Handshake: minimum wrist gap 2.3 cm; longest continuous interval within 15 cm
 was 1.15 s. Console: minimum wrist-to-target distance 3.0 cm; 1.75 s continuously
 within 12 cm. These are measured proximity checks, not a physical grasp solver.
 
-The selected fight has 49.1 cm lateral dodge displacement, a 14.9 cm minimum
-hand/forearm guard gap sustained within the guard tolerance for 0.15 s, and
-pair separation increasing from 1.007 to 1.168 m in the push-reaction window.
-**7 of 24 screened paired samples passed all six action proxies.** Seed 42's
-complete fight failed block/push checks and was retained as a diagnostic; seed
-38 passed a fresh complete-scene run. This is a curated, reproducible scene,
-not evidence that arbitrary fight prompts are reliably correct.
+The selected fight has 91.3 cm lateral dodge displacement, a 6.2 cm minimum
+hand/forearm guard gap sustained within the guard tolerance for 0.75 s, and
+pair separation increasing from 0.766 to 1.512 m in the push-reaction window.
+**7 of 24 screened paired samples passed all six action proxies.** An initial
+seed-42 fight with a different prompt failed block/push checks; a complete
+seed-38 fight passed but looked like loose sparring. The selected prompt-2,
+seed-42 pair visibly improves arm engagement and separation, and its full
+live scene passes the same gates. Both earlier full runs are retained as
+diagnostics. The block and push are staged visual actions, not validated
+physical contact; this curation is not evidence that arbitrary fight prompts
+are reliably correct.
 
 ## What is ready and what is bounded
 
@@ -56,6 +60,10 @@ grasping, rigid-body physics, or general visual object recognition. Conservative
 root-disc overlap during handshake is recorded as a review flag; mesh-level
 physical collision is not certified. Full studio adoption remains a separate
 integration step because other agents are actively changing that UI.
+
+## Review recordings
+
+See the [three full videos, contact sheets, and browser screenshots](../review/realtime-showcase/README.md).
 
 ## Reproduction
 

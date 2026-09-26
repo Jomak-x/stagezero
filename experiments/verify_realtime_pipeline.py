@@ -489,9 +489,26 @@ def validate_showcase_artifacts(directory: Path) -> dict:
                     "passed_screening": len(matches) == 1 and matches[0].get("passed") is True,
                     "same_model_source_revision": source_revision == screening.get("model_source_revision"),
                 }
+                screening_archive = (directory / "diagnostics/fight-screening" /
+                                     f"prompt{selected_screened_candidate['prompt_index']}_seed{plan['seed']}.npz")
+                if not screening_archive.is_file():
+                    raise AssertionError("selected screened pair archive is missing")
+                with np.load(screening_archive, allow_pickle=False) as selected_archive:
+                    selected_p = selected_archive["positions"]
+                    selected_r = selected_archive["rotations"]
+                    screened_source_exact = (np.array_equal(selected_p, original_p)
+                                             and np.array_equal(selected_r, original_r))
+                provenance = plan.get("provenance", {}).get("screened_pair_candidate", {})
+                provenance_matches = (provenance.get("seed") == plan["seed"]
+                                      and provenance.get("prompt_index") == selected_screened_candidate["prompt_index"])
+                selected_screened_candidate.update(
+                    screened_source_arrays_exact=screened_source_exact,
+                    plan_provenance_matches=provenance_matches,
+                    screened_candidate_sha256=sha256_file(screening_archive))
                 selected_screened_candidate["passed"] = (screening["passed"]
                     and selected_screened_candidate["passed_screening"]
-                    and selected_screened_candidate["same_model_source_revision"])
+                    and selected_screened_candidate["same_model_source_revision"]
+                    and screened_source_exact and provenance_matches)
             # Re-serialize and reload the saved project to check the actual
             # on-disk arrays survive an ordinary subsequent save as well.
             reloaded = RealtimeDirector.load_project(director.save_project()).timeline_clip()

@@ -13,7 +13,7 @@ from experiments.generate_scene_showcase import (PlaybackMonitor, _service_body,
 from realtime_backend import validate_job
 from realtime_clip import CanonicalClip
 from realtime_director import RealtimeDirector, StageSpec
-from scene_beats import RECOMMENDED_SEEDS, SCENARIOS, build_scene
+from scene_beats import FIGHT_PAIR_PROMPT, RECOMMENDED_SEEDS, SCENARIOS, build_scene
 
 
 class SceneBeatTests(unittest.TestCase):
@@ -22,6 +22,11 @@ class SceneBeatTests(unittest.TestCase):
         for name, seed in RECOMMENDED_SEEDS.items():
             self.assertEqual(build_scene(name)["seed"], seed)
             self.assertEqual(build_scene(name, 7)["seed"], 7)
+        fight = build_scene("staged_fight")
+        pair = [beat for beat in fight["beats"] if beat["source"] == "intergen"]
+        self.assertEqual([beat["prompt"] for beat in pair], [FIGHT_PAIR_PROMPT] * 2)
+        self.assertEqual(pair[0]["metadata"]["pair_sequence_id"], "fight_screen_2_42")
+        self.assertEqual(fight["provenance"]["screened_pair_candidate"]["prompt_index"], 2)
 
     def test_all_scenes_cover_30_seconds_with_dense_native_root_goals(self):
         for name in SCENARIOS:

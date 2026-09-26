@@ -16,8 +16,10 @@ from scene_objects import make_object
 FPS = 20
 TOTAL_FRAMES = 600
 SCENARIOS = ("gate_meet_handshake", "staged_fight", "object_reach_inspect")
-RECOMMENDED_SEEDS = {"gate_meet_handshake": 42, "staged_fight": 38,
+RECOMMENDED_SEEDS = {"gate_meet_handshake": 42, "staged_fight": 42,
                      "object_reach_inspect": 42}
+FIGHT_PAIR_PROMPT = ("Two people perform a choreographed martial arts exchange: "
+                     "sidestep dodge, forearm block, controlled push, then step apart.")
 
 
 def _prop(kind, index, name, position, size, color):
@@ -176,7 +178,7 @@ def _fight(seed):
                "fighter_b": _actor("Guard and prepare to evade.")},
               gates=({"metric": "continuity", "max_boundary_jump_m": .35},)),
         _beat("dodge_block_push", "paired", 160, 240,
-              "A staged sparring sequence: feint, sidestep dodge, guarded block, light push, then release and step apart.",
+              FIGHT_PAIR_PROMPT,
               {"fighter_a": _actor("Feint, block, stage push, and release."),
                "fighter_b": _actor("Dodge, guard, react to push, and recover.")},
               source="intergen", gates=({"metric": "pair_separation", "min_m": .42,
@@ -187,16 +189,16 @@ def _fight(seed):
                                          "minimum_duration_s": .1, "research_only": True},
                                         {"metric": "push_reaction", "research_only": True}),
               metadata={"choreography": "dodge_block_push", "license": "CC BY-NC-SA 4.0",
-                        "research_preview": True, "pair_sequence_id": f"fight_{seed}",
+                        "research_preview": True, "pair_sequence_id": f"fight_screen_2_{seed}",
                         "source_start_frame": 0, "source_total_frames": 120, "seed": seed}),
         _beat("fight_release", "exit", 240, 280,
-              "A staged sparring sequence: feint, sidestep dodge, guarded block, light push, then release and step apart.",
+              FIGHT_PAIR_PROMPT,
               {"fighter_a": _actor("Release and step apart."),
                "fighter_b": _actor("Release and recover balance.")}, source="intergen",
               gates=({"metric": "hand_release", "research_only": True},
                      {"metric": "pair_separation", "min_m": .42}),
               metadata={"choreography": "dodge_block_push", "license": "CC BY-NC-SA 4.0",
-                        "research_preview": True, "pair_sequence_id": f"fight_{seed}",
+                        "research_preview": True, "pair_sequence_id": f"fight_screen_2_{seed}",
                         "source_start_frame": 80, "source_total_frames": 120,
                         "release_window": [80, 120], "seed": seed}),
         _beat("recover", "continuation", 280, 440,
@@ -289,12 +291,16 @@ def build_scene(name: str, seed: int | None = None) -> dict:
             if frames != sorted(set(frames)) or any(not beat["start_frame"] <= f < beat["end_frame"]
                                                      for f in frames):
                 raise AssertionError("Root goals are not ordered within their beat")
+    provenance = {"planner": "interaction_planner.plan_action",
+                  "root_goals": "official ARDY Core constraints",
+                  "joint_animation": "model_output_only",
+                  "research_pair_model": "InterGen" if any(
+                      beat["source"] == "intergen" for beat in beats) else None}
+    if name == "staged_fight" and seed == 42:
+        provenance["screened_pair_candidate"] = {
+            "prompt_index": 2, "seed": 42,
+            "screening_summary": "diagnostics/fight-screening/summary.json"}
     return {"version": 1, "name": name, "seed": seed, "fps": FPS,
             "total_frames": TOTAL_FRAMES, "scene": scene,
             "actor_ids": list(placements), "initial_placements": placements,
-            "beats": beats, "route_plans": routes,
-            "provenance": {"planner": "interaction_planner.plan_action",
-                           "root_goals": "official ARDY Core constraints",
-                           "joint_animation": "model_output_only",
-                           "research_pair_model": "InterGen" if any(
-                               beat["source"] == "intergen" for beat in beats) else None}}
+            "beats": beats, "route_plans": routes, "provenance": provenance}

@@ -30,7 +30,7 @@ from interaction_scene_collision import scene_collision
 from realtime_client import RealtimeClient
 from realtime_clip import CanonicalClip
 from realtime_director import RealtimeDirector, StageSpec
-from scene_beats import SCENARIOS, build_scene
+from scene_beats import FIGHT_PAIR_PROMPT, SCENARIOS, build_scene
 
 
 def _job_id(scenario: str, beat_id: str) -> str:
@@ -580,7 +580,7 @@ def run_scene(plan: dict, client: RealtimeClient, output_dir: Path, *, realtime:
 FIGHT_PROMPTS = (
     "A staged sparring sequence: feint, sidestep dodge, guarded block, light push, then release and step apart.",
     "Two stunt performers spar. One dodges a punch and blocks another. The other pushes them backward, and both step apart.",
-    "Two people perform a choreographed martial arts exchange: sidestep dodge, forearm block, controlled push, then step apart.",
+    FIGHT_PAIR_PROMPT,
 )
 
 
