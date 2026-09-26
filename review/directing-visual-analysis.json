@@ -1,0 +1,140 @@
+{
+  "source_file": "StageZero-two-endings-20260926-015459-6a268b.stagezero.npz",
+  "source_sha256": "e8eef02166c615b73b2964d39e15972287ea8ef0a4f42c261b3254bd0951923c",
+  "fps": 25,
+  "take_count": 2,
+  "active_take_id": "487bf8c1-7aac-4a3f-b2f9-928c9f04c43c",
+  "saved_frame": 104,
+  "scene_roundtrip_exact": true,
+  "shared_prefix_frames": 104,
+  "shared_prefix_all_arrays_bit_exact": {
+    "positions": true,
+    "rotations": true,
+    "motion": true
+  },
+  "takes": [
+    {
+      "id": "0050aa2f-ed8d-48b5-9b89-c7c313beec93",
+      "name": "Take 1",
+      "frames": 208,
+      "duration_seconds": 8.32,
+      "parent": null,
+      "branch_frame": null,
+      "segment_bounds": [
+        [
+          0,
+          104
+        ],
+        [
+          104,
+          208
+        ]
+      ],
+      "events": [
+        {
+          "type": "gate_open",
+          "frame": 79
+        }
+      ],
+      "roundtrip_arrays_bit_exact": {
+        "positions": true,
+        "rotations": true,
+        "motion": true
+      },
+      "roundtrip_metadata_exact": true,
+      "finite_arrays": {
+        "positions": true,
+        "rotations": true,
+        "motion": true
+      },
+      "max_rotation_orthogonality_error": 4.172325134277344e-07,
+      "max_rotation_determinant_error": 4.172325134277344e-07,
+      "invalid_rotations_absent_at_validation_tolerance_0_02": true,
+      "max_fk_position_error_m": 4.76837158203125e-07,
+      "max_fk_rotation_element_error": 1.0132789611816406e-06,
+      "post_branch_hand_height_relative_to_shoulder_m": {
+        "left": {
+          "hand_joint_index": 25,
+          "shoulder_joint_index": 18,
+          "max_height_m": -0.35332852602005005,
+          "peak_frame": 180
+        },
+        "right": {
+          "hand_joint_index": 33,
+          "shoulder_joint_index": 26,
+          "max_height_m": 0.37945640087127686,
+          "peak_frame": 140
+        }
+      },
+      "right_hand_above_shoulder": {
+        "first_frame": 116,
+        "last_frame": 152,
+        "positive_frame_count": 37,
+        "all_frames_in_interval_positive": true,
+        "height_at_frame_160_m": -0.4256764054298401,
+        "height_at_final_frame_m": -0.45247429609298706
+      }
+    },
+    {
+      "id": "487bf8c1-7aac-4a3f-b2f9-928c9f04c43c",
+      "name": "Take 2 \u00b7 alternate",
+      "frames": 208,
+      "duration_seconds": 8.32,
+      "parent": "0050aa2f-ed8d-48b5-9b89-c7c313beec93",
+      "branch_frame": 103,
+      "segment_bounds": [
+        [
+          0,
+          104
+        ],
+        [
+          104,
+          208
+        ]
+      ],
+      "events": [
+        {
+          "type": "gate_open",
+          "frame": 79
+        }
+      ],
+      "roundtrip_arrays_bit_exact": {
+        "positions": true,
+        "rotations": true,
+        "motion": true
+      },
+      "roundtrip_metadata_exact": true,
+      "finite_arrays": {
+        "positions": true,
+        "rotations": true,
+        "motion": true
+      },
+      "max_rotation_orthogonality_error": 4.172325134277344e-07,
+      "max_rotation_determinant_error": 4.172325134277344e-07,
+      "invalid_rotations_absent_at_validation_tolerance_0_02": true,
+      "max_fk_position_error_m": 4.76837158203125e-07,
+      "max_fk_rotation_element_error": 1.0728836059570312e-06,
+      "post_branch_hand_height_relative_to_shoulder_m": {
+        "left": {
+          "hand_joint_index": 25,
+          "shoulder_joint_index": 18,
+          "max_height_m": -0.37020212411880493,
+          "peak_frame": 148
+        },
+        "right": {
+          "hand_joint_index": 33,
+          "shoulder_joint_index": 26,
+          "max_height_m": -0.3668566942214966,
+          "peak_frame": 133
+        }
+      }
+    }
+  ],
+  "document_claims": {
+    "all_three_arrays_share_exact_104_frame_prefix": true,
+    "wave_peak_frame_140_and_height_rounds_to_0_379_m": true,
+    "overhead_ending_does_not_raise_both_arms": true,
+    "gate_event_frame_79_on_both_takes": true,
+    "fk_position_error_at_most_0_00000048_m": true
+  }
+}
