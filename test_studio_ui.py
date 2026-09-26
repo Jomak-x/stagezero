@@ -833,6 +833,40 @@ class StudioUITests(unittest.TestCase):
         self.ui.update()
         self.assertEqual(self.ui.takes.value, second)
 
+    def test_paired_research_status_and_transport_take_priority_without_g1_changes(self):
+        class Motion:
+            def __init__(self, active, status):
+                self.active = active
+                self.status = status
+                self.calls = []
+
+            def snapshot(self):
+                return {'active': self.active, 'status': self.status,
+                        'total_frames': 120, 'frame': 7}
+
+            def play(self): self.calls.append(('play',))
+            def pause(self): self.calls.append(('pause',))
+            def seek(self, frame): self.calls.append(('seek', frame))
+
+        core = Motion(False, 'Native Core saved')
+        paired = Motion(True, 'Joint pair ready')
+        before = self.session.positions.copy()
+        self.ui.core_session = core
+        self.ui.paired_session = paired
+        self.ui.transport.click('Play')
+        self.assertEqual(paired.calls, [('play',)])
+        self.assertEqual(core.calls, [])
+        self.ui.update()
+        self.assertIn('Joint pair · InterGen research', self.ui.status.content)
+        self.assertTrue(np.array_equal(self.session.positions, before))
+
+        paired.active = False
+        core.active = True
+        self.ui.transport.click('Pause')
+        self.assertEqual(core.calls, [('pause',)])
+        self.ui.update()
+        self.assertIn('Scene direction', self.ui.status.content)
+
 
 if __name__ == '__main__':
     unittest.main()
