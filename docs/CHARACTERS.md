@@ -17,7 +17,7 @@ The feature uses the configured Neon gateway to create a photographic reference,
 - The worker listens privately through an SSH tunnel on `127.0.0.1:8770`. `STAGEZERO_CHARACTER_BACKEND_URL` can select another localhost tunnel. It admits one job at a time and waits for 14 GiB of free GPU memory; its PyTorch allocator is capped at 12 GiB.
 - Start the main UI with `python director_viewer.py`. Characters persist under `.runtime/characters` (or `--characters PATH`).
 
-Optional `STAGEZERO_CHARACTER_IMAGE_MODEL` and `STAGEZERO_CHARACTER_DESIGN_MODEL` overrides default to `gpt-6-astra`. The gateway must support image generation for the configured model.
+Optional `STAGEZERO_CHARACTER_IMAGE_MODEL` and `STAGEZERO_CHARACTER_DESIGN_MODEL` overrides can be set in the private `.runtime/objects.env` file or process environment; process environment wins. Both default to `gpt-6-astra`. The gateway must support image generation for the configured image model.
 
 ## Verification
 

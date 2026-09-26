@@ -24,6 +24,7 @@ from interaction_scene import passage_for, scene_objects
 VERBS = ("go_through", "approach", "face", "reach", "handoff")
 MAX_ACTIONS = 12
 MAX_RESPONSE_BYTES = 64_000
+DEFAULT_NEON_PLANNER_MODEL = "gpt-6-astra"
 _ID = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
 _KEYS = ("STAGEZERO_SCENE_AI_API_BASE", "STAGEZERO_SCENE_AI_MODEL",
          "STAGEZERO_SCENE_AI_API_KEY", "OPENAI_API_KEY",
@@ -234,11 +235,13 @@ class SceneAIPlanner:
     def from_env(cls, *, config_path: Path | None = None) -> "SceneAIPlanner":
         values = _config(config_path)
         base = values.get("STAGEZERO_SCENE_AI_API_BASE")
+        use_neon_default = not base and bool(values.get("NEON_AI_GATEWAY_BASE_URL"))
         if not base and values.get("NEON_AI_GATEWAY_BASE_URL"):
             base = values["NEON_AI_GATEWAY_BASE_URL"].rstrip("/") + "/v1"
         if not base:
             base = "https://api.openai.com/v1"
-        model = values.get("STAGEZERO_SCENE_AI_MODEL") or values.get("STAGEZERO_OBJECT_MODEL")
+        model = (values.get("STAGEZERO_SCENE_AI_MODEL") or
+                 (DEFAULT_NEON_PLANNER_MODEL if use_neon_default else values.get("STAGEZERO_OBJECT_MODEL")))
         key = (values.get("STAGEZERO_SCENE_AI_API_KEY") or values.get("NEON_AI_GATEWAY_TOKEN")
                or values.get("OPENAI_API_KEY"))
         if not model or not key:

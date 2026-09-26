@@ -1,7 +1,11 @@
 import base64
 import io
 import json
+import os
+from pathlib import Path
+import tempfile
 import unittest
+from unittest import mock
 
 from PIL import Image
 
@@ -51,6 +55,27 @@ class NeonCharacterReferenceTests(unittest.TestCase):
             {"type": "output_text", "text": "A visually distinct explorer in a navy flight suit with warm brass trim."}]}}
         transport = FakeTransport(FakeResponse([design]), FakeResponse(events, status))
         return NeonCharacterReference("https://branch.example", "secret", transport=transport), transport
+
+    def test_private_character_model_overrides_and_explicit_arguments(self):
+        with tempfile.TemporaryDirectory() as folder:
+            module_path = Path(folder) / "object_generation.py"
+            private = Path(folder) / ".runtime" / "objects.env"
+            private.parent.mkdir()
+            private.write_text("NEON_AI_GATEWAY_BASE_URL=https://branch.example\n"
+                               "NEON_AI_GATEWAY_TOKEN=test-secret\n"
+                               "STAGEZERO_CHARACTER_IMAGE_MODEL=gpt-image-choice\n"
+                               "STAGEZERO_CHARACTER_DESIGN_MODEL=gpt-design-choice\n")
+            with mock.patch("object_generation.__file__", str(module_path)), mock.patch.dict(
+                    os.environ, {}, clear=True):
+                configured = NeonCharacterReference.from_env()
+                explicit = NeonCharacterReference.from_env(model="gpt-explicit-choice")
+                with mock.patch.dict(os.environ, {"STAGEZERO_CHARACTER_IMAGE_MODEL": "gpt-env-choice"}):
+                    environment = NeonCharacterReference.from_env()
+        self.assertEqual(configured.model, "gpt-image-choice")
+        self.assertEqual(configured.design_model, "gpt-design-choice")
+        self.assertEqual(explicit.model, "gpt-explicit-choice")
+        self.assertEqual(explicit.design_model, "gpt-design-choice")
+        self.assertEqual(environment.model, "gpt-env-choice")
 
     def test_generates_png_using_responses_image_tool(self):
         expected = image_bytes()

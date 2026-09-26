@@ -86,11 +86,27 @@ AWS keys in that file are ignored by scene generation.
 ```sh
 NEON_AI_GATEWAY_BASE_URL='https://YOUR_BRANCH_GATEWAY_HOST'
 NEON_AI_GATEWAY_TOKEN='YOUR_GATEWAY_TOKEN'
-STAGEZERO_OBJECT_MODEL='gpt-5-mini'
-# Optional overrides for original geometry and scene layout:
-STAGEZERO_SCENE_ASSET_MODEL='gpt-5-6-sol'
-STAGEZERO_SCENE_LAYOUT_MODEL='gpt-5-6-sol'
 ```
+
+With Neon, the model is selected by workflow when no role override is set:
+
+| Workflow | Default model | Optional override |
+| --- | --- | --- |
+| General objects and scenes | `gpt-5-6-sol` | `STAGEZERO_OBJECT_MODEL` |
+| Custom prop geometry and assets | `gpt-6-astra` | `STAGEZERO_SCENE_ASSET_MODEL` |
+| Scene layout | `gpt-5-6-sol` | `STAGEZERO_SCENE_LAYOUT_MODEL` |
+| Grounded scene action planning | `gpt-6-astra` | `STAGEZERO_SCENE_AI_MODEL` |
+| Character design | `gpt-6-astra` | `STAGEZERO_CHARACTER_DESIGN_MODEL` |
+| Character reference image | `gpt-6-astra` | `STAGEZERO_CHARACTER_IMAGE_MODEL` |
+
+Set only the overrides you need in the same private file or process environment.
+For Neon, `STAGEZERO_OBJECT_MODEL` applies to general objects and scenes; it does
+not change the asset, layout, or action-planning roles. Use the corresponding
+role override to change those models.
+An alternate OpenAI-compatible gateway selected with `STAGEZERO_OBJECT_API_BASE`
+or `STAGEZERO_SCENE_AI_API_BASE` requires an explicit model; it does not inherit
+Neon defaults. Scene planning can reuse `STAGEZERO_OBJECT_MODEL` with an alternate
+provider when `STAGEZERO_SCENE_AI_MODEL` is unset.
 
 The gateway token needs `ai_gateway:invoke`. The code appends `/v1` to Neon's bare
 host, then calls `/chat/completions`. Alternative OpenAI-compatible gateways can

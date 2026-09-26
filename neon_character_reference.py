@@ -8,7 +8,6 @@ import base64
 import binascii
 from io import BytesIO
 import json
-import os
 import time
 from urllib.parse import urlsplit
 
@@ -135,8 +134,8 @@ class NeonCharacterReference:
         token = config.get("NEON_AI_GATEWAY_TOKEN")
         if not base or not token:
             raise ValueError("Configure Neon gateway URL and token in .runtime/objects.env or the environment")
-        model = kwargs.pop("model", os.environ.get("STAGEZERO_CHARACTER_IMAGE_MODEL", "gpt-6-astra"))
-        design_model = kwargs.pop("design_model", os.environ.get("STAGEZERO_CHARACTER_DESIGN_MODEL", "gpt-6-astra"))
+        model = kwargs.pop("model", config.get("STAGEZERO_CHARACTER_IMAGE_MODEL", "gpt-6-astra"))
+        design_model = kwargs.pop("design_model", config.get("STAGEZERO_CHARACTER_DESIGN_MODEL", "gpt-6-astra"))
         return cls(base, token, model=model, design_model=design_model, **kwargs)
 
     def _check(self, cancelled, expires):

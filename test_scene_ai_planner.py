@@ -201,7 +201,33 @@ class SceneAIPlannerTests(unittest.TestCase):
                 planner = SceneAIPlanner.from_env(config_path=config)
         self.assertEqual(planner.url,
                          "https://br-test-api.ai.us-east-2.aws.neon.tech/v1/chat/completions")
-        self.assertEqual(planner.model, "test-model")
+        self.assertEqual(planner.model, "gpt-6-astra")
+
+    def test_neon_planning_defaults_to_strong_model(self):
+        values = {"NEON_AI_GATEWAY_BASE_URL": "https://branch.example",
+                  "NEON_AI_GATEWAY_TOKEN": "test-secret",
+                  "STAGEZERO_OBJECT_MODEL": "gpt-5-6-sol"}
+        with mock.patch("scene_ai_planner._config", return_value=values):
+            planner = SceneAIPlanner.from_env()
+        self.assertEqual(planner.url, "https://branch.example/v1/chat/completions")
+        self.assertEqual(planner.model, "gpt-6-astra")
+        values["STAGEZERO_SCENE_AI_MODEL"] = "planner-choice"
+        with mock.patch("scene_ai_planner._config", return_value=values):
+            self.assertEqual(SceneAIPlanner.from_env().model, "planner-choice")
+
+    def test_other_planning_providers_retain_explicit_model_or_fail_closed(self):
+        values = {"STAGEZERO_SCENE_AI_API_BASE": "https://other.example/v1",
+                  "STAGEZERO_SCENE_AI_API_KEY": "other-secret",
+                  "NEON_AI_GATEWAY_BASE_URL": "https://branch.example",
+                  "STAGEZERO_OBJECT_MODEL": "general-choice"}
+        with mock.patch("scene_ai_planner._config", return_value=values):
+            planner = SceneAIPlanner.from_env()
+        self.assertEqual(planner.url, "https://other.example/v1/chat/completions")
+        self.assertEqual(planner.model, "general-choice")
+        values.pop("STAGEZERO_OBJECT_MODEL")
+        with mock.patch("scene_ai_planner._config", return_value=values):
+            with self.assertRaisesRegex(ValueError, "no AI request was sent"):
+                SceneAIPlanner.from_env()
 
 
 if __name__ == "__main__":

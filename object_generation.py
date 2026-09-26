@@ -12,6 +12,7 @@ from scene_objects import make_object, validate_objects
 
 MAX_RESPONSE_BYTES = 100_000
 DEFAULT_SCENE_MODEL = 'gpt-5-6-sol'
+DEFAULT_ASSET_MODEL = 'gpt-6-astra'
 
 
 def validate_prompt(prompt):
@@ -57,15 +58,18 @@ class GatewayGenerator:
     def from_env(cls, stage=None):
         config = gateway_config()
         base = config.get('STAGEZERO_OBJECT_API_BASE')
+        use_neon_defaults = not base and bool(config.get('NEON_AI_GATEWAY_BASE_URL'))
         if not base and config.get('NEON_AI_GATEWAY_BASE_URL'):
             base = config['NEON_AI_GATEWAY_BASE_URL'].rstrip('/') + '/v1'
         model = config.get('STAGEZERO_OBJECT_MODEL')
-        if stage in ('assets', 'layout'):
-            override = ('STAGEZERO_SCENE_ASSET_MODEL' if stage == 'assets'
-                        else 'STAGEZERO_SCENE_LAYOUT_MODEL')
-            model = config.get(override) or (DEFAULT_SCENE_MODEL if config.get('NEON_AI_GATEWAY_BASE_URL') else model)
+        if stage == 'assets':
+            model = config.get('STAGEZERO_SCENE_ASSET_MODEL') or (DEFAULT_ASSET_MODEL if use_neon_defaults else model)
+        elif stage == 'layout':
+            model = config.get('STAGEZERO_SCENE_LAYOUT_MODEL') or (DEFAULT_SCENE_MODEL if use_neon_defaults else model)
         elif stage is not None:
             raise ValueError('Unknown gateway generation stage')
+        else:
+            model = model or (DEFAULT_SCENE_MODEL if use_neon_defaults else None)
         token = config.get('STAGEZERO_OBJECT_API_KEY') or config.get('NEON_AI_GATEWAY_TOKEN')
         if not base or not model or not token:
             raise ValueError('Configure gateway URL, model and token in .runtime/objects.env or the environment')
@@ -121,7 +125,8 @@ def gateway_config():
     """
     names = ('STAGEZERO_OBJECT_API_BASE', 'STAGEZERO_OBJECT_MODEL', 'STAGEZERO_OBJECT_API_KEY',
              'NEON_AI_GATEWAY_BASE_URL', 'NEON_AI_GATEWAY_TOKEN', 'STAGEZERO_LOCAL_MODEL',
-             'STAGEZERO_SCENE_ASSET_MODEL', 'STAGEZERO_SCENE_LAYOUT_MODEL')
+             'STAGEZERO_SCENE_ASSET_MODEL', 'STAGEZERO_SCENE_LAYOUT_MODEL',
+             'STAGEZERO_CHARACTER_IMAGE_MODEL', 'STAGEZERO_CHARACTER_DESIGN_MODEL')
     values = {}
     path = Path(__file__).resolve().parent / '.runtime' / 'objects.env'
     if path.is_file():
