@@ -1,0 +1,435 @@
+{
+  "adapter_options": {
+    "preserve_wrists": true,
+    "floor_y": -0.01
+  },
+  "adapter_provenance": [
+    {
+      "character_source": "existing generated textured GLB",
+      "mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+      "source_name": "original-human-v2.glb",
+      "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+      "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+      "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK; two-bone arms follow per-frame native wrist targets and native elbow poles",
+      "root_height_offset_m": -0.14691282523348326,
+      "limitations": [
+        "Approximate fitted rig, not an artist-authored production rig.",
+        "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+        "Different limb proportions change contact locations; no contact or floor IK is applied.",
+        "Texture and anatomical defects in the generated GLB remain visible."
+      ],
+      "preserve_native_wrists": true,
+      "wrist_target_reference": "native global wrist plus fixed canonical pelvis offset and any disclosed clip-wide floor translation",
+      "wrist_target_error_m": {
+        "max": 2.7755575615628914e-17,
+        "mean": 9.251858538542971e-19,
+        "unreachable_fraction": 0.0
+      },
+      "floor_calibration": [
+        {
+          "applied": true,
+          "offset_m": -0.0012175547053363215,
+          "floor_y": -0.01,
+          "support_sample_count": 95,
+          "support_height_quantile": 0.1,
+          "reference_support_height_m": -0.008782445294663679,
+          "method": "single clip-wide translation from robust low slowly-moving sole support; no frame snapping"
+        }
+      ]
+    },
+    {
+      "character_source": "existing generated textured GLB",
+      "mesh_sha256": "c335cca53cf6a449826aabe42434f2ff44fe7a239d7f2a7ff1a0e1f5ff9c9087",
+      "source_name": "ranger-final.glb",
+      "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+      "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+      "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK; two-bone arms follow per-frame native wrist targets and native elbow poles",
+      "root_height_offset_m": -0.14691282523348326,
+      "limitations": [
+        "Approximate fitted rig, not an artist-authored production rig.",
+        "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+        "Different limb proportions change contact locations; no contact or floor IK is applied.",
+        "Texture and anatomical defects in the generated GLB remain visible."
+      ],
+      "preserve_native_wrists": true,
+      "wrist_target_reference": "native global wrist plus fixed canonical pelvis offset and any disclosed clip-wide floor translation",
+      "wrist_target_error_m": {
+        "max": 2.7755575615628914e-17,
+        "mean": 8.673617379884035e-19,
+        "unreachable_fraction": 0.0
+      },
+      "floor_calibration": [
+        {
+          "applied": true,
+          "offset_m": -0.03565460089831087,
+          "floor_y": -0.01,
+          "support_sample_count": 101,
+          "support_height_quantile": 0.1,
+          "reference_support_height_m": 0.02565460089831087,
+          "method": "single clip-wide translation from robust low slowly-moving sole support; no frame snapping"
+        }
+      ]
+    }
+  ],
+  "feet": [
+    {
+      "feet": {
+        "left": {
+          "sole_vertices_sampled": 128,
+          "sole_height_above_floor_m": {
+            "samples": 15360,
+            "min": -0.00522303829604851,
+            "median": 0.08255220096412319,
+            "mean": 0.08547217221868228,
+            "p95": 0.14970275215203735,
+            "max": 0.20915018478542916
+          },
+          "lowest_sole_vertex_each_frame_m": {
+            "samples": 120,
+            "min": -0.00522303829604851,
+            "median": 0.04206598924330662,
+            "mean": 0.040551185263048316,
+            "p95": 0.06952907156298925,
+            "max": 0.08186275448285574
+          },
+          "frames_with_sole_below_minus_1cm": 0,
+          "frames_all_sampled_sole_above_5cm": 37,
+          "inferred_contact_vertex_intervals": 419,
+          "contact_vertex_horizontal_speed_m_s": {
+            "samples": 419,
+            "min": 0.05716864115906396,
+            "median": 0.24897771351952247,
+            "mean": 0.26818713884204864,
+            "p95": 0.6134788955844696,
+            "max": 0.6671634116744742
+          },
+          "all_sole_vertex_horizontal_speed_m_s": {
+            "samples": 15232,
+            "min": 0.0021632106039152616,
+            "median": 0.15268852452580686,
+            "mean": 0.25035323374786494,
+            "p95": 0.9604352493692528,
+            "max": 1.9621414625646372
+          }
+        },
+        "right": {
+          "sole_vertices_sampled": 128,
+          "sole_height_above_floor_m": {
+            "samples": 15360,
+            "min": -0.005108179092876912,
+            "median": 0.0777119020632546,
+            "mean": 0.08102762745516404,
+            "p95": 0.15333303310149432,
+            "max": 0.21908450434295604
+          },
+          "lowest_sole_vertex_each_frame_m": {
+            "samples": 120,
+            "min": -0.005108179092876912,
+            "median": 0.025979342017232725,
+            "mean": 0.02827168892659647,
+            "p95": 0.05791610343442523,
+            "max": 0.08696381479257408
+          },
+          "frames_with_sole_below_minus_1cm": 0,
+          "frames_all_sampled_sole_above_5cm": 18,
+          "inferred_contact_vertex_intervals": 764,
+          "contact_vertex_horizontal_speed_m_s": {
+            "samples": 764,
+            "min": 0.023133161408888745,
+            "median": 0.11411277051732682,
+            "mean": 0.1306118990193828,
+            "p95": 0.24989843039773252,
+            "max": 0.3828813741154772
+          },
+          "all_sole_vertex_horizontal_speed_m_s": {
+            "samples": 15232,
+            "min": 0.0021548931128225236,
+            "median": 0.13884096632919254,
+            "mean": 0.32313114606718046,
+            "p95": 1.5035465448226542,
+            "max": 2.9741554173022715
+          }
+        }
+      },
+      "frames_both_soles_above_5cm": 13,
+      "fitted_pose_input": "provided fitted transforms",
+      "fps": 20.0,
+      "floor_height_m": -0.01,
+      "contact_height_m": 0.025,
+      "contact_vertical_speed_m_s": 0.15,
+      "rig_provenance": {
+        "character_source": "existing generated textured GLB",
+        "mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+        "source_name": "original-human-v2.glb",
+        "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+        "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+        "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK",
+        "root_height_offset_m": -0.14691282523348326,
+        "limitations": [
+          "Approximate fitted rig, not an artist-authored production rig.",
+          "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+          "Different limb proportions change contact locations; no contact or floor IK is applied.",
+          "Texture and anatomical defects in the generated GLB remain visible."
+        ]
+      },
+      "interpretation": "Exact current LBS sole samples with approximate fitted rig; no foot locking, root correction, or mesh quality pass."
+    },
+    {
+      "feet": {
+        "left": {
+          "sole_vertices_sampled": 128,
+          "sole_height_above_floor_m": {
+            "samples": 15360,
+            "min": 0.007014804531685243,
+            "median": 0.08069596853384954,
+            "mean": 0.08465401991066826,
+            "p95": 0.14874376865805924,
+            "max": 0.23265713234982124
+          },
+          "lowest_sole_vertex_each_frame_m": {
+            "samples": 120,
+            "min": 0.007014804531685243,
+            "median": 0.05519870185037265,
+            "mean": 0.052995440190346646,
+            "p95": 0.09144679163455233,
+            "max": 0.09823051083470663
+          },
+          "frames_with_sole_below_minus_1cm": 0,
+          "frames_all_sampled_sole_above_5cm": 65,
+          "inferred_contact_vertex_intervals": 68,
+          "contact_vertex_horizontal_speed_m_s": {
+            "samples": 68,
+            "min": 0.17559825580938782,
+            "median": 0.179976101973985,
+            "mean": 0.23839032150418493,
+            "p95": 0.31509362494757015,
+            "max": 0.31589495277836893
+          },
+          "all_sole_vertex_horizontal_speed_m_s": {
+            "samples": 15232,
+            "min": 0.00026739712083212713,
+            "median": 0.17812968723028422,
+            "mean": 0.41288239962664613,
+            "p95": 2.1164167355748043,
+            "max": 3.1605816388042083
+          }
+        },
+        "right": {
+          "sole_vertices_sampled": 128,
+          "sole_height_above_floor_m": {
+            "samples": 15360,
+            "min": -0.007859245006210583,
+            "median": 0.04901967533871198,
+            "mean": 0.05663560243838253,
+            "p95": 0.13238884951700158,
+            "max": 0.22023506946670424
+          },
+          "lowest_sole_vertex_each_frame_m": {
+            "samples": 120,
+            "min": -0.007859245006210583,
+            "median": 0.021652050879634933,
+            "mean": 0.02632044699305824,
+            "p95": 0.0797289222374792,
+            "max": 0.09924613441776435
+          },
+          "frames_with_sole_below_minus_1cm": 0,
+          "frames_all_sampled_sole_above_5cm": 18,
+          "inferred_contact_vertex_intervals": 2232,
+          "contact_vertex_horizontal_speed_m_s": {
+            "samples": 2232,
+            "min": 0.027232865946850166,
+            "median": 0.09614809702319069,
+            "mean": 0.1443467026950234,
+            "p95": 0.41525052057732625,
+            "max": 1.1114367357690231
+          },
+          "all_sole_vertex_horizontal_speed_m_s": {
+            "samples": 15232,
+            "min": 0.001083332856221867,
+            "median": 0.13662577328623932,
+            "mean": 0.3048598270447674,
+            "p95": 1.1437065265368491,
+            "max": 3.458059195520443
+          }
+        }
+      },
+      "frames_both_soles_above_5cm": 15,
+      "fitted_pose_input": "provided fitted transforms",
+      "fps": 20.0,
+      "floor_height_m": -0.01,
+      "contact_height_m": 0.025,
+      "contact_vertical_speed_m_s": 0.15,
+      "rig_provenance": {
+        "character_source": "existing generated textured GLB",
+        "mesh_sha256": "c335cca53cf6a449826aabe42434f2ff44fe7a239d7f2a7ff1a0e1f5ff9c9087",
+        "source_name": "ranger-final.glb",
+        "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+        "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+        "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK",
+        "root_height_offset_m": -0.14691282523348326,
+        "limitations": [
+          "Approximate fitted rig, not an artist-authored production rig.",
+          "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+          "Different limb proportions change contact locations; no contact or floor IK is applied.",
+          "Texture and anatomical defects in the generated GLB remain visible."
+        ]
+      },
+      "interpretation": "Exact current LBS sole samples with approximate fitted rig; no foot locking, root correction, or mesh quality pass."
+    }
+  ],
+  "hands": {
+    "hand_pairs": {
+      "left_to_left": {
+        "raw_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.3116382086336756,
+          "median": 0.7898532884263307,
+          "mean": 0.7533084547820703,
+          "p95": 0.895070535730989,
+          "max": 0.9200564646968951
+        },
+        "fitted_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.32997059229068026,
+          "median": 0.7801424670873358,
+          "mean": 0.752104411998467,
+          "p95": 0.9030241559493779,
+          "max": 0.9334861735594805
+        },
+        "sampled_hand_vertex_gap_m": {
+          "samples": 120,
+          "min": 0.21619429225388867,
+          "median": 0.6884817571890754,
+          "mean": 0.666229332099867,
+          "p95": 0.8365673587608476,
+          "max": 0.8732197755981579
+        },
+        "closest_sampled_hand_frame": 119,
+        "frames_sampled_hand_gap_under_5cm": 0,
+        "longest_sampled_hand_gap_under_5cm_seconds": 0.0
+      },
+      "left_to_right": {
+        "raw_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.011990317854446772,
+          "median": 0.13069661199924354,
+          "mean": 0.1527538593919085,
+          "p95": 0.32309434672030324,
+          "max": 0.4217378646637779
+        },
+        "fitted_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.024875934560633254,
+          "median": 0.14497505470067115,
+          "mean": 0.1658889196466486,
+          "p95": 0.3412742482739519,
+          "max": 0.42400628934330986
+        },
+        "sampled_hand_vertex_gap_m": {
+          "samples": 120,
+          "min": 0.0037546596448918344,
+          "median": 0.10245358656645531,
+          "mean": 0.11736077856234856,
+          "p95": 0.2691769799721155,
+          "max": 0.39447738662504445
+        },
+        "closest_sampled_hand_frame": 36,
+        "frames_sampled_hand_gap_under_5cm": 20,
+        "longest_sampled_hand_gap_under_5cm_seconds": 0.55
+      },
+      "right_to_left": {
+        "raw_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.06822836689574215,
+          "median": 0.15934303195928579,
+          "mean": 0.16469195975823428,
+          "p95": 0.2605322615374931,
+          "max": 0.34748057729701004
+        },
+        "fitted_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.06253157303760254,
+          "median": 0.1610912277630197,
+          "mean": 0.1692798268907732,
+          "p95": 0.26258941259996854,
+          "max": 0.3571971380128045
+        },
+        "sampled_hand_vertex_gap_m": {
+          "samples": 120,
+          "min": 0.004662608585166609,
+          "median": 0.13205423548346298,
+          "mean": 0.12280642048338007,
+          "p95": 0.18432098687560683,
+          "max": 0.23730239233072226
+        },
+        "closest_sampled_hand_frame": 58,
+        "frames_sampled_hand_gap_under_5cm": 10,
+        "longest_sampled_hand_gap_under_5cm_seconds": 0.25
+      },
+      "right_to_right": {
+        "raw_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.6197158082247394,
+          "median": 0.8218996125544393,
+          "mean": 0.8283236869613831,
+          "p95": 0.9619379459792267,
+          "max": 0.9937402747904249
+        },
+        "fitted_wrist_gap_m": {
+          "samples": 120,
+          "min": 0.6351791666330091,
+          "median": 0.8342918645345745,
+          "mean": 0.8335288627029416,
+          "p95": 0.9564180571512375,
+          "max": 0.9901088833391529
+        },
+        "sampled_hand_vertex_gap_m": {
+          "samples": 120,
+          "min": 0.49301491748516585,
+          "median": 0.7387190256138484,
+          "mean": 0.7249454784680018,
+          "p95": 0.856879888538164,
+          "max": 0.8772842047183687
+        },
+        "closest_sampled_hand_frame": 2,
+        "frames_sampled_hand_gap_under_5cm": 0,
+        "longest_sampled_hand_gap_under_5cm_seconds": 0.0
+      }
+    },
+    "fitted_pose_input": "provided fitted transforms",
+    "fps": 20.0,
+    "rig_provenance": [
+      {
+        "character_source": "existing generated textured GLB",
+        "mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+        "source_name": "original-human-v2.glb",
+        "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+        "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+        "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK",
+        "root_height_offset_m": -0.14691282523348326,
+        "limitations": [
+          "Approximate fitted rig, not an artist-authored production rig.",
+          "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+          "Different limb proportions change contact locations; no contact or floor IK is applied.",
+          "Texture and anatomical defects in the generated GLB remain visible."
+        ]
+      },
+      {
+        "character_source": "existing generated textured GLB",
+        "mesh_sha256": "c335cca53cf6a449826aabe42434f2ff44fe7a239d7f2a7ff1a0e1f5ff9c9087",
+        "source_name": "ranger-final.glb",
+        "rig_method": "anatomical silhouette/connectivity fit, 17 bones, four-weight LBS",
+        "fit_source_sha256": "daaafa95ce27cdc77383749966aedcbe1fe620161023df8c036e0abe27b4e0d5",
+        "retarget_method": "canonical Core27 T-pose to fitted human A-pose axis alignment; fixed-length FK",
+        "root_height_offset_m": -0.14691282523348326,
+        "limitations": [
+          "Approximate fitted rig, not an artist-authored production rig.",
+          "Core spine is compressed to one torso bone; no independent clavicle, finger or facial motion.",
+          "Different limb proportions change contact locations; no contact or floor IK is applied.",
+          "Texture and anatomical defects in the generated GLB remain visible."
+        ]
+      }
+    ],
+    "interpretation": "Same-frame native wrist, fitted wrist and sampled exact LBS hand geometry. Surface sampling does not establish a grasp or detect mesh penetration."
+  }
+}

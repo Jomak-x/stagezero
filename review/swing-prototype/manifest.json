@@ -1,0 +1,15 @@
+{
+  "run_id": "20260926-062105-a81b85",
+  "capture": "Actual browser canvas including controls, without cuts or speed changes",
+  "original_webm_sha256": "57203f8ed0c2844ac9e7e6e6148f64ebbb7425788d29a6b83b13ce91a151c28d",
+  "review_mp4_sha256": "11947cc32096357fb75d0590dd078f7d613138105f76fca6aba4801749d284c0",
+  "transcode": "ffmpeg libx264 CRF23 preset fast; all original frames/timing; no concatenation",
+  "source_files": {
+    "swing_dynamics.py": "09438164e6df09401a42e458336f98206d9557fff486191638510eb91ffcbdfd",
+    "swing_pose.py": "deec26a76b667f6a55efd5a512d3ad701bd0cd1b8d32d17edb32e0f3a8166d4a",
+    "swing_scene.py": "b0a9d7088490b3add87b975e5b01f034194ef4a004d09c916b412a5ee199ec14",
+    "swing_server.py": "9d99b589935904531ccb852ae207108306f995133e8493a62a2f3e6a36148a23",
+    "swing_web/main.js": "9799da6ae678731d479a6591714626f8236672f36799da21c56086e7b2d480ac"
+  },
+  "source_hash_note": "Current source hashes. Controller, pose, scene and viewer match the captured implementation; server later gained capture sealing/idle retention only, covered by regression."
+}

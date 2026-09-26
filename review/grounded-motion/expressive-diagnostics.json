@@ -1,0 +1,2712 @@
+{
+  "kind": "native motion diagnostics, not a quality certificate",
+  "clips": [
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/core_celebration_jump_8s.npz",
+      "sha256": "1c218ed09f415e0c0f207b73bdcf3ebcc9f74bf5875ad54417c97783c5d46235",
+      "metadata": {
+        "name": "core_celebration_jump_8s",
+        "seed": 6203,
+        "prompt": "A person celebrates excitedly, crouches and jumps off both feet with arms raised overhead, lands with bent knees, then pumps both fists in the air.",
+        "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+        "frames": 160,
+        "fps": 20,
+        "model": "ARDY-Core-RP-20FPS-Horizon40",
+        "source": "Unmodified native ARDY Core model poses",
+        "stage_kind": "approach",
+        "actor_ids": [
+          "person_a"
+        ],
+        "client_round_trip_seconds": 2.750620249978965,
+        "chunk_metadata": [
+          {
+            "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6203
+          },
+          {
+            "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+            "chunk_index": 1,
+            "start_frame": 40,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6203
+          },
+          {
+            "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+            "chunk_index": 2,
+            "start_frame": 80,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6203
+          },
+          {
+            "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+            "chunk_index": 3,
+            "start_frame": 120,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6203
+          }
+        ],
+        "service_result": {
+          "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+          "stage_kind": "approach",
+          "status": "complete",
+          "produced_chunks": 4,
+          "total_chunks": 4,
+          "available_chunks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "submitted_at": 1373364.353500622,
+          "started_at": 1373364.353697254,
+          "finished_at": 1373364.697643028,
+          "error": null,
+          "metadata": {
+            "request_id": "grounded-core_celebration_jump_8s-5118980a05",
+            "model": "ARDY-Core-RP-20FPS-Horizon40",
+            "fps": 20,
+            "frames": 160,
+            "actors": [
+              {
+                "id": "person_a",
+                "prompt": "A person celebrates excitedly, crouches and jumps off both feet with arms raised overhead, lands with bent knees, then pumps both fists in the air.",
+                "seed": 6203,
+                "history_frames": 0,
+                "initial_position_xz": null,
+                "initial_yaw": null,
+                "conditioned_frames": [],
+                "root_targets": []
+              }
+            ],
+            "groups": [
+              {
+                "actor_indices": [
+                  0
+                ],
+                "seed": 6203,
+                "batch_size": 1,
+                "encoding_seconds": 0.047098474111407995,
+                "step_seconds": [
+                  0.06635372596792877,
+                  0.06857946398667991,
+                  0.06874399585649371,
+                  0.06839106185361743
+                ]
+              }
+            ],
+            "generation_seconds": 0.3438318120315671,
+            "native_conditions": false,
+            "post_generation_pose_edits": false
+          }
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.7756068110466003,
+              "median": 0.9226695001125336,
+              "mean": 0.9234316866844893,
+              "p95": 0.9792933523654936,
+              "max": 1.0869299173355103
+            },
+            "root_path_length_m": 2.7405931260800322,
+            "root_net_displacement_m": 0.0944765295040173,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.026200851655482815,
+              "median": 0.255398734968887,
+              "mean": 0.34472869510440657,
+              "p95": 0.8872326205974643,
+              "max": 1.5775530811960727
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 0.0001825373258571011,
+              "median": 0.014504364277772281,
+              "mean": 0.024362473037157818,
+              "p95": 0.08128357884471156,
+              "max": 0.24036763327891822
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": -0.014627993106842041,
+                  "median": 0.001321941614151001,
+                  "mean": 0.0015883889049291612,
+                  "p95": 0.01095575094223021,
+                  "max": 0.05335879325866699
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 147,
+                "inferred_contact_seconds": 7.35,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 147,
+                  "min": 0.0029780925318958194,
+                  "median": 0.023986184154765472,
+                  "mean": 0.041285475323910914,
+                  "p95": 0.11038569400956004,
+                  "max": 0.5444185450560817
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0029780925318958194,
+                  "median": 0.0253258825641987,
+                  "mean": 0.048797968346789185,
+                  "p95": 0.1857113176107684,
+                  "max": 0.5444185450560817
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 14,
+                    "duration_seconds": 0.7,
+                    "path_drift_m": 0.011538392661516229,
+                    "net_drift_m": 0.007621961502427326
+                  },
+                  {
+                    "first_frame": 17,
+                    "last_frame": 19,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.029145090123083393,
+                    "net_drift_m": 0.02890990401996305
+                  },
+                  {
+                    "first_frame": 21,
+                    "last_frame": 26,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.01122938096210747,
+                    "net_drift_m": 0.005547427896941783
+                  },
+                  {
+                    "first_frame": 27,
+                    "last_frame": 36,
+                    "duration_seconds": 0.45,
+                    "path_drift_m": 0.016644727254063116,
+                    "net_drift_m": 0.010263246829070722
+                  },
+                  {
+                    "first_frame": 37,
+                    "last_frame": 38,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.003126705710169988,
+                    "net_drift_m": 0.003126705710169988
+                  },
+                  {
+                    "first_frame": 39,
+                    "last_frame": 54,
+                    "duration_seconds": 0.75,
+                    "path_drift_m": 0.03228646196879863,
+                    "net_drift_m": 0.010560964124619373
+                  },
+                  {
+                    "first_frame": 55,
+                    "last_frame": 104,
+                    "duration_seconds": 2.45,
+                    "path_drift_m": 0.08599659426788663,
+                    "net_drift_m": 0.004295715403546865
+                  },
+                  {
+                    "first_frame": 105,
+                    "last_frame": 118,
+                    "duration_seconds": 0.65,
+                    "path_drift_m": 0.03996958313363196,
+                    "net_drift_m": 0.021173035879982958
+                  },
+                  {
+                    "first_frame": 119,
+                    "last_frame": 121,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.03788936061216453,
+                    "net_drift_m": 0.03756771486818876
+                  },
+                  {
+                    "first_frame": 122,
+                    "last_frame": 159,
+                    "duration_seconds": 1.85,
+                    "path_drift_m": 0.035621946937323234,
+                    "net_drift_m": 0.019297194949261954
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": -0.011922240257263184,
+                  "median": 0.0035219788551330566,
+                  "mean": 0.003997240215539932,
+                  "p95": 0.010411196947097771,
+                  "max": 0.06595146656036377
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 151,
+                "inferred_contact_seconds": 7.55,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 151,
+                  "min": 0.0017272589452168178,
+                  "median": 0.030569101136102565,
+                  "mean": 0.03751514749823645,
+                  "p95": 0.08977946327073755,
+                  "max": 0.4985278102740068
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0017272589452168178,
+                  "median": 0.030930814987156177,
+                  "mean": 0.04384420802730116,
+                  "p95": 0.11761380027383575,
+                  "max": 0.4985278102740068
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 14,
+                    "duration_seconds": 0.7,
+                    "path_drift_m": 0.010015794928553845,
+                    "net_drift_m": 0.0040905171692490905
+                  },
+                  {
+                    "first_frame": 18,
+                    "last_frame": 19,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.02492639051370034,
+                    "net_drift_m": 0.02492639051370034
+                  },
+                  {
+                    "first_frame": 22,
+                    "last_frame": 38,
+                    "duration_seconds": 0.8,
+                    "path_drift_m": 0.040578175649365125,
+                    "net_drift_m": 0.015450181644235788
+                  },
+                  {
+                    "first_frame": 39,
+                    "last_frame": 159,
+                    "duration_seconds": 6.0,
+                    "path_drift_m": 0.20771900252006592,
+                    "net_drift_m": 0.03857281341962418
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 46.354064416555,
+                    "median": 132.23424131601507,
+                    "mean": 126.10245541294498,
+                    "p95": 153.8496284655038,
+                    "max": 158.13731268369685
+                  },
+                  "range_degrees": 111.78324826714186,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.011630003588152249,
+                    "median": 70.59934186126611,
+                    "mean": 118.16844367489523,
+                    "p95": 400.228413763496,
+                    "max": 583.0897882736836
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 79.78621388688427,
+                    "median": 135.53944582517443,
+                    "mean": 127.05250335083683,
+                    "p95": 152.5722301497194,
+                    "max": 159.42235451453936
+                  },
+                  "range_degrees": 79.6361406276551,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.30979397923260876,
+                    "median": 63.89803687929259,
+                    "mean": 94.74863908028001,
+                    "p95": 284.46433543921165,
+                    "max": 447.1918907289134
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 104.83129138997518,
+                    "median": 144.08381269938047,
+                    "mean": 144.48905053263002,
+                    "p95": 167.65543768274955,
+                    "max": 173.4120954579783
+                  },
+                  "range_degrees": 68.58080406800312,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.007001994150869,
+                    "median": 51.81689255377762,
+                    "mean": 78.60087132428714,
+                    "p95": 241.43371842018865,
+                    "max": 400.0472701903004
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 104.3973531091349,
+                    "median": 142.04025837319057,
+                    "mean": 142.77974641265934,
+                    "p95": 163.652013664611,
+                    "max": 179.25890209564076
+                  },
+                  "range_degrees": 74.86154898650587,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.496356363369955,
+                    "median": 58.91649325784783,
+                    "mean": 81.28931904690462,
+                    "p95": 202.2159552156475,
+                    "max": 463.1822268203092
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 147.0279294529794,
+                    "median": 153.75450313310756,
+                    "mean": 153.73983024391714,
+                    "p95": 158.0899097495673,
+                    "max": 160.02685724897225
+                  },
+                  "range_degrees": 12.998927795992842,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.48230609137817737,
+                    "median": 11.865340393640054,
+                    "mean": 13.843744732089851,
+                    "p95": 36.29198193945804,
+                    "max": 72.30847043989343
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 136.51192098927453,
+                    "median": 172.08063595163947,
+                    "mean": 171.26436101052636,
+                    "p95": 177.97235643182225,
+                    "max": 179.5879694743852
+                  },
+                  "range_degrees": 43.076048485110675,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.20995615969638948,
+                    "median": 19.455584907408365,
+                    "mean": 30.02644990811244,
+                    "p95": 89.64322100338555,
+                    "max": 261.7669806675974
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 134.57865087047017,
+                    "median": 174.2874521768727,
+                    "mean": 171.65692790835467,
+                    "p95": 178.2352326066835,
+                    "max": 179.16408345149637
+                  },
+                  "range_degrees": 44.5854325810262,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.07562788153961719,
+                    "median": 19.05109570307218,
+                    "mean": 29.98165420326851,
+                    "p95": 98.81433785148984,
+                    "max": 285.44765010235324
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 71.19373077555227,
+                    "median": 161.95628005213467,
+                    "mean": 143.69483774745726,
+                    "p95": 170.5568949842019,
+                    "max": 171.60345949531737
+                  },
+                  "range_degrees": 100.4097287197651,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.2244205885011752,
+                    "median": 33.46892360172433,
+                    "mean": 64.67038772601732,
+                    "p95": 252.1761472250429,
+                    "max": 367.4069899186438
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 66.50263145787568,
+                    "median": 148.86414272517106,
+                    "mean": 134.97350176653927,
+                    "p95": 166.48806284384514,
+                    "max": 172.22686850790276
+                  },
+                  "range_degrees": 105.72423705002709,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.23289215173122102,
+                    "median": 29.15164977635129,
+                    "mean": 63.5977810912572,
+                    "p95": 230.81036804535194,
+                    "max": 293.00156191258765
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 3.093508443852144e-08,
+                "median": 3.08145452054126e-07,
+                "mean": 2.952538365989585e-07,
+                "p95": 4.523051027986724e-07,
+                "max": 4.820253948767395e-07
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 6.807901753379318e-08,
+                "median": 3.1944553206220913e-07,
+                "mean": 3.747022987187265e-07,
+                "p95": 9.081509775288111e-07,
+                "max": 1.0484383569328838e-06
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.14920154352875917,
+                "mean": 0.3358330635765343,
+                "p95": 1.3881398205371505,
+                "max": 4.455377707509153
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    },
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/core_hiphop_8s.npz",
+      "sha256": "6fefb55eab76441d5c0d4fd1e9e9f6f344ae5896f43cf1f7417b02cb9c5401f1",
+      "metadata": {
+        "name": "core_hiphop_8s",
+        "seed": 6200,
+        "prompt": "A person performs an energetic hip hop dance with deep knee bends, alternating side steps, quick torso twists and broad rhythmic arm swings.",
+        "request_id": "grounded-core_hiphop_8s-8218644243",
+        "frames": 160,
+        "fps": 20,
+        "model": "ARDY-Core-RP-20FPS-Horizon40",
+        "source": "Unmodified native ARDY Core model poses",
+        "stage_kind": "approach",
+        "actor_ids": [
+          "person_a"
+        ],
+        "client_round_trip_seconds": 3.150692583003547,
+        "chunk_metadata": [
+          {
+            "request_id": "grounded-core_hiphop_8s-8218644243",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6200
+          },
+          {
+            "request_id": "grounded-core_hiphop_8s-8218644243",
+            "chunk_index": 1,
+            "start_frame": 40,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6200
+          },
+          {
+            "request_id": "grounded-core_hiphop_8s-8218644243",
+            "chunk_index": 2,
+            "start_frame": 80,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6200
+          },
+          {
+            "request_id": "grounded-core_hiphop_8s-8218644243",
+            "chunk_index": 3,
+            "start_frame": 120,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6200
+          }
+        ],
+        "service_result": {
+          "request_id": "grounded-core_hiphop_8s-8218644243",
+          "stage_kind": "approach",
+          "status": "complete",
+          "produced_chunks": 4,
+          "total_chunks": 4,
+          "available_chunks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "submitted_at": 1373354.65563818,
+          "started_at": 1373354.655839222,
+          "finished_at": 1373355.009991675,
+          "error": null,
+          "metadata": {
+            "request_id": "grounded-core_hiphop_8s-8218644243",
+            "model": "ARDY-Core-RP-20FPS-Horizon40",
+            "fps": 20,
+            "frames": 160,
+            "actors": [
+              {
+                "id": "person_a",
+                "prompt": "A person performs an energetic hip hop dance with deep knee bends, alternating side steps, quick torso twists and broad rhythmic arm swings.",
+                "seed": 6200,
+                "history_frames": 0,
+                "initial_position_xz": null,
+                "initial_yaw": null,
+                "conditioned_frames": [],
+                "root_targets": []
+              }
+            ],
+            "groups": [
+              {
+                "actor_indices": [
+                  0
+                ],
+                "seed": 6200,
+                "batch_size": 1,
+                "encoding_seconds": 0.05670094396919012,
+                "step_seconds": [
+                  0.06627638498321176,
+                  0.06825904990546405,
+                  0.06928823399357498,
+                  0.06845456291921437
+                ]
+              }
+            ],
+            "generation_seconds": 0.35404061106964946,
+            "native_conditions": false,
+            "post_generation_pose_edits": false
+          }
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.798248827457428,
+              "median": 0.8392883837223053,
+              "mean": 0.850500413775444,
+              "p95": 0.9365135133266448,
+              "max": 0.9570450186729431
+            },
+            "root_path_length_m": 2.8312635715048557,
+            "root_net_displacement_m": 0.14826040474250526,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.033951049346153644,
+              "median": 0.3587606963835194,
+              "mean": 0.3561337825792271,
+              "p95": 0.579737803443364,
+              "max": 0.7925405966735004
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 0.00029340121194320175,
+              "median": 0.018400616168407616,
+              "mean": 0.03492590634062509,
+              "p95": 0.13193152616349532,
+              "max": 0.263718530453543
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": -0.0007124543190002441,
+                  "median": 0.011385887861251831,
+                  "mean": 0.012987684458494186,
+                  "p95": 0.02799983620643612,
+                  "max": 0.03995513916015625
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 155,
+                "inferred_contact_seconds": 7.75,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 155,
+                  "min": 0.003690608560803958,
+                  "median": 0.06534398804409805,
+                  "mean": 0.09213765152721083,
+                  "p95": 0.2682474815434455,
+                  "max": 0.6032424650306424
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.003690608560803958,
+                  "median": 0.06750942917411834,
+                  "mean": 0.098571147957655,
+                  "p95": 0.33378207019387274,
+                  "max": 0.6032424650306424
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 14,
+                    "duration_seconds": 0.7,
+                    "path_drift_m": 0.027456677032738446,
+                    "net_drift_m": 0.020595408123565494
+                  },
+                  {
+                    "first_frame": 15,
+                    "last_frame": 16,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.03016212325153212,
+                    "net_drift_m": 0.03016212325153212
+                  },
+                  {
+                    "first_frame": 17,
+                    "last_frame": 20,
+                    "duration_seconds": 0.15,
+                    "path_drift_m": 0.012559806481485757,
+                    "net_drift_m": 0.01140288946854259
+                  },
+                  {
+                    "first_frame": 21,
+                    "last_frame": 26,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.04570805503299741,
+                    "net_drift_m": 0.0451708012137758
+                  },
+                  {
+                    "first_frame": 27,
+                    "last_frame": 159,
+                    "duration_seconds": 6.6,
+                    "path_drift_m": 0.5981801375371303,
+                    "net_drift_m": 0.15992801812397797
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": -0.004364132881164551,
+                  "median": 0.011287868022918701,
+                  "mean": 0.011653856560587882,
+                  "p95": 0.020663368701934786,
+                  "max": 0.02421778440475464
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 160,
+                "inferred_contact_intervals": 159,
+                "inferred_contact_seconds": 7.95,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 159,
+                  "min": 0.005154472667967211,
+                  "median": 0.05390751560220859,
+                  "mean": 0.07212297676204299,
+                  "p95": 0.2003402024395157,
+                  "max": 0.44593900275138965
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.005154472667967211,
+                  "median": 0.05390751560220859,
+                  "mean": 0.07212297676204299,
+                  "p95": 0.2003402024395157,
+                  "max": 0.44593900275138965
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 159,
+                    "duration_seconds": 7.95,
+                    "path_drift_m": 0.5733776652582417,
+                    "net_drift_m": 0.027946577126310636
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 54.22844136520539,
+                    "median": 101.4720277947123,
+                    "mean": 106.0766256447805,
+                    "p95": 158.71390464182483,
+                    "max": 166.37992254508308
+                  },
+                  "range_degrees": 112.15148117987769,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 3.9515464992391003,
+                    "median": 231.75267714633634,
+                    "mean": 254.3890713822271,
+                    "p95": 583.5065637309679,
+                    "max": 785.6444987259065
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 53.693583142308405,
+                    "median": 94.61780134679991,
+                    "mean": 100.06685751663578,
+                    "p95": 151.593942619178,
+                    "max": 161.37392552018588
+                  },
+                  "range_degrees": 107.68034237787748,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 2.116860632013129,
+                    "median": 210.7224252660177,
+                    "mean": 243.89536991202513,
+                    "p95": 576.6237947599491,
+                    "max": 855.3118899607412
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 99.93671375711789,
+                    "median": 120.58602650747827,
+                    "mean": 123.29987141422752,
+                    "p95": 155.36615448610706,
+                    "max": 176.4506911165915
+                  },
+                  "range_degrees": 76.51397735947363,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.22778110842210708,
+                    "median": 44.06132115463379,
+                    "mean": 50.00129132382678,
+                    "p95": 116.11425517261257,
+                    "max": 168.45883845180538
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 104.26137419967638,
+                    "median": 119.66764714054656,
+                    "mean": 122.29127476913013,
+                    "p95": 148.00010139027347,
+                    "max": 172.5018647954234
+                  },
+                  "range_degrees": 68.240490595747,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.9630802721815144,
+                    "median": 44.64193089532699,
+                    "mean": 52.38377420856307,
+                    "p95": 119.75544659282906,
+                    "max": 160.80623664208986
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 129.76777154238235,
+                    "median": 140.0342940857439,
+                    "mean": 140.1188508050077,
+                    "p95": 151.2625828233268,
+                    "max": 156.58053262469076
+                  },
+                  "range_degrees": 26.812761082308413,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.2759455638624786,
+                    "median": 17.77634522514802,
+                    "mean": 21.849541030925895,
+                    "p95": 53.47397372224893,
+                    "max": 79.95469121056999
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 126.32428324309106,
+                    "median": 148.14035545368935,
+                    "mean": 148.5577858303826,
+                    "p95": 169.68313805972315,
+                    "max": 173.78018481343148
+                  },
+                  "range_degrees": 47.455901570340416,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.05577943036598754,
+                    "median": 34.20059445897664,
+                    "mean": 41.254246375444566,
+                    "p95": 99.3636706100221,
+                    "max": 139.81247359858287
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 128.78093913393693,
+                    "median": 148.46950708369462,
+                    "mean": 148.27551421052743,
+                    "p95": 167.07271687904907,
+                    "max": 171.7415612813584
+                  },
+                  "range_degrees": 42.960622147421475,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.7424736119702402,
+                    "median": 32.30844443731144,
+                    "mean": 36.176859297090374,
+                    "p95": 81.9683167600368,
+                    "max": 124.50705824659678
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 52.79026746705008,
+                    "median": 81.16886256965938,
+                    "mean": 84.30451556047517,
+                    "p95": 121.72262128083662,
+                    "max": 132.68926687735686
+                  },
+                  "range_degrees": 79.89899941030677,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.09842829307146417,
+                    "median": 63.920359075470685,
+                    "mean": 77.98768349960403,
+                    "p95": 211.68121913110494,
+                    "max": 312.21224417623205
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 52.457353257825254,
+                    "median": 78.46268848008759,
+                    "mean": 80.22880941080693,
+                    "p95": 112.90131479333434,
+                    "max": 133.96893266756265
+                  },
+                  "range_degrees": 81.51157940973741,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.27016000116816485,
+                    "median": 59.82845923671789,
+                    "mean": 83.57418183543332,
+                    "p95": 251.9261403860822,
+                    "max": 335.8896473487826
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 3.880982887838336e-08,
+                "median": 2.636304977515769e-07,
+                "mean": 2.5127537915056305e-07,
+                "p95": 4.2804857840195165e-07,
+                "max": 5.656235420037348e-07
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 7.349294256359257e-08,
+                "median": 2.5570092642042503e-07,
+                "mean": 2.888182492232909e-07,
+                "p95": 5.594519299375658e-07,
+                "max": 5.883516694690342e-07
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.4026537682681696,
+                "mean": 0.7253836615855389,
+                "p95": 2.687012463126527,
+                "max": 5.1407860983346065
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    },
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/core_martial_combo_8s.npz",
+      "sha256": "988bd834e32b21298205ae055cd24ad57334d8d6294b908968d8c64479013021",
+      "metadata": {
+        "name": "core_martial_combo_8s",
+        "seed": 6201,
+        "prompt": "A martial artist performs a sharp combination: a left jab, a right cross, a front kick, then resets into a low guarded stance and repeats the combination.",
+        "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+        "frames": 160,
+        "fps": 20,
+        "model": "ARDY-Core-RP-20FPS-Horizon40",
+        "source": "Unmodified native ARDY Core model poses",
+        "stage_kind": "approach",
+        "actor_ids": [
+          "person_a"
+        ],
+        "client_round_trip_seconds": 2.979939041979378,
+        "chunk_metadata": [
+          {
+            "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6201
+          },
+          {
+            "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+            "chunk_index": 1,
+            "start_frame": 40,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6201
+          },
+          {
+            "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+            "chunk_index": 2,
+            "start_frame": 80,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6201
+          },
+          {
+            "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+            "chunk_index": 3,
+            "start_frame": 120,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6201
+          }
+        ],
+        "service_result": {
+          "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+          "stage_kind": "approach",
+          "status": "complete",
+          "produced_chunks": 4,
+          "total_chunks": 4,
+          "available_chunks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "submitted_at": 1373357.791936747,
+          "started_at": 1373357.792104659,
+          "finished_at": 1373358.1382751,
+          "error": null,
+          "metadata": {
+            "request_id": "grounded-core_martial_combo_8s-f29fb861e4",
+            "model": "ARDY-Core-RP-20FPS-Horizon40",
+            "fps": 20,
+            "frames": 160,
+            "actors": [
+              {
+                "id": "person_a",
+                "prompt": "A martial artist performs a sharp combination: a left jab, a right cross, a front kick, then resets into a low guarded stance and repeats the combination.",
+                "seed": 6201,
+                "history_frames": 0,
+                "initial_position_xz": null,
+                "initial_yaw": null,
+                "conditioned_frames": [],
+                "root_targets": []
+              }
+            ],
+            "groups": [
+              {
+                "actor_indices": [
+                  0
+                ],
+                "seed": 6201,
+                "batch_size": 1,
+                "encoding_seconds": 0.04741809703409672,
+                "step_seconds": [
+                  0.06680124206468463,
+                  0.06913506193086505,
+                  0.06857331399805844,
+                  0.06922536203637719
+                ]
+              }
+            ],
+            "generation_seconds": 0.3460593498311937,
+            "native_conditions": false,
+            "post_generation_pose_edits": false
+          }
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.755439817905426,
+              "median": 0.8647182583808899,
+              "mean": 0.8689941365271807,
+              "p95": 0.9746905535459518,
+              "max": 0.9916515350341797
+            },
+            "root_path_length_m": 4.419355520085199,
+            "root_net_displacement_m": 1.726833196782356,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.08703842475135887,
+              "median": 0.5158329879866372,
+              "mean": 0.5558937761113458,
+              "p95": 1.0946695320038837,
+              "max": 1.298293585527686
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 0.0005905114522544442,
+              "median": 0.034309244593412676,
+              "mean": 0.05159535789234231,
+              "p95": 0.16514270892787827,
+              "max": 0.5844554493920797
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.0028176307678222656,
+                  "median": 0.018695801496505737,
+                  "mean": 0.043035661801695824,
+                  "p95": 0.19711541235446794,
+                  "max": 0.6224890947341919
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 148,
+                "inferred_contact_intervals": 126,
+                "inferred_contact_seconds": 6.3,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 126,
+                  "min": 0.007430095764426339,
+                  "median": 0.07753617794103412,
+                  "mean": 0.2052448973249976,
+                  "p95": 0.37203507281008785,
+                  "max": 3.865458958038708
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.007430095764426339,
+                  "median": 0.0987133524144212,
+                  "mean": 0.5971221106902758,
+                  "p95": 3.883209894325434,
+                  "max": 6.003187914215311
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 48,
+                    "duration_seconds": 2.4,
+                    "path_drift_m": 0.19028707824002605,
+                    "net_drift_m": 0.02920475648195807
+                  },
+                  {
+                    "first_frame": 49,
+                    "last_frame": 50,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.034504073053419855,
+                    "net_drift_m": 0.034504073053419855
+                  },
+                  {
+                    "first_frame": 52,
+                    "last_frame": 75,
+                    "duration_seconds": 1.15,
+                    "path_drift_m": 0.1464763123337174,
+                    "net_drift_m": 0.12845093744362596
+                  },
+                  {
+                    "first_frame": 77,
+                    "last_frame": 79,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.3483883247952868,
+                    "net_drift_m": 0.3482394985761265
+                  },
+                  {
+                    "first_frame": 82,
+                    "last_frame": 83,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.053001122287176954,
+                    "net_drift_m": 0.053001122287176954
+                  },
+                  {
+                    "first_frame": 86,
+                    "last_frame": 117,
+                    "duration_seconds": 1.55,
+                    "path_drift_m": 0.13402642230026537,
+                    "net_drift_m": 0.0757420428271531
+                  },
+                  {
+                    "first_frame": 118,
+                    "last_frame": 119,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.15553833514582108,
+                    "net_drift_m": 0.15553833514582108
+                  },
+                  {
+                    "first_frame": 120,
+                    "last_frame": 121,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.12766091585946235,
+                    "net_drift_m": 0.12766091585946235
+                  },
+                  {
+                    "first_frame": 124,
+                    "last_frame": 134,
+                    "duration_seconds": 0.5,
+                    "path_drift_m": 0.046293848619256874,
+                    "net_drift_m": 0.030701367935863127
+                  },
+                  {
+                    "first_frame": 150,
+                    "last_frame": 156,
+                    "duration_seconds": 0.3,
+                    "path_drift_m": 0.048261487806086606,
+                    "net_drift_m": 0.046000608816337295
+                  },
+                  {
+                    "first_frame": 157,
+                    "last_frame": 159,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.008604932706965674,
+                    "net_drift_m": 0.0065313143787381804
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": -0.0006833672523498535,
+                  "median": 0.021981239318847656,
+                  "mean": 0.1323205903172493,
+                  "p95": 0.6948664098978012,
+                  "max": 1.2502223253250122
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 125,
+                "inferred_contact_intervals": 101,
+                "inferred_contact_seconds": 5.05,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 101,
+                  "min": 0.006304775933874296,
+                  "median": 0.07823156129607997,
+                  "mean": 0.34957201305436386,
+                  "p95": 2.1978636023049147,
+                  "max": 4.600819739024948
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.006304775933874296,
+                  "median": 0.16430435312947617,
+                  "mean": 1.2479916474740813,
+                  "p95": 5.574844835826615,
+                  "max": 10.447938592209757
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 27,
+                    "duration_seconds": 1.35,
+                    "path_drift_m": 0.10753645874294476,
+                    "net_drift_m": 0.041121609685056085
+                  },
+                  {
+                    "first_frame": 46,
+                    "last_frame": 61,
+                    "duration_seconds": 0.75,
+                    "path_drift_m": 0.09217131068405371,
+                    "net_drift_m": 0.07809920635191482
+                  },
+                  {
+                    "first_frame": 63,
+                    "last_frame": 68,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.5566455669351171,
+                    "net_drift_m": 0.5558511533693368
+                  },
+                  {
+                    "first_frame": 69,
+                    "last_frame": 70,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.06209380657158641,
+                    "net_drift_m": 0.06209380657158641
+                  },
+                  {
+                    "first_frame": 74,
+                    "last_frame": 83,
+                    "duration_seconds": 0.45,
+                    "path_drift_m": 0.026809033418508516,
+                    "net_drift_m": 0.021508502571721582
+                  },
+                  {
+                    "first_frame": 84,
+                    "last_frame": 87,
+                    "duration_seconds": 0.15,
+                    "path_drift_m": 0.009191642313180325,
+                    "net_drift_m": 0.009051548714224186
+                  },
+                  {
+                    "first_frame": 94,
+                    "last_frame": 95,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.04545588725032106,
+                    "net_drift_m": 0.04545588725032106
+                  },
+                  {
+                    "first_frame": 107,
+                    "last_frame": 109,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.010094614990654158,
+                    "net_drift_m": 0.009977128809513196
+                  },
+                  {
+                    "first_frame": 110,
+                    "last_frame": 113,
+                    "duration_seconds": 0.15,
+                    "path_drift_m": 0.6020938435459176,
+                    "net_drift_m": 0.6019465462716008
+                  },
+                  {
+                    "first_frame": 115,
+                    "last_frame": 131,
+                    "duration_seconds": 0.8,
+                    "path_drift_m": 0.10066277302930418,
+                    "net_drift_m": 0.08837725921104021
+                  },
+                  {
+                    "first_frame": 132,
+                    "last_frame": 133,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.05470308795465148,
+                    "net_drift_m": 0.05470308795465148
+                  },
+                  {
+                    "first_frame": 134,
+                    "last_frame": 152,
+                    "duration_seconds": 0.9,
+                    "path_drift_m": 0.0978806404882979,
+                    "net_drift_m": 0.012393009617328457
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 38.93868749320783,
+                    "median": 60.46833948256474,
+                    "mean": 66.48621376455189,
+                    "p95": 113.38492330563318,
+                    "max": 152.85927913976127
+                  },
+                  "range_degrees": 113.92059164655345,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.396600836344021,
+                    "median": 67.31552097059307,
+                    "mean": 130.77197080625453,
+                    "p95": 486.35697631838127,
+                    "max": 892.7049586962175
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 38.41205210370715,
+                    "median": 57.04245608891688,
+                    "mean": 63.060479162338495,
+                    "p95": 101.34457143990355,
+                    "max": 125.09693619127655
+                  },
+                  "range_degrees": 86.6848840875694,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.1360466770348978,
+                    "median": 61.77475504622677,
+                    "mean": 101.14546992087388,
+                    "p95": 408.7396935592656,
+                    "max": 642.7901496623026
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 66.18812064923647,
+                    "median": 125.67748137132706,
+                    "mean": 124.99434879422506,
+                    "p95": 146.19031718518224,
+                    "max": 152.39618639617524
+                  },
+                  "range_degrees": 86.20806574693877,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.5390436318180036,
+                    "median": 47.41891361419505,
+                    "mean": 75.25131939628086,
+                    "p95": 276.004660072239,
+                    "max": 466.37424408522236
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 52.084808242539935,
+                    "median": 122.69682667216841,
+                    "mean": 118.28051707867152,
+                    "p95": 137.99551014284015,
+                    "max": 147.82213172578057
+                  },
+                  "range_degrees": 95.73732348324063,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.4326593145012225,
+                    "median": 60.97726881611038,
+                    "mean": 120.37164048719498,
+                    "p95": 478.2990166493272,
+                    "max": 880.989918633011
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 130.25253011402484,
+                    "median": 146.30384601373038,
+                    "mean": 145.81207311900693,
+                    "p95": 153.59546633201495,
+                    "max": 156.94374225179791
+                  },
+                  "range_degrees": 26.69121213777308,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.1814183680920678,
+                    "median": 19.102293352626702,
+                    "mean": 25.815051431599603,
+                    "p95": 67.89954126462686,
+                    "max": 122.55922211302732
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 112.77726198965648,
+                    "median": 153.96242461852168,
+                    "mean": 151.47181908958123,
+                    "p95": 173.9846240332539,
+                    "max": 177.726053041272
+                  },
+                  "range_degrees": 64.94879105161552,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.9471866984324606,
+                    "median": 51.15935493338327,
+                    "mean": 68.239922974541,
+                    "p95": 165.46203090306827,
+                    "max": 440.28578174888764
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 111.8117714038867,
+                    "median": 154.38453227770344,
+                    "mean": 152.75192863084982,
+                    "p95": 173.7739593010993,
+                    "max": 177.29565664642877
+                  },
+                  "range_degrees": 65.48388524254207,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.5545434777351375,
+                    "median": 75.73344430329144,
+                    "mean": 89.55553292617824,
+                    "p95": 257.8784433712822,
+                    "max": 385.69494446630017
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 67.0795310137536,
+                    "median": 92.28016526209089,
+                    "mean": 97.37368759606015,
+                    "p95": 139.89255833841713,
+                    "max": 153.45938046565672
+                  },
+                  "range_degrees": 86.37984945190313,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.830567907317743,
+                    "median": 80.5841656542421,
+                    "mean": 120.41917985137923,
+                    "p95": 379.2057151223959,
+                    "max": 686.7555427410849
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 70.80058987697733,
+                    "median": 92.87648611638626,
+                    "mean": 96.2323418431152,
+                    "p95": 132.99265638718265,
+                    "max": 148.18945458262806
+                  },
+                  "range_degrees": 77.38886470565073,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.8111146260634428,
+                    "median": 74.44452469861346,
+                    "mean": 98.36972534802348,
+                    "p95": 290.8141512218533,
+                    "max": 472.9613626755017
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 7.642714697220221e-08,
+                "median": 2.8590969754910267e-07,
+                "mean": 2.612805636228796e-07,
+                "p95": 3.589206385989918e-07,
+                "max": 3.8055754458810043e-07
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 1.2769643159695106e-07,
+                "median": 2.492480448462887e-07,
+                "mean": 3.393926884902438e-07,
+                "p95": 6.485533834661911e-07,
+                "max": 8.186108937113069e-07
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.6131083893323859,
+                "mean": 0.9442858326137582,
+                "p95": 3.2207438806035946,
+                "max": 11.038021041150618
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    },
+    {
+      "path": "/Users/jakob/.codex/worktrees/web-swing-prototype/Shellhacks/.runtime/grounded-experiments/core_stumble_recover_8s.npz",
+      "sha256": "1e48bd9caf0264c2b4e8e395c0b829d02d952e7ac0251f322dfb315978c2abc9",
+      "metadata": {
+        "name": "core_stumble_recover_8s",
+        "seed": 6202,
+        "prompt": "A person walks forward, trips and stumbles, throws both arms out to regain balance, takes several quick recovery steps, and returns to a stable standing position.",
+        "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+        "frames": 160,
+        "fps": 20,
+        "model": "ARDY-Core-RP-20FPS-Horizon40",
+        "source": "Unmodified native ARDY Core model poses",
+        "stage_kind": "approach",
+        "actor_ids": [
+          "person_a"
+        ],
+        "client_round_trip_seconds": 2.6414394169987645,
+        "chunk_metadata": [
+          {
+            "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6202
+          },
+          {
+            "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+            "chunk_index": 1,
+            "start_frame": 40,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6202
+          },
+          {
+            "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+            "chunk_index": 2,
+            "start_frame": 80,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6202
+          },
+          {
+            "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+            "chunk_index": 3,
+            "start_frame": 120,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "person_a"
+            ],
+            "source": "ARDY Core",
+            "seed": 6202
+          }
+        ],
+        "service_result": {
+          "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+          "stage_kind": "approach",
+          "status": "complete",
+          "produced_chunks": 4,
+          "total_chunks": 4,
+          "available_chunks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "submitted_at": 1373361.275988275,
+          "started_at": 1373361.276167688,
+          "finished_at": 1373361.623372732,
+          "error": null,
+          "metadata": {
+            "request_id": "grounded-core_stumble_recover_8s-986fa53c0c",
+            "model": "ARDY-Core-RP-20FPS-Horizon40",
+            "fps": 20,
+            "frames": 160,
+            "actors": [
+              {
+                "id": "person_a",
+                "prompt": "A person walks forward, trips and stumbles, throws both arms out to regain balance, takes several quick recovery steps, and returns to a stable standing position.",
+                "seed": 6202,
+                "history_frames": 0,
+                "initial_position_xz": null,
+                "initial_yaw": null,
+                "conditioned_frames": [],
+                "root_targets": []
+              }
+            ],
+            "groups": [
+              {
+                "actor_indices": [
+                  0
+                ],
+                "seed": 6202,
+                "batch_size": 1,
+                "encoding_seconds": 0.04727873601950705,
+                "step_seconds": [
+                  0.068582704057917,
+                  0.06927900295704603,
+                  0.06849289289675653,
+                  0.06847215304151177
+                ]
+              }
+            ],
+            "generation_seconds": 0.3470969730988145,
+            "native_conditions": false,
+            "post_generation_pose_edits": false
+          }
+        }
+      },
+      "diagnostics": {
+        "schema": "core27",
+        "frames": 160,
+        "actors_count": 1,
+        "fps": 20.0,
+        "sample_duration_seconds": 8.0,
+        "time_between_first_and_last_frame_seconds": 7.95,
+        "actors": [
+          {
+            "actor": 0,
+            "root_height_m": {
+              "samples": 160,
+              "min": 0.8722408413887024,
+              "median": 0.9371798634529114,
+              "mean": 0.9350437398999929,
+              "p95": 0.9567225009202958,
+              "max": 0.9600969552993774
+            },
+            "root_path_length_m": 6.254497692939813,
+            "root_net_displacement_m": 5.977316431923807,
+            "root_speed_m_s": {
+              "samples": 159,
+              "min": 0.2617634184589547,
+              "median": 0.7448057794607701,
+              "mean": 0.7867292695521777,
+              "p95": 1.4126933630322585,
+              "max": 1.7611279446788703
+            },
+            "joint_step_m": {
+              "samples": 4293,
+              "min": 0.0002599543817120651,
+              "median": 0.039102296827489065,
+              "mean": 0.045173099170171475,
+              "p95": 0.10914481075062374,
+              "max": 0.28304873407828113
+            },
+            "feet": {
+              "right": {
+                "joint_index": 22,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.0056351423263549805,
+                  "median": 0.019034236669540405,
+                  "mean": 0.031002378091216087,
+                  "p95": 0.07954008281230925,
+                  "max": 0.10416460037231445
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 152,
+                "inferred_contact_intervals": 102,
+                "inferred_contact_seconds": 5.1,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 102,
+                  "min": 0.0018299443550125454,
+                  "median": 0.019097053945449798,
+                  "mean": 0.35906339356247896,
+                  "p95": 2.8092058590659974,
+                  "max": 3.9237647561493216
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0018299443550125454,
+                  "median": 0.038023974841817326,
+                  "mean": 0.8154904256239787,
+                  "p95": 3.7576149516877684,
+                  "max": 5.643544932859827
+                },
+                "episodes": [
+                  {
+                    "first_frame": 0,
+                    "last_frame": 2,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.006140020192395325,
+                    "net_drift_m": 0.0061200770243009855
+                  },
+                  {
+                    "first_frame": 5,
+                    "last_frame": 6,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.15471489116446407,
+                    "net_drift_m": 0.15471489116446407
+                  },
+                  {
+                    "first_frame": 7,
+                    "last_frame": 8,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.19562089038614122,
+                    "net_drift_m": 0.19562089038614122
+                  },
+                  {
+                    "first_frame": 13,
+                    "last_frame": 23,
+                    "duration_seconds": 0.5,
+                    "path_drift_m": 0.009803208173228741,
+                    "net_drift_m": 0.006316820984347064
+                  },
+                  {
+                    "first_frame": 32,
+                    "last_frame": 51,
+                    "duration_seconds": 0.95,
+                    "path_drift_m": 0.024724160130468936,
+                    "net_drift_m": 0.01207540827277871
+                  },
+                  {
+                    "first_frame": 53,
+                    "last_frame": 54,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.06091566543224771,
+                    "net_drift_m": 0.06091566543224771
+                  },
+                  {
+                    "first_frame": 56,
+                    "last_frame": 61,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.008688020432073184,
+                    "net_drift_m": 0.004232147115617772
+                  },
+                  {
+                    "first_frame": 63,
+                    "last_frame": 65,
+                    "duration_seconds": 0.1,
+                    "path_drift_m": 0.3378490404112236,
+                    "net_drift_m": 0.3365161527843899
+                  },
+                  {
+                    "first_frame": 66,
+                    "last_frame": 67,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.11765060959460963,
+                    "net_drift_m": 0.11765060959460963
+                  },
+                  {
+                    "first_frame": 68,
+                    "last_frame": 85,
+                    "duration_seconds": 0.85,
+                    "path_drift_m": 0.02109134288922726,
+                    "net_drift_m": 0.009792151570069922
+                  },
+                  {
+                    "first_frame": 87,
+                    "last_frame": 92,
+                    "duration_seconds": 0.25,
+                    "path_drift_m": 0.3390810532973876,
+                    "net_drift_m": 0.33903756102782
+                  },
+                  {
+                    "first_frame": 95,
+                    "last_frame": 96,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.04635461352393665,
+                    "net_drift_m": 0.04635461352393665
+                  },
+                  {
+                    "first_frame": 101,
+                    "last_frame": 115,
+                    "duration_seconds": 0.7,
+                    "path_drift_m": 0.013798090039571739,
+                    "net_drift_m": 0.009416607382815393
+                  },
+                  {
+                    "first_frame": 117,
+                    "last_frame": 118,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.10290649350970757,
+                    "net_drift_m": 0.10290649350970757
+                  },
+                  {
+                    "first_frame": 120,
+                    "last_frame": 121,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.15194698248997263,
+                    "net_drift_m": 0.15194698248997263
+                  },
+                  {
+                    "first_frame": 128,
+                    "last_frame": 143,
+                    "duration_seconds": 0.75,
+                    "path_drift_m": 0.006864883900983258,
+                    "net_drift_m": 0.0031105244807182173
+                  },
+                  {
+                    "first_frame": 149,
+                    "last_frame": 150,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.18065389269039886,
+                    "net_drift_m": 0.18065389269039886
+                  },
+                  {
+                    "first_frame": 152,
+                    "last_frame": 153,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.049088191579124786,
+                    "net_drift_m": 0.049088191579124786
+                  },
+                  {
+                    "first_frame": 155,
+                    "last_frame": 159,
+                    "duration_seconds": 0.2,
+                    "path_drift_m": 0.0033312573314806205,
+                    "net_drift_m": 0.003140849523274655
+                  }
+                ]
+              },
+              "left": {
+                "joint_index": 26,
+                "height_above_declared_floor_m": {
+                  "samples": 160,
+                  "min": 0.007150173187255859,
+                  "median": 0.02670234441757202,
+                  "mean": 0.036778349056839944,
+                  "p95": 0.08522463738918304,
+                  "max": 0.13484960794448853
+                },
+                "below_floor_frames": 0,
+                "floor_proximity_frames": 145,
+                "inferred_contact_intervals": 99,
+                "inferred_contact_seconds": 4.95,
+                "horizontal_speed_during_inferred_contact_m_s": {
+                  "samples": 99,
+                  "min": 0.0006972265902112671,
+                  "median": 0.0315488348570133,
+                  "mean": 0.16489290239177093,
+                  "p95": 0.824285817245144,
+                  "max": 3.3587910557585126
+                },
+                "all_horizontal_speed_m_s": {
+                  "samples": 159,
+                  "min": 0.0006972265902112671,
+                  "median": 0.0698992018557479,
+                  "mean": 0.7252028369610779,
+                  "p95": 3.361126331429662,
+                  "max": 4.962177469893489
+                },
+                "episodes": [
+                  {
+                    "first_frame": 1,
+                    "last_frame": 13,
+                    "duration_seconds": 0.6,
+                    "path_drift_m": 0.027504599190643554,
+                    "net_drift_m": 0.02141717411432581
+                  },
+                  {
+                    "first_frame": 24,
+                    "last_frame": 32,
+                    "duration_seconds": 0.4,
+                    "path_drift_m": 0.014584594401148222,
+                    "net_drift_m": 0.010362847804191985
+                  },
+                  {
+                    "first_frame": 35,
+                    "last_frame": 38,
+                    "duration_seconds": 0.15,
+                    "path_drift_m": 0.16763210565447614,
+                    "net_drift_m": 0.14259847024697536
+                  },
+                  {
+                    "first_frame": 47,
+                    "last_frame": 50,
+                    "duration_seconds": 0.15,
+                    "path_drift_m": 0.11776246127085732,
+                    "net_drift_m": 0.11299845017590468
+                  },
+                  {
+                    "first_frame": 51,
+                    "last_frame": 68,
+                    "duration_seconds": 0.85,
+                    "path_drift_m": 0.07271965264041051,
+                    "net_drift_m": 0.0694348101004571
+                  },
+                  {
+                    "first_frame": 77,
+                    "last_frame": 78,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.07194333438713506,
+                    "net_drift_m": 0.07194333438713506
+                  },
+                  {
+                    "first_frame": 80,
+                    "last_frame": 103,
+                    "duration_seconds": 1.15,
+                    "path_drift_m": 0.033360197152110874,
+                    "net_drift_m": 0.021697865010627256
+                  },
+                  {
+                    "first_frame": 105,
+                    "last_frame": 106,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.11698091114130424,
+                    "net_drift_m": 0.11698091114130424
+                  },
+                  {
+                    "first_frame": 108,
+                    "last_frame": 109,
+                    "duration_seconds": 0.05,
+                    "path_drift_m": 0.16793955278792563,
+                    "net_drift_m": 0.16793955278792563
+                  },
+                  {
+                    "first_frame": 113,
+                    "last_frame": 130,
+                    "duration_seconds": 0.85,
+                    "path_drift_m": 0.012310403609669271,
+                    "net_drift_m": 0.008716392401336346
+                  },
+                  {
+                    "first_frame": 143,
+                    "last_frame": 156,
+                    "duration_seconds": 0.65,
+                    "path_drift_m": 0.01348205460358549,
+                    "net_drift_m": 0.012249158837641862
+                  }
+                ]
+              }
+            },
+            "articulation": {
+              "internal_joint_angles": {
+                "right_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 130.76896815982502,
+                    "median": 149.6848514445976,
+                    "mean": 149.12929192449965,
+                    "p95": 160.98835706879342,
+                    "max": 165.89067422885773
+                  },
+                  "range_degrees": 35.12170606903271,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.2360295955759284,
+                    "median": 30.68969936882695,
+                    "mean": 38.03926726841424,
+                    "p95": 94.72135879581502,
+                    "max": 177.63630070834097
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_elbow": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 115.91151760030627,
+                    "median": 153.28974436854924,
+                    "mean": 150.124663756006,
+                    "p95": 163.01003717133466,
+                    "max": 166.43404115010708
+                  },
+                  "range_degrees": 50.52252354980081,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.17607737379535138,
+                    "median": 30.077520666001192,
+                    "mean": 44.98716376188444,
+                    "p95": 139.51859847268938,
+                    "max": 196.07401447668252
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 103.01311040262493,
+                    "median": 157.4879143252669,
+                    "mean": 151.2427134331646,
+                    "p95": 172.78372790474552,
+                    "max": 177.83824069115755
+                  },
+                  "range_degrees": 74.82513028853262,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.1168086862898008,
+                    "median": 79.53978178223906,
+                    "mean": 118.50463090878047,
+                    "p95": 350.19355418344225,
+                    "max": 468.8492623568308
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_knee": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 103.61355017411051,
+                    "median": 152.14857817187527,
+                    "mean": 147.31038664483117,
+                    "p95": 169.0286897412424,
+                    "max": 176.47378072390987
+                  },
+                  "range_degrees": 72.86023054979935,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.10689103475556294,
+                    "median": 51.03997886498462,
+                    "mean": 96.57025383447196,
+                    "p95": 316.480217177289,
+                    "max": 433.72021455481956
+                  },
+                  "degenerate_frames": 0
+                },
+                "spine": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 146.32190231824504,
+                    "median": 150.06430887963995,
+                    "mean": 150.1246361210545,
+                    "p95": 152.2137829259441,
+                    "max": 157.31759438145053
+                  },
+                  "range_degrees": 10.995692063205496,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.019650102170203354,
+                    "median": 5.326058405136109,
+                    "mean": 8.535412181385563,
+                    "p95": 25.32418227025005,
+                    "max": 65.64512651733423
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 148.7262096467027,
+                    "median": 163.10677830258015,
+                    "mean": 162.2563733802237,
+                    "p95": 171.81913993711697,
+                    "max": 175.3245424884912
+                  },
+                  "range_degrees": 26.598332841788505,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 1.0131041653590955,
+                    "median": 26.514592749845747,
+                    "mean": 43.93712477145628,
+                    "p95": 154.82468620480915,
+                    "max": 236.925644112427
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_hip": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 149.25645610691518,
+                    "median": 163.81698018668504,
+                    "mean": 163.89782610760932,
+                    "p95": 174.5934827975033,
+                    "max": 177.41970846360445
+                  },
+                  "range_degrees": 28.16325235668927,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.4834989922363775,
+                    "median": 25.459890487808252,
+                    "mean": 38.27892834211949,
+                    "p95": 122.37202067739008,
+                    "max": 178.71143759912002
+                  },
+                  "degenerate_frames": 0
+                },
+                "right_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 60.49455838910164,
+                    "median": 71.78943991283836,
+                    "mean": 76.97930656325278,
+                    "p95": 119.1041985551524,
+                    "max": 144.61473294659234
+                  },
+                  "range_degrees": 84.1201745574907,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.3326449781106078,
+                    "median": 36.82515776249005,
+                    "mean": 46.56206540720124,
+                    "p95": 142.25956177156147,
+                    "max": 249.51973558637064
+                  },
+                  "degenerate_frames": 0
+                },
+                "left_shoulder": {
+                  "angle_degrees": {
+                    "samples": 160,
+                    "min": 55.68843485330618,
+                    "median": 70.6939810480605,
+                    "mean": 76.24723454409005,
+                    "p95": 116.3790767545811,
+                    "max": 144.73531666764907
+                  },
+                  "range_degrees": 89.0468818143429,
+                  "angular_speed_degrees_s": {
+                    "samples": 159,
+                    "min": 0.101763399275967,
+                    "median": 24.3151882814675,
+                    "mean": 54.014069063699054,
+                    "p95": 217.30932400240872,
+                    "max": 324.56583918798344
+                  },
+                  "degenerate_frames": 0
+                }
+              },
+              "bone_length_temporal_range_m": {
+                "samples": 26,
+                "min": 1.1666836409462977e-07,
+                "median": 4.0539658447552585e-07,
+                "mean": 4.20435541223187e-07,
+                "p95": 7.31106578923113e-07,
+                "max": 7.905114546014058e-07
+              },
+              "bone_length_coefficient_of_variation": {
+                "samples": 26,
+                "min": 1.6352834496519712e-07,
+                "median": 3.9996763445649045e-07,
+                "mean": 5.300795613284807e-07,
+                "p95": 1.2565656260656487e-06,
+                "max": 1.677325540995441e-06
+              },
+              "root_relative_joint_speed_m_s": {
+                "samples": 4293,
+                "min": 0.0,
+                "median": 0.26207708005523545,
+                "mean": 0.4953240852841812,
+                "p95": 1.6089958274784593,
+                "max": 4.4401552254656815
+              },
+              "interpretation": "Internal angles ignore global rigid translation/rotation. Root-relative speed also contains whole-body turns; neither measures prompt adherence."
+            }
+          }
+        ],
+        "pairs": [],
+        "assumptions": {
+          "floor_height_m": 0.0,
+          "floor_is_declared_not_estimated": true,
+          "contact_height_m": 0.08,
+          "contact_vertical_speed_m_s": 0.15,
+          "contact_lower_height_m": -0.02,
+          "horizontal_speed_used_to_infer_contact": false,
+          "capsules": [
+            {
+              "name": "torso",
+              "joints": [
+                0,
+                4
+              ],
+              "radius_m": 0.15
+            },
+            {
+              "name": "upper_torso",
+              "joints": [
+                4,
+                5
+              ],
+              "radius_m": 0.12
+            },
+            {
+              "name": "head",
+              "joints": [
+                6,
+                6
+              ],
+              "radius_m": 0.11
+            },
+            {
+              "name": "right_upper_arm",
+              "joints": [
+                8,
+                9
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "right_forearm",
+              "joints": [
+                9,
+                10
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "left_upper_arm",
+              "joints": [
+                14,
+                15
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_forearm",
+              "joints": [
+                15,
+                16
+              ],
+              "radius_m": 0.045
+            },
+            {
+              "name": "right_thigh",
+              "joints": [
+                19,
+                20
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "right_calf",
+              "joints": [
+                20,
+                21
+              ],
+              "radius_m": 0.065
+            },
+            {
+              "name": "left_thigh",
+              "joints": [
+                23,
+                24
+              ],
+              "radius_m": 0.095
+            },
+            {
+              "name": "left_calf",
+              "joints": [
+                24,
+                25
+              ],
+              "radius_m": 0.065
+            }
+          ],
+          "input_corrections": "none",
+          "limitations": [
+            "Toe/wrist centres do not locate soles, palms, or forces.",
+            "Articulation magnitude is not naturalness or semantic accuracy.",
+            "Capsules cannot certify actual mesh penetration or intentional contact.",
+            "Visual review is required; no aggregate quality pass is emitted."
+          ]
+        }
+      }
+    }
+  ]
+}

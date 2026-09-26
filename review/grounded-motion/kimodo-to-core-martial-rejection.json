@@ -1,0 +1,245 @@
+{
+  "outcome": "rejected",
+  "error": "RuntimeError: ValueError: positions/rotations are inconsistent with the model Core27 neutral skeleton",
+  "request": {
+    "request_id": "kimodo-core-audit-de78a66490d7-6300",
+    "stage_kind": "continuation",
+    "frames": 80,
+    "actor_ids": [
+      "person_a"
+    ],
+    "prompt": "A martial artist continues a grounded combination of quick punches and a front kick, then returns to a guarded fighting stance.",
+    "seed": 6300
+  },
+  "source": ".runtime/grounded-experiments/kimodo_martial_combo_8s_core27.npz",
+  "source_sha256": "de78a66490d7c1651552758aa3f9f8a58e1c62dbfe7a069a4847bd35d773cf71",
+  "source_model": "kimodo-soma-rp-v1.1",
+  "history_frames": 40,
+  "repeat_purpose": "record exact backend rejection with deterministic request id after initial exploratory rejection",
+  "elapsed_seconds": 0.7658709580136929,
+  "service_status": {
+    "request_id": "kimodo-core-audit-de78a66490d7-6300",
+    "stage_kind": "continuation",
+    "status": "failed",
+    "produced_chunks": 0,
+    "total_chunks": 2,
+    "available_chunks": [],
+    "submitted_at": 1375135.539939944,
+    "started_at": 1375135.540105416,
+    "finished_at": 1375135.553194811,
+    "error": "ValueError: positions/rotations are inconsistent with the model Core27 neutral skeleton",
+    "metadata": null
+  },
+  "authoritative_core_fk_residual_m": {
+    "samples": 4320,
+    "min": 0.0,
+    "median": 0.1124343903195652,
+    "mean": 0.0981698008589121,
+    "p95": 0.15012645329630256,
+    "max": 0.1790375867266216
+  },
+  "largest_joint_mismatches": [
+    {
+      "joint": "LeftHandEnd",
+      "native_core_length_m": 0.06961149999999994,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.09307051374160481,
+        "median": 0.09307051422136191,
+        "mean": 0.09307051422267802,
+        "p95": 0.09307051440030673,
+        "max": 0.09307051453803844
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.09378404063282685,
+        "median": 0.10466217449220669,
+        "mean": 0.1154747642547537,
+        "p95": 0.16523693389473124,
+        "max": 0.1790375867266216
+      }
+    },
+    {
+      "joint": "Spine3",
+      "native_core_length_m": 0.09465219565699273,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.037970139827736595,
+        "median": 0.03797013982773676,
+        "mean": 0.03797013982773677,
+        "p95": 0.037970139827736914,
+        "max": 0.03797013982773692
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.15403590596557046,
+        "median": 0.166255641764397,
+        "mean": 0.16515093268830977,
+        "p95": 0.16747476117205717,
+        "max": 0.1689374980537126
+      }
+    },
+    {
+      "joint": "LeftHand",
+      "native_core_length_m": 0.23265200000000008,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.2709398132565383,
+        "median": 0.2709398132565386,
+        "mean": 0.2709398132565386,
+        "p95": 0.27093981325653876,
+        "max": 0.2709398132565389
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.0976818321103995,
+        "median": 0.10439631841162073,
+        "mean": 0.1123391434713128,
+        "p95": 0.14952583205867312,
+        "max": 0.15769424665166606
+      }
+    },
+    {
+      "joint": "RightHandEnd",
+      "native_core_length_m": 0.06961150000000423,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.09307834959541997,
+        "median": 0.09307835003683589,
+        "mean": 0.09307835002943003,
+        "p95": 0.09307835021356164,
+        "max": 0.09307835039836815
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.09603927164896112,
+        "median": 0.12368253892169864,
+        "mean": 0.12406727575210943,
+        "p95": 0.14450917863573762,
+        "max": 0.15685218867504033
+      }
+    },
+    {
+      "joint": "LeftHandThumb1",
+      "native_core_length_m": 0.057215249897209504,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.041599611541702164,
+        "median": 0.04159961154170225,
+        "mean": 0.04159961154170224,
+        "p95": 0.04159961154170231,
+        "max": 0.041599611541702324
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.10877281830673739,
+        "median": 0.11638279523154099,
+        "mean": 0.12145229877416082,
+        "p95": 0.1470321110659567,
+        "max": 0.1561301193940629
+      }
+    },
+    {
+      "joint": "Head",
+      "native_core_length_m": 0.13014699274752764,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.06432774519725262,
+        "median": 0.06432774519725275,
+        "mean": 0.06432774519725275,
+        "p95": 0.06432774519725284,
+        "max": 0.0643277451972529
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.14042639058388254,
+        "median": 0.14876552194243534,
+        "mean": 0.14812952746045652,
+        "p95": 0.15109644509283265,
+        "max": 0.15192621250316274
+      }
+    },
+    {
+      "joint": "RightHandThumb1",
+      "native_core_length_m": 0.05721524989721043,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.04134249375881912,
+        "median": 0.041342493758819224,
+        "mean": 0.04134249375881923,
+        "p95": 0.04134249375881932,
+        "max": 0.04134249375881934
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.11522242384840449,
+        "median": 0.13545619854309554,
+        "mean": 0.13282341717818347,
+        "p95": 0.14156251628349598,
+        "max": 0.1455298946110789
+      }
+    },
+    {
+      "joint": "RightHand",
+      "native_core_length_m": 0.23265200000001404,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.27133619887886024,
+        "median": 0.27133619887886046,
+        "mean": 0.2713361988788604,
+        "p95": 0.2713361988788606,
+        "max": 0.27133619887886073
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.10268796492208247,
+        "median": 0.12462219808645289,
+        "mean": 0.12275331354057475,
+        "p95": 0.13408470253333393,
+        "max": 0.14128810700252678
+      }
+    },
+    {
+      "joint": "RightShoulder",
+      "native_core_length_m": 0.18362289863964307,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.2379955615242929,
+        "median": 0.23799556152429313,
+        "mean": 0.2379955615242931,
+        "p95": 0.23799556152429324,
+        "max": 0.2379955615242933
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.12463806288787156,
+        "median": 0.1300640270009442,
+        "mean": 0.1295165255365736,
+        "p95": 0.13111721745818292,
+        "max": 0.13128624918346618
+      }
+    },
+    {
+      "joint": "RightArm",
+      "native_core_length_m": 0.1589080000000095,
+      "converted_length_m": {
+        "samples": 160,
+        "min": 0.16027195563010926,
+        "median": 0.1602719556301094,
+        "mean": 0.16027195563010938,
+        "p95": 0.16027195563010946,
+        "max": 0.1602719556301095
+      },
+      "position_fk_error_m": {
+        "samples": 160,
+        "min": 0.1241765000208045,
+        "median": 0.12979700177509873,
+        "mean": 0.12917614538729605,
+        "p95": 0.1307862243210551,
+        "max": 0.1309988357040564
+      }
+    }
+  ],
+  "core_history_position_tolerance_m": 0.0002,
+  "recommendation": "Disable cross-model Continue/LIVE for these converted Kimodo clips; do not bypass skeleton validation."
+}

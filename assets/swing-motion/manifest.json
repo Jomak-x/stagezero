@@ -1,0 +1,40 @@
+{
+  "service": {
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "joints": 27,
+    "horizon": 40
+  },
+  "cases": {
+    "swing": {
+      "file": "swing.npz",
+      "sha256": "8a820777a1c90359c16d57f4d899fd0746f5de3176233a2a77789e806526ec87",
+      "seed": 1201,
+      "prompt": "A person swings forward through the air while holding a rope high overhead with the right hand, legs bent and body leaning back.",
+      "frames": 80,
+      "client_round_trip_seconds": 1.006,
+      "root_horizontal_range_m": 0.2338,
+      "root_vertical_range_m": 0.1219
+    },
+    "hang_reach": {
+      "file": "hang_reach.npz",
+      "sha256": "a2f41b299bf77781cad18ae30df8820d12b3218f375c298a725512f2704e4d3e",
+      "seed": 1202,
+      "prompt": "A person hangs by the right hand from an overhead rope and reaches forward with the left hand, knees tucked up.",
+      "frames": 80,
+      "client_round_trip_seconds": 0.9883,
+      "root_horizontal_range_m": 0.0913,
+      "root_vertical_range_m": 0.0478
+    },
+    "land_carry": {
+      "file": "land_carry.npz",
+      "sha256": "dc2100c1359d17aed9dcae50bbfecde3a30d5c2e58bb4c7f35cdf2236bafbdd1",
+      "seed": 1203,
+      "prompt": "A person lands from a jump, bends the knees to absorb the impact, stands up and carries another person in both arms.",
+      "frames": 80,
+      "client_round_trip_seconds": 1.1087,
+      "root_horizontal_range_m": 0.172,
+      "root_vertical_range_m": 0.586
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Webline — a live motion scene</title>
+  <link rel="stylesheet" href="/swing_web/style.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✳</span><span>WEBLINE</span><small>LIVE MOTION LAB</small></div>
+      <div class="top-status"><span class="pulse"></span><span id="connection">Connecting to motion engine</span><span class="separator"></span><span>CORE27 · 20 FPS</span></div>
+    </header>
+    <section class="stage-wrap">
+      <canvas id="stage" aria-label="Interactive Spider-Man swinging scene. Use the painted buttons or keyboard controls."></canvas>
+      <div id="access-controls" aria-label="Scene controls"></div>
+      <div class="loading" id="loading"><div class="spinner"></div><strong>Preparing the city</strong><span id="loading-detail">Loading live geometry and character rig…</span></div>
+    </section>
+    <footer class="footer">
+      <span>LIVE SCENE <em>01 / 01</em></span>
+      <span class="hint">S START &nbsp; · &nbsp; ← → STEER &nbsp; · &nbsp; C CARRY &nbsp; · &nbsp; L LAND &nbsp; · &nbsp; K KISS &nbsp; · &nbsp; SPACE CAMERA &nbsp; · &nbsp; X RESET</span>
+      <span>ACTUAL CANVAS CAPTURE</span>
+    </footer>
+  </main>
+  <script type="module" src="/swing_web/main.js"></script>
+</body>
+</html>

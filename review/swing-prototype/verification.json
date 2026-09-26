@@ -1,0 +1,385 @@
+{
+  "run_id": "20260926-062105-a81b85",
+  "frames": 8785,
+  "recorded_report": "recorded-report.json",
+  "recorded_report_sha256": "3c5d7452888702c05380019a9c783ed373d66f4511624f1be8280e58530d577e",
+  "recorded_frame_log_prefix_sha256": "be48c7f88378a1b478ffe44635303c9f4ebf57409bbc421d3b5f2d600552611f",
+  "scene_provenance_matches_current_source": true,
+  "first_frame": 1,
+  "last_frame": 8785,
+  "duration_seconds": 146.40000000000865,
+  "max_frame_index_gap": 1,
+  "nonfinite_frames": 0,
+  "phases": [
+    "kiss",
+    "landed",
+    "landing",
+    "pickup",
+    "ready",
+    "settling",
+    "swing"
+  ],
+  "phase_counts": {
+    "ready": 4,
+    "swing": 4597,
+    "pickup": 363,
+    "landing": 314,
+    "settling": 84,
+    "landed": 1920,
+    "kiss": 1503
+  },
+  "phase_first_frame": {
+    "ready": 1,
+    "swing": 5,
+    "pickup": 2162,
+    "landing": 4965,
+    "settling": 5279,
+    "landed": 5363,
+    "kiss": 7283
+  },
+  "events": [
+    "city_boundary_turn",
+    "command",
+    "kiss_started",
+    "landed",
+    "landing_contact",
+    "landing_requested",
+    "mj_attached",
+    "model",
+    "pickup_requested",
+    "reset",
+    "steering_applied",
+    "web_attached",
+    "web_released"
+  ],
+  "sequence": {
+    "required": [
+      "swing",
+      "steer",
+      "steer",
+      "carry",
+      "steer",
+      "land",
+      "kiss"
+    ],
+    "observed": [
+      "swing",
+      "steer",
+      "steer",
+      "carry",
+      "steer",
+      "land",
+      "kiss"
+    ],
+    "matched_command_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "complete": true
+  },
+  "command_states_at_apply": {
+    "1": {
+      "frame": 5,
+      "phase": "swing",
+      "status": "applied",
+      "carry_amount": 0.0,
+      "flight_amount": 1.781910677969689e-05,
+      "grounded": false
+    },
+    "2": {
+      "frame": 955,
+      "phase": "swing",
+      "status": "applied",
+      "carry_amount": 0.0,
+      "flight_amount": 1.0,
+      "grounded": false
+    },
+    "3": {
+      "frame": 1790,
+      "phase": "swing",
+      "status": "applied",
+      "carry_amount": 0.0,
+      "flight_amount": 1.0,
+      "grounded": false
+    },
+    "4": {
+      "frame": 2162,
+      "phase": "pickup",
+      "status": "applied",
+      "carry_amount": 0.0,
+      "flight_amount": 1.0,
+      "grounded": false
+    },
+    "5": {
+      "frame": 4041,
+      "phase": "swing",
+      "status": "applied",
+      "carry_amount": 1.0,
+      "flight_amount": 1.0,
+      "grounded": false
+    },
+    "6": {
+      "frame": 4965,
+      "phase": "landing",
+      "status": "applied",
+      "carry_amount": 1.0,
+      "flight_amount": 1.0,
+      "grounded": false
+    },
+    "7": {
+      "frame": 7283,
+      "phase": "kiss",
+      "status": "applied",
+      "carry_amount": 0.0,
+      "flight_amount": 0.0,
+      "grounded": true
+    }
+  },
+  "stateful_sequence_complete": true,
+  "joint_step_m": {
+    "samples": 8784,
+    "max": 0.14324633344885454,
+    "p95": 0.08292896663208466,
+    "mean": 0.025549611512113515
+  },
+  "worst_joint_step": {
+    "metres": 0.14324633344885454,
+    "from_frame": 28,
+    "to_frame": 29,
+    "actor": "spider",
+    "joint": 18
+  },
+  "root_step_m": {
+    "samples": 8784,
+    "max": 0.12338546293926811,
+    "p95": 0.07975076890221543,
+    "mean": 0.02081231112886005
+  },
+  "bone_length_drift_m": {
+    "samples": 8785,
+    "max": 3.3861802251067274e-15,
+    "p95": 1.9984014443252818e-15,
+    "mean": 1.4836437270668435e-15
+  },
+  "rotation_orthogonality_error": {
+    "samples": 8785,
+    "max": 1.7763568394002505e-15,
+    "p95": 1.3322676295501878e-15,
+    "mean": 8.695251563609479e-16
+  },
+  "city_aabb_torso_penetration_m": {
+    "samples": 0,
+    "max": null,
+    "p95": null,
+    "mean": null
+  },
+  "city_aabb_penetration_samples_by_building": {},
+  "city_aabb_full_body_penetration_m": {
+    "samples": 4328,
+    "max": 0.025153562652251937,
+    "p95": 0.007166344418601478,
+    "mean": 0.007186692491539018
+  },
+  "city_aabb_full_body_samples_by_building": {
+    "city-4": 4316,
+    "city-10": 12
+  },
+  "worst_full_body_aabb_overlap": {
+    "metres": 0.025153562652251937,
+    "frame": 5278,
+    "time": 87.96666666666296,
+    "actor": "spider",
+    "segment": 22,
+    "building": "city-10",
+    "sample_point": [
+      3.4465864121450416,
+      9.139846437347748,
+      -18.197516426221178
+    ],
+    "sample_radius": 0.065
+  },
+  "allowed_roof_foot_contact_samples": 53077,
+  "web_aabb_penetration_m": {
+    "samples": 0,
+    "max": null,
+    "p95": null,
+    "mean": null
+  },
+  "web_aabb_samples_by_building": {},
+  "web_frames": 4379,
+  "web_terminal_allowances_m": [
+    0.503,
+    0.614,
+    0.729,
+    0.755
+  ],
+  "worst_web_collision": {
+    "metres": 0.0,
+    "frame": null,
+    "building": null,
+    "fraction_hand_to_anchor": null,
+    "anchor_building": null
+  },
+  "active_carry_frames": 2737,
+  "active_carry_grips_m": {
+    "mj_right_shoulder_m": {
+      "samples": 2737,
+      "max": 0.0067507189425996,
+      "p95": 0.0,
+      "mean": 9.973375361932372e-06
+    },
+    "mj_left_shoulder_m": {
+      "samples": 2737,
+      "max": 0.007619656680976706,
+      "p95": 0.0,
+      "mean": 1.0501827298808174e-05
+    },
+    "hero_thigh_m": {
+      "samples": 2737,
+      "max": 0.004100758996101698,
+      "p95": 0.0,
+      "mean": 5.676751426228639e-06
+    }
+  },
+  "roof_support_final": {
+    "spider": {
+      "roof_id": "roof-city-10",
+      "toe_plane_errors_m": [
+        0.10077070970640101,
+        0.10077070970640101
+      ],
+      "toe_center_distances_xz_m": [
+        0.16561487375981135,
+        0.1067272982152088
+      ],
+      "roof_radius_m": 0.333,
+      "within_supporting_building_aabb_xz": true,
+      "within_roof_proxy": true
+    },
+    "mj": {
+      "roof_id": "roof-city-10",
+      "toe_plane_errors_m": [
+        0.08213805275227415,
+        0.08213805275227415
+      ],
+      "toe_center_distances_xz_m": [
+        0.2930878040651007,
+        0.2893752427521446
+      ],
+      "roof_radius_m": 0.333,
+      "within_supporting_building_aabb_xz": true,
+      "within_roof_proxy": true
+    }
+  },
+  "final_phase": "kiss",
+  "visible_command_latency_ms": {
+    "samples": 7,
+    "max": 94.0370409807656,
+    "p95": 91.49637878872454,
+    "mean": 57.22223214356096
+  },
+  "server_control_latency_ms": {
+    "samples": 7,
+    "max": 16.630541009362787,
+    "p95": 16.594053807784803,
+    "mean": 10.037577141442203
+  },
+  "native_core_refresh_seconds": {
+    "samples": 7,
+    "max": 1.0859185000008438,
+    "p95": 1.0362235123000572,
+    "mean": 0.8482928688504866
+  },
+  "latency_meaning": "Server control latency measures HTTP command receipt to next physics application. Visible latency measures server receipt to browser telemetry sent after WebGL render and canvas draw; it does not measure photons on the display. Native Core refresh time is measured separately from model request start to completed model response; physics reacts before it arrives.",
+  "browser_video": {
+    "present": true,
+    "bytes": 74617972,
+    "webm_header": true,
+    "duration_seconds": 146.266,
+    "video_packets": 4389,
+    "max_packet_gap_seconds": 0.05000000000000071,
+    "sha256": "57203f8ed0c2844ac9e7e6e6148f64ebbb7425788d29a6b83b13ce91a151c28d"
+  },
+  "pose_sources": [
+    "native Core motion + authored flight/contact IK"
+  ],
+  "recording_time_difference_seconds": -0.13400000000865475,
+  "native_refresh_files": [
+    {
+      "file": "core-command-1.npz",
+      "sha256": "1a1ce0b0d42e228ac38d4556a875bc2e2b529b913cdce4fe150f9be028e49eeb",
+      "valid_core27_window": true,
+      "prompt": "A person reaches one arm overhead and balances.",
+      "command_id": 1
+    },
+    {
+      "file": "core-command-2.npz",
+      "sha256": "ec7ab96ea9d96c45545f6fb93341752b305689dbf0e2aa580e50b748773d8603",
+      "valid_core27_window": true,
+      "prompt": "A person leans to the left and reaches overhead with the left hand.",
+      "command_id": 2
+    },
+    {
+      "file": "core-command-3.npz",
+      "sha256": "2c7b19945c6a731ec91dbed66bf64d8557ad838f7dff233c0cb7584a8b825cdd",
+      "valid_core27_window": true,
+      "prompt": "A person leans to the right and reaches overhead with the left hand.",
+      "command_id": 3
+    },
+    {
+      "file": "core-command-4.npz",
+      "sha256": "a06636e94568b3e247e77610056641e930cd34f383100a84b79abec2fe364751",
+      "valid_core27_window": true,
+      "prompt": "A person carefully supports another adult on their back and balances.",
+      "command_id": 4
+    },
+    {
+      "file": "core-command-5.npz",
+      "sha256": "420a790a34d79466269c4607225007f59623f400a476d2b6c5c95fc1b10215d5",
+      "valid_core27_window": true,
+      "prompt": "A person leans to the right and reaches overhead with the left hand.",
+      "command_id": 5
+    },
+    {
+      "file": "core-command-6.npz",
+      "sha256": "7f2c1e8eab9e34919c4e7d7605d24c6a62d7e9baa20c6afb0af409552c8f23d9",
+      "valid_core27_window": true,
+      "prompt": "A person bends the knees to absorb a landing and stands steadily.",
+      "command_id": 6
+    },
+    {
+      "file": "core-command-7.npz",
+      "sha256": "2f844acbc6b94e0b53bbc0d43ef812811b68f4a3e3183a6055b03baed12d6fa5",
+      "valid_core27_window": true,
+      "prompt": "A person stands close to a partner and gently leans the head forward.",
+      "command_id": 7
+    }
+  ],
+  "native_refreshes_reported": 7,
+  "method": "Actual logged world joint poses; five point samples per Core27 bone with segment radii; 25-cm samples along web with each source-mesh-derived terminal allowance only at its anchor building; conservative building AABBs; intended roof foot contact reported separately. These are geometric proxies, not mesh contact or force proofs.",
+  "gates": {
+    "sequence": true,
+    "stateful_command_sequence": true,
+    "scene_source_matches_record": true,
+    "fixed_60hz_frames": true,
+    "finite_poses": true,
+    "joint_step_under_0_25m": true,
+    "root_step_under_0_20m": true,
+    "bone_drift_under_1cm": true,
+    "no_deep_torso_aabb_penetration": true,
+    "no_deep_full_body_aabb_penetration": true,
+    "web_clears_city_aabbs": true,
+    "active_carry_contacts": true,
+    "landing_and_kiss_phases": true,
+    "final_roof_support": true,
+    "browser_paint_acknowledged": true,
+    "native_refreshes_recorded": true,
+    "continuous_browser_recording": true
+  },
+  "pass": true
+}
