@@ -1,0 +1,47 @@
+{
+  "checks": {
+    "unauthorized_rejected": true,
+    "malformed_rejected": true,
+    "unknown_cancellation_false": true,
+    "save_load_exact": true,
+    "successful_generation_after_failure": true,
+    "baseline_conditions_false": true,
+    "unmodified_model_output": true
+  },
+  "passed": true,
+  "round_trip_seconds": 0.36467820801772177,
+  "runtime": {
+    "request_id": "valid-recovery-probe",
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "frames": 40,
+    "actors": [
+      {
+        "id": "actor",
+        "prompt": "A person walks forward.",
+        "seed": 701,
+        "history_frames": 0,
+        "initial_position_xz": null,
+        "initial_yaw": null,
+        "conditioned_frames": [],
+        "root_targets": []
+      }
+    ],
+    "groups": [
+      {
+        "actor_indices": [
+          0
+        ],
+        "seed": 701,
+        "batch_size": 1,
+        "encoding_seconds": 0.04659519693814218,
+        "step_seconds": [
+          0.06617602496407926
+        ]
+      }
+    ],
+    "generation_seconds": 0.11573840002529323,
+    "native_conditions": false,
+    "post_generation_pose_edits": false
+  }
+}

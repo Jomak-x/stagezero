@@ -1,3 +1,5 @@
+> **2026-09-26 scene interaction milestone:** The latest isolated experiments and review URLs are documented in [SCENE-INTERACTION-RESULTS.md](SCENE-INTERACTION-RESULTS.md). Branch: `codex/scene-interaction-lab`. Native Core gates/contact, real AI planning and InterGen paired motion are verified research components; they have not replaced the live studio. Experimental GPU processes have exited. The earlier scope below is historical and was superseded by the user’s explicit request to explore interactions and other models.
+
 # StageZero review handoff — 2026-09-26
 
 Workspace: `/Users/jakob/Desktop/Shellhacks`; branch: `feat/directing-workflow`.

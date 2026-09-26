@@ -1,0 +1,4991 @@
+{
+  "model": "ARDY-Core-RP-20FPS-Horizon40",
+  "fps": 20,
+  "health": {
+    "ready": true,
+    "error": null,
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "service": "interaction-lab-v1",
+    "fps": 20,
+    "joints": 27,
+    "features": 330,
+    "horizon": 40,
+    "load_seconds": 65.46777962404303,
+    "gpu": "NVIDIA RTX 6000 Ada Generation"
+  },
+  "trials": [
+    {
+      "name": "straight_arch__text__seed11",
+      "path": "straight_arch__text__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.009334802627563477,
+              "toe_penetration_max_depth_m": 0.009334802627563477,
+              "toe_penetration_frames": 112,
+              "low_toe_samples": 130,
+              "low_toe_slide_mean_mps": 0.3179777834562813,
+              "low_toe_slide_peak_mps": 4.639579584623241
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 26,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 26,
+                  "first_collision_frame": 54,
+                  "minimum_clearance_m": -0.38414003849029543,
+                  "worst_penetration_m": 0.38414003849029543
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.07709722289460232,
+              "root_peak_speed_mps": 1.5419444578920463,
+              "mean_joint_peak_step_m": 0.06948262329369025,
+              "root_peak_acceleration_mps2": 4.543427974308124,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.04619589139987292,
+                  "mean_joint_step_m": 0.05655736844224724,
+                  "root_speed_mps": 0.9239178279974585,
+                  "velocity_jump_mps": 0.12798028782088708
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.06790431460062372,
+                  "mean_joint_step_m": 0.062246721533067324,
+                  "root_speed_mps": 1.3580862920124745,
+                  "velocity_jump_mps": 0.20295475941703175
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [
+                {
+                  "frame_before": 68,
+                  "frame_after": 69,
+                  "fraction_after_frame": 0.2742640040734625,
+                  "max_body_lateral_m": 1.5699720989953572,
+                  "body_low_y_m": 0.5899583181225286,
+                  "body_high_y_m": 1.8981920242110615,
+                  "clearance_proxy": false
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 1.5005650332956988,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.4326732158660889,
+                2.3237457275390625
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.6248093312302476,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                3.3090033531188965,
+                4.249776840209961
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.34757172293029726,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.6488617499999236
+    },
+    {
+      "name": "straight_arch__controlled__seed11",
+      "path": "straight_arch__controlled__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.01256626844406128,
+              "toe_penetration_max_depth_m": 0.01256626844406128,
+              "toe_penetration_frames": 48,
+              "low_toe_samples": 123,
+              "low_toe_slide_mean_mps": 0.25236378921569624,
+              "low_toe_slide_peak_mps": 4.877770933642884
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.34889882200938693,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.1426282970391511,
+              "root_peak_speed_mps": 2.8525659407830215,
+              "mean_joint_peak_step_m": 0.11124998952258583,
+              "root_peak_acceleration_mps2": 15.366203294184668,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.05838850561911935,
+                  "mean_joint_step_m": 0.06818220844977015,
+                  "root_speed_mps": 1.1677701123823871,
+                  "velocity_jump_mps": 0.4315480928591263
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.07554111967664504,
+                  "mean_joint_step_m": 0.06243092994352105,
+                  "root_speed_mps": 1.5108223935329006,
+                  "velocity_jump_mps": 0.1244058111880702
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 59,
+                  "frame_after": 60,
+                  "fraction_after_frame": 0.7007057147309602,
+                  "max_body_lateral_m": 0.4256189252391875,
+                  "body_low_y_m": 0.599159120483505,
+                  "body_high_y_m": 1.8987148419701223,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.031653512068619646,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.02633991837501526,
+                2.752445697784424
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 2.7748403013079574,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.0508358478546143,
+                5.338167190551758
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.3088730650488287,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5783742500061635
+    },
+    {
+      "name": "straight_arch__text__seed22",
+      "path": "straight_arch__text__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.017109990119934082,
+              "toe_penetration_max_depth_m": 0.017109990119934082,
+              "toe_penetration_frames": 119,
+              "low_toe_samples": 138,
+              "low_toe_slide_mean_mps": 0.3260107668960536,
+              "low_toe_slide_peak_mps": 4.360938263097429
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 18,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 18,
+                  "first_collision_frame": 63,
+                  "minimum_clearance_m": -0.25451695919036854,
+                  "worst_penetration_m": 0.25451695919036854
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06858204374250007,
+              "root_peak_speed_mps": 1.3716408748500015,
+              "mean_joint_peak_step_m": 0.0639470812826251,
+              "root_peak_acceleration_mps2": 5.005748063754283,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.040508886678099994,
+                  "mean_joint_step_m": 0.04422635017767282,
+                  "root_speed_mps": 0.8101777335619998,
+                  "velocity_jump_mps": 0.25028740318771414
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.06177529683893185,
+                  "mean_joint_step_m": 0.052787567746954936,
+                  "root_speed_mps": 1.235505936778637,
+                  "velocity_jump_mps": 0.09813594283948059
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [
+                {
+                  "frame_before": 75,
+                  "frame_after": 76,
+                  "fraction_after_frame": 0.12697592654875542,
+                  "max_body_lateral_m": 1.95365448347759,
+                  "body_low_y_m": 0.6234812460008621,
+                  "body_high_y_m": 1.9334143699269115,
+                  "clearance_proxy": false
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 1.7676748472552413,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.5890350341796875,
+                1.9956344366073608
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.1892922096306053,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.93338680267334,
+                4.021729469299316
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.26393726910464466,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.524127166980179
+    },
+    {
+      "name": "straight_arch__controlled__seed22",
+      "path": "straight_arch__controlled__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.017109990119934082,
+              "toe_penetration_max_depth_m": 0.017109990119934082,
+              "toe_penetration_frames": 99,
+              "low_toe_samples": 131,
+              "low_toe_slide_mean_mps": 0.5153581529207235,
+              "low_toe_slide_peak_mps": 8.238380726636807
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.11881163298296757,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.16731613184696822,
+              "root_peak_speed_mps": 3.3463226369393646,
+              "mean_joint_peak_step_m": 0.1322056304662332,
+              "root_peak_acceleration_mps2": 20.98341516795562,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.06119904030480371,
+                  "mean_joint_step_m": 0.06397751419028375,
+                  "root_speed_mps": 1.2239808060960742,
+                  "velocity_jump_mps": 0.558858248067221
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.055888426258318684,
+                  "mean_joint_step_m": 0.06586779669249453,
+                  "root_speed_mps": 1.1177685251663736,
+                  "velocity_jump_mps": 0.18887462033135163
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 59,
+                  "frame_after": 60,
+                  "fraction_after_frame": 0.5852487811088279,
+                  "max_body_lateral_m": 0.4407893226306637,
+                  "body_low_y_m": 0.5792541390893147,
+                  "body_high_y_m": 1.8790601513051042,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.03363801508456274,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.02203160524368286,
+                2.7954189777374268
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 2.872899829026001,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -1.7579355239868164,
+                5.042271137237549
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2541762050241232,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5183890000043903
+    },
+    {
+      "name": "straight_arch__text__seed33",
+      "path": "straight_arch__text__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0027793049812316895,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 192,
+              "low_toe_slide_mean_mps": 0.17693144239136627,
+              "low_toe_slide_peak_mps": 3.1166372451020043
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.07632966995239257,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.053164235663419435,
+              "root_peak_speed_mps": 1.0632847132683887,
+              "mean_joint_peak_step_m": 0.043626924025772104,
+              "root_peak_acceleration_mps2": 2.7967037285846676,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0032623767543998525,
+                  "mean_joint_step_m": 0.005677957757635444,
+                  "root_speed_mps": 0.06524753508799705,
+                  "velocity_jump_mps": 0.018112793972769593
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.027727388768912963,
+                  "mean_joint_step_m": 0.03249501044135244,
+                  "root_speed_mps": 0.5545477753782593,
+                  "velocity_jump_mps": 0.049306294296271765
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 3.070317793574699,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.2613667845726013,
+                -0.289172887802124
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.7452519174928725,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.870473325252533,
+                1.2573267221450806
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2525598651263863,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5140797080239281
+    },
+    {
+      "name": "straight_arch__controlled__seed33",
+      "path": "straight_arch__controlled__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0027793049812316895,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 178,
+              "low_toe_slide_mean_mps": 0.1073164944070862,
+              "low_toe_slide_peak_mps": 3.456312110229017
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.3374476674230591,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.27538002877404133,
+              "root_peak_speed_mps": 5.507600575480827,
+              "mean_joint_peak_step_m": 0.24171068768301293,
+              "root_peak_acceleration_mps2": 58.96163846366124,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.14831558254785024,
+                  "mean_joint_step_m": 0.17397876456893477,
+                  "root_speed_mps": 2.966311650957005,
+                  "velocity_jump_mps": 0.5074164895684993
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.05291783721406228,
+                  "mean_joint_step_m": 0.05548263589751598,
+                  "root_speed_mps": 1.0583567442812456,
+                  "velocity_jump_mps": 0.285382438962499
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 57,
+                  "frame_after": 58,
+                  "fraction_after_frame": 0.4326479459987381,
+                  "max_body_lateral_m": 0.39734811544973164,
+                  "body_low_y_m": 0.48628206741348157,
+                  "body_high_y_m": 1.6983658108802036,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.11089155346519675,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.021414315328001976,
+                2.661195755004883
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.5143735999853658,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.28180038928985596,
+                3.200312376022339
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25263709598220885,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5098077919974457
+    },
+    {
+      "name": "straight_arch__text__seed44",
+      "path": "straight_arch__text__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0039147138595581055,
+              "toe_penetration_max_depth_m": 0.0039147138595581055,
+              "toe_penetration_frames": 15,
+              "low_toe_samples": 165,
+              "low_toe_slide_mean_mps": 0.27326850515485906,
+              "low_toe_slide_peak_mps": 3.577765729740649
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.22639987156217065,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06036868599546202,
+              "root_peak_speed_mps": 1.2073737199092403,
+              "mean_joint_peak_step_m": 0.05856067338207008,
+              "root_peak_acceleration_mps2": 3.3385263891784476,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.04971982907797987,
+                  "mean_joint_step_m": 0.0474689945822255,
+                  "root_speed_mps": 0.9943965815595974,
+                  "velocity_jump_mps": 0.1152702461087924
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.02060059226309565,
+                  "mean_joint_step_m": 0.0250001721246274,
+                  "root_speed_mps": 0.41201184526191303,
+                  "velocity_jump_mps": 0.05234168107349088
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 73,
+                  "frame_after": 74,
+                  "fraction_after_frame": 0.32217792936649997,
+                  "max_body_lateral_m": 0.4874361448167118,
+                  "body_low_y_m": 0.6159889641252343,
+                  "body_high_y_m": 1.9283771719495773,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.707050929490756,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.12440381944179535,
+                2.073979377746582
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.5853588685854297,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.5319317579269409,
+                3.0143227577209473
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25142874103039503,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5126844999904279
+    },
+    {
+      "name": "straight_arch__controlled__seed44",
+      "path": "straight_arch__controlled__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0039147138595581055,
+              "toe_penetration_max_depth_m": 0.0039147138595581055,
+              "toe_penetration_frames": 17,
+              "low_toe_samples": 171,
+              "low_toe_slide_mean_mps": 0.21793727227382298,
+              "low_toe_slide_peak_mps": 5.462731761908292
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.42587554717837495,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.10402247163058326,
+              "root_peak_speed_mps": 2.0804494326116654,
+              "mean_joint_peak_step_m": 0.09640952208748502,
+              "root_peak_acceleration_mps2": 13.798461511287899,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.08638004011652678,
+                  "mean_joint_step_m": 0.08874740220569537,
+                  "root_speed_mps": 1.7276008023305356,
+                  "velocity_jump_mps": 0.15085013805947067
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.027677886782972578,
+                  "mean_joint_step_m": 0.02235542043772925,
+                  "root_speed_mps": 0.5535577356594515,
+                  "velocity_jump_mps": 0.0847033354439494
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 58,
+                  "frame_after": 59,
+                  "fraction_after_frame": 0.6568643656983234,
+                  "max_body_lateral_m": 0.37790015782999986,
+                  "body_low_y_m": 0.5951166395659522,
+                  "body_high_y_m": 1.90388739283502,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.04254367335654234,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -6.031617522239685e-05,
+                2.8125436305999756
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.3832434956317939,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.002558009698987007,
+                3.1532349586486816
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25425854604691267,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.511270458024228
+    },
+    {
+      "name": "straight_arch__text__seed55",
+      "path": "straight_arch__text__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.010540544986724854,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 180,
+              "low_toe_slide_mean_mps": 0.20332927549918006,
+              "low_toe_slide_peak_mps": 2.82816587059323
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 1.5363477523559876,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.0894852573551276,
+              "root_peak_speed_mps": 1.789705147102552,
+              "mean_joint_peak_step_m": 0.07692085722407045,
+              "root_peak_acceleration_mps2": 5.09004531666886,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.012151871550360844,
+                  "mean_joint_step_m": 0.013033958226207109,
+                  "root_speed_mps": 0.24303743100721686,
+                  "velocity_jump_mps": 0.16239843538827045
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.0052888461420776385,
+                  "mean_joint_step_m": 0.011117077241441606,
+                  "root_speed_mps": 0.10577692284155277,
+                  "velocity_jump_mps": 0.06736763275073934
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.717022692605319,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.10662908852100372,
+                0.055070433765649796
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.5785254838483356,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.223841667175293,
+                -0.03363565355539322
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25173845421522856,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5061070829979144
+    },
+    {
+      "name": "straight_arch__controlled__seed55",
+      "path": "straight_arch__controlled__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.012532949447631836,
+              "toe_penetration_max_depth_m": 0.012532949447631836,
+              "toe_penetration_frames": 4,
+              "low_toe_samples": 138,
+              "low_toe_slide_mean_mps": 0.30874194493908896,
+              "low_toe_slide_peak_mps": 5.482862140461662
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.16643650921930778,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.24167764477302298,
+              "root_peak_speed_mps": 4.83355289546046,
+              "mean_joint_peak_step_m": 0.21388393329396424,
+              "root_peak_acceleration_mps2": 46.77728422157241,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.1181135400808258,
+                  "mean_joint_step_m": 0.14051905228434464,
+                  "root_speed_mps": 2.362270801616516,
+                  "velocity_jump_mps": 0.6865166647238515
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.003245087126477016,
+                  "mean_joint_step_m": 0.008275342117379018,
+                  "root_speed_mps": 0.06490174252954033,
+                  "velocity_jump_mps": 0.04265272951486801
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 52,
+                  "frame_after": 53,
+                  "fraction_after_frame": 0.5229808548205048,
+                  "max_body_lateral_m": 0.3786507774024053,
+                  "body_low_y_m": 0.5655933073287446,
+                  "body_high_y_m": 1.836954099666729,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 75,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.05141828054120593,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.033871036022901535,
+                2.731314182281494
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 2.0259135424594628,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.9878010749816895,
+                3.1611170768737793
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2533167351502925,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5178004170011263
+    },
+    {
+      "name": "rotated_gate__text__seed11",
+      "path": "rotated_gate__text__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.013393759727478027,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 201,
+              "low_toe_slide_mean_mps": 0.18833687601506052,
+              "low_toe_slide_peak_mps": 3.555445342594443
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.9418183931403775,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06088698137630481,
+              "root_peak_speed_mps": 1.2177396275260963,
+              "mean_joint_peak_step_m": 0.055677095386374005,
+              "root_peak_acceleration_mps2": 3.1308558617630777,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.004607326296208806,
+                  "mean_joint_step_m": 0.009325074717372752,
+                  "root_speed_mps": 0.09214652592417612,
+                  "velocity_jump_mps": 0.02049244374820113
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.040970407787810935,
+                  "mean_joint_step_m": 0.055677095386374005,
+                  "root_speed_mps": 0.8194081557562187,
+                  "velocity_jump_mps": 0.06897722293352747
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 3.1883732076774813,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.33372360467910767,
+                -0.3052903413772583
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 2.70715502744452,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.22115132212638855,
+                -0.6857987642288208
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2546927121002227,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5170949579915032
+    },
+    {
+      "name": "rotated_gate__controlled__seed11",
+      "path": "rotated_gate__controlled__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0012064576148986816,
+              "toe_penetration_max_depth_m": 0.0012064576148986816,
+              "toe_penetration_frames": 1,
+              "low_toe_samples": 170,
+              "low_toe_slide_mean_mps": 0.13888064802590463,
+              "low_toe_slide_peak_mps": 1.0637870453362317
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.5124739685402285,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.21236507251899586,
+              "root_peak_speed_mps": 4.247301450379918,
+              "mean_joint_peak_step_m": 0.22938717364560832,
+              "root_peak_acceleration_mps2": 68.48710870042456,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.16748781379562944,
+                  "mean_joint_step_m": 0.1966993654480668,
+                  "root_speed_mps": 3.349756275912589,
+                  "velocity_jump_mps": 0.5901850632637007
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.021670552053153484,
+                  "mean_joint_step_m": 0.031248307023979974,
+                  "root_speed_mps": 0.4334110410630697,
+                  "velocity_jump_mps": 0.15264887057391813
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 57,
+                  "frame_after": 58,
+                  "fraction_after_frame": 0.15502243263811769,
+                  "max_body_lateral_m": 0.5683360228608003,
+                  "body_low_y_m": -0.14899052698250964,
+                  "body_high_y_m": 0.9148757040835356,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.10636123094483567,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.932724952697754,
+                -0.052103690803050995
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.19198447187098056,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.7453744411468506,
+                -0.16704502701759338
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2531303521245718,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5084203340229578
+    },
+    {
+      "name": "rotated_gate__text__seed22",
+      "path": "rotated_gate__text__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.004100978374481201,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 180,
+              "low_toe_slide_mean_mps": 0.07837102699253248,
+              "low_toe_slide_peak_mps": 3.1296629279315784
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 1.4625675487055831,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.0648171508591888,
+              "root_peak_speed_mps": 1.296343017183776,
+              "mean_joint_peak_step_m": 0.06613217570374924,
+              "root_peak_acceleration_mps2": 4.831878262234437,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.017560413432325755,
+                  "mean_joint_step_m": 0.02421370917414995,
+                  "root_speed_mps": 0.3512082686465151,
+                  "velocity_jump_mps": 0.06616425624625737
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.007685796170639477,
+                  "mean_joint_step_m": 0.011141442557644439,
+                  "root_speed_mps": 0.15371592341278956,
+                  "velocity_jump_mps": 0.017294846467380973
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.6127845149378484,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.23530812561511993,
+                -0.20548275113105774
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.318701332844129,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.36517465114593506,
+                0.8606009483337402
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.251157637918368,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5155608750064857
+    },
+    {
+      "name": "rotated_gate__controlled__seed22",
+      "path": "rotated_gate__controlled__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0067511796951293945,
+              "toe_penetration_max_depth_m": 0.0067511796951293945,
+              "toe_penetration_frames": 3,
+              "low_toe_samples": 162,
+              "low_toe_slide_mean_mps": 0.11344134658219499,
+              "low_toe_slide_peak_mps": 4.107192206863301
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 6,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 6,
+                  "first_collision_frame": 114,
+                  "minimum_clearance_m": -0.1486726760864258,
+                  "worst_penetration_m": 0.1486726760864258
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.26460759610347695,
+              "root_peak_speed_mps": 5.292151922069539,
+              "mean_joint_peak_step_m": 0.29927775383677363,
+              "root_peak_acceleration_mps2": 94.20204811917284,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.25285724679633775,
+                  "mean_joint_step_m": 0.29927775383677363,
+                  "root_speed_mps": 5.057144935926755,
+                  "velocity_jump_mps": 0.24265885883821114
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.004138892174676485,
+                  "mean_joint_step_m": 0.01228267283573108,
+                  "root_speed_mps": 0.08277784349352971,
+                  "velocity_jump_mps": 0.010946779647922377
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 55,
+                  "frame_after": 56,
+                  "fraction_after_frame": 0.7118218706723995,
+                  "max_body_lateral_m": 0.39154050940131124,
+                  "body_low_y_m": 0.6568680833953429,
+                  "body_high_y_m": 1.9682160327982174,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.12022414733678898,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.9599504470825195,
+                -0.008107764646410942
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.4243852730436581,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.463691473007202,
+                1.3737777471542358
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2522665208671242,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5122034579981118
+    },
+    {
+      "name": "rotated_gate__text__seed33",
+      "path": "rotated_gate__text__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.00993955135345459,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 238,
+              "low_toe_slide_mean_mps": 0.008478546203420291,
+              "low_toe_slide_peak_mps": 0.09829000979816145
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 2.0479931818551607,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.005650561338908983,
+              "root_peak_speed_mps": 0.11301122677817965,
+              "mean_joint_peak_step_m": 0.011314309039354676,
+              "root_peak_acceleration_mps2": 1.1962181074547176,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.002040506330402168,
+                  "mean_joint_step_m": 0.011314309039354676,
+                  "root_speed_mps": 0.04081012660804336,
+                  "velocity_jump_mps": 0.018853695486002162
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.001455630717843286,
+                  "mean_joint_step_m": 0.005129886546363745,
+                  "root_speed_mps": 0.02911261435686572,
+                  "velocity_jump_mps": 0.015002497760106568
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 3.8388091147311956,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.998371958732605,
+                -0.05793207883834839
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.9356134844218467,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -1.0938308238983154,
+                -0.11844217032194138
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.31458448711782694,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5781805420119781
+    },
+    {
+      "name": "rotated_gate__controlled__seed33",
+      "path": "rotated_gate__controlled__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0005273222923278809,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 193,
+              "low_toe_slide_mean_mps": 0.12239982498244657,
+              "low_toe_slide_peak_mps": 7.381886074035716
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.6554463557944213,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.2429933887970664,
+              "root_peak_speed_mps": 4.859867775941328,
+              "mean_joint_peak_step_m": 0.21609376655260434,
+              "root_peak_acceleration_mps2": 73.41862874934763,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.18267014784275273,
+                  "mean_joint_step_m": 0.21609376655260434,
+                  "root_speed_mps": 3.6534029568550546,
+                  "velocity_jump_mps": 0.8025743813427999
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.008682794320973065,
+                  "mean_joint_step_m": 0.010200194650495242,
+                  "root_speed_mps": 0.17365588641946128,
+                  "velocity_jump_mps": 0.045833513818921076
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 57,
+                  "frame_after": 58,
+                  "fraction_after_frame": 0.4570277053837998,
+                  "max_body_lateral_m": 0.3781354460994657,
+                  "body_low_y_m": 0.5647160526752356,
+                  "body_high_y_m": 1.857832733589464,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.14991861317823615,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.9898908138275146,
+                -0.0028869546949863434
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.3675573738455061,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                3.1940906047821045,
+                -0.09858126938343048
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25276507693342865,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5064978749724105
+    },
+    {
+      "name": "rotated_gate__text__seed44",
+      "path": "rotated_gate__text__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.01409900188446045,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 200,
+              "low_toe_slide_mean_mps": 0.1534276805040182,
+              "low_toe_slide_peak_mps": 4.243324141629638
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.8049585507116989,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.058744119026760105,
+              "root_peak_speed_mps": 1.1748823805352022,
+              "mean_joint_peak_step_m": 0.05814292332961927,
+              "root_peak_acceleration_mps2": 3.8049747861201375,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.003510967183470638,
+                  "mean_joint_step_m": 0.013294078318054707,
+                  "root_speed_mps": 0.07021934366941275,
+                  "velocity_jump_mps": 0.04785468191852492
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.04495389799247038,
+                  "mean_joint_step_m": 0.04412337473878974,
+                  "root_speed_mps": 0.8990779598494076,
+                  "velocity_jump_mps": 0.024363951335914978
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 3.669663491852296,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.828978419303894,
+                -0.07090488076210022
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.9620001618323784,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.9139717817306519,
+                -0.37397852540016174
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2530679409392178,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5185541249811649
+    },
+    {
+      "name": "rotated_gate__controlled__seed44",
+      "path": "rotated_gate__controlled__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.013926982879638672,
+              "toe_penetration_max_depth_m": 0.013926982879638672,
+              "toe_penetration_frames": 1,
+              "low_toe_samples": 184,
+              "low_toe_slide_mean_mps": 0.13953516773519434,
+              "low_toe_slide_peak_mps": 6.673383688162862
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.6211974570778717,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.45148535195348827,
+              "root_peak_speed_mps": 9.029707039069766,
+              "mean_joint_peak_step_m": 0.5910902144202229,
+              "root_peak_acceleration_mps2": 111.13964978686171,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.24607969674229882,
+                  "mean_joint_step_m": 0.14419499102807856,
+                  "root_speed_mps": 4.921593934845976,
+                  "velocity_jump_mps": 1.0413197095874827
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.003948909367367351,
+                  "mean_joint_step_m": 0.012299250659959342,
+                  "root_speed_mps": 0.07897818734734703,
+                  "velocity_jump_mps": 0.045006125720189506
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 54,
+                  "frame_after": 55,
+                  "fraction_after_frame": 0.8625042111660082,
+                  "max_body_lateral_m": 0.38493614732885434,
+                  "body_low_y_m": 0.5855960296240916,
+                  "body_high_y_m": 1.8943455135111682,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.09527561836553837,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.9329237937927246,
+                -0.021038345992565155
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.5627734555344794,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                3.3940188884735107,
+                0.0988788828253746
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5258894320577383,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.7816629579756409
+    },
+    {
+      "name": "rotated_gate__text__seed55",
+      "path": "rotated_gate__text__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.019372522830963135,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 164,
+              "low_toe_slide_mean_mps": 0.06373408278147014,
+              "low_toe_slide_peak_mps": 1.8074446686741583
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.19628849422156,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.05408348086410545,
+              "root_peak_speed_mps": 1.081669617282109,
+              "mean_joint_peak_step_m": 0.04422203615044639,
+              "root_peak_acceleration_mps2": 3.4835560379356187,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.02740251685550441,
+                  "mean_joint_step_m": 0.02509841998955453,
+                  "root_speed_mps": 0.5480503371100882,
+                  "velocity_jump_mps": 0.05705398401448237
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.025846744135418476,
+                  "mean_joint_step_m": 0.029459781339939404,
+                  "root_speed_mps": 0.5169348827083695,
+                  "velocity_jump_mps": 0.06170726411496494
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.312027450674365,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.5680463314056396,
+                -0.42859941720962524
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.6163732155874064,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.3781241178512573,
+                -0.689624011516571
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5411043239291757,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.8504315000027418
+    },
+    {
+      "name": "rotated_gate__controlled__seed55",
+      "path": "rotated_gate__controlled__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0030677318572998047,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 148,
+              "low_toe_slide_mean_mps": 0.16336470623898947,
+              "low_toe_slide_peak_mps": 4.893520972641203
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "red-gate",
+                  "kind": "custom",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.47301266564731415,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.27388160980508697,
+              "root_peak_speed_mps": 5.477632196101739,
+              "mean_joint_peak_step_m": 0.22470046825867507,
+              "root_peak_acceleration_mps2": 68.40801050572873,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.19707822424004612,
+                  "mean_joint_step_m": 0.22470046825867507,
+                  "root_speed_mps": 3.9415644848009226,
+                  "velocity_jump_mps": 1.1837587872150843
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.004571783440448846,
+                  "mean_joint_step_m": 0.013737320534863148,
+                  "root_speed_mps": 0.09143566880897692,
+                  "velocity_jump_mps": 0.043190718882664146
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 51,
+                  "frame_after": 52,
+                  "fraction_after_frame": 0.726237476893585,
+                  "max_body_lateral_m": 0.3992813676721443,
+                  "body_low_y_m": 0.48668728858687493,
+                  "body_high_y_m": 1.800524296403304,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 2.2,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 77,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.11151292522163737,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.9399986267089844,
+                -0.049349844455718994
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.1943665416988962,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                4.0183424949646,
+                -0.1949882060289383
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2532565239816904,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5142502090020571
+    },
+    {
+      "name": "obstacle_arch__text__seed11",
+      "path": "obstacle_arch__text__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.009334802627563477,
+              "toe_penetration_max_depth_m": 0.009334802627563477,
+              "toe_penetration_frames": 112,
+              "low_toe_samples": 130,
+              "low_toe_slide_mean_mps": 0.3179777834562813,
+              "low_toe_slide_peak_mps": 4.639579584623241
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 59,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 26,
+                  "first_collision_frame": 54,
+                  "minimum_clearance_m": -0.38414003849029543,
+                  "worst_penetration_m": 0.38414003849029543
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 33,
+                  "first_collision_frame": 15,
+                  "minimum_clearance_m": -0.4267614018917084,
+                  "worst_penetration_m": 0.4267614018917084
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.07709722289460232,
+              "root_peak_speed_mps": 1.5419444578920463,
+              "mean_joint_peak_step_m": 0.06948262329369025,
+              "root_peak_acceleration_mps2": 4.543427974308124,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.04619589139987292,
+                  "mean_joint_step_m": 0.05655736844224724,
+                  "root_speed_mps": 0.9239178279974585,
+                  "velocity_jump_mps": 0.12798028782088708
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.06790431460062372,
+                  "mean_joint_step_m": 0.062246721533067324,
+                  "root_speed_mps": 1.3580862920124745,
+                  "velocity_jump_mps": 0.20295475941703175
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [
+                {
+                  "frame_before": 68,
+                  "frame_after": 69,
+                  "fraction_after_frame": 0.2742640040734625,
+                  "max_body_lateral_m": 1.5699720989953572,
+                  "body_low_y_m": 0.5899583181225286,
+                  "body_high_y_m": 1.8981920242110615,
+                  "clearance_proxy": false
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.3608872628425734,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.314603567123413,
+                3.23518705368042
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.6248093312302476,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                3.3090033531188965,
+                4.249776840209961
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2513880799524486,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5123080830089748
+    },
+    {
+      "name": "obstacle_arch__controlled__seed11",
+      "path": "obstacle_arch__controlled__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.02546912431716919,
+              "toe_penetration_max_depth_m": 0.02546912431716919,
+              "toe_penetration_frames": 41,
+              "low_toe_samples": 101,
+              "low_toe_slide_mean_mps": 0.5516288240284999,
+              "low_toe_slide_peak_mps": 4.730640495012704
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 4,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.04991210686673775,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 4,
+                  "first_collision_frame": 71,
+                  "minimum_clearance_m": -0.028917956352233903,
+                  "worst_penetration_m": 0.028917956352233903
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.2581828635466895,
+              "root_peak_speed_mps": 5.16365727093379,
+              "mean_joint_peak_step_m": 0.24629835525624136,
+              "root_peak_acceleration_mps2": 35.475031305773896,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.051724578775542145,
+                  "mean_joint_step_m": 0.07955053277716108,
+                  "root_speed_mps": 1.0344915755108428,
+                  "velocity_jump_mps": 0.6588836947207316
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.06934531852491721,
+                  "mean_joint_step_m": 0.06357078525565575,
+                  "root_speed_mps": 1.3869063704983442,
+                  "velocity_jump_mps": 0.6314397606117478
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 90,
+                  "frame_after": 91,
+                  "fraction_after_frame": 0.7139169329330214,
+                  "max_body_lateral_m": 0.5770086919702575,
+                  "body_low_y_m": 0.4936482842373139,
+                  "body_high_y_m": 1.67949075056542,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.04440266005074157,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.04439634084701538,
+                2.770749092102051
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.996148576325869,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                1.2817553281784058,
+                6.555010795593262
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.255207858979702,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5174071670044214
+    },
+    {
+      "name": "obstacle_arch__text__seed22",
+      "path": "obstacle_arch__text__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.017109990119934082,
+              "toe_penetration_max_depth_m": 0.017109990119934082,
+              "toe_penetration_frames": 119,
+              "low_toe_samples": 138,
+              "low_toe_slide_mean_mps": 0.3260107668960536,
+              "low_toe_slide_peak_mps": 4.360938263097429
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 49,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 18,
+                  "first_collision_frame": 63,
+                  "minimum_clearance_m": -0.25451695919036854,
+                  "worst_penetration_m": 0.25451695919036854
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 31,
+                  "first_collision_frame": 8,
+                  "minimum_clearance_m": -0.35853097259998323,
+                  "worst_penetration_m": 0.35853097259998323
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06858204374250007,
+              "root_peak_speed_mps": 1.3716408748500015,
+              "mean_joint_peak_step_m": 0.0639470812826251,
+              "root_peak_acceleration_mps2": 5.005748063754283,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.040508886678099994,
+                  "mean_joint_step_m": 0.04422635017767282,
+                  "root_speed_mps": 0.8101777335619998,
+                  "velocity_jump_mps": 0.25028740318771414
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.06177529683893185,
+                  "mean_joint_step_m": 0.052787567746954936,
+                  "root_speed_mps": 1.235505936778637,
+                  "velocity_jump_mps": 0.09813594283948059
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [
+                {
+                  "frame_before": 75,
+                  "frame_after": 76,
+                  "fraction_after_frame": 0.12697592654875542,
+                  "max_body_lateral_m": 1.95365448347759,
+                  "body_low_y_m": 0.6234812460008621,
+                  "body_high_y_m": 1.9334143699269115,
+                  "clearance_proxy": false
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.210978011538889,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.2048747539520264,
+                2.9341678619384766
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.1892922096306053,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.93338680267334,
+                4.021729469299316
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25118879694491625,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5132304159924388
+    },
+    {
+      "name": "obstacle_arch__controlled__seed22",
+      "path": "obstacle_arch__controlled__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.029119253158569336,
+              "toe_penetration_max_depth_m": 0.029119253158569336,
+              "toe_penetration_frames": 76,
+              "low_toe_samples": 105,
+              "low_toe_slide_mean_mps": 0.5293917316477886,
+              "low_toe_slide_peak_mps": 9.968359231505945
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 18,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.015572203315742147,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 18,
+                  "first_collision_frame": 70,
+                  "minimum_clearance_m": -0.16250653743743898,
+                  "worst_penetration_m": 0.16250653743743898
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.26367509289032465,
+              "root_peak_speed_mps": 5.273501857806493,
+              "mean_joint_peak_step_m": 0.24778467269940962,
+              "root_peak_acceleration_mps2": 52.78439933668928,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.05655153617067075,
+                  "mean_joint_step_m": 0.060859097738635286,
+                  "root_speed_mps": 1.131030723413415,
+                  "velocity_jump_mps": 0.21187639329168287
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.10380570557840081,
+                  "mean_joint_step_m": 0.12369855689640714,
+                  "root_speed_mps": 2.076114111568016,
+                  "velocity_jump_mps": 1.0733877638486893
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 91,
+                  "frame_after": 92,
+                  "fraction_after_frame": 0.5442639612908985,
+                  "max_body_lateral_m": 0.42556765152640996,
+                  "body_low_y_m": 0.5333121772883833,
+                  "body_high_y_m": 1.652224448407387,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.0535461554557004,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.026882514357566833,
+                2.8163089752197266
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 5.301425360465829,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.447613000869751,
+                8.052495002746582
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2542040660046041,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5147257090138737
+    },
+    {
+      "name": "obstacle_arch__text__seed33",
+      "path": "obstacle_arch__text__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0027793049812316895,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 192,
+              "low_toe_slide_mean_mps": 0.17693144239136627,
+              "low_toe_slide_peak_mps": 3.1166372451020043
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 40,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.07632966995239257,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 40,
+                  "first_collision_frame": 69,
+                  "minimum_clearance_m": -0.24502750158309938,
+                  "worst_penetration_m": 0.24502750158309938
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.053164235663419435,
+              "root_peak_speed_mps": 1.0632847132683887,
+              "mean_joint_peak_step_m": 0.043626924025772104,
+              "root_peak_acceleration_mps2": 2.7967037285846676,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0032623767543998525,
+                  "mean_joint_step_m": 0.005677957757635444,
+                  "root_speed_mps": 0.06524753508799705,
+                  "velocity_jump_mps": 0.018112793972769593
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.027727388768912963,
+                  "mean_joint_step_m": 0.03249501044135244,
+                  "root_speed_mps": 0.5545477753782593,
+                  "velocity_jump_mps": 0.049306294296271765
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.3855820084073205,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.4531947374343872,
+                0.4278607964515686
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 1.7452519174928725,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.870473325252533,
+                1.2573267221450806
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25667647598311305,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5185590839828365
+    },
+    {
+      "name": "obstacle_arch__controlled__seed33",
+      "path": "obstacle_arch__controlled__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.03920239210128784,
+              "toe_penetration_max_depth_m": 0.03920239210128784,
+              "toe_penetration_frames": 67,
+              "low_toe_samples": 108,
+              "low_toe_slide_mean_mps": 1.019714395260656,
+              "low_toe_slide_peak_mps": 7.458991130935452
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 22,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 14,
+                  "first_collision_frame": 53,
+                  "minimum_clearance_m": -0.2866504449844361,
+                  "worst_penetration_m": 0.2866504449844361
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 10,
+                  "first_collision_frame": 67,
+                  "minimum_clearance_m": -0.16097030043601993,
+                  "worst_penetration_m": 0.16097030043601993
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.2636752180573659,
+              "root_peak_speed_mps": 5.273504361147317,
+              "mean_joint_peak_step_m": 0.23869503939172973,
+              "root_peak_acceleration_mps2": 53.92861912064615,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.06626153878063346,
+                  "mean_joint_step_m": 0.09131992693129604,
+                  "root_speed_mps": 1.325230775612669,
+                  "velocity_jump_mps": 0.7839149076871186
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.12534326612456043,
+                  "mean_joint_step_m": 0.12311768648775737,
+                  "root_speed_mps": 2.5068653224912083,
+                  "velocity_jump_mps": 0.6462042894945292
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [
+                {
+                  "frame_before": 81,
+                  "frame_after": 82,
+                  "fraction_after_frame": 0.31357101100734586,
+                  "max_body_lateral_m": 1.2116271265864718,
+                  "body_low_y_m": 0.6220298508184178,
+                  "body_high_y_m": 1.8974479828097237,
+                  "clearance_proxy": false
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.0633174598964554,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.04954516515135765,
+                2.8094255924224854
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 2.435382432439654,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -2.1740877628326416,
+                3.8674652576446533
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25493513513356447,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5162203750223853
+    },
+    {
+      "name": "obstacle_arch__text__seed44",
+      "path": "obstacle_arch__text__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0039147138595581055,
+              "toe_penetration_max_depth_m": 0.0039147138595581055,
+              "toe_penetration_frames": 15,
+              "low_toe_samples": 165,
+              "low_toe_slide_mean_mps": 0.27326850515485906,
+              "low_toe_slide_peak_mps": 3.577765729740649
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 29,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.22639987156217065,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 29,
+                  "first_collision_frame": 23,
+                  "minimum_clearance_m": -0.42896238565444944,
+                  "worst_penetration_m": 0.42896238565444944
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06036868599546202,
+              "root_peak_speed_mps": 1.2073737199092403,
+              "mean_joint_peak_step_m": 0.05856067338207008,
+              "root_peak_acceleration_mps2": 3.3385263891784476,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.04971982907797987,
+                  "mean_joint_step_m": 0.0474689945822255,
+                  "root_speed_mps": 0.9943965815595974,
+                  "velocity_jump_mps": 0.1152702461087924
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.02060059226309565,
+                  "mean_joint_step_m": 0.0250001721246274,
+                  "root_speed_mps": 0.41201184526191303,
+                  "velocity_jump_mps": 0.05234168107349088
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 73,
+                  "frame_after": 74,
+                  "fraction_after_frame": 0.32217792936649997,
+                  "max_body_lateral_m": 0.4874361448167118,
+                  "body_low_y_m": 0.6159889641252343,
+                  "body_high_y_m": 1.9283771719495773,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.40749573768901354,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.30634915828704834,
+                2.501293897628784
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 0.5853588685854297,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.5319317579269409,
+                3.0143227577209473
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25101994490250945,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5154329169890843
+    },
+    {
+      "name": "obstacle_arch__controlled__seed44",
+      "path": "obstacle_arch__controlled__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.02268838882446289,
+              "toe_penetration_max_depth_m": 0.02268838882446289,
+              "toe_penetration_frames": 54,
+              "low_toe_samples": 93,
+              "low_toe_slide_mean_mps": 0.6259837393806601,
+              "low_toe_slide_peak_mps": 8.496974428653118
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 14,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.12773485891242883,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 14,
+                  "first_collision_frame": 73,
+                  "minimum_clearance_m": -0.2517754602432251,
+                  "worst_penetration_m": 0.2517754602432251
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.1908261982480927,
+              "root_peak_speed_mps": 3.8165239649618536,
+              "mean_joint_peak_step_m": 0.19153993878223965,
+              "root_peak_acceleration_mps2": 77.79298336306364,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.054762444046180164,
+                  "mean_joint_step_m": 0.059505946182064604,
+                  "root_speed_mps": 1.0952488809236032,
+                  "velocity_jump_mps": 0.41338411813981774
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.12026211230111317,
+                  "mean_joint_step_m": 0.1429830208594803,
+                  "root_speed_mps": 2.4052422460222633,
+                  "velocity_jump_mps": 0.9698613114770871
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 91,
+                  "frame_after": 92,
+                  "fraction_after_frame": 0.023846824900914932,
+                  "max_body_lateral_m": 0.47093706236880306,
+                  "body_low_y_m": 0.5064582430846024,
+                  "body_high_y_m": 1.7582180997044239,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.11690584657295128,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.04284358397126198,
+                2.878772258758545
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.8729502236940316,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.7078261375427246,
+                6.577719211578369
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.254465269157663,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5080414999974892
+    },
+    {
+      "name": "obstacle_arch__text__seed55",
+      "path": "obstacle_arch__text__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.010540544986724854,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 180,
+              "low_toe_slide_mean_mps": 0.20332927549918006,
+              "low_toe_slide_peak_mps": 2.82816587059323
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 72,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 1.5363477523559876,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 72,
+                  "first_collision_frame": 25,
+                  "minimum_clearance_m": -0.3187321320176125,
+                  "worst_penetration_m": 0.3187321320176125
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.0894852573551276,
+              "root_peak_speed_mps": 1.789705147102552,
+              "mean_joint_peak_step_m": 0.07692085722407045,
+              "root_peak_acceleration_mps2": 5.09004531666886,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.012151871550360844,
+                  "mean_joint_step_m": 0.013033958226207109,
+                  "root_speed_mps": 0.24303743100721686,
+                  "velocity_jump_mps": 0.16239843538827045
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.0052888461420776385,
+                  "mean_joint_step_m": 0.011117077241441606,
+                  "root_speed_mps": 0.10577692284155277,
+                  "velocity_jump_mps": 0.06736763275073934
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": false,
+              "plane_crossings": [],
+              "crossing_count": 0,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 2.921775519803197,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.631106972694397,
+                -0.0828014612197876
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.5785254838483356,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                2.223841667175293,
+                -0.03363565355539322
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.2513655300717801,
+        "native_conditions": false,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5072122499987017
+    },
+    {
+      "name": "obstacle_arch__controlled__seed55",
+      "path": "obstacle_arch__controlled__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.007122516632080078,
+              "toe_penetration_max_depth_m": 0.007122516632080078,
+              "toe_penetration_frames": 14,
+              "low_toe_samples": 126,
+              "low_toe_slide_mean_mps": 0.6349134795035954,
+              "low_toe_slide_peak_mps": 9.048656848551408
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [
+                {
+                  "object_id": "north-arch",
+                  "kind": "arch",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.1321626851488948,
+                  "worst_penetration_m": 0.0
+                },
+                {
+                  "object_id": "approach-crate",
+                  "kind": "crate",
+                  "collision_frames": 0,
+                  "first_collision_frame": null,
+                  "minimum_clearance_m": 0.12554349660873407,
+                  "worst_penetration_m": 0.0
+                }
+              ],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.1862188933044443,
+              "root_peak_speed_mps": 3.724377866088886,
+              "mean_joint_peak_step_m": 0.1869860590195399,
+              "root_peak_acceleration_mps2": 26.165385819529497,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.054483591362970756,
+                  "mean_joint_step_m": 0.06660451518050238,
+                  "root_speed_mps": 1.089671827259415,
+                  "velocity_jump_mps": 0.40006704574774377
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.07701912560196617,
+                  "mean_joint_step_m": 0.08565501863411577,
+                  "root_speed_mps": 1.5403825120393233,
+                  "velocity_jump_mps": 0.373212118342357
+                }
+              ]
+            },
+            "gate": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 89,
+                  "frame_after": 90,
+                  "fraction_after_frame": 0.39712688665204016,
+                  "max_body_lateral_m": 0.417276286535724,
+                  "body_low_y_m": 0.5417308436870212,
+                  "body_high_y_m": 1.796721815505304,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.512,
+              "body_radius_m": 0.28,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            },
+            "planned_exit_frame": 96,
+            "endpoint": {
+              "endpoint_error_xz_m": 0.0583757363855022,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.00046189501881599426,
+                2.828373908996582
+              ]
+            },
+            "final_exit_drift": {
+              "endpoint_error_xz_m": 3.364884645555901,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.03995944932103157,
+                6.134647369384766
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.25570599385537207,
+        "native_conditions": true,
+        "post_generation_pose_edits": false
+      },
+      "client_round_trip_seconds": 0.5085227500239853
+    },
+    {
+      "name": "paired_approach__text__seed11",
+      "path": "paired_approach__text__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.003960728645324707,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 225,
+              "low_toe_slide_mean_mps": 0.07425731934413671,
+              "low_toe_slide_peak_mps": 2.509744419646929
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.027740408438927694,
+              "root_peak_speed_mps": 0.5548081687785539,
+              "mean_joint_peak_step_m": 0.028904772986439124,
+              "root_peak_acceleration_mps2": 1.867064750158426,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0015297802750978905,
+                  "mean_joint_step_m": 0.00379863447338025,
+                  "root_speed_mps": 0.03059560550195781,
+                  "velocity_jump_mps": 0.029870058082509334
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.0030164004996509836,
+                  "mean_joint_step_m": 0.003581877851816438,
+                  "root_speed_mps": 0.06032800999301967,
+                  "velocity_jump_mps": 0.017595170434468354
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.2612608287134159,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.10165131837129593,
+                -0.8906745314598083
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.006654977798461914,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 236,
+              "low_toe_slide_mean_mps": 0.014402999653136263,
+              "low_toe_slide_peak_mps": 0.4882800604060382
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.010590009370621068,
+              "root_peak_speed_mps": 0.21180018741242135,
+              "mean_joint_peak_step_m": 0.011865424315950912,
+              "root_peak_acceleration_mps2": 0.9601529090133638,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0008392821803642557,
+                  "mean_joint_step_m": 0.0016748557908538605,
+                  "root_speed_mps": 0.016785643607285114,
+                  "velocity_jump_mps": 0.012665157740632352
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.001169886725800544,
+                  "mean_joint_step_m": 0.002525223743110713,
+                  "root_speed_mps": 0.02339773451601088,
+                  "velocity_jump_mps": 0.007374116638868438
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.8187377130589616,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.0660136267542839,
+                1.4660720825195312
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5069304129574448,
+        "native_conditions": false,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 2.336801224529037,
+            "mean_root_separation_xz_m": 2.442533123041771,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 2.031622805634591,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                14.242008274674971,
+                8.040211785730047
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                14.270816901664572,
+                11.81709415099223
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.8147488329850603
+    },
+    {
+      "name": "paired_approach__controlled__seed11",
+      "path": "paired_approach__controlled__seed11.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.003960728645324707,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 204,
+              "low_toe_slide_mean_mps": 0.1661491004936905,
+              "low_toe_slide_peak_mps": 3.8873894559552937
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.04485692525266152,
+              "root_peak_speed_mps": 0.8971385050532305,
+              "mean_joint_peak_step_m": 0.0514686622326952,
+              "root_peak_acceleration_mps2": 5.617337905588141,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0017774970610030152,
+                  "mean_joint_step_m": 0.0038008764797725606,
+                  "root_speed_mps": 0.035549941220060305,
+                  "velocity_jump_mps": 0.03252311451748831
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.028205090886672342,
+                  "mean_joint_step_m": 0.02530532194250939,
+                  "root_speed_mps": 0.5641018177334468,
+                  "velocity_jump_mps": 0.12988747418809524
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.026609906714527707,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.026193518191576004,
+                -0.6453109979629517
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.001733541488647461,
+              "toe_penetration_max_depth_m": 0.001733541488647461,
+              "toe_penetration_frames": 7,
+              "low_toe_samples": 200,
+              "low_toe_slide_mean_mps": 0.13340873112280824,
+              "low_toe_slide_peak_mps": 3.5255279617617234
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06570137393184329,
+              "root_peak_speed_mps": 1.3140274786368658,
+              "mean_joint_peak_step_m": 0.05720565878714986,
+              "root_peak_acceleration_mps2": 4.742302484414154,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0011432019541081516,
+                  "mean_joint_step_m": 0.0019247961599792268,
+                  "root_speed_mps": 0.022864039082163033,
+                  "velocity_jump_mps": 0.01823435744075607
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.04559742205410992,
+                  "mean_joint_step_m": 0.055848136487509414,
+                  "root_speed_mps": 0.9119484410821985,
+                  "velocity_jump_mps": 0.09991703748020378
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.008646858268199982,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.005332701373845339,
+                0.6568066477775574
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5090142090339214,
+        "native_conditions": true,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.4283412648136433,
+            "mean_root_separation_xz_m": 1.852228547550023,
+            "root_disc_overlap_proxy_frames": 12,
+            "root_disc_overlap_proxy_fraction": 0.1,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.20663828882998242,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                1.3136040075893076,
+                1.136005149265211
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                1.124102921667342,
+                0.9245133579166884
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7633272499952
+    },
+    {
+      "name": "paired_approach__text__seed22",
+      "path": "paired_approach__text__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.012482106685638428,
+              "toe_penetration_max_depth_m": 0.012482106685638428,
+              "toe_penetration_frames": 120,
+              "low_toe_samples": 193,
+              "low_toe_slide_mean_mps": 0.12063517559043879,
+              "low_toe_slide_peak_mps": 3.0682612311847346
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.04994754797156106,
+              "root_peak_speed_mps": 0.9989509594312213,
+              "mean_joint_peak_step_m": 0.0497160376797202,
+              "root_peak_acceleration_mps2": 3.1335764707634652,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.008052088326522483,
+                  "mean_joint_step_m": 0.010253878534442838,
+                  "root_speed_mps": 0.16104176653044966,
+                  "velocity_jump_mps": 0.02869336169676346
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.006009013816537711,
+                  "mean_joint_step_m": 0.006167936007754305,
+                  "root_speed_mps": 0.12018027633075423,
+                  "velocity_jump_mps": 0.03602622472093862
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 1.1582253647665572,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.15221171081066132,
+                0.4981801211833954
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0063936710357666016,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 226,
+              "low_toe_slide_mean_mps": 0.03956008384678676,
+              "low_toe_slide_peak_mps": 2.651976755735048
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.04724426557601058,
+              "root_peak_speed_mps": 0.9448853115202116,
+              "mean_joint_peak_step_m": 0.042688899698768476,
+              "root_peak_acceleration_mps2": 2.9600538196757515,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0008636671110223252,
+                  "mean_joint_step_m": 0.001593953197892038,
+                  "root_speed_mps": 0.017273342220446502,
+                  "velocity_jump_mps": 0.008739656728277293
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.005669432044654064,
+                  "mean_joint_step_m": 0.00681826086586303,
+                  "root_speed_mps": 0.11338864089308127,
+                  "velocity_jump_mps": 0.042111012986060965
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.2990370568281997,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.1137843057513237,
+                0.9265434741973877
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5034403188619763,
+        "native_conditions": false,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.5042311404824518,
+            "mean_root_separation_xz_m": 1.4126878942281949,
+            "root_disc_overlap_proxy_frames": 2,
+            "root_disc_overlap_proxy_fraction": 0.016666666666666666,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.3449050961933028,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                21.011361462106624,
+                17.464535641313436
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                56.68807984477574,
+                20.961383172985883
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7530956669943407
+    },
+    {
+      "name": "paired_approach__controlled__seed22",
+      "path": "paired_approach__controlled__seed22.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.012482106685638428,
+              "toe_penetration_max_depth_m": 0.012482106685638428,
+              "toe_penetration_frames": 120,
+              "low_toe_samples": 214,
+              "low_toe_slide_mean_mps": 0.08033913679499982,
+              "low_toe_slide_peak_mps": 3.0682612311847346
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.04994754797156106,
+              "root_peak_speed_mps": 0.9989509594312213,
+              "mean_joint_peak_step_m": 0.0497160376797202,
+              "root_peak_acceleration_mps2": 3.1335764707634652,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.007829113322065772,
+                  "mean_joint_step_m": 0.010163740632524567,
+                  "root_speed_mps": 0.15658226644131545,
+                  "velocity_jump_mps": 0.028160464595076366
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.009629047623975302,
+                  "mean_joint_step_m": 0.017700582415456464,
+                  "root_speed_mps": 0.19258095247950605,
+                  "velocity_jump_mps": 0.03839726056220585
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.014952322483694025,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.012043358758091927,
+                -0.6411383152008057
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.002266526222229004,
+              "toe_penetration_max_depth_m": 0.002266526222229004,
+              "toe_penetration_frames": 6,
+              "low_toe_samples": 212,
+              "low_toe_slide_mean_mps": 0.12991007915935993,
+              "low_toe_slide_peak_mps": 3.9713582870718094
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.08049580831848496,
+              "root_peak_speed_mps": 1.6099161663696993,
+              "mean_joint_peak_step_m": 0.07919658752270488,
+              "root_peak_acceleration_mps2": 6.815288100011647,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0006101155259294312,
+                  "mean_joint_step_m": 0.0013385672175522468,
+                  "root_speed_mps": 0.012202310518588624,
+                  "velocity_jump_mps": 0.0053977600027240715
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.03971823789452794,
+                  "mean_joint_step_m": 0.06260003680970787,
+                  "root_speed_mps": 0.7943647578905588,
+                  "velocity_jump_mps": 0.10029755612266807
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.024222696583514766,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.0164568480104208,
+                0.6322261095046997
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5128783478867263,
+        "native_conditions": true,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.8635636842461938,
+            "mean_root_separation_xz_m": 1.438980886057124,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.1721016701009249,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                0.6393113027273085,
+                1.0809623275351345
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                0.8075254542173924,
+                1.2228554421269644
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7615055839996785
+    },
+    {
+      "name": "paired_approach__text__seed33",
+      "path": "paired_approach__text__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0025316476821899414,
+              "toe_penetration_max_depth_m": 0.0025316476821899414,
+              "toe_penetration_frames": 5,
+              "low_toe_samples": 221,
+              "low_toe_slide_mean_mps": 0.10871489545484854,
+              "low_toe_slide_peak_mps": 2.8222459695547384
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.045991970265129294,
+              "root_peak_speed_mps": 0.9198394053025859,
+              "mean_joint_peak_step_m": 0.038520954257089735,
+              "root_peak_acceleration_mps2": 2.9548563942235146,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0005077173499938502,
+                  "mean_joint_step_m": 0.001571183163977036,
+                  "root_speed_mps": 0.010154346999877004,
+                  "velocity_jump_mps": 0.007285636065361251
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.031296736588658954,
+                  "mean_joint_step_m": 0.030164596473604893,
+                  "root_speed_mps": 0.625934731773179,
+                  "velocity_jump_mps": 0.13435611381944912
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.1742767420918249,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.1305694282054901,
+                -0.5345703363418579
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.007287859916687012,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 211,
+              "low_toe_slide_mean_mps": 0.1780108203845569,
+              "low_toe_slide_peak_mps": 2.1230973978209744
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.035887502499726165,
+              "root_peak_speed_mps": 0.7177500499945233,
+              "mean_joint_peak_step_m": 0.03285499669923427,
+              "root_peak_acceleration_mps2": 1.7949965911470567,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.00906044988123508,
+                  "mean_joint_step_m": 0.00934527043033615,
+                  "root_speed_mps": 0.1812089976247016,
+                  "velocity_jump_mps": 0.055792950826621286
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.010925041046798195,
+                  "mean_joint_step_m": 0.009203097245860298,
+                  "root_speed_mps": 0.2185008209359639,
+                  "velocity_jump_mps": 0.02799789330642583
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.5480886728665435,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.1743089258670807,
+                0.13036783039569855
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5038090841844678,
+        "native_conditions": false,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.6477228788139856,
+            "mean_root_separation_xz_m": 1.766331139786186,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.26001646404307227,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                0.8159070363646637,
+                1.4103276298238032
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                2.4559282327236116,
+                9.569668937887995
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7488707090087701
+    },
+    {
+      "name": "paired_approach__controlled__seed33",
+      "path": "paired_approach__controlled__seed33.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0030158162117004395,
+              "toe_penetration_max_depth_m": 0.0030158162117004395,
+              "toe_penetration_frames": 28,
+              "low_toe_samples": 207,
+              "low_toe_slide_mean_mps": 0.11829453317053747,
+              "low_toe_slide_peak_mps": 2.9163821259018174
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.06810408456910257,
+              "root_peak_speed_mps": 1.3620816913820513,
+              "mean_joint_peak_step_m": 0.06294762369155478,
+              "root_peak_acceleration_mps2": 5.456445688017814,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0004485921607824545,
+                  "mean_joint_step_m": 0.0016730109656392256,
+                  "root_speed_mps": 0.00897184321564909,
+                  "velocity_jump_mps": 0.009902292555049949
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.0474360895760644,
+                  "mean_joint_step_m": 0.05163335423556578,
+                  "root_speed_mps": 0.948721791521288,
+                  "velocity_jump_mps": 0.10679634043669793
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.0031949548163566596,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.0008229874074459076,
+                -0.6530871391296387
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.007287859916687012,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 221,
+              "low_toe_slide_mean_mps": 0.12191657956637164,
+              "low_toe_slide_peak_mps": 2.1230973978209744
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.035887502499726165,
+              "root_peak_speed_mps": 0.7177500499945233,
+              "mean_joint_peak_step_m": 0.03285499669923427,
+              "root_peak_acceleration_mps2": 1.7543672790374731,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.009302678205633635,
+                  "mean_joint_step_m": 0.009546308210606617,
+                  "root_speed_mps": 0.1860535641126727,
+                  "velocity_jump_mps": 0.05840285966464792
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.0011137016979085345,
+                  "mean_joint_step_m": 0.0024006023727819923,
+                  "root_speed_mps": 0.02227403395817069,
+                  "velocity_jump_mps": 0.009112083016872908
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.0017104809853234167,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.0006036551203578711,
+                0.6516004204750061
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5095564459916204,
+        "native_conditions": true,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.8038349993241464,
+            "mean_root_separation_xz_m": 1.9038970532824337,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.40589171773792554,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                3.373256461122163,
+                0.3886139646287121
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                2.2752336034530303,
+                0.6921099641828515
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.748689583997475
+    },
+    {
+      "name": "paired_approach__text__seed44",
+      "path": "paired_approach__text__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.007718265056610107,
+              "toe_penetration_max_depth_m": 0.007718265056610107,
+              "toe_penetration_frames": 100,
+              "low_toe_samples": 222,
+              "low_toe_slide_mean_mps": 0.050470099864852284,
+              "low_toe_slide_peak_mps": 2.146566000667793
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.03343279221006546,
+              "root_peak_speed_mps": 0.6686558442013092,
+              "mean_joint_peak_step_m": 0.030408208328879985,
+              "root_peak_acceleration_mps2": 1.670112861499477,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0008922311138991019,
+                  "mean_joint_step_m": 0.002733789272281602,
+                  "root_speed_mps": 0.017844622277982038,
+                  "velocity_jump_mps": 0.017304888492309448
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.008955809227041594,
+                  "mean_joint_step_m": 0.009543864747355087,
+                  "root_speed_mps": 0.1791161845408319,
+                  "velocity_jump_mps": 0.02069693428130845
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.30324587110788787,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.22634193301200867,
+                -0.8518102765083313
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0049021244049072266,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 232,
+              "low_toe_slide_mean_mps": 0.08462815338763588,
+              "low_toe_slide_peak_mps": 2.73321845185433
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.03823195039209089,
+              "root_peak_speed_mps": 0.7646390078418177,
+              "mean_joint_peak_step_m": 0.03664480919412861,
+              "root_peak_acceleration_mps2": 2.1430722267608164,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.00855402881002557,
+                  "mean_joint_step_m": 0.008479421458336175,
+                  "root_speed_mps": 0.17108057620051137,
+                  "velocity_jump_mps": 0.028999017516711627
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.003589647714993827,
+                  "mean_joint_step_m": 0.002837366308705324,
+                  "root_speed_mps": 0.07179295429987653,
+                  "velocity_jump_mps": 0.011803596698040071
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.3323868377696694,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.08317936956882477,
+                0.9718108177185059
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5041094070766121,
+        "native_conditions": false,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 1.8292319193805662,
+            "mean_root_separation_xz_m": 2.4123107777479906,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 1.5307759818340745,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                0.5699876306229844,
+                11.011570476677862
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                4.857879640086414,
+                1.2220872004075984
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7453577500127722
+    },
+    {
+      "name": "paired_approach__controlled__seed44",
+      "path": "paired_approach__controlled__seed44.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.007718265056610107,
+              "toe_penetration_max_depth_m": 0.007718265056610107,
+              "toe_penetration_frames": 93,
+              "low_toe_samples": 204,
+              "low_toe_slide_mean_mps": 0.11270013975606613,
+              "low_toe_slide_peak_mps": 2.146566000667793
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.03967399232254642,
+              "root_peak_speed_mps": 0.7934798464509284,
+              "mean_joint_peak_step_m": 0.032562982645071833,
+              "root_peak_acceleration_mps2": 2.6281304725334076,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.0008047658188634342,
+                  "mean_joint_step_m": 0.0027025953321571008,
+                  "root_speed_mps": 0.016095316377268683,
+                  "velocity_jump_mps": 0.014880903734877276
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.03967399232254642,
+                  "mean_joint_step_m": 0.032562982645071833,
+                  "root_speed_mps": 0.7934798464509284,
+                  "velocity_jump_mps": 0.07272339244436106
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.030308358401468675,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.025659356266260147,
+                -0.633869469165802
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0049021244049072266,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 222,
+              "low_toe_slide_mean_mps": 0.06722734843314697,
+              "low_toe_slide_peak_mps": 2.6834691082053665
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.05874303586121929,
+              "root_peak_speed_mps": 1.174860717224386,
+              "mean_joint_peak_step_m": 0.04970934590015344,
+              "root_peak_acceleration_mps2": 3.4410270038800483,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.008183424583724827,
+                  "mean_joint_step_m": 0.008243292370441304,
+                  "root_speed_mps": 0.16366849167449654,
+                  "velocity_jump_mps": 0.03961271069005866
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.005142247210001728,
+                  "mean_joint_step_m": 0.012173344555814859,
+                  "root_speed_mps": 0.10284494420003455,
+                  "velocity_jump_mps": 0.01846315612780165
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.005654987568723799,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.005331417080014944,
+                0.6481145620346069
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5106947000604123,
+        "native_conditions": true,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 1.069241898520495,
+            "mean_root_separation_xz_m": 1.9422194084462123,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.8002342678638292,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                0.4971319900075105,
+                0.29862520356375877
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                1.3545610314499719,
+                0.24688219305465298
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7564248750277329
+    },
+    {
+      "name": "paired_approach__text__seed55",
+      "path": "paired_approach__text__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.019528448581695557,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 202,
+              "low_toe_slide_mean_mps": 0.15792793380883888,
+              "low_toe_slide_peak_mps": 2.518349797329729
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.0429995174698746,
+              "root_peak_speed_mps": 0.859990349397492,
+              "mean_joint_peak_step_m": 0.03507133513280261,
+              "root_peak_acceleration_mps2": 2.6136807943066636,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.005270478924756837,
+                  "mean_joint_step_m": 0.004368587974190618,
+                  "root_speed_mps": 0.10540957849513674,
+                  "velocity_jump_mps": 0.010364110068812778
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.03567857339876492,
+                  "mean_joint_step_m": 0.03167551423571709,
+                  "root_speed_mps": 0.7135714679752985,
+                  "velocity_jump_mps": 0.13068403971533318
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.8526707585072578,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.10799311101436615,
+                0.19580429792404175
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.0011761188507080078,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 210,
+              "low_toe_slide_mean_mps": 0.10567007433201828,
+              "low_toe_slide_peak_mps": 2.5005453240020326
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.04733509892453903,
+              "root_peak_speed_mps": 0.9467019784907805,
+              "mean_joint_peak_step_m": 0.04040582319242663,
+              "root_peak_acceleration_mps2": 3.0661090583970663,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.00101983872669584,
+                  "mean_joint_step_m": 0.0012779261542884275,
+                  "root_speed_mps": 0.0203967745339168,
+                  "velocity_jump_mps": 0.018904447765136848
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.02818912214174479,
+                  "mean_joint_step_m": 0.03471591054834576,
+                  "root_speed_mps": 0.5637824428348958,
+                  "velocity_jump_mps": 0.057315498911854966
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.5888799192928375,
+              "within_tolerance": false,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.1403617560863495,
+                0.0780925452709198
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5049500181339681,
+        "native_conditions": false,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.12208106280855271,
+            "mean_root_separation_xz_m": 1.4150028502818877,
+            "root_disc_overlap_proxy_frames": 36,
+            "root_disc_overlap_proxy_fraction": 0.3,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.20610328357348456,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                9.66544580711083,
+                9.780748658327667
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                175.14471547844,
+                143.81885106713915
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.750690917018801
+    },
+    {
+      "name": "paired_approach__controlled__seed55",
+      "path": "paired_approach__controlled__seed55.npz",
+      "status": "ok",
+      "metrics": {
+        "actors": [
+          {
+            "id": "person-1",
+            "floor": {
+              "toe_min_height_above_floor_m": 0.020041465759277344,
+              "toe_penetration_max_depth_m": 0.0,
+              "toe_penetration_frames": 0,
+              "low_toe_samples": 208,
+              "low_toe_slide_mean_mps": 0.10558510507147711,
+              "low_toe_slide_peak_mps": 2.4491083434402796
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.030640442148802998,
+              "root_peak_speed_mps": 0.61280884297606,
+              "mean_joint_peak_step_m": 0.024446294941530514,
+              "root_peak_acceleration_mps2": 2.4193623478799733,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.005424836975647517,
+                  "mean_joint_step_m": 0.004130703901311193,
+                  "root_speed_mps": 0.10849673951295034,
+                  "velocity_jump_mps": 0.006977830420968057
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.02466892417316715,
+                  "mean_joint_step_m": 0.021736600659568707,
+                  "root_speed_mps": 0.493378483463343,
+                  "velocity_jump_mps": 0.07683376027092473
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.028070418939728798,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                0.011768451891839504,
+                -0.6245156526565552
+              ]
+            }
+          },
+          {
+            "id": "person-2",
+            "floor": {
+              "toe_min_height_above_floor_m": -0.0009996891021728516,
+              "toe_penetration_max_depth_m": 0.0009996891021728516,
+              "toe_penetration_frames": 3,
+              "low_toe_samples": 212,
+              "low_toe_slide_mean_mps": 0.096015458398702,
+              "low_toe_slide_peak_mps": 2.002890145043326
+            },
+            "scene_collision": {
+              "version": 1,
+              "skeleton": "core27",
+              "frames": 120,
+              "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+              "sampled_body_points_per_frame": 30,
+              "total_collision_frames": 0,
+              "per_object": [],
+              "assumptions": {
+                "units": "metres",
+                "up_axis": "+Y",
+                "scene_source": "object_metadata",
+                "object_geometry": "conservative boxes with explicit passage cutouts",
+                "mesh_or_physics_collision_verified": false
+              }
+            },
+            "continuity": {
+              "root_peak_step_m": 0.047502946128181456,
+              "root_peak_speed_mps": 0.9500589225636291,
+              "mean_joint_peak_step_m": 0.04704352862361715,
+              "root_peak_acceleration_mps2": 3.3248110728618387,
+              "horizon_seams": [
+                {
+                  "frame_after": 40,
+                  "root_step_m": 0.001080127179527556,
+                  "mean_joint_step_m": 0.0011362733342745394,
+                  "root_speed_mps": 0.02160254359055112,
+                  "velocity_jump_mps": 0.022336208156418548
+                },
+                {
+                  "frame_after": 80,
+                  "root_step_m": 0.03927507626433223,
+                  "mean_joint_step_m": 0.0370470707129113,
+                  "root_speed_mps": 0.7855015252866446,
+                  "velocity_jump_mps": 0.14130244262998967
+                }
+              ]
+            },
+            "endpoint": {
+              "endpoint_error_xz_m": 0.03296696708425943,
+              "within_tolerance": true,
+              "tolerance_m": 0.3,
+              "final_root_xz_m": [
+                -0.005804393906146288,
+                0.6824519634246826
+              ]
+            }
+          }
+        ],
+        "generation_seconds": 0.5095679461956024,
+        "native_conditions": true,
+        "post_generation_pose_edits": false,
+        "pair": {
+          "separation": {
+            "min_root_separation_xz_m": 0.8135231271987464,
+            "mean_root_separation_xz_m": 1.70716589188589,
+            "root_disc_overlap_proxy_frames": 0,
+            "root_disc_overlap_proxy_fraction": 0.0,
+            "collision_radius_sum_m": 0.56
+          },
+          "hand_proximity": {
+            "min_hand_distance_m": 0.5794142510730191,
+            "near_frames": 0,
+            "longest_near_run_frames": 0,
+            "longest_near_run_s": 0.0,
+            "contact_proxy": false,
+            "tolerance_m": 0.12,
+            "minimum_duration_s": 0.15
+          },
+          "facing_from_hip_vector": [
+            {
+              "frame": 79,
+              "facing_error_degrees": [
+                1.282239680281521,
+                0.9083163743354363
+              ]
+            },
+            {
+              "frame": 119,
+              "facing_error_degrees": [
+                0.48278750523748076,
+                0.5927409936725664
+              ]
+            }
+          ]
+        }
+      },
+      "client_round_trip_seconds": 0.7668281669903081
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "straight_arch__text": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 1,
+      "endpoint_within_tolerance": 0,
+      "scene_collision_free": 3,
+      "endpoint_error_mean_m": 1.9525262592443426,
+      "generation_mean_seconds": 0.27344721048139037,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "straight_arch__controlled": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 5,
+      "endpoint_within_tolerance": 5,
+      "scene_collision_free": 5,
+      "endpoint_error_mean_m": 0.054029006903225485,
+      "generation_mean_seconds": 0.2646523294504732,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "rotated_gate__text": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 0,
+      "endpoint_within_tolerance": 0,
+      "scene_collision_free": 5,
+      "endpoint_error_mean_m": 3.124331555974637,
+      "generation_mean_seconds": 0.3229214204009622,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "rotated_gate__controlled": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 5,
+      "endpoint_within_tolerance": 5,
+      "scene_collision_free": 4,
+      "endpoint_error_mean_m": 0.11665850700940732,
+      "generation_mean_seconds": 0.30746158119291067,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "obstacle_arch__text": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 1,
+      "endpoint_within_tolerance": 0,
+      "scene_collision_free": 0,
+      "endpoint_error_mean_m": 2.057343708056199,
+      "generation_mean_seconds": 0.2523277655709535,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "obstacle_arch__controlled": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 4,
+      "endpoint_within_tolerance": 5,
+      "scene_collision_free": 1,
+      "endpoint_error_mean_m": 0.06730957167227017,
+      "generation_mean_seconds": 0.25490366462618114,
+      "pair_mean_min_separation_mean_m": null
+    },
+    "paired_approach__text": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 0,
+      "endpoint_within_tolerance": 2,
+      "scene_collision_free": 5,
+      "endpoint_error_mean_m": 0.5499359130373888,
+      "generation_mean_seconds": 0.5046478482428938,
+      "pair_mean_min_separation_mean_m": 1.0880136452029185
+    },
+    "paired_approach__controlled": {
+      "attempted": 5,
+      "completed": 5,
+      "gate_traversed": 0,
+      "endpoint_within_tolerance": 5,
+      "scene_collision_free": 5,
+      "endpoint_error_mean_m": 0.020627192271155174,
+      "generation_mean_seconds": 0.5103423298336566,
+      "pair_mean_min_separation_mean_m": 0.7957009948206449
+    }
+  }
+}

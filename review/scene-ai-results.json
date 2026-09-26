@@ -1,0 +1,348 @@
+{
+  "experiment": "real_scene_ai_gateway_v1",
+  "timestamp_utc": "2026-09-26T08:08:20.143561+00:00",
+  "provenance": "real configured project gateway; no fallback, no simulated transport",
+  "model": "gpt-5-mini",
+  "cases": [
+    {
+      "id": "gate_name",
+      "prompt": "Alex, go through the gate.",
+      "expected": "route",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "arch-0",
+          "start_seconds": 0.0
+        }
+      ],
+      "source": "ai",
+      "outcome": "compiled_routes",
+      "route_count": 1,
+      "routes": [
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "arch-0",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                0.0,
+                -3.0
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 2.239,
+              "position_xz": [
+                0.0,
+                -0.761
+              ],
+              "role": "entry"
+            },
+            {
+              "time_seconds": 3.0,
+              "position_xz": [
+                0.0,
+                0.0
+              ],
+              "role": "center"
+            },
+            {
+              "time_seconds": 3.761,
+              "position_xz": [
+                0.0,
+                0.761
+              ],
+              "role": "exit"
+            }
+          ],
+          "motion_following_verified": false
+        }
+      ],
+      "elapsed_seconds": 1.174,
+      "expectation_met": true
+    },
+    {
+      "id": "rotated_gate_id",
+      "prompt": "Alex, go through gate-rotated.",
+      "expected": "route",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "gate-rotated",
+          "start_seconds": 0.0
+        }
+      ],
+      "source": "ai",
+      "outcome": "compiled_routes",
+      "route_count": 1,
+      "routes": [
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "gate-rotated",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                0.0,
+                -3.0
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 2.5045,
+              "position_xz": [
+                -0.55861,
+                -0.55861
+              ],
+              "role": "entry"
+            },
+            {
+              "time_seconds": 3.2945,
+              "position_xz": [
+                0.0,
+                0.0
+              ],
+              "role": "center"
+            },
+            {
+              "time_seconds": 4.0845,
+              "position_xz": [
+                0.55861,
+                0.55861
+              ],
+              "role": "exit"
+            }
+          ],
+          "motion_following_verified": false
+        }
+      ],
+      "elapsed_seconds": 1.248,
+      "expectation_met": true
+    },
+    {
+      "id": "ambiguous_gates",
+      "prompt": "Alex, go through the gate.",
+      "expected": "reject_ambiguous",
+      "outcome": "rejected",
+      "reason": "Several objects match 'gate'; specify an exact target ID",
+      "elapsed_seconds": 0.0,
+      "expectation_met": true
+    },
+    {
+      "id": "approach_then_pass",
+      "prompt": "Alex, first approach the gate, then go through it.",
+      "expected": "two_routes",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "approach",
+          "target_id": "arch-0",
+          "start_seconds": 0.0
+        },
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "arch-0"
+        }
+      ],
+      "source": "ai",
+      "outcome": "compiled_routes",
+      "route_count": 2,
+      "routes": [
+        {
+          "actor_id": "alex",
+          "verb": "approach",
+          "target_id": "arch-0",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                0.0,
+                -3.0
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 2.12,
+              "position_xz": [
+                0.0,
+                -0.88
+              ],
+              "role": "approach"
+            }
+          ],
+          "motion_following_verified": false
+        },
+        {
+          "actor_id": "alex",
+          "verb": "go_through",
+          "target_id": "arch-0",
+          "waypoints": [
+            {
+              "time_seconds": 2.12,
+              "position_xz": [
+                0.0,
+                -0.88
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 2.239,
+              "position_xz": [
+                0.0,
+                -0.761
+              ],
+              "role": "entry"
+            },
+            {
+              "time_seconds": 3.0,
+              "position_xz": [
+                0.0,
+                0.0
+              ],
+              "role": "center"
+            },
+            {
+              "time_seconds": 3.761,
+              "position_xz": [
+                0.0,
+                0.761
+              ],
+              "role": "exit"
+            }
+          ],
+          "motion_following_verified": false
+        }
+      ],
+      "elapsed_seconds": 1.457,
+      "expectation_met": true
+    },
+    {
+      "id": "nonexistent_object",
+      "prompt": "Alex, go through the rocket hatch.",
+      "expected": "reject_unknown",
+      "outcome": "rejected",
+      "reason": "Target 'arch-0' was not named in the direction; no plan was applied",
+      "elapsed_seconds": 1.36,
+      "expectation_met": true
+    },
+    {
+      "id": "two_actors_staging",
+      "prompt": "Alex approach the gate while Bea approaches the ball.",
+      "expected": "two_independent_routes",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "approach",
+          "target_id": "arch-0"
+        },
+        {
+          "actor_id": "bea",
+          "verb": "approach",
+          "target_id": "ball-1"
+        }
+      ],
+      "source": "ai",
+      "outcome": "compiled_routes",
+      "route_count": 2,
+      "routes": [
+        {
+          "actor_id": "alex",
+          "verb": "approach",
+          "target_id": "arch-0",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                0.0,
+                -3.0
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 2.12,
+              "position_xz": [
+                0.0,
+                -0.88
+              ],
+              "role": "approach"
+            }
+          ],
+          "motion_following_verified": false
+        },
+        {
+          "actor_id": "bea",
+          "verb": "approach",
+          "target_id": "ball-1",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                3.5,
+                -3.0
+              ],
+              "role": "start"
+            },
+            {
+              "time_seconds": 1.9379,
+              "position_xz": [
+                2.5,
+                -1.34
+              ],
+              "role": "approach"
+            }
+          ],
+          "motion_following_verified": false
+        }
+      ],
+      "elapsed_seconds": 1.812,
+      "expectation_met": true
+    },
+    {
+      "id": "face_partner",
+      "prompt": "Alex face Bea.",
+      "expected": "symbolic_only",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "face",
+          "target_id": "bea",
+          "start_seconds": 0.0
+        }
+      ],
+      "source": "ai",
+      "outcome": "validated_symbolic_or_uncompilable",
+      "reason": "Plan contains symbolic face/reach/handoff or actor-target actions; no executable geometry exists",
+      "elapsed_seconds": 1.153,
+      "expectation_met": true
+    },
+    {
+      "id": "handoff_prop",
+      "prompt": "Alex hand the ball to Bea.",
+      "expected": "symbolic_only",
+      "actions": [
+        {
+          "actor_id": "alex",
+          "verb": "handoff",
+          "target_id": "bea",
+          "start_seconds": 0.0
+        }
+      ],
+      "source": "ai",
+      "outcome": "validated_symbolic_or_uncompilable",
+      "reason": "Plan contains symbolic face/reach/handoff or actor-target actions; no executable geometry exists",
+      "elapsed_seconds": 1.132,
+      "expectation_met": true
+    }
+  ],
+  "summary": {
+    "expectations_met": 8,
+    "cases": 8,
+    "api_trial_median_seconds": 1.248
+  }
+}
