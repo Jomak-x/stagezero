@@ -11,4 +11,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install numpy==1.26.4 requests==2.34.2
-      - run: python -m unittest discover -v -p 'test_*.py'
+      - name: Discover original and edge-case tests (simulated transport)
+        run: python -m unittest discover -v -p 'test_*.py'
+      - name: Compile Python sources without importing viewer or inference dependencies
+        run: python -m compileall -q live_motion.py live_viewer.py preview.py pod_backend.py measure_backend.py test_live_motion.py tests

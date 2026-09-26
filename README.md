@@ -9,17 +9,51 @@ git clone --recurse-submodules https://github.com/Jomak-x/stagezero.git
 cd stagezero
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for independent tasks, tests without a
-GPU, and required asset access. This repository excludes the gated recorded
-CSV, model weights, installed environments and all credentials. A fresh clone
-needs an authorized `assets/recorded_g1.csv` before either viewer can start.
-Use Python 3.11 and `uv pip install --python .venv/bin/python -r requirements-live.txt`
-after creating `.venv` with `uv venv --python 3.11 .venv`.
+This repository excludes the gated recorded CSV, model weights, installed
+environments and all credentials. Start with the [offline controller checks in
+CONTRIBUTING.md](CONTRIBUTING.md#offline-controller-checks): they need no Pod,
+GPU, token, recording or viewer dependencies. See [docs/QA.md](docs/QA.md) for
+reproducible checks and the limits of offline validation.
 
-Existing installations retain their private files. Copy `pod.env.example` to
-`.runtime/pod.env` for connection configuration; the bearer token and verified
-SSH host keys must already be provisioned privately on the trusted machines.
-The addresses below are placeholders, not public demo endpoints.
+### Local viewer setup (authorized recording required)
+
+From the clone root, with Git and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+installed:
+
+```sh
+git submodule update --init --recursive
+uv venv --python 3.11 .venv
+uv pip install --python .venv/bin/python -r requirements-live.txt
+```
+
+`uv` can install Python 3.11 if it is missing. The requirements install public
+Python packages and the pinned viewer fork, not model weights. The viewer uses
+Torch for skeleton/rendering utilities; this does not run local inference.
+Do not install all upstream ARDY inference dependencies for this viewer.
+
+Both viewers load `assets/recorded_g1.csv` at startup, including Live ARDY's
+reference pose. See [CONTRIBUTING.md](CONTRIBUTING.md#viewer-and-private-demo-prerequisites)
+for the authorized source member. Without that private file, viewer startup
+is expected to fail; passing controller tests does not make a demo runnable.
+Once it is present, `./run-preview.command` opens standalone recorded playback
+at http://127.0.0.1:2334/ with no token, SSH configuration or Pod.
+
+### Existing private live demo
+
+The live viewer additionally reads `.runtime/api-token` at startup, even in
+Recorded preview mode. `run-live.command` also requires SSH configuration.
+For an existing authorized installation, prepare the configuration directory:
+
+```sh
+mkdir -p .runtime
+cp pod.env.example .runtime/pod.env  # First setup only; keep existing settings.
+```
+
+Edit `.runtime/pod.env` with the current connection details. The core owner
+must privately provision matching local/Pod bearer tokens and verified
+`.runtime/known_hosts` entries before live startup. The example config does
+not supply them. Existing installations retain their private files. The
+addresses below are placeholders, not public demo endpoints.
 
 ## Try it now
 
@@ -48,7 +82,7 @@ cd /path/to/stagezero
 ./run-live.command
 ```
 
-This reuses/starts the backend on the existing Pod, restores an SSH tunnel if absent, and reuses/starts the local viewer. It does not provision resources. Cached model loading takes about 70 seconds; the viewer can show recorded playback while loading. If generation reports unavailable, run the launcher again and retry. An expired/replaced Pod address requires updating the script's SSH host/port.
+This reuses/starts the backend on the existing Pod, restores an SSH tunnel if absent, and reuses/starts the local viewer. It does not provision resources. Cached model loading historically took about 70 seconds; the configured viewer can show recorded playback while loading. If generation reports unavailable, run the launcher again and retry. An expired/replaced Pod address requires updating `STAGEZERO_SSH_HOST` and `STAGEZERO_SSH_PORT` in `.runtime/pod.env`.
 
 The existing private Tailscale forwarding is configured as:
 
@@ -79,7 +113,14 @@ and replace `/path/to/stagezero` with its actual path.
 
 ## Original fallback
 
-`preview.py`, `run-preview.command`, original G1 assets and recorded CSV remain unchanged. `./run-preview.command` runs the original standalone preview at http://127.0.0.1:2334/. See `review/MILESTONE-1.md` for the historical preview report and source provenance. The live viewer's Recorded preview mode is available without a working Pod connection.
+`preview.py`, `run-preview.command` and the original G1 assets remain unchanged;
+the recorded CSV is private and must be supplied separately. `./run-preview.command`
+runs the original standalone preview at http://127.0.0.1:2334/. See
+`review/MILESTONE-1.md` for the historical preview report and source provenance.
+The configured live viewer's Recorded preview mode works without a responding
+Pod, but still requires the startup files described above. Port 2334 is also
+used by the documented Tailscale forwarding setup; the live viewer itself
+listens on loopback port 2335.
 
 ## Implementation and dependencies
 
@@ -92,7 +133,7 @@ Pod: Python 3.12.3, torch 2.14.0+cu130, RTX 6000 Ada. Exact installed packages a
 Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating that environment. The Mac renders and manages playback; it does not run inference. No new local inference compatibility investigation was performed.
 
 ```sh
-.venv/bin/python -m unittest -v test_live_motion.py
+.venv/bin/python -m unittest discover -v -p 'test_*.py'
 # Optional real Pod soak test: 24 fresh requests, about 100 seconds
 .venv/bin/python measure_backend.py
 ```
