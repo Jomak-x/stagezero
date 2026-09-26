@@ -1,0 +1,14 @@
+name: Controller regression tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  controller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy==1.26.4 requests==2.34.2
+      - run: python -m unittest discover -v -p 'test_*.py'
