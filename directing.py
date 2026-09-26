@@ -408,7 +408,12 @@ class DirectorSession(MotionSession):
             if undo is None or self.takes.get(undo[0].id) is not undo[1]:
                 self.status = 'No action edit to undo'
                 return False
-            original, _, frame, stop, detached = undo
+            original, edited, frame, stop, detached = undo
+            total = (sum(len(t.positions) for t in self.takes.values())
+                     - len(edited.positions) + len(original.positions))
+            if total > MAX_TOTAL_FRAMES:
+                self.status = 'Cannot undo edit: project motion budget exceeded. Remove another take and try again.'
+                return False
             for child in self.takes.values():
                 if child.parent == original.id and child.branch_frame >= stop:
                     child.parent = None
