@@ -84,7 +84,7 @@ class StudioUI:
         self._last_action_choice = None
         gui = server.gui
         gui.add_html(STYLE)
-        gui.add_html('<div class="sz-hud"><div class="sz-eyebrow">STAGEZERO / VIEWPORT</div><strong>G1 · Motion studio</strong><span>Drag to pan · Alt-drag to orbit · pinch/Alt-scroll to zoom · WASD/QE</span></div>')
+        gui.add_html('<div class="sz-hud"><div class="sz-eyebrow">STAGEZERO / VIEWPORT</div><strong>Motion studio</strong><span>Drag to pan · Alt-drag to orbit · pinch/Alt-scroll to zoom · WASD/QE</span></div>')
         gui.add_html('<div class="sz-brand"><strong>StageZero.</strong><span>Motion studio</span></div>')
         self.status = gui.add_html('')
         self.playhead = gui.add_html('')

@@ -1,4 +1,5 @@
 """Character swaps are committed by the browser, independently of motion state."""
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -7,10 +8,10 @@ import unittest
 import numpy as np
 
 from character_controls import CharacterControls
-from character_assets import inspect_glb
+from character_assets import import_glb, inspect_glb
 from live_motion import MotionSession
-from retargeting import neutral_source_pose
-from tests.glb_fixtures import make_humanoid_glb, make_static_glb
+from retargeting import detect_rig_profile, neutral_source_pose
+from tests.glb_fixtures import base_document_and_binary, make_glb, make_humanoid_glb, make_static_glb
 
 
 class BrowserBridge:
@@ -144,6 +145,41 @@ class CharacterControlsTests(unittest.TestCase):
         expected = self.controls.active_entry.asset.bounds.mean(axis=0)
         expected[1] = 0.
         np.testing.assert_allclose(self.controls.actor_root(), expected)
+
+    def test_full_saved_catalog_reimport_preserves_custom_mapping_and_name(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            data = make_humanoid_glb('mixamo')
+            asset = import_glb(data, root, display_name='Saved performer')
+            profile = detect_rig_profile(asset)
+            mapping = {'schema_version': 1, 'bones': dict(profile.bones), 'root_scale': 1.7}
+            mapping_file = root / asset.asset_id / 'mapping.json'
+            mapping_file.write_text(json.dumps(mapping))
+            manifest_file = root / asset.asset_id / 'manifest.json'
+            original_manifest = manifest_file.read_bytes()
+            for index in range(15):
+                document, binary = base_document_and_binary()
+                document['asset']['generator'] = f'catalog filler {index}'
+                import_glb(make_glb(document, binary), root, display_name=f'Filler {index}')
+
+            with patch('character_controls.GlbCharacterRenderer', BrowserBridge):
+                controls = CharacterControls(SimpleNamespace(), self.session, None, root)
+            self.assertEqual(len(controls.entries), 16)
+            original_entry = controls.entries[asset.asset_id]
+            self.assertEqual(original_entry.retargeter.profile.root_scale, 1.7)
+
+            self.assertEqual(controls.add_file(data, 'Renamed duplicate.glb'), asset.asset_id)
+            self.assertIs(controls.entries[asset.asset_id], original_entry)
+            self.assertEqual(original_entry.asset.display_name, 'Saved performer')
+            self.assertEqual(original_entry.retargeter.profile.root_scale, 1.7)
+            self.assertEqual(manifest_file.read_bytes(), original_manifest)
+            self.assertEqual(json.loads(mapping_file.read_text()), mapping)
+            self.assertEqual(len(controls.entries), 16)
+
+            document, binary = base_document_and_binary()
+            document['asset']['generator'] = 'new asset after full catalog'
+            with self.assertRaisesRegex(ValueError, 'Character library is full'):
+                controls.add_file(make_glb(document, binary), 'new.glb')
 
 
 if __name__ == '__main__':

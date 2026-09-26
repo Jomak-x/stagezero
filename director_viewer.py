@@ -1,5 +1,6 @@
 """StageZero motion studio: direct, review, edit, and navigate stored performances."""
 import argparse
+from pathlib import Path
 import time
 import threading
 import numpy as np
@@ -20,20 +21,52 @@ from studio_ui import StudioUI, section
 from character_controls import CharacterControls
 
 
-def main():
+MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
+
+
+def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=2336)
     parser.add_argument('--project', type=str, help='Open a saved project at startup')
     parser.add_argument('--objects', type=str, help='Load a generated object scene JSON')
-    parser.add_argument('--characters', type=str, default=str(ROOT / '.runtime/characters'), help='Private imported GLB library')
+    parser.add_argument('--characters', type=Path, default=ROOT / '.runtime/characters', help='Private imported GLB library')
+    parser.add_argument('--glb', type=Path, help='Open a local GLB on first browser connection')
+    parser.add_argument('--environment', choices=('studio', 'warehouse', 'none'), default='studio',
+                        help='Reflection lighting for PBR character materials')
+    parser.add_argument('--recording', type=Path, default=ROOT / 'assets/recorded_g1.csv',
+                        help='Private recorded G1 motion CSV')
+    parser.add_argument('--token-path', type=Path, default=ROOT / '.runtime/api-token',
+                        help='Private Live ARDY bearer token file')
+    parser.add_argument('--backend-url', default='http://127.0.0.1:8765',
+                        help='Live ARDY backend URL')
+    return parser
+
+
+def load_startup_glb(parser, controls, path):
+    if path is None:
+        return
+    try:
+        # Bound the read even if a local file changes after startup begins.
+        with path.open('rb') as source:
+            data = source.read(MAX_STARTUP_GLB_BYTES + 1)
+        if len(data) > MAX_STARTUP_GLB_BYTES:
+            raise ValueError('GLB exceeds the 32 MiB import limit')
+        asset_id = controls.add_file(data, path.name)
+    except (OSError, ValueError) as exc:
+        parser.error(f'Cannot load startup GLB: {exc}')
+    controls.set_initial_asset(asset_id)
+
+
+def main():
+    parser = build_parser()
     args = parser.parse_args()
     torch.set_num_threads(2)
-    skeleton, positions, rotations = load_recording(ROOT / 'assets/recorded_g1.csv')
+    skeleton, positions, rotations = load_recording(args.recording)
     server = create_studio_server(host='127.0.0.1', port=args.port, label='StageZero Studio', enable_camera_keyboard_controls=False)
     server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False, brand_color=(126, 224, 195))
     server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
-    server.scene.configure_environment_map(None)
+    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
     server.scene.configure_default_lights(enabled=True, cast_shadow=True)
     server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
     server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
@@ -45,11 +78,11 @@ def main():
     if not character.g1_mesh_rig.mesh_handles:
         raise RuntimeError('Supplied G1 meshes are missing; cannot show the preview')
     for mesh in character.g1_mesh_rig.mesh_handles: mesh.color = (206, 226, 233)
-    backend = Backend(ROOT / '.runtime/api-token')
+    backend = Backend(args.token_path, args.backend_url)
     session = DirectorSession(backend, positions.numpy(), rotations.numpy(), ROOT / 'review/live-metrics.jsonl')
     characters = CharacterControls(server, session, skeleton, args.characters)
+    load_startup_glb(parser, characters, args.glb)
     if args.project:
-        from pathlib import Path
         session.load_project(Path(args.project).read_bytes())
     if args.objects:
         session.load_objects(args.objects)

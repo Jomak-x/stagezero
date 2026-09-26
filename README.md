@@ -1,8 +1,11 @@
 # StageZero — Single-actor directing
 
 The Studio now supports [GLB character import and humanoid rig mapping](docs/GLB-CHARACTERS.md).
-Use `asset_viewer.py --port 2341` for an isolated character lab without a token,
-private recording or Pod; its diagnostic motion is synthetic.
+Use `director_viewer.py --glb /path/to/character.glb` for GLB characters with the
+normal **Direct** prompt/Generate controls, takes and timeline. The **Character**
+tab loads or switches models. Live generation uses the existing authorized ARDY
+backend; see the [GLB startup guide](docs/GLB-CHARACTERS.md#use-glbs-with-prompts-and-live-generation).
+`asset_viewer.py` is a separate synthetic diagnostic lab and has no prompt generation.
 
 Real ARDY G1 generation is connected to the existing viewer. The original recorded preview is retained in a separate, clearly labeled mode. This is **complete-segment generation, not streaming**: each instruction produces 104 fresh frames (4.16 seconds at 25 fps), then playback begins.
 

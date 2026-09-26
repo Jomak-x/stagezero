@@ -4,6 +4,31 @@ The Studio can import a character without changing the ARDY checkpoint or motion
 history. GLB geometry, materials and skinning stay in the browser; G1 joint poses
 are retargeted locally. The original G1 character remains available.
 
+## Use GLBs with prompts and live generation
+
+Run the normal Studio to control GLBs with text prompts. With the existing
+private recording, token and backend already configured at their default paths:
+
+```sh
+.venv/bin/python director_viewer.py --port 2341 --glb /path/to/character.glb --environment studio
+```
+
+Use a free port or stop only your own existing viewer before starting this.
+The **Character** tab imports/selects models; **Direct** contains the motion
+prompt, duration, **Generate**, extend and replace controls. **Takes** and the
+timeline review generated motion. Generation automatically switches the project
+to **Live ARDY** and applies the resulting G1 motion to the selected rigged GLB.
+It returns complete generated segments, not token-by-token animation streaming.
+The synthetic lab's standing/sweep pose is not substituted for generated motion.
+
+`--recording PATH`, `--token-path PATH` and `--backend-url URL` can point to an
+existing private setup or a separately owned SSH tunnel without modifying other
+viewers. Defaults remain `assets/recorded_g1.csv`, `.runtime/api-token` and
+`http://127.0.0.1:8765`. Credentials remain server-side. `--characters DIRECTORY`
+selects the imported-model library; its default is `.runtime/characters`.
+Studio reflection lighting defaults to `studio`; `warehouse` and `none` are
+also supported. Starting the viewer does not provision or restart the backend.
+
 ## Run the isolated character lab
 
 From this checkout, using its own environment:
@@ -41,10 +66,8 @@ have reflections. Use `--environment warehouse` for another preset or
 After rebuilding the client, restart your own viewer process so Viser serves the
 new asset index. Keep other workers' viewer processes running.
 
-The normal `director_viewer.py` now has a **Character** tab. Its existing startup
-requirements and backend configuration still apply. `--characters DIRECTORY`
-selects an imported-character library; the default is `.runtime/characters`.
-No Pod upload endpoint or backend contract was added.
+The lab is for inspecting materials and retargeting. Use the normal Studio above
+for prompts and live generation. No Pod upload endpoint or backend contract was added.
 
 ## Import and select
 
@@ -67,7 +90,10 @@ pending generation, preserving recorded takes. Switching between compatible
 animated characters preserves the source motion and playback state.
 
 Imported files and mappings persist locally; the current selection starts at G1
-on a new server run unless `asset_viewer.py --glb` selects a startup model.
+on a new server run unless `director_viewer.py --glb` or `asset_viewer.py --glb`
+selects a startup model.
+Reimporting identical bytes reuses the saved character, including its custom
+mapping and name, and does not consume another library slot.
 Character artwork is not embedded in exported motion project files. To use an
 imported model on another viewer machine, import it there as well.
 

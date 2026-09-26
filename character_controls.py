@@ -5,12 +5,13 @@ from dataclasses import dataclass
 from html import escape
 from pathlib import Path
 from queue import SimpleQueue, Empty
-from threading import RLock
+from threading import Lock, RLock
+import hashlib
 import json
 import numpy as np
 
 from bounded_upload import ScopedUploadLimits
-from character_assets import import_glb, load_character_asset
+from character_assets import DEFAULT_LIMITS, import_glb, load_character_asset
 from character_renderer import GlbCharacterRenderer
 from retargeting import build_retargeter, RigMappingError
 
@@ -39,6 +40,7 @@ class CharacterControls:
         self.revision = 0
         self.status = 'G1 robot · ready for motion'
         self._lock = RLock()
+        self._import_lock = Lock()
         self._results = SimpleQueue()
         self._ticket = 0
         self._pending = None
@@ -82,12 +84,21 @@ class CharacterControls:
     def add_file(self, data, name):
         if not name.lower().endswith('.glb'):
             raise ValueError('Choose a .glb file')
-        if len(self.entries) >= 16:
-            raise ValueError('Character library is full (16 models); use a new character directory')
-        asset = import_glb(data, self.storage_root, display_name=Path(name).name)
-        entry = self._entry(asset)
-        with self._lock:
-            self.entries[asset.sha256] = entry
+        if not isinstance(data, bytes):
+            raise ValueError('GLB upload must be bytes')
+        if len(data) > DEFAULT_LIMITS.max_file_bytes:
+            raise ValueError('GLB exceeds the file size limit')
+        digest = hashlib.sha256(data).hexdigest()
+        with self._import_lock:
+            with self._lock:
+                if digest in self.entries:
+                    return digest
+                if len(self.entries) >= 16:
+                    raise ValueError('Character library is full (16 models); use a new character directory')
+            asset = import_glb(data, self.storage_root, display_name=Path(name).name)
+            entry = self._entry(asset)
+            with self._lock:
+                self.entries[asset.sha256] = entry
         return asset.sha256
 
     def set_initial_asset(self, asset_id):
