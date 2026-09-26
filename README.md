@@ -26,7 +26,11 @@ The addresses below are placeholders, not public demo endpoints.
 The current viewer adds stored takes, exact-prefix alternate endings, scrubbing,
 project save/load, automatic backups and a deterministic gate reaction.
 Run `./run-director.command` and open http://127.0.0.1:2336/.
-For the private remote demo, use the existing Tailscale address on port 2334.
+For the private demo, use your configured Tailscale host on port 2335.
+In **Motion**, generate your first action, then use **Add action** to extend the sequence. **New take** starts a separate draft. Click an action card to edit its prompt or delete it; later actions stay in order. **Undo last edit** restores the latest change. In **Character**, use **Move character start** to drag the starting position, or set exact coordinates and facing.
+
+Use **Add a saved take** to append another take after the current one without AI generation. The source stays available, duration updates automatically, and the timeline shows the resulting action order. Saved joins align position and facing but use a cut between poses rather than generating a transition.
+
 See [the directing guide](docs/DIRECTING.md) for the workflow and
 [measured results and screenshots](review/DIRECTING-RESULTS.md) for verification.
 
@@ -106,3 +110,28 @@ Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating tha
 ```
 
 See `review/MILESTONE-2.md` for measurements, visual evidence, and limitations. Glasses and multiple actors are not started and require review approval.
+
+## Character generation
+
+The studio's **Character** tab creates and uses characters directly in the scene.
+Neon Astra develops the appearance, image generation renders the design, and
+our self-hosted TRELLIS worker builds the textured body. The engine fits body
+motion automatically and replaces the default actor. Characters remain in
+**Your cast** for switching and reuse; no file download is needed.
+See [character generation and setup](docs/CHARACTERS.md) for quality limits and setup.
+
+## Scene generation
+
+The studio's **Background** tab composes 16 procedural prop types,
+eight animated effects, five lighting palettes and five complete starter sets.
+Use instant offline recipes, the connected Neon AI gateway, or an optional local
+Ollama model. Move/duplicate props and import/export standalone scene JSON.
+See [scene generation and setup](docs/OBJECTS.md) for examples, the UI-independent
+integration API and current contact limitations. Reusable examples live in
+`examples/scenes/`; `ai-observatory.json` was generated through Neon.
+
+## Cinematic effects
+
+Add a layered explosion or energy burst from **Background → Cinematic effects & lighting**.
+Position, scale and intensity save with the scene; pause and scrub follow actor playback.
+See [cinematic effects and visual review](docs/CINEMATIC-EFFECTS.md).

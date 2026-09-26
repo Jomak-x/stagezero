@@ -83,3 +83,52 @@ retention, cancellation of late results, and save snapshot status. They do not
 measure real inference or motion quality. Browser visuals and the sustained
 Pod run are reported separately in [DIRECTING-RESULTS.md](../review/DIRECTING-RESULTS.md)
 with measured results and screenshots.
+
+## Studio interface
+
+The viewer now has a collapsible studio sidebar with **Direct**, **Takes**,
+**Scene**, **Camera**, and **Project** tabs. Playback and a seconds-based playhead
+remain above the tabs; the bottom timeline shows the generated action segments
+and supports frame scrubbing. Segment blocks describe stored motion and are
+read-only; choose Replace ending in Direct to generate an alternate version.
+
+- **Direct:** choose Create, Extend, or Replace ending; describe motion; set an
+  Auto, new-motion, or total duration; and cancel an in-flight generation.
+- **Takes:** rename, duplicate, trim through the playhead into a new take, jump to
+  action boundaries, reuse an action's prompt, loop, and play at 0.25–2× speed.
+  Duplication and trimming preserve the original performance.
+- **Scene:** show/hide the grid and platform, enable the gate, and edit its floor
+  position and trigger radius. Enable the move handle to drag the gate. Gate
+  events are recalculated for stored takes when its geometry changes.
+- **Camera:** perspective/front/side/top views, focus actor, orbit/pan/dolly
+  buttons, and reset. Drag or two-finger scroll to pan, pinch to zoom, select Orbit or Look, and use
+  WASD/QE for movement. Follow is off by default, preserves manual camera offsets,
+  and does not sweep the camera on playhead jumps. Rewinding preserves the view.
+- **Project:** saves and downloads all takes. Opening another project first backs
+  up current takes. An existing project can also be opened at startup with
+  `--project /path/to/project.stagezero.npz`; use `--port` for an isolated preview.
+
+Studio regression checks:
+
+```sh
+.venv/bin/python -m unittest discover -v
+```
+
+
+### Touchpad studio client
+
+Build the versioned browser client with `cd studio_client && npm ci && npm run build`. The launcher builds it when missing. Restart the viewer after Python changes and reload the browser after rebuilding the client.
+
+Plain drag and two-finger scroll pan. Pinch zooms. The viewport toolbar switches drag between Pan, Orbit, and Look; Alt-drag or middle-drag also orbits. Navigation stays upright. Click the viewport before using WASD and Q/E to move, Space to play/pause, arrows to step, and Home/End to seek. Focus actor and Reset camera recover your view.
+
+The timeline uses seconds and exact frame positions, reserves its own visible row, and previews scrubbing locally. The time field is an explicit seek input; it is not overwritten during playback. Playback status and rendered pose update together, and idle controls avoid repeated network updates.
+
+### Create, extend, and revise motion
+
+The Motion tab separates three operations. **New take** opens a fresh draft while keeping existing takes. **Add action** appends generated motion after the selected take. Click an action card or choose **Edit action** to load that action's direction, rewrite it, and replace only that action; later actions are retained and repositioned to join the result. **Delete selected action** closes the gap and updates the duration. Take options contains rename, duplicate, trim, and delete take. **Undo last edit** restores the latest edit, deletion, generation, or placement while no subsequent project change has superseded it.
+
+In **Character**, choose **Move character start**, drag the red or blue floor arrow, and press **Done placing**. Exact start position also controls X, Z, and facing. Placement changes the stored motion and generation starting pose, so playback, continuation, and saved projects agree. Moving an existing take moves its entire motion path; it does not reroute that path around obstacles. Sequence joins align position and facing but remain cuts, not animation blends.
+
+Duration planning runs at 25 frames per second. An explicit duration is rounded to the nearest frame. Requests longer than one model segment are generated as consecutive conditioned segments, with the final segment trimmed to the planned length. The controller installs the complete result only after every segment succeeds; cancellation or failure leaves the stored original intact.
+
+Auto uses a duration written in the prompt when one is present, otherwise a labelled estimate based on instruction length and sequence words. It is an editing convenience, not an AI prediction of when an action is complete. Each request is limited to 30 seconds of new motion. Scene props and effects follow the take's timeline; this duration control concerns the motion take, not a separate scene clip.

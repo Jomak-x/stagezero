@@ -49,11 +49,11 @@ class Backend:
         return result
 
 
-def validate_result(result, request_id):
+def validate_result(result, request_id, frames=104):
     p, r, m, meta = (result[k] for k in ("positions", "rotations", "motion", "metadata"))
     if meta["request_id"] != request_id or meta["model"] != MODEL or meta["fps"] != 25:
         raise ValueError("Backend returned a different request or incompatible checkpoint")
-    if p.shape != (104, 34, 3) or r.shape != (104, 34, 3, 3) or m.shape != (104, 414):
+    if p.shape != (frames, 34, 3) or r.shape != (frames, 34, 3, 3) or m.shape != (frames, 414):
         raise ValueError("Backend returned an incompatible G1 skeleton or clip length")
     if any(not np.isfinite(a).all() for a in (p, r, m)):
         raise ValueError("Backend returned invalid motion values")

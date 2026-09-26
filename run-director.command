@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
+if [[ ! -f studio_client/build/index.html ]] || [[ -n "$(find studio_client/src studio_client/package.json -newer studio_client/build/index.html -print -quit 2>/dev/null)" ]]; then
+  (cd studio_client && npm ci && npm run build)
+fi
 test -s .runtime/api-token
 if [[ -f .runtime/pod.env ]]; then source .runtime/pod.env; fi
 : "${STAGEZERO_SSH_HOST:?Set STAGEZERO_SSH_HOST in .runtime/pod.env (see pod.env.example)}"
