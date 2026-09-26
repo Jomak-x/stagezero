@@ -70,6 +70,48 @@ class CharacterRendererTests(unittest.TestCase):
             self.server, on_result=lambda *result: self.results.append(result)
         )
 
+    def test_fallback_pose_required_until_every_connected_tab_has_active_glb(self):
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        first = self.renderer.load("first", b"glb-one", 1)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(1, "first", first)
+        self.assertTrue(self.renderer.commit(first))
+        self.assertTrue(self.renderer.fallback_pose_needed)  # tab 2 is still loading
+        self.server.ack(2, "first", first)
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        late = FakeClient(3)
+        self.server.clients[3] = late
+        self.server.connected(late)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(3, "first", first)
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        second = self.renderer.load("second", b"glb-two", 1)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.assertTrue(self.renderer.reject(second))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        self.renderer.restore_g1()
+        self.assertTrue(self.renderer.fallback_pose_needed)
+
+    def test_failed_or_reconnected_tab_needs_current_g1_pose(self):
+        first = self.renderer.load("first", b"glb-one", 1)
+        self.server.ack(1, "first", first)
+        self.server.ack(2, "first", first)
+        self.assertTrue(self.renderer.commit(first))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        self.server.disconnected(self.server.clients.pop(2))
+        replacement = FakeClient(2)
+        self.server.clients[2] = replacement
+        self.server.connected(replacement)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(2, "first", first, "error", "shader failed")
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.disconnected(self.server.clients.pop(2))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
     def test_candidate_commits_only_after_initiator_ack_and_preserves_old_on_failure(self):
         first = self.renderer.load("first", b"glb-one", 1, required_nodes=(2, 3))
         self.assertEqual(self.renderer.state, "loading")

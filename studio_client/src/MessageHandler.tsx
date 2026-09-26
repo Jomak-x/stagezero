@@ -168,7 +168,7 @@ function useMessageHandler() {
       }
       // Set timeline state.
       case "TimelineMessage": {
-        setTimeline(normalizeTimelineMessage(message));
+        setTimeline(normalizeTimelineMessage(message, viewer.useGui.getState().timeline));
         return;
       }
       // Set arrow-key overlay state (shown above timeline).
@@ -849,7 +849,9 @@ export function FrameSynchronizedMessageHandler() {
           }
           mergedUpdates[k] = { ...currentState[k], ...v };
         }
-        viewer.useSceneTree.setState(mergedUpdates);
+        if (Object.keys(mergedUpdates).length > 0) {
+          viewer.useSceneTree.setState(mergedUpdates);
+        }
         if (hasCameraCommand) {
           if (processBatch.some((message) => message.type === "SetCameraLookAtMessage")) {
             viewerMutable.captureInitialCameraView?.();
