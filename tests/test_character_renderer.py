@@ -70,6 +70,48 @@ class CharacterRendererTests(unittest.TestCase):
             self.server, on_result=lambda *result: self.results.append(result)
         )
 
+    def test_fallback_pose_required_until_every_connected_tab_has_active_glb(self):
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        first = self.renderer.load("first", b"glb-one", 1)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(1, "first", first)
+        self.assertTrue(self.renderer.commit(first))
+        self.assertTrue(self.renderer.fallback_pose_needed)  # tab 2 is still loading
+        self.server.ack(2, "first", first)
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        late = FakeClient(3)
+        self.server.clients[3] = late
+        self.server.connected(late)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(3, "first", first)
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        second = self.renderer.load("second", b"glb-two", 1)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.assertTrue(self.renderer.reject(second))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        self.renderer.restore_g1()
+        self.assertTrue(self.renderer.fallback_pose_needed)
+
+    def test_failed_or_reconnected_tab_needs_current_g1_pose(self):
+        first = self.renderer.load("first", b"glb-one", 1)
+        self.server.ack(1, "first", first)
+        self.server.ack(2, "first", first)
+        self.assertTrue(self.renderer.commit(first))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
+        self.server.disconnected(self.server.clients.pop(2))
+        replacement = FakeClient(2)
+        self.server.clients[2] = replacement
+        self.server.connected(replacement)
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.ack(2, "first", first, "error", "shader failed")
+        self.assertTrue(self.renderer.fallback_pose_needed)
+        self.server.disconnected(self.server.clients.pop(2))
+        self.assertFalse(self.renderer.fallback_pose_needed)
+
     def test_candidate_commits_only_after_initiator_ack_and_preserves_old_on_failure(self):
         first = self.renderer.load("first", b"glb-one", 1, required_nodes=(2, 3))
         self.assertEqual(self.renderer.state, "loading")
@@ -106,6 +148,41 @@ class CharacterRendererTests(unittest.TestCase):
         self.assertEqual([type(message) for message in late.messages],
                          [ActorGlbLoadMessage, ActorGlbPoseMessage,
                           ActorGlbCommandMessage])
+
+    def test_ground_offset_is_world_units_and_survives_replay_and_rejection(self):
+        first = self.renderer.load("first", b"old", 1, scale=0.5, ground_offset=0.2775)
+        first_load = [message for message in self.server.clients[1].messages
+                      if isinstance(message, ActorGlbLoadMessage)][-1]
+        self.assertEqual((first_load.scale, first_load.ground_offset), (0.5, 0.2775))
+        self.server.ack(1, "first", first)
+        self.assertTrue(self.renderer.commit(first))
+
+        second = self.renderer.load("second", b"new", 1, scale=2.0, ground_offset=-1.0)
+        second_load = [message for message in self.server.clients[1].messages
+                       if isinstance(message, ActorGlbLoadMessage)][-1]
+        self.assertEqual((second_load.scale, second_load.ground_offset), (2.0, -1.0))
+        self.assertTrue(self.renderer.reject(second))
+
+        late = FakeClient(3)
+        self.server.clients[3] = late
+        self.server.connected(late)
+        replay = [message for message in late.messages
+                  if isinstance(message, ActorGlbLoadMessage)]
+        self.assertEqual([(message.asset_id, message.ground_offset) for message in replay],
+                         [("first", 0.2775)])
+
+    def test_ground_offset_defaults_to_zero_and_must_be_finite(self):
+        revision = self.renderer.load("legacy", b"glb", 1)
+        load = [message for message in self.server.clients[1].messages
+                if isinstance(message, ActorGlbLoadMessage)][-1]
+        self.assertEqual(load.revision, revision)
+        self.assertEqual(load.ground_offset, 0.0)
+        for invalid in (float("nan"), float("inf"), -float("inf")):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(ValueError, "ground_offset must be finite"):
+                    self.renderer.load("invalid", b"glb", 1, ground_offset=invalid)
+        self.assertEqual(self.renderer.state, "loading")
+        self.assertEqual(self.renderer._pending.revision, revision)
 
     def test_superseded_and_disconnected_initiator_do_not_replace_actor(self):
         old = self.renderer.load("old", b"old", 1)
@@ -152,7 +229,7 @@ class CharacterRendererTests(unittest.TestCase):
     def test_custom_messages_round_trip_through_pinned_viser_codec(self):
         messages = [
             ActorGlbLoadMessage("/actor/glb_actor", "id", 1, b"glb", 1.0,
-                                "/actor/g1_mesh", (1, 2)),
+                                "/actor/g1_mesh", (1, 2), ground_offset=0.555),
             ActorGlbCommandMessage(1, "commit"),
             ActorGlbStatusMessage("id", 1, "loaded", None),
         ]

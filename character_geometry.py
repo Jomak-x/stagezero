@@ -9,7 +9,7 @@ from character_assets import CharacterAsset
 def posed_minimum_y(asset: CharacterAsset, world_matrices: np.ndarray) -> float:
     """Lowest displayed vertex after skinning, without moving the character.
 
-    Used once for the lab's standing pose to place its floor. This is not a
+    Used once for a standing/rest pose to place its carrier group. This is not a
     contact/IK solver and must not be used to pin a moving character each frame.
     The asset must already have passed the GLB importer.
     """
@@ -70,3 +70,16 @@ def posed_minimum_y(asset: CharacterAsset, world_matrices: np.ndarray) -> float:
     if not np.isfinite(bottom):
         raise ValueError('Selected scene has no displayed vertices')
     return bottom
+
+
+def ground_offset(asset: CharacterAsset, world_matrices=None, *, scale=1.0, floor_y=0.0) -> float:
+    """World-space carrier offset; scale never changes the imported source.
+
+    The caller supplies the deterministic standing pose for a moving rig, or
+    omits it for the displayed rest pose. Keep this value fixed during motion.
+    """
+    if not np.isfinite(scale) or scale <= 0 or not np.isfinite(floor_y):
+        raise ValueError('Ground placement needs a finite positive scale and finite floor height')
+    if world_matrices is None:
+        world_matrices = np.stack([node.world_matrix for node in asset.nodes])
+    return float(floor_y - scale * posed_minimum_y(asset, world_matrices))

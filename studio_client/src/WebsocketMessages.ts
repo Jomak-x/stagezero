@@ -29,6 +29,7 @@ export interface ActorGlbLoadMessage {
   revision: number;
   glb_data: Uint8Array<ArrayBuffer>;
   scale: number;
+  ground_offset?: number;
   fallback_name: string;
   required_nodes: number[];
   cast_shadow: boolean;

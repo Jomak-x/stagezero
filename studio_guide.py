@@ -10,9 +10,10 @@ GUIDE_HTML = '''
 </style>
 <div class="sz-guide">
 <h3>Make a take</h3>
-<p>Choose <b>New take</b>, describe the motion, choose a length, and press <b>Generate motion</b>. Use the bottom timeline to play and inspect it. New takes keep your earlier versions and scene.</p>
+<p>Choose <b>Wave</b>, <b>Walk</b>, or <b>Dance</b> in Motion to fill a direction, or write your own. Choose a length and press <b>Generate motion</b>. Use the bottom timeline to play and inspect it. <b>New take</b> keeps your earlier versions and scene.</p>
 <details open><summary>Edit motion</summary>
-<p>Select a take, then click an action on the timeline to edit it or insert an action nearby. Change the direction and length, then press <b>Save action</b> or <b>Add action</b>. Later actions regenerate to follow the change. <b>Undo edit</b> restores the previous motion.</p>
+<p>Select a take, then click an action on the timeline to edit it or insert an action nearby. Change the direction and length, then press <b>Update motion</b> or <b>Add action</b>. The form shows how many following actions will regenerate. <b>Undo edit</b> restores the previous motion.</p>
+<p>During generation, Motion shows the completed chunk count and elapsed time. Cancel preserves stored motion. If generation fails, review the same form and use <b>Retry</b>.</p>
 <p>To continue from the end, press <b>Add action</b> in Motion.</p></details>
 <details><summary>Make a different ending</summary>
 <p>Open <b>Advanced: change ending as a new version</b> in Motion, or use <b>Change ending · new version</b> in Takes. Choose the time to keep, describe the new motion, and generate. The original take stays available.</p>
@@ -22,6 +23,6 @@ GUIDE_HTML = '''
 <details><summary>Build and view the scene</summary>
 <p>Use <b>Scene</b> for props, lighting, and effects. Drag or two-finger scroll to pan; pinch to zoom. In <b>View</b>, choose Orbit or Look, or reset the camera. Click the viewport and use WASD and Q/E to move.</p></details>
 <details><summary>Save your project</summary>
-<p><b>Project → Save project + download</b> stores takes and the shared scene. You can reopen a saved project there. Opening another project backs up the current one first.</p></details>
+<p><b>Save project + download</b> above the tabs stores takes and the shared scene. The status beside it reports the latest save or unsaved change. Open saved projects in <b>Project</b>; opening another project backs up the current one first.</p></details>
 </div>
 '''

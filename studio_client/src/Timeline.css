@@ -1,0 +1,186 @@
+.sz-studio-toolbar {
+  --sz-timeline-text: #edf2f5;
+  --sz-timeline-muted: #929ba9;
+  --sz-timeline-line: rgba(255, 255, 255, 0.1);
+  --sz-timeline-button: rgba(255, 255, 255, 0.055);
+  --sz-timeline-button-hover: rgba(255, 255, 255, 0.105);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-height: 47px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  background: #1c2028;
+  color: var(--sz-timeline-text);
+  border-bottom: 1px solid var(--sz-timeline-line);
+  min-width: 0;
+  flex-shrink: 0;
+  z-index: 5;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.sz-studio-toolbar[data-theme="light"] {
+  --sz-timeline-text: #283441;
+  --sz-timeline-muted: #667484;
+  --sz-timeline-line: rgba(35, 48, 60, 0.13);
+  --sz-timeline-button: rgba(35, 48, 60, 0.045);
+  --sz-timeline-button-hover: rgba(35, 48, 60, 0.09);
+  background: #f8fafb;
+}
+
+.sz-studio-transport {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--sz-timeline-line);
+  border-radius: 10px;
+  background: var(--sz-timeline-button);
+  flex-shrink: 0;
+}
+
+.sz-studio-toolbar button {
+  appearance: none;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--sz-timeline-text);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.sz-studio-transport-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.sz-studio-transport-button:hover:not(:disabled),
+.sz-studio-command-button:hover:not(:disabled) {
+  background: var(--sz-timeline-button-hover);
+}
+
+.sz-studio-transport-button:active:not(:disabled),
+.sz-studio-command-button:active:not(:disabled) {
+  background: rgba(161, 229, 208, 0.15);
+}
+
+.sz-studio-toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--sz-timeline-line);
+  flex-shrink: 0;
+}
+
+.sz-studio-toolbar-title {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+.sz-studio-toolbar-title span,
+.sz-studio-toolbar-selection {
+  color: var(--sz-timeline-muted);
+  font-weight: 500;
+}
+
+.sz-studio-toolbar-selection {
+  min-width: 80px;
+  flex: 1 1 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+
+.sz-studio-command-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.sz-studio-command-button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--sz-timeline-line);
+  border-radius: 8px;
+  background: var(--sz-timeline-button);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sz-studio-toolbar button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.sz-studio-toolbar button:focus-visible,
+.sz-studio-clip-button:focus-visible {
+  outline: 2px solid #a1e5d0;
+  outline-offset: 2px;
+}
+
+.sz-studio-clip-button:focus-visible {
+  outline-offset: -2px;
+}
+
+.sz-studio-time-counter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+
+.sz-studio-time-counter strong {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.sz-studio-time-counter span {
+  font-size: 9px;
+  opacity: 0.72;
+}
+
+@media (max-width: 48rem), (pointer: coarse) {
+  .sz-studio-toolbar {
+    padding: 7px 10px;
+    gap: 7px 9px;
+  }
+
+  .sz-studio-transport-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .sz-studio-command-button {
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+
+  .sz-studio-toolbar-selection {
+    flex-basis: 60px;
+  }
+
+  .sz-studio-command-group {
+    margin-left: 0;
+  }
+}

@@ -11,7 +11,8 @@ from unittest.mock import patch
 import numpy as np
 
 from character_controls import CharacterControls
-from director_viewer import MAX_STARTUP_GLB_BYTES, build_parser, load_startup_glb
+from director_viewer import (MAX_STARTUP_GLB_BYTES, build_parser,
+                             load_startup_glb, should_update_fallback_pose)
 from live_motion import MotionSession
 from preview import ROOT
 from retargeting import neutral_source_pose
@@ -33,6 +34,13 @@ class StartupControls:
 
 
 class DirectorStartupTests(unittest.TestCase):
+    def test_fallback_pose_catches_up_after_paused_client_transition(self):
+        self.assertTrue(should_update_fallback_pose(True, True, True))
+        self.assertFalse(should_update_fallback_pose(True, False, True))
+        self.assertFalse(should_update_fallback_pose(False, False, False))
+        self.assertTrue(should_update_fallback_pose(False, True, False))
+        self.assertFalse(should_update_fallback_pose(False, True, True))
+
     def test_default_startup_keeps_live_backend_and_recorded_source(self):
         args = build_parser().parse_args([])
         self.assertEqual(args.recording, ROOT / 'assets/recorded_g1.csv')
@@ -73,17 +81,20 @@ class DirectorStartupTests(unittest.TestCase):
             positions, rotations = neutral_source_pose()
             session = MotionSession(None, np.tile(positions, (4, 1, 1)),
                                     np.tile(rotations, (4, 1, 1, 1)))
+            client = SimpleNamespace(client_id=7, camera=SimpleNamespace())
+            server = SimpleNamespace(get_clients=lambda: {7: client})
             with patch('character_controls.GlbCharacterRenderer', BrowserBridge):
-                controls = CharacterControls(SimpleNamespace(), session, None, root / 'catalog')
+                controls = CharacterControls(server, session, None, root / 'catalog')
             load_startup_glb(build_parser(), controls, glb)
             self.assertIsNone(controls.active_id)
-            client = SimpleNamespace(client_id=7)
             controls.on_client_connect(client)
             self.assertEqual(controls.renderer.pending[0], client.client_id)
+            self.assertFalse(hasattr(client.camera, 'look_at'))
             controls.renderer.respond()
             controls.tick((0, 0))
             self.assertEqual(controls.active_id, controls.renderer.active[1])
             self.assertTrue(session.character_motion_enabled)
+            self.assertTrue(np.isfinite(client.camera.look_at).all())
 
     def test_oversized_glb_is_rejected_before_import(self):
         with TemporaryDirectory() as directory:

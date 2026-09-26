@@ -3,9 +3,9 @@ import React from "react";
 import { useDisclosure } from "@mantine/hooks";
 
 const BottomPanelContext = React.createContext<null | {
-  wrapperRef: React.RefObject<HTMLDivElement>;
   expanded: boolean;
   toggleExpanded: () => void;
+  contentsId: string;
 }>(null);
 
 /** A bottom panel is used to display the controls on mobile devices. */
@@ -14,39 +14,58 @@ export default function BottomPanel({
 }: {
   children: string | React.ReactNode;
 }) {
-  const panelWrapperRef = React.useRef<HTMLDivElement>(null);
-  const [expanded, { toggle: toggleExpanded }] = useDisclosure(true);
+  const [expanded, { toggle: toggleExpanded }] = useDisclosure(false);
+  const contentsId = React.useId();
+  const [dockLayout, setDockLayout] = React.useState({
+    bottom: 0,
+    availableHeight: typeof window === "undefined" ? 0 : window.innerHeight,
+    viewportHeight: typeof window === "undefined" ? 0 : window.innerHeight,
+  });
+
+  // The timeline is docked outside the viewport containing this panel. Keep
+  // the mobile sheet above it as track count and window size change.
+  React.useLayoutEffect(() => {
+    const dock = document.querySelector<HTMLElement>("[data-studio-timeline-dock]");
+    const update = () => {
+      const bottom = dock && dock.getBoundingClientRect().height > 0
+        ? Math.max(0, window.innerHeight - dock.getBoundingClientRect().top)
+        : 0;
+      setDockLayout({
+        bottom,
+        // Leave air above the sheet and between it and the timeline.
+        availableHeight: Math.max(0, window.innerHeight - bottom - 40),
+        viewportHeight: window.innerHeight,
+      });
+    };
+    update();
+    const observer = dock && typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
+    if (dock && observer) observer.observe(dock);
+    window.addEventListener("resize", update);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
   return (
     <BottomPanelContext.Provider
       value={{
-        wrapperRef: panelWrapperRef,
         expanded: expanded,
         toggleExpanded: toggleExpanded,
+        contentsId,
       }}
     >
       <>
         <Paper
-          radius="0"
-          shadow="0 0 1em 0 rgba(0,0,0,0.1)"
+          className="sz-mobile-inspector"
+          data-testid="studio-mobile-inspector"
           style={{
-            boxSizing: "border-box",
-            zIndex: 10,
-            position: "fixed",
-            bottom: 0,
-            right: 0,
-            margin: 0,
-            minHeight: "3.5em",
-            maxHeight: "60%",
-            width: "20em",
-            transition: "height 0.3s linear",
+            bottom: dockLayout.bottom + 12,
+            maxHeight: Math.min(dockLayout.viewportHeight * 0.58, dockLayout.availableHeight),
           }}
           component={ScrollArea.Autosize}
-          ref={panelWrapperRef}
         >
           <Box
-            /* Prevent internals from getting too wide. Needs to match the
-             * width of the wrapper element above. */
-            style={{ width: "20em" }}
+            style={{ width: "100%" }}
           >
             {children}
           </Box>
@@ -63,21 +82,33 @@ BottomPanel.Handle = function BottomPanelHandle({
   const panelContext = React.useContext(BottomPanelContext)!;
   return (
     <Box
+      className="sz-inspector-header sz-mobile-inspector-header"
       style={{
-        cursor: "pointer",
-        position: "relative",
-        fontWeight: 400,
-        userSelect: "none",
-        display: "flex",
-        alignItems: "center",
-        padding: "0 0.8em",
-        height: "3.5em",
-      }}
-      onClick={() => {
-        panelContext.toggleExpanded();
+        minHeight: "3.5em",
       }}
     >
       {children}
+      <button
+        type="button"
+        aria-label={panelContext.expanded ? "Collapse controls" : "Expand controls"}
+        aria-expanded={panelContext.expanded}
+        aria-controls={panelContext.contentsId}
+        onClick={panelContext.toggleExpanded}
+        style={{
+          flexShrink: 0,
+          minWidth: 44,
+          minHeight: 44,
+          padding: "0 8px",
+          border: 0,
+          borderRadius: 6,
+          background: "transparent",
+          color: "inherit",
+          font: "inherit",
+          cursor: "pointer",
+        }}
+      >
+        {panelContext.expanded ? "Close" : "Controls"}
+      </button>
     </Box>
   );
 };
@@ -89,8 +120,10 @@ BottomPanel.Contents = function BottomPanelContents({
   children: string | React.ReactNode;
 }) {
   const panelContext = React.useContext(BottomPanelContext)!;
+  // Inner generated-control collapses measure their content as data arrives.
+  // Keep this wrapper in layout while closed so their height is measurable.
   return (
-    <Collapse in={panelContext.expanded}>
+    <Collapse id={panelContext.contentsId} in={panelContext.expanded} keepMounted>
       <Divider mx="xs" />
       {children}
     </Collapse>

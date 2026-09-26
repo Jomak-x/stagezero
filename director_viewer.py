@@ -58,6 +58,11 @@ def load_startup_glb(parser, controls, path):
     controls.set_initial_asset(asset_id)
 
 
+def should_update_fallback_pose(pose_changed, fallback_needed, previous_fallback_needed):
+    """Refresh G1 on a new pose or when a paused tab needs it again."""
+    return fallback_needed and (pose_changed or not previous_fallback_needed)
+
+
 def main():
     parser = build_parser()
     args = parser.parse_args()
@@ -166,6 +171,7 @@ def main():
                 session.seek(len(session.positions) - 1)
     previous = None
     previous_character = -1
+    previous_fallback_needed = False
     last_scene = None
     render_thread = None
     last_ui = 0.
@@ -188,16 +194,23 @@ def main():
             rendered_root = characters.actor_root()
             character_changed = characters.revision != previous_character
             pose_changed = key != previous or character_changed
+            fallback_needed = characters.renderer.fallback_pose_needed
+            fallback_pose_changed = should_update_fallback_pose(
+                pose_changed, fallback_needed, previous_fallback_needed)
             with session.lock:
-                if pose_changed:
+                if pose_changed or fallback_pose_changed:
                     with server.atomic():
-                        character.set_pose(torch.from_numpy(session.positions[session.frame]),torch.from_numpy(session.rotations[session.frame]))
-                        root = rendered_root
-                        if character_changed or previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
-                            camera.rebase(root)
-                        camera.update(root)
-                    previous = key
-                    previous_character = characters.revision
+                        if fallback_pose_changed:
+                            character.set_pose(torch.from_numpy(session.positions[session.frame]),torch.from_numpy(session.rotations[session.frame]))
+                        if pose_changed:
+                            root = rendered_root
+                            if character_changed or previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
+                                camera.rebase(root)
+                            camera.update(root)
+                    if pose_changed:
+                        previous = key
+                        previous_character = characters.revision
+                previous_fallback_needed = fallback_needed
                 camera_studio.update()
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                     request_id,submitted = session.needs_ack
@@ -228,11 +241,14 @@ def main():
                     gate_ui['radius'].value = gate['radius']
                     gate_ui['status'].content = '**Gate open** · actor entered the activation area' if gate_open else '**Gate ready** · waiting for actor' if gate['enabled'] else 'Gate disabled'
                     last_scene = scene_key
-            if pose_changed or time.monotonic()-last_ui >= .1:
+            ui_due = time.monotonic()-last_ui >= .1
+            if pose_changed or ui_due:
                 with server.atomic():
-                    ui.update()
+                    if ui_due:
+                        ui.update()
                     timeline.update()
-                last_ui = time.monotonic()
+                if ui_due:
+                    last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
         session.reset()

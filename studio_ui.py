@@ -2,12 +2,15 @@
 from html import escape
 import json
 import math
+import time
 import viser
 from takes import MAX_TAKES
 from duration_planning import plan_duration
 from studio_guide import GUIDE_HTML
-from upload_events import install_upload_snapshots
 from studio_navigation import navigate_tab
+from prompt_assistant import needs_clarification
+from prompt_assistant_ui import PromptAssistantUI
+from upload_events import install_upload_snapshots
 
 CREATE = 'Create new'
 EXTEND = 'Add action to end'
@@ -49,6 +52,11 @@ STYLE = """<style>
 .sz-note { margin: 4px 12px 7px; padding-left: 8px; border-left: 2px solid #39545b; color: #93abba; font-size: 11px; line-height: 1.45; }
 .sz-preview { margin: 5px 12px 7px; padding: 7px 8px; border: 1px solid #36554f; border-radius: 7px; background: #152a29; color: #cfe9e5; font-size: 11px; line-height: 1.45; }
 .sz-preview.invalid { border-color: #805145; color: #ffb9a9; }
+.sz-intro { margin: 7px 12px 11px; padding: 10px; border: 1px solid #36554f; border-radius: 8px; background: #152a29; color: #d5eee8; font-size: 12px; line-height: 1.5; }
+.sz-intro b { display: block; color: #f0f6fa; font-size: 14px; margin-bottom: 3px; }
+.sz-progress { margin: 7px 12px; padding: 9px 10px; border: 1px solid #42665f; border-radius: 8px; background: #19302e; color: #d5eee8; font-size: 12px; line-height: 1.5; }
+.sz-progress.error { border-color: #805145; background: #302320; color: #ffcfbf; }
+.sz-project-status { margin: 2px 12px 8px; color: #9bc6bc; font-size: 11px; line-height: 1.4; }
 .sz-segments { display: flex; margin: 8px 12px; height: 7px; gap: 3px; }
 .sz-segments i { background: #518c88; border-radius: 3px; min-width: 3px; }
 .sz-segments i.active { background: #a6f2db; }
@@ -70,8 +78,12 @@ class StudioUI:
         self._published_take_selection = None
         self._last_action_choice = None
         self.action_edit = None
+        self._action_source = None
         self._last_timeline_nonce = None
         self._submitted_action_edit = None
+        self._action_request_context = None
+        self._generation_request_context = None
+        self._generation_started_at = None
         self.take_slots = []
         self.slot_ids = ()
         gui = server.gui
@@ -80,6 +92,9 @@ class StudioUI:
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
         self.quick_actions = gui.add_button_group('Quick actions', ('New take', 'Guide'))
+        self.project_name = gui.add_text('Project name', initial_value='My performance')
+        self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD, color='gray')
+        self.files = gui.add_html('')
         self.tabs = gui.add_tab_group()
         with self.tabs.add_tab('Motion'):
             # Timeline clicks arrive through a normal Viser text update. The
@@ -87,12 +102,18 @@ class StudioUI:
             # action so an old click cannot edit a newly selected take.
             self.timeline_command = gui.add_text('Timeline action command', initial_value='')
             self.timeline_command.visible = False
+            self.motion_intro = gui.add_html('')
+            self.ideas_folder = gui.add_folder('Try a direction', expand_by_default=True)
+            with self.ideas_folder:
+                self.ideas = gui.add_button_group('Example directions', ('Wave', 'Walk', 'Dance'))
             self.action_heading = gui.add_html('')
             self.action_note = gui.add_html('')
             self.action_prompt = gui.add_text('Direction', initial_value='', multiline=True)
+            self.action_assistant = self._make_prompt_assistant(gui, action=True)
             self.action_duration = gui.add_text('Length (s)', initial_value='4.16')
             self.action_feedback = gui.add_html('')
-            self.save_action = gui.add_button('Save action', icon=viser.Icon.SPARKLES)
+            self.save_action = gui.add_button('Update motion', icon=viser.Icon.SPARKLES)
+            self.action_progress = gui.add_html('')
             self.cancel_action = gui.add_button('Cancel', color='gray')
             self.undo_action = gui.add_button('Undo edit', color='gray')
             self.editor_context = gui.add_html('')
@@ -101,15 +122,14 @@ class StudioUI:
             self.edit_explainer = gui.add_html('')
             self.replace_time = gui.add_text('Keep motion before this time (seconds)', initial_value='0.00')
             self.prompt = gui.add_text('Direction', initial_value='', multiline=True)
+            self.prompt_assistant = self._make_prompt_assistant(gui, action=False)
             self.prompt_count = gui.add_html('')
             self.duration_mode = gui.add_dropdown('Length', (AUTO, SET_DURATION, TARGET_TOTAL), initial_value=AUTO)
             self.duration_seconds = gui.add_text('New motion length (seconds, 0.16–30)', initial_value='4.16')
             self.duration_preview = gui.add_html('')
             self.generate = gui.add_button('Generate', icon=viser.Icon.SPARKLES)
             self.cancel = gui.add_button('Cancel generation', color='gray', visible=False)
-            self.ideas_folder = gui.add_folder('Example directions', expand_by_default=False)
-            with self.ideas_folder:
-                self.ideas = gui.add_button_group('Try an example', ('Wave', 'Walk', 'Dance'))
+            self.motion_progress = gui.add_html('')
             self.advanced_folder = gui.add_folder('Advanced: change ending as a new version', expand_by_default=False)
             with self.advanced_folder:
                 self.advanced_replace = gui.add_button('Change ending', color='gray')
@@ -152,14 +172,11 @@ class StudioUI:
             section(gui, 'Camera')
             camera.build_gui(gui)
         with self.tabs.add_tab('Project'):
-            section(gui, 'Project')
-            self.project_name = gui.add_text('Project name', initial_value='My performance')
-            self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD)
+            section(gui, 'Open or start a project', 'Use Save project + download above to keep the current project.')
             self.saved = gui.add_dropdown('Saved projects', ('No saved projects',))
             self.open = gui.add_button('Open selected project', color='gray')
             self.upload = gui.add_upload_button('Open project file', mime_type='.npz')
             self.clear = gui.add_button('New project · back up current', color='gray')
-            self.files = gui.add_markdown('')
             gui.add_html('<div class="sz-note">Opening a project automatically backs up the current takes. All connected viewers share the same project.</div>')
             with gui.add_folder('Generation diagnostics', expand_by_default=False):
                 self.performance = gui.add_markdown('No generation in this session.')
@@ -197,12 +214,16 @@ class StudioUI:
 
     def _clear_action_edit(self):
         self.action_edit = None
+        self._action_source = None
         self._submitted_action_edit = None
+        self._action_request_context = None
 
     def _begin_action_edit(self, take, index, operation):
         segment = take.segments[index]
         self.action_edit = (take.id, index, operation)
+        self._action_source = take
         self._submitted_action_edit = None
+        self._action_request_context = None
         self._set(self.action_prompt, 'value', segment['prompt'] if operation == 'replace' else '')
         self._set(self.action_duration, 'value',
                   f'{(segment["end"] - segment["start"])/25:.2f}' if operation == 'replace' else '4.16')
@@ -216,10 +237,53 @@ class StudioUI:
         except ValueError:
             return None, 'Enter an action length from 0.16 to 30 seconds.'
 
+    def _assistant_context(self, action):
+        s = self.session
+        with s.lock:
+            return (s.active_take, s.project_revision, s.clip_revision,
+                    s.character_motion_enabled, s.busy,
+                    self._action_context() if action else self._generation_context())
+
+    def _make_prompt_assistant(self, gui, *, action):
+        target = self.action_prompt if action else self.prompt
+
+        def apply(text, expected_context, expected_prompt):
+            s = self.session
+            with s.lock:
+                if (s.busy or not s.character_motion_enabled or not target.visible
+                        or self._assistant_context(action) != expected_context
+                        or target.value != expected_prompt or not self._valid_prompt(text)):
+                    return False
+                self._set(target, 'value', text)
+                if not action:
+                    s.edit_prompt(text)
+            self.update()
+            return True
+
+        return PromptAssistantUI(gui, target, lambda: self._assistant_context(action), apply)
+
+    def _action_context(self):
+        return (self.action_edit, id(self._action_source), self.session.project_revision,
+                self.action_prompt.value.strip(), self.action_duration.value)
+
+    def _generation_context(self):
+        return (self.session.active_take, self.session.project_revision,
+                self.edit_action.value, self.prompt.value.strip(),
+                self.duration_mode.value, self.duration_seconds.value, self.replace_time.value)
+
+    def _progress_content(self, status, failed=False):
+        elapsed = ''
+        if not failed and self._generation_started_at is not None:
+            elapsed = f' · {int(max(0, time.perf_counter() - self._generation_started_at))} s elapsed'
+        detail = (' Review the direction and length above, then retry.' if failed else '')
+        style = 'sz-progress error' if failed else 'sz-progress'
+        return f'<div class="{style}" role="status" aria-live="polite">{escape(status)}{elapsed}{detail}</div>'
+
     def _refresh_action_edit(self, take, busy):
         edit = self.action_edit
         editing = edit is not None
-        if editing and (take is None or take.id != edit[0] or edit[1] >= len(take.segments)):
+        if editing and (take is None or take is not self._action_source or
+                        take.id != edit[0] or edit[1] >= len(take.segments)):
             self._clear_action_edit()
             editing = False
         submitted = self._submitted_action_edit
@@ -260,16 +324,27 @@ class StudioUI:
                  else 'Add action to end' if index == len(take.segments) - 1
                  else f'Add after action {action_number}')
         self._set(self.action_heading, 'content', f'<div class="sz-section">{escape(title)}</div>')
+        following = len(take.segments) - index - (operation != 'insert_before')
+        affected = (f'{following} following action' + ('s' if following != 1 else '') + ' will regenerate.'
+                    if following else 'No following actions need regeneration.')
+        change = 'Updating this action' if operation == 'replace' else 'Adding this action'
         self._set(self.action_note, 'content',
-                  '<div class="sz-note">Later actions regenerate. Undo edit restores the previous motion.</div>')
+                  f'<div class="sz-note">{change} regenerates motion from here. '
+                  f'{affected} Original motion stays until completion; Undo edit restores it afterward.</div>')
         seconds, error = self._action_duration_value()
         if not self._valid_prompt(self.action_prompt.value):
             error = 'Enter a direction (1–500 characters).'
         self._set(self.action_feedback, 'visible', error is not None)
         self._set(self.action_feedback, 'content',
                   f'<div class="sz-preview invalid">{escape(error)}</div>' if error else '')
-        self._set(self.save_action, 'label', 'Saving action…' if busy else
-                  'Save action' if operation == 'replace' else 'Add action')
+        retry = (self.session.status.startswith('Action edit failed') and
+                 self._action_request_context == self._action_context())
+        self._set(self.save_action, 'label',
+                  'Updating motion…' if busy and operation == 'replace' else
+                  'Adding action…' if busy else
+                  'Retry update motion' if retry and operation == 'replace' else
+                  'Retry add action' if retry else
+                  'Update motion' if operation == 'replace' else 'Add action')
         self._set(self.save_action, 'disabled', busy or not self.session.character_motion_enabled or error is not None)
         self._set(self.action_prompt, 'disabled', busy)
         self._set(self.action_duration, 'disabled', busy)
@@ -365,7 +440,10 @@ class StudioUI:
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
         disabled = busy or not self.session.character_motion_enabled or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
         self._set(self.generate, 'disabled', disabled)
-        self._set(self.generate, 'label', 'Generating…' if busy else 'Take limit reached' if at_limit else 'Generate motion')
+        retry = (self.session.status.startswith('Generation failed') and
+                 self._generation_request_context == self._generation_context())
+        self._set(self.generate, 'label', 'Generating…' if busy else 'Take limit reached' if at_limit else
+                  'Retry generation' if retry else 'Generate motion')
 
     def refresh_saved(self):
         self.saved_map = {p.name: p for p in sorted(self.folder.glob('*.stagezero.npz'), key=lambda p: p.stat().st_mtime, reverse=True)}
@@ -497,7 +575,7 @@ class StudioUI:
                 self._begin_action_edit(take, index, operation)
                 selected = take.segments[index]
                 s.seek(selected['end'] - 1 if operation == 'insert_after' else selected['start'])
-                s.status = f'Editing action {index + 1} · write a direction and save'
+                s.status = f'Editing action {index + 1} · write a direction and update motion'
             self.update()
             navigate_tab(self.tabs, 0, e.client)
 
@@ -516,16 +594,24 @@ class StudioUI:
             with s.lock:
                 edit = self.action_edit
                 take = s.takes.get(s.active_take)
-                if (not s.character_motion_enabled or s.busy or edit is None or take is None or take.id != edit[0] or
+                if (not s.character_motion_enabled or s.busy or edit is None or take is not self._action_source or
+                        take.id != edit[0] or
                         edit[1] >= len(take.segments) or not self._valid_prompt(self.action_prompt.value)):
                     return
                 seconds, error = self._action_duration_value()
                 if error is not None:
                     s.status = error
                     return
+                if needs_clarification(self.action_prompt.value):
+                    self.action_assistant.clarify()
+                    s.status = 'Clarify the direction in Prompt assistant before updating motion'
+                    self.update()
+                    return
                 revision = s.action_edit_revision
                 if s.submit_action_edit(self.action_prompt.value, edit[1], edit[2], seconds=seconds):
                     self._submitted_action_edit = revision
+                    self._action_request_context = self._action_context()
+                    self._generation_started_at = time.perf_counter()
             self.update()
 
         @self.cancel_action.on_click
@@ -605,6 +691,11 @@ class StudioUI:
             with s.lock:
                 if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
                     return
+                if needs_clarification(self.prompt.value):
+                    self.prompt_assistant.clarify()
+                    s.status = 'Clarify the direction in Prompt assistant before generating motion'
+                    self.update()
+                    return
                 take = s.takes.get(s.active_take)
                 plan, error = self._generation_plan(take)
                 if error is not None:
@@ -618,6 +709,10 @@ class StudioUI:
                          seconds=None if self.duration_mode.value == AUTO else duration.seconds,
                          edit_mode={CREATE:'new', EXTEND:'extend', REPLACE:'replace'}[choice],
                          at_frame=at_frame)
+                if s.busy:
+                    self._generation_request_context = self._generation_context()
+                    self._generation_started_at = time.perf_counter()
+            self.update()
 
         @self.cancel.on_click
         def cancel(_):
@@ -625,6 +720,7 @@ class StudioUI:
                 if not s.busy: return
                 s.seek(s.frame)
                 s.status = 'Generation cancelled · stored motion preserved'
+            self.update()
 
         @self.takes.on_update
         def take(e):
@@ -746,10 +842,18 @@ class StudioUI:
                 with s.lock:
                     if s.busy: return
                 path, data = s.save_project(self.folder, self.project_name.value)
-                self.refresh_saved()
-                self._set(self.saved, 'value', path.name)
-                if e.client is not None: e.client.send_file_download(path.name, data)
-            except Exception as exc: s.project_status = f'Save failed: {exc}'
+            except Exception as exc:
+                s.project_status = f'Save failed: {exc}'
+                self.update()
+                return
+            self.refresh_saved()
+            self._set(self.saved, 'value', path.name)
+            if e.client is not None:
+                try:
+                    e.client.send_file_download(path.name, data)
+                except Exception as exc:
+                    s.project_status += f' · Download failed: {exc}'
+            self.update()
 
         @self.open.on_click
         def open_saved(_):
@@ -820,14 +924,44 @@ class StudioUI:
             self._refresh_action_edit(take, s.busy)
             self._prompt_feedback()
             self._refresh_generation(take, s.busy)
+            self.prompt_assistant.refresh(
+                visible=self.prompt.visible and s.character_motion_enabled, busy=s.busy)
+            self.action_assistant.refresh(
+                visible=self.action_prompt.visible and s.character_motion_enabled, busy=s.busy)
             self._set(self.cancel, 'visible', s.busy)
+            if s.busy:
+                if self._generation_started_at is None:
+                    self._generation_started_at = time.perf_counter()
+                progress = self._progress_content(s.status)
+                action_progress = self.action_edit is not None
+            else:
+                action_progress = self.action_edit is not None and (
+                    s.status.startswith('Action edit failed') and
+                    self._action_request_context == self._action_context())
+                motion_progress = (s.status.startswith('Generation failed') and
+                                   self._generation_request_context == self._generation_context())
+                progress = self._progress_content(s.status, failed=True) if action_progress or motion_progress else ''
+                self._generation_started_at = None
+            self._set(self.action_progress, 'visible', action_progress)
+            self._set(self.action_progress, 'content', progress if action_progress else '')
+            self._set(self.motion_progress, 'visible', not action_progress and bool(progress))
+            self._set(self.motion_progress, 'content', progress if not action_progress else '')
+            intro = ('Select a motion-ready character to generate motion.' if not s.character_motion_enabled else
+                     'Choose Wave, Walk, or Dance below, or write your own direction. '
+                     'Set a length, then press Generate motion.')
+            heading = 'Create your first motion' if not s.takes else 'Start another take'
+            self._set(self.motion_intro, 'content',
+                      f'<div class="sz-intro"><b>{heading}</b>{intro}</div>')
+            self._set(self.motion_intro, 'visible', take is None and not s.busy)
             if take is None:
                 editor_state = 'New take draft' if live else 'Start a new take'
             elif self.edit_action.value == REPLACE:
                 editor_state = f'New ending for {take.name}'
             else:
+                action_count = len(take.segments)
                 editor_state = (f'{take.name} · {len(take.positions)/25:.2f} s · '
-                                f'{len(take.segments)} actions. Click a timeline action to edit.')
+                                f'{action_count} action{"s" if action_count != 1 else ""}. '
+                                'Click a timeline action to edit.')
             self._set(self.editor_context, 'content', f'<div class="sz-note">{escape(editor_state)}</div>')
             self.take_map = {f'{i+1:02d} · {t.name} · {len(t.positions)/25:.2f}s':t.id for i,t in enumerate(s.takes.values())}
             options = tuple(self.take_map) or ('No takes yet',)
@@ -871,6 +1005,8 @@ class StudioUI:
             segments = tuple(self.segment_map) or ('No generated actions',)
             self._set(self.segments, 'options', segments)
             self._set(self.action, 'content', f'<div class="sz-note">At playhead: {escape(s.current_action() or "No generated action")}</div>')
-            self._set(self.files, 'content', s.project_status)
+            project_status = s.project_status or 'No project save in this session.'
+            self._set(self.files, 'content',
+                      f'<div class="sz-project-status" role="status">{escape(project_status)}</div>')
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')

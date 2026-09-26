@@ -1,0 +1,128 @@
+/* The scene owns the inspector; the timeline remains a full-width row below it. */
+.sz-workspace,
+.sz-workspace-stack,
+.sz-scene {
+  min-width: 0;
+  min-height: 0;
+}
+
+.sz-workspace-stack,
+.sz-scene {
+  width: 100%;
+}
+
+.sz-timeline-dock {
+  margin: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 18px;
+  isolation: isolate;
+}
+
+.sz-timeline-dock:empty {
+  margin: 0;
+}
+
+.sz-inspector {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(380px, max(360px, var(--sz-control-width, 372px)), calc(100% - 44px));
+  height: min(720px, calc(100% - 44px));
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  transition: width 180ms ease, height 180ms ease;
+}
+
+.sz-inspector-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.sz-inspector-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 52px;
+  padding: 7px 12px;
+  line-height: 1.5;
+}
+
+.sz-inspector[data-collapsed="true"] {
+  width: 150px;
+  height: 46px;
+}
+
+/* Keep generated controls laid out while the desktop inspector is a pill. */
+.sz-inspector[data-collapsed="true"] .sz-inspector-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  flex: none;
+  width: min(380px, calc(100vw - 44px));
+  height: min(672px, calc(100vh - 92px));
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sz-inspector-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sz-inspector-pill:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+  border-radius: inherit;
+}
+
+.sz-mobile-inspector {
+  position: fixed;
+  right: 16px;
+  left: 16px;
+  z-index: 22;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.sz-mobile-inspector-header {
+  padding: 4px 10px;
+  user-select: none;
+}
+
+@media (max-width: 575px) {
+  .sz-inspector {
+    top: 16px;
+    right: 16px;
+    width: calc(100% - 32px);
+    height: min(720px, calc(100% - 32px));
+  }
+}

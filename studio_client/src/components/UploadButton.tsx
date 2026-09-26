@@ -17,7 +17,7 @@ const scopedUploadLimits: Record<string, { extension: string; maxBytes: number }
 
 export default function UploadButtonComponent({
   uuid,
-  props: { disabled, mime_type, color, _icon_html: icon_html, label },
+  props: { visible, disabled, mime_type, color, _icon_html: icon_html, label },
 }: GuiUploadButtonMessage) {
   // Handle GUI input types.
   const viewer = useContext(ViewerContext)!;
@@ -27,6 +27,8 @@ export default function UploadButtonComponent({
     componentUuid: uuid,
     label,
   });
+
+  if (!(visible ?? true)) return null;
 
   return (
     <Box mx="xs" mb="0.5em">

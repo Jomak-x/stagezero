@@ -16,14 +16,14 @@ import {
   poses,
   subscribeActorGlbControl,
 } from "./ActorGlbProtocol";
-import { configureActorMeshes } from "./ActorGlbRendering";
+import { configureActorMeshes, createActorPlacement } from "./ActorGlbRendering";
 import { committedLoadToRetry, rejectionCancelsInFlightLoad } from "./ActorGlbLifecycle";
 
 type LoadedActor = {
   assetId: string;
   revision: number;
   scene: THREE.Group;
-  scale: number;
+  placement: THREE.Group;
   nodes: Map<number, THREE.Object3D[]>;
 };
 
@@ -104,7 +104,7 @@ function applyPose(actor: LoadedActor, message: ActorGlbPoseMessage) {
       node.matrixWorldNeedsUpdate = true;
     });
   });
-  actor.scene.updateMatrixWorld(true);
+  actor.placement.updateMatrixWorld(true);
 }
 
 /** The controlled GLB actor. Normal GlbMessage assets keep their usual loader. */
@@ -280,7 +280,7 @@ export const ActorGlbAsset = React.forwardRef<
             assetId: loadMessage.asset_id,
             revision: loadMessage.revision,
             scene: gltf.scene,
-            scale: loadMessage.scale,
+            placement: new THREE.Group(),
             nodes: new Map(),
           };
           if (token !== loadToken.current || loadMessage.revision <= g1Revision) {
@@ -294,7 +294,9 @@ export const ActorGlbAsset = React.forwardRef<
               throw new Error(`GLB is missing required node indices: ${missing.join(", ")}`);
             }
             configureActorMeshes(actor.scene, loadMessage.cast_shadow, loadMessage.receive_shadow);
-            actor.scene.updateMatrixWorld(true);
+            actor.placement = createActorPlacement(
+              actor.scene, loadMessage.scale, loadMessage.ground_offset,
+            );
           } catch (error) {
             disposeActor(actor);
             if (token === loadToken.current) inFlightRevision.current = null;
@@ -347,7 +349,8 @@ export const ActorGlbAsset = React.forwardRef<
         inFlightRevision.current = null;
       }
     };
-  }, [loadMessage.asset_id, loadMessage.revision, loadMessage.glb_data, gl, camera, scene]);
+  }, [loadMessage.asset_id, loadMessage.revision, loadMessage.glb_data,
+      loadMessage.scale, loadMessage.ground_offset, gl, camera, scene]);
 
   // SceneTree applies server visibility at priority -1000. Override only the
   // local G1 subtree after that pass; no shared server node state is changed.
@@ -357,7 +360,7 @@ export const ActorGlbAsset = React.forwardRef<
 
   return (
     <group ref={ref}>
-      {visible && <primitive object={visible.scene} scale={visible.scale} />}
+      {visible && <primitive object={visible.placement} />}
       {children}
     </group>
   );

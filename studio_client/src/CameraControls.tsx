@@ -39,9 +39,10 @@ function NavigationOverlay({
     if (!parent) return;
     const container = document.createElement("div");
     Object.assign(container.style, {
-      position: "absolute", right: "12px", top: "12px",
+      // Below the Welcome return button and clear of the right-hand inspector.
+      position: "absolute", left: "20px", top: "108px",
       maxWidth: "calc(100% - 24px)", zIndex: "20",
-      display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px",
+      display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "5px",
       pointerEvents: "none", fontFamily: "system-ui, sans-serif",
       fontSize: "11px", color: "white", textShadow: "0 1px 3px #000",
     });
@@ -58,7 +59,7 @@ function NavigationOverlay({
       button.textContent = option;
       button.title = `${option} with a plain drag`;
       Object.assign(button.style, {
-        border: "0", borderRadius: "5px", padding: "5px 9px",
+        border: "0", borderRadius: "5px", padding: "5px 7px",
         cursor: "pointer", color: "white", fontSize: "11px",
       });
       button.onclick = () => setMode(option);
@@ -68,8 +69,8 @@ function NavigationOverlay({
     const hint = document.createElement("div");
     Object.assign(hint.style, {
       padding: "8px 10px", borderRadius: "5px",
-      background: "rgba(20, 24, 32, 0.94)", textAlign: "right",
-      display: "none", lineHeight: "1.6", maxWidth: "280px",
+      background: "rgba(20, 24, 32, 0.94)", textAlign: "left",
+      display: "none", lineHeight: "1.6", maxWidth: "min(184px, 100%)",
     });
     const help = document.createElement("button");
     help.type = "button";

@@ -33,6 +33,7 @@ class ActorGlbLoadMessage(_messages.Message):
     scale: float
     fallback_name: str
     required_nodes: tuple[int, ...]
+    ground_offset: float = 0.0
     cast_shadow: bool = True
     receive_shadow: bool = True
     props: dict[str, object] = field(default_factory=dict)
@@ -84,6 +85,7 @@ class _AssetState:
     glb_data: bytes
     scale: float
     required_nodes: tuple[int, ...]
+    ground_offset: float
     initiator_id: int | None = None
     deadline: float = 0.0
     client_status: dict[int, Status] = field(default_factory=dict)
@@ -148,6 +150,20 @@ class GlbCharacterRenderer:
         with self._lock:
             return None if self._active is None else self._active.asset_id
 
+    @property
+    def fallback_pose_needed(self) -> bool:
+        """Keep G1 current while any tab may still display it.
+
+        A committed asset alone is insufficient: late tabs load it
+        asynchronously, and a tab can reject it while others succeed.
+        """
+        with self._lock:
+            state = self._active
+            if state is None or self._pending is not None:
+                return True
+            return any(state.client_status.get(client_id) != "loaded"
+                       for client_id in self.server.get_clients())
+
     def _send(self, client: viser.ClientHandle, message: _messages.Message) -> None:
         # ClientHandle exposes its connection privately in pinned Viser 1.0.16;
         # queue_message itself is the supported infra transport operation.
@@ -162,6 +178,7 @@ class GlbCharacterRenderer:
             scale=state.scale,
             fallback_name=self.fallback_name,
             required_nodes=state.required_nodes,
+            ground_offset=state.ground_offset,
         )
 
     def _send_state(self, client: viser.ClientHandle, state: _AssetState, *, committed: bool) -> None:
@@ -174,6 +191,11 @@ class GlbCharacterRenderer:
 
     def _client_connected(self, client: viser.ClientHandle) -> None:
         with self._lock:
+            # Client IDs can be reused after reconnect. A new tab must prove
+            # that it loaded this revision before G1 updates can be skipped.
+            for state in (self._active, self._pending):
+                if state is not None:
+                    state.client_status.pop(client.client_id, None)
             if self._active is not None:
                 self._send_state(client, self._active, committed=True)
             elif self._pending is not None:
@@ -184,9 +206,11 @@ class GlbCharacterRenderer:
         with self._lock:
             if self._active is not None:
                 self._active.sent_clients.discard(client.client_id)
+                self._active.client_status.pop(client.client_id, None)
             pending = self._pending
             if pending is not None:
                 pending.sent_clients.discard(client.client_id)
+                pending.client_status.pop(client.client_id, None)
             if pending is not None and pending.initiator_id == client.client_id:
                 failure = (
                     client.client_id,
@@ -232,6 +256,7 @@ class GlbCharacterRenderer:
         initiating_client_id: int,
         *,
         scale: float = 1.0,
+        ground_offset: float = 0.0,
         required_nodes: tuple[int, ...] = (),
         initial_node_matrices: np.ndarray | Mapping[int, np.ndarray] | None = None,
     ) -> int:
@@ -241,6 +266,8 @@ class GlbCharacterRenderer:
             raise ValueError("glb_data is empty")
         if not np.isfinite(scale) or scale <= 0:
             raise ValueError("scale must be finite and positive")
+        if not np.isfinite(ground_offset):
+            raise ValueError("ground_offset must be finite")
         if any(index < 0 for index in required_nodes):
             raise ValueError("required_nodes must contain nonnegative glTF indices")
         with self._lock:
@@ -256,6 +283,7 @@ class GlbCharacterRenderer:
                 glb_data=bytes(glb_data),
                 scale=float(scale),
                 required_nodes=tuple(required_nodes),
+                ground_offset=float(ground_offset),
                 initiator_id=initiating_client_id,
                 deadline=time.monotonic() + self.timeout_seconds,
             )

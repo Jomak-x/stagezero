@@ -30,6 +30,7 @@ export default function ButtonComponent({
     <Box mx="xs" pb="0.5em">
       <Button
         id={uuid}
+        data-studio-color={typeof color === "string" ? color : undefined}
         fullWidth
         color={toMantineColor(color)}
         onClick={() => {

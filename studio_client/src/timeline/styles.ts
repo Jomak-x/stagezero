@@ -18,19 +18,19 @@ export interface TimelineTheme {
 }
 
 export const DARK_THEME: TimelineTheme = {
-  timeCursorColor: "#52A5F4",
-  backgroundColor: "#2C2E33",
-  frameLabelColor: "#A6A7AB",
-  frameTickColor: "#41434A",
-  promptBorderColor: "#1A1B1E",
+  timeCursorColor: "#A1E5D0",
+  backgroundColor: "#1C2028",
+  frameLabelColor: "#929AA7",
+  frameTickColor: "rgba(255, 255, 255, 0.07)",
+  promptBorderColor: "rgba(12, 18, 24, 0.7)",
   promptTextColor: "#FFFFFF",
-  trackLabelColor: "#A6A7AB",
-  trackSeparatorColor: "#41434A",
-  labelOverlayColor: "#2C2E33",
-  keyframeBorderColor: "#FFFFFF",
-  intervalBorderColor: "#FFFFFF",
-  headerShadowColor: "rgba(0, 0, 0, 0.2)",
-  topBorderColor: "rgba(0, 0, 0, 0.3)",
+  trackLabelColor: "#AAB3C0",
+  trackSeparatorColor: "rgba(255, 255, 255, 0.1)",
+  labelOverlayColor: "#1C2028",
+  keyframeBorderColor: "rgba(255, 255, 255, 0.72)",
+  intervalBorderColor: "rgba(255, 255, 255, 0.54)",
+  headerShadowColor: "rgba(0, 0, 0, 0.12)",
+  topBorderColor: "rgba(255, 255, 255, 0.1)",
 };
 
 export const LIGHT_THEME: TimelineTheme = {
@@ -60,17 +60,17 @@ export const PROMPT_COLORS: [number, number, number][] = [
   [236, 72, 153],  // Pink
 ];
 
-export const DEFAULT_PROMPT_COLOR: [number, number, number] = PROMPT_COLORS[0]!;
+export const DEFAULT_PROMPT_COLOR: [number, number, number] = [73, 118, 121];
 export const PROMPT_TEXT_SHADOW = "rgba(0, 0, 0, 0.5)";
 
-export const HIGHLIGHT_COLOR = "#F4D03F";
-export const HIGHLIGHT_BORDER_COLOR = "rgba(255, 255, 255, 0.9)";
-export const HIGHLIGHT_SHADOW_COLOR = "rgba(0, 0, 0, 0.3)";
-export const HIGHLIGHT_TEXT_COLOR = "#000000";
+export const HIGHLIGHT_COLOR = "#A1E5D0";
+export const HIGHLIGHT_BORDER_COLOR = "rgba(255, 255, 255, 0.22)";
+export const HIGHLIGHT_SHADOW_COLOR = "rgba(0, 0, 0, 0.18)";
+export const HIGHLIGHT_TEXT_COLOR = "#14251F";
 export const HIGHLIGHT_FONT =
   "bold 10px Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-export const HIGHLIGHT_TEXT_SHADOW_COLOR = "rgba(255, 255, 255, 0.6)";
-export const HIGHLIGHT_SHADOW_BLUR = 5;
-export const HIGHLIGHT_SHADOW_OFFSET_Y = 2;
-export const HIGHLIGHT_BORDER_WIDTH = 1.5;
-export const HIGHLIGHT_TEXT_SHADOW_BLUR = 2;
+export const HIGHLIGHT_TEXT_SHADOW_COLOR = "rgba(0, 0, 0, 0)";
+export const HIGHLIGHT_SHADOW_BLUR = 4;
+export const HIGHLIGHT_SHADOW_OFFSET_Y = 1;
+export const HIGHLIGHT_BORDER_WIDTH = 1;
+export const HIGHLIGHT_TEXT_SHADOW_BLUR = 0;

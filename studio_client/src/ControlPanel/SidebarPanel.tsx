@@ -1,6 +1,6 @@
 // @refresh reset
 
-import { ActionIcon, Box, Divider, Paper, ScrollArea, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Paper, ScrollArea, Tooltip } from "@mantine/core";
 import React from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
@@ -10,7 +10,7 @@ const SidebarPanelContext = React.createContext<null | {
   toggleCollapsed: () => void;
 }>(null);
 
-/** A full-height inspector next to the viewport and timeline. */
+/** A floating inspector over the viewport. */
 export default function SidebarPanel({
   children,
   collapsible,
@@ -27,46 +27,30 @@ export default function SidebarPanel({
       <Paper
         component="aside"
         data-testid="studio-inspector"
+        data-collapsed={collapsed}
         aria-label="Inspector"
-        radius={0}
-        shadow="-0.25em 0 0.8em rgba(0,0,0,0.12)"
-        style={{
-          width: collapsed ? "2.75em" : `min(${width}, 40vw)`,
-          height: "100%",
-          minWidth: 0,
-          minHeight: 0,
-          flex: "0 0 auto",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          boxSizing: "border-box",
-          transition: "width 180ms ease",
-          zIndex: 8,
-        }}
+        className="sz-inspector"
+        style={{ "--sz-control-width": width } as React.CSSProperties}
       >
         {collapsed && (
-          <Tooltip zIndex={100} label="Show sidebar">
-            <ActionIcon
-              aria-label="Show sidebar"
-              m="xs"
+          <Tooltip zIndex={100} label="Show inspector">
+            <button
+              type="button"
+              className="sz-inspector-pill"
+              aria-label="Show inspector"
               onClick={(evt) => {
                 evt.stopPropagation();
                 toggleCollapsed();
               }}
             >
-              <IconChevronLeft />
-            </ActionIcon>
+              <IconChevronLeft size={17} stroke={1.7} />
+              <span>Inspector</span>
+            </button>
           </Tooltip>
         )}
         <Box
-          style={{
-            width: "100%",
-            minWidth: 0,
-            minHeight: 0,
-            flex: "1 1 auto",
-            display: collapsed ? "none" : "flex",
-            flexDirection: "column",
-          }}
+          className="sz-inspector-content"
+          aria-hidden={collapsed}
         >
           {children}
         </Box>
@@ -84,38 +68,22 @@ SidebarPanel.Handle = function SidebarPanelHandle({
   const { toggleCollapsed, collapsible } = React.useContext(SidebarPanelContext)!;
 
   return (
-    <>
-      <Box
-        p="xs"
-        style={{
-          lineHeight: "1.5em",
-          fontWeight: 400,
-          position: "relative",
-          zIndex: 20,
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "row",
-          minWidth: 0,
-          flex: "0 0 auto",
-        }}
-      >
-        {children}
-        {collapsible && (
-          <Tooltip zIndex={100} label="Collapse sidebar">
-            <ActionIcon
-              aria-label="Collapse sidebar"
-              onClick={(evt) => {
-                evt.stopPropagation();
-                toggleCollapsed();
-              }}
-            >
-              <IconChevronRight stroke={1.625} />
-            </ActionIcon>
-          </Tooltip>
-        )}
-      </Box>
-      <Divider mx="xs" />
-    </>
+    <Box className="sz-inspector-header">
+      {children}
+      {collapsible && (
+        <Tooltip zIndex={100} label="Collapse inspector">
+          <ActionIcon
+            aria-label="Collapse inspector"
+            onClick={(evt) => {
+              evt.stopPropagation();
+              toggleCollapsed();
+            }}
+          >
+            <IconChevronRight stroke={1.625} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+    </Box>
   );
 };
 
