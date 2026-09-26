@@ -1,0 +1,3524 @@
+{
+  "kind": "actual-gpu-service",
+  "passed": true,
+  "checks": {
+    "auth_rejects_wrong_token": true,
+    "malformed_rejected": true,
+    "soak_25_or_more": true,
+    "all_jobs_complete": true,
+    "progressive_three_chunk_job": true,
+    "save_load_exact_arrays": true,
+    "queued_cancel_discards_chunks": true,
+    "cancelled_request_recovery": true,
+    "three_core_compositions": true,
+    "two_actor_timeline": true,
+    "committed_prefix_exact": true,
+    "core_composition_seams_within_limits": true,
+    "no_playback_underruns": true,
+    "warm_first_chunk_p95_below_2s": true,
+    "warm_realtime_factor_p05_above_1": true,
+    "three_integrated_600_frame_scenes": true
+  },
+  "thresholds": {
+    "root_seam_m": 0.15,
+    "mean_joint_seam_m": 0.15,
+    "max_joint_seam_m": 0.4,
+    "first_chunk_p95_s": 2.0,
+    "realtime_factor_p05": 1.0
+  },
+  "health": {
+    "service": null,
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "joints": 27,
+    "features": null,
+    "horizon": 40,
+    "ready": true
+  },
+  "soak": {
+    "request_count": 25,
+    "first_chunk": {
+      "samples": 25,
+      "p50_s": 0.8273568340227939,
+      "p95_s": 0.9078990914043971,
+      "max_s": 1.5094214159762487
+    },
+    "completion": {
+      "samples": 25,
+      "p50_s": 0.8273804170021322,
+      "p95_s": 0.9079477418097668,
+      "max_s": 1.5094722079811618
+    },
+    "realtime_factor_p05": 2.2027704289239085,
+    "realtime_factor_p50": 2.41726775120766,
+    "realtime_factor_p95": 2.769440605135136,
+    "underruns": 0,
+    "jobs": [
+      {
+        "request_id": "validation-soak-0-84d7027fdbf8",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 1.5094722079811618,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 1.3249664282821696,
+        "clock": {
+          "first_chunk_s": 1.5094214159762487,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            1.5094214159762487
+          ],
+          "playback_deadlines_s": [
+            1.5094214159762487
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-1-a412c8802790",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8267972080211621,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.4189728516219295,
+        "clock": {
+          "first_chunk_s": 0.8267636249947827,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8267636249947827
+          ],
+          "playback_deadlines_s": [
+            0.8267636249947827
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-2-004a0163073a",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7779891249956563,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.5707300214654882,
+        "clock": {
+          "first_chunk_s": 0.7779533750144765,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7779533750144765
+          ],
+          "playback_deadlines_s": [
+            0.7779533750144765
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-3-a50b01693bfa",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8273804170021322,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.41726775120766,
+        "clock": {
+          "first_chunk_s": 0.8273568340227939,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8273568340227939
+          ],
+          "playback_deadlines_s": [
+            0.8273568340227939
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-4-3fdd3b325af0",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7776605419931002,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.571816225719917,
+        "clock": {
+          "first_chunk_s": 0.7776311670022551,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7776311670022551
+          ],
+          "playback_deadlines_s": [
+            0.7776311670022551
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-5-e320580afc74",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7780369170068298,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.570572110760708,
+        "clock": {
+          "first_chunk_s": 0.778008499997668,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.778008499997668
+          ],
+          "playback_deadlines_s": [
+            0.778008499997668
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-6-0a08ad527121",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.9011259170074482,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.2194456537681284,
+        "clock": {
+          "first_chunk_s": 0.9011167080025189,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.9011167080025189
+          ],
+          "playback_deadlines_s": [
+            0.9011167080025189
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-7-e5944a17d837",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7597979169804603,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.6322788669232873,
+        "clock": {
+          "first_chunk_s": 0.7597847919969354,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7597847919969354
+          ],
+          "playback_deadlines_s": [
+            0.7597847919969354
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-8-f83a0d3fa1f6",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.6880811669980176,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.9066338332229957,
+        "clock": {
+          "first_chunk_s": 0.6880678330198862,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.6880678330198862
+          ],
+          "playback_deadlines_s": [
+            0.6880678330198862
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-9-a1a5b7174fdc",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7795594579947647,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.5655515810744376,
+        "clock": {
+          "first_chunk_s": 0.7795460830093361,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7795460830093361
+          ],
+          "playback_deadlines_s": [
+            0.7795460830093361
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-10-7ec69b28a807",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7137582499999553,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.802069187992048,
+        "clock": {
+          "first_chunk_s": 0.7137455409974791,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7137455409974791
+          ],
+          "playback_deadlines_s": [
+            0.7137455409974791
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-11-1b0c489d82af",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7790147500054445,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.5673454834918363,
+        "clock": {
+          "first_chunk_s": 0.7790017920196988,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7790017920196988
+          ],
+          "playback_deadlines_s": [
+            0.7790017920196988
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-12-1cb384f862e9",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7634960419964045,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.6195289693583224,
+        "clock": {
+          "first_chunk_s": 0.763483584014466,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.763483584014466
+          ],
+          "playback_deadlines_s": [
+            0.763483584014466
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-13-4d5c726438a9",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.7578839999914635,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.6389262737074897,
+        "clock": {
+          "first_chunk_s": 0.7578726249921601,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.7578726249921601
+          ],
+          "playback_deadlines_s": [
+            0.7578726249921601
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-14-409bc6138e76",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.9058422090020031,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.2078900498614074,
+        "clock": {
+          "first_chunk_s": 0.9058092089835554,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.9058092089835554
+          ],
+          "playback_deadlines_s": [
+            0.9058092089835554
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-15-1d2317b48f94",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8287392499914858,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.4133043053295076,
+        "clock": {
+          "first_chunk_s": 0.8287062919989694,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8287062919989694
+          ],
+          "playback_deadlines_s": [
+            0.8287062919989694
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-16-e20d703442e8",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8302152919932269,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.4090136851108697,
+        "clock": {
+          "first_chunk_s": 0.8301827920076903,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8301827920076903
+          ],
+          "playback_deadlines_s": [
+            0.8301827920076903
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-17-9e08ec538644",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8316607500019018,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.404826727719718,
+        "clock": {
+          "first_chunk_s": 0.8316269579809159,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8316269579809159
+          ],
+          "playback_deadlines_s": [
+            0.8316269579809159
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-18-4e48582da908",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8317325829993933,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.404619033665366,
+        "clock": {
+          "first_chunk_s": 0.8317054999934044,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8317054999934044
+          ],
+          "playback_deadlines_s": [
+            0.8317054999934044
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-19-6f83f8e9adf6",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.9081597920157947,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.2022556135861344,
+        "clock": {
+          "first_chunk_s": 0.9081009580113459,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.9081009580113459
+          ],
+          "playback_deadlines_s": [
+            0.9081009580113459
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-20-90bdc8038d11",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8305537499836646,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.4080319907523577,
+        "clock": {
+          "first_chunk_s": 0.8305420829856303,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8305420829856303
+          ],
+          "playback_deadlines_s": [
+            0.8305420829856303
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-21-66044bb30d94",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8336711669981014,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.399027433324385,
+        "clock": {
+          "first_chunk_s": 0.8336647079850081,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8336647079850081
+          ],
+          "playback_deadlines_s": [
+            0.8336647079850081
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-22-f077a196f85e",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.760937458020635,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.6283369006467865,
+        "clock": {
+          "first_chunk_s": 0.760912833007751,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.760912833007751
+          ],
+          "playback_deadlines_s": [
+            0.760912833007751
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-23-9794cce21562",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.8338822090008762,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.398420278562267,
+        "clock": {
+          "first_chunk_s": 0.8338502090191469,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.8338502090191469
+          ],
+          "playback_deadlines_s": [
+            0.8338502090191469
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      },
+      {
+        "request_id": "validation-soak-24-6373eb8cffe2",
+        "stage_kind": "approach",
+        "actors": 1,
+        "frames": 40,
+        "chunks": 1,
+        "elapsed_s": 0.907099540985655,
+        "chunks_received_before_completion": 0,
+        "realtime_factor": 2.204829690275004,
+        "clock": {
+          "first_chunk_s": 0.9070916249766015,
+          "underruns": 0,
+          "max_late_s": 0.0,
+          "arrival_offsets_s": [
+            0.9070916249766015
+          ],
+          "playback_deadlines_s": [
+            0.9070916249766015
+          ]
+        },
+        "seams": {
+          "seams": [],
+          "passed": true
+        }
+      }
+    ]
+  },
+  "multi_window": {
+    "request_id": "validation-multi-window-012e8fddcc44",
+    "stage_kind": "approach",
+    "actors": 1,
+    "frames": 120,
+    "chunks": 3,
+    "elapsed_s": 1.7488813330128323,
+    "chunks_received_before_completion": 3,
+    "realtime_factor": 3.43076450456686,
+    "clock": {
+      "first_chunk_s": 0.9111721660010517,
+      "underruns": 0,
+      "max_late_s": 0.0,
+      "arrival_offsets_s": [
+        0.9111721660010517,
+        1.2198966249998193,
+        1.5265114580106456
+      ],
+      "playback_deadlines_s": [
+        0.9111721660010517,
+        2.9111721660010517,
+        4.911172166001052
+      ]
+    },
+    "seams": {
+      "seams": [
+        {
+          "frame_after": 40,
+          "root_step_m": 0.060723846688387886,
+          "mean_joint_step_m": 0.06259273857482375,
+          "root_speed_mps": 1.2144769337677577,
+          "velocity_jump_mps": 0.1171891988089658,
+          "actor_index": 0,
+          "max_joint_step_m": 0.13695068657398224,
+          "pass_root": true,
+          "pass_mean_joint": true,
+          "pass_max_joint": true,
+          "max_joint_rotation_deg": 11.039613723754883,
+          "mean_joint_rotation_deg": 2.8640692234039307,
+          "root_angular_velocity_deg_s": 41.54330253601074
+        },
+        {
+          "frame_after": 80,
+          "root_step_m": 0.05332540732027124,
+          "mean_joint_step_m": 0.05642199165301282,
+          "root_speed_mps": 1.0665081464054247,
+          "velocity_jump_mps": 0.08469814640126676,
+          "actor_index": 0,
+          "max_joint_step_m": 0.16086460649967194,
+          "pass_root": true,
+          "pass_mean_joint": true,
+          "pass_max_joint": true,
+          "max_joint_rotation_deg": 10.183947563171387,
+          "mean_joint_rotation_deg": 4.072978973388672,
+          "root_angular_velocity_deg_s": 34.538350105285645
+        }
+      ],
+      "passed": true
+    }
+  },
+  "scenes": [
+    {
+      "name": "walk-turn",
+      "actor_ids": [
+        "walker"
+      ],
+      "frames": 120,
+      "stage_jobs": [
+        {
+          "request_id": "validation-walk-turn-approach-971ed7c2f9f5",
+          "stage_kind": "approach",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.9110529579920694,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.1952620673203604,
+          "clock": {
+            "first_chunk_s": 0.9110189170169178,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.9110189170169178
+            ],
+            "playback_deadlines_s": [
+              0.9110189170169178
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-walk-turn-continuation-65196d97f66c",
+          "stage_kind": "continuation",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.8360259999753907,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.392270096933435,
+          "clock": {
+            "first_chunk_s": 0.8359776669822168,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8359776669822168
+            ],
+            "playback_deadlines_s": [
+              0.8359776669822168
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-walk-turn-continuation-b64e435ff5e1",
+          "stage_kind": "continuation",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.8368409170070663,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.389940500463258,
+          "clock": {
+            "first_chunk_s": 0.8368038329936098,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8368038329936098
+            ],
+            "playback_deadlines_s": [
+              0.8368038329936098
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        }
+      ],
+      "continuous_clock": {
+        "first_chunk_s": 0.911150333005935,
+        "underruns": 0,
+        "max_late_s": 0.0,
+        "arrival_offsets_s": [
+          0.911150333005935,
+          1.7473930830019526,
+          2.584519583004294
+        ],
+        "playback_deadlines_s": [
+          0.911150333005935,
+          2.911150333005935,
+          4.911150333005935
+        ]
+      },
+      "seams": {
+        "seams": [
+          {
+            "frame_after": 40,
+            "root_step_m": 0.04973138872769763,
+            "mean_joint_step_m": 0.042345080739510266,
+            "root_speed_mps": 0.9946277745539527,
+            "velocity_jump_mps": 0.16039952849386735,
+            "actor_index": 0,
+            "max_joint_step_m": 0.06254731863737106,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 11.410590171813965,
+            "mean_joint_rotation_deg": 4.262677192687988,
+            "root_angular_velocity_deg_s": 69.18196678161621
+          },
+          {
+            "frame_after": 80,
+            "root_step_m": 0.061443056931148037,
+            "mean_joint_step_m": 0.05309319161118237,
+            "root_speed_mps": 1.2288611386229606,
+            "velocity_jump_mps": 0.17063994776835104,
+            "actor_index": 0,
+            "max_joint_step_m": 0.06824198365211487,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 10.522014617919922,
+            "mean_joint_rotation_deg": 3.31911563873291,
+            "root_angular_velocity_deg_s": 31.294608116149902
+          }
+        ],
+        "passed": true
+      },
+      "committed_prefix_exact": true
+    },
+    {
+      "name": "reach",
+      "actor_ids": [
+        "reacher"
+      ],
+      "frames": 120,
+      "stage_jobs": [
+        {
+          "request_id": "validation-reach-approach-12c69b9bb943",
+          "stage_kind": "approach",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.8295482910179999,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.4109506603234063,
+          "clock": {
+            "first_chunk_s": 0.8295335410221014,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8295335410221014
+            ],
+            "playback_deadlines_s": [
+              0.8295335410221014
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-reach-continuation-79b833869275",
+          "stage_kind": "continuation",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.836966166010825,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.389582854385219,
+          "clock": {
+            "first_chunk_s": 0.8369291659910232,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8369291659910232
+            ],
+            "playback_deadlines_s": [
+              0.8369291659910232
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-reach-continuation-9c382c80cdf9",
+          "stage_kind": "continuation",
+          "actors": 1,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.8331681670097169,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.40047577331009,
+          "clock": {
+            "first_chunk_s": 0.8331487500108778,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8331487500108778
+            ],
+            "playback_deadlines_s": [
+              0.8331487500108778
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        }
+      ],
+      "continuous_clock": {
+        "first_chunk_s": 0.8296462910075206,
+        "underruns": 0,
+        "max_late_s": 0.0,
+        "arrival_offsets_s": [
+          0.8296462910075206,
+          1.666690790996654,
+          2.5000573330034968
+        ],
+        "playback_deadlines_s": [
+          0.8296462910075206,
+          2.8296462910075206,
+          4.829646291007521
+        ]
+      },
+      "seams": {
+        "seams": [
+          {
+            "frame_after": 40,
+            "root_step_m": 0.0010556757827845551,
+            "mean_joint_step_m": 0.002094392820168499,
+            "root_speed_mps": 0.0211135156556911,
+            "velocity_jump_mps": 0.01661484890115792,
+            "actor_index": 0,
+            "max_joint_step_m": 0.00837667565792799,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 2.612544059753418,
+            "mean_joint_rotation_deg": 0.9152031540870667,
+            "root_angular_velocity_deg_s": 4.034823477268219
+          },
+          {
+            "frame_after": 80,
+            "root_step_m": 0.002760297883057162,
+            "mean_joint_step_m": 0.01283844778305366,
+            "root_speed_mps": 0.055205957661143244,
+            "velocity_jump_mps": 0.02160569526206786,
+            "actor_index": 0,
+            "max_joint_step_m": 0.06573677808046341,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 9.292208671569824,
+            "mean_joint_rotation_deg": 3.2571680545806885,
+            "root_angular_velocity_deg_s": 30.92219591140747
+          }
+        ],
+        "passed": true
+      },
+      "committed_prefix_exact": true
+    },
+    {
+      "name": "meeting",
+      "actor_ids": [
+        "left",
+        "right"
+      ],
+      "frames": 120,
+      "stage_jobs": [
+        {
+          "request_id": "validation-meeting-approach-5936bb887b57",
+          "stage_kind": "approach",
+          "actors": 2,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.8985767079866491,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.225742089933757,
+          "clock": {
+            "first_chunk_s": 0.8985575000115205,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.8985575000115205
+            ],
+            "playback_deadlines_s": [
+              0.8985575000115205
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-meeting-continuation-5d3ae1a5f63b",
+          "stage_kind": "continuation",
+          "actors": 2,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.9557507089921273,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.0925958842437797,
+          "clock": {
+            "first_chunk_s": 0.9557108340086415,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.9557108340086415
+            ],
+            "playback_deadlines_s": [
+              0.9557108340086415
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        },
+        {
+          "request_id": "validation-meeting-continuation-5e5e2d00a9a6",
+          "stage_kind": "continuation",
+          "actors": 2,
+          "frames": 40,
+          "chunks": 1,
+          "elapsed_s": 0.9392389999993611,
+          "chunks_received_before_completion": 0,
+          "realtime_factor": 2.129383468958764,
+          "clock": {
+            "first_chunk_s": 0.9391973330057226,
+            "underruns": 0,
+            "max_late_s": 0.0,
+            "arrival_offsets_s": [
+              0.9391973330057226
+            ],
+            "playback_deadlines_s": [
+              0.9391973330057226
+            ]
+          },
+          "seams": {
+            "seams": [],
+            "passed": true
+          }
+        }
+      ],
+      "continuous_clock": {
+        "first_chunk_s": 0.8986740419932175,
+        "underruns": 0,
+        "max_late_s": 0.0,
+        "arrival_offsets_s": [
+          0.8986740419932175,
+          1.8545356669928879,
+          2.794031500001438
+        ],
+        "playback_deadlines_s": [
+          0.8986740419932175,
+          2.8986740419932175,
+          4.8986740419932175
+        ]
+      },
+      "seams": {
+        "seams": [
+          {
+            "frame_after": 40,
+            "root_step_m": 0.0006911428317832189,
+            "mean_joint_step_m": 0.010557131989035884,
+            "root_speed_mps": 0.013822856635664377,
+            "velocity_jump_mps": 0.012766238360587634,
+            "actor_index": 0,
+            "max_joint_step_m": 0.06831657141447067,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 12.461615562438965,
+            "mean_joint_rotation_deg": 2.980348825454712,
+            "root_angular_velocity_deg_s": 12.436215877532959
+          },
+          {
+            "frame_after": 80,
+            "root_step_m": 0.0010955927225060444,
+            "mean_joint_step_m": 0.009936887788482264,
+            "root_speed_mps": 0.021911854450120886,
+            "velocity_jump_mps": 0.01644018830018172,
+            "actor_index": 0,
+            "max_joint_step_m": 0.06940905004739761,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 8.957079887390137,
+            "mean_joint_rotation_deg": 2.0638997554779053,
+            "root_angular_velocity_deg_s": 5.035765767097473
+          },
+          {
+            "frame_after": 40,
+            "root_step_m": 0.0004267364963540454,
+            "mean_joint_step_m": 0.0021604612830714467,
+            "root_speed_mps": 0.008534729927080908,
+            "velocity_jump_mps": 0.002669303766014541,
+            "actor_index": 1,
+            "max_joint_step_m": 0.008018775843083858,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 1.918874740600586,
+            "mean_joint_rotation_deg": 0.5672523975372314,
+            "root_angular_velocity_deg_s": 7.67189085483551
+          },
+          {
+            "frame_after": 80,
+            "root_step_m": 0.0005630222141059203,
+            "mean_joint_step_m": 0.0032750370180317906,
+            "root_speed_mps": 0.011260444282118406,
+            "velocity_jump_mps": 0.018674286211700943,
+            "actor_index": 1,
+            "max_joint_step_m": 0.013080556876957417,
+            "pass_root": true,
+            "pass_mean_joint": true,
+            "pass_max_joint": true,
+            "max_joint_rotation_deg": 7.088752746582031,
+            "mean_joint_rotation_deg": 1.5623736381530762,
+            "root_angular_velocity_deg_s": 10.892908573150635
+          }
+        ],
+        "passed": true
+      },
+      "committed_prefix_exact": true,
+      "pair_separation": {
+        "min_root_separation_xz_m": 0.0009763403035333038,
+        "mean_root_separation_xz_m": 0.012497115297592062,
+        "root_disc_overlap_proxy_frames": 120,
+        "root_disc_overlap_proxy_fraction": 1.0,
+        "collision_radius_sum_m": 0.5
+      },
+      "hand_gap": {
+        "min_hand_distance_m": 0.4848335063643817,
+        "near_frames": 0,
+        "longest_near_run_frames": 0,
+        "longest_near_run_s": 0.0,
+        "contact_proxy": false,
+        "tolerance_m": 0.12,
+        "minimum_duration_s": 0.12
+      }
+    }
+  ],
+  "cancellation": {
+    "queued_cancelled_without_chunks": true,
+    "lead_completed": true,
+    "queued_status": "cancelled",
+    "queued_chunks": 0,
+    "lead_status": "complete"
+  },
+  "limitations": [
+    "Proximity metrics are geometric proxies, not proof of physical contact or mesh clearance.",
+    "This probe measures service chunk arrival; browser rendering latency is separate.",
+    "The service is already warm at health check; process/model cold load is measured separately."
+  ],
+  "showcase": {
+    "passed": true,
+    "scenarios": [
+      {
+        "scenario": "gate_meet_handshake",
+        "passed": true,
+        "source_status": "complete",
+        "frames": 600,
+        "actors": 2,
+        "project_raw_exact": true,
+        "resave_exact": true,
+        "source_artifact_sha256": {
+          "report_sha256": "d30418419dfc25c638a6fa9beac09d07f914130e7e24d2bbc2059e2513d4542e",
+          "project_sha256": "cbd09fa06f1dd880c1d92aa60bb845e352d91ab045021f30e54679146d2ce292",
+          "raw_sha256": "98601e2acb8380a4421e568801341242c3027c9223c1312772fda9e583f9cb18",
+          "pair_source_sha256": "ea851f9a1459b07b0eb85d011c44d689ce8d89a03adf81a03861f93686e06271"
+        },
+        "selected_screened_candidate": null,
+        "playback": {
+          "clock": "wall",
+          "startup_seconds": 2.858012916985899,
+          "first_pose_network_seconds": 1.1696739589970093,
+          "buffer_underrun_seconds": 0.0,
+          "buffer_underrun_events": 0,
+          "pair_prefetch_seconds": 1.3825021669908892,
+          "realtime_passed": true
+        },
+        "realtime_measured": true,
+        "pair_source_transform": {
+          "source_frames": 120,
+          "max_position_error_m": 1.1911475494841284e-07,
+          "max_rotation_matrix_error": 2.9799388401308136e-08,
+          "shared_rigid_transform_exact": true,
+          "license": "CC BY-NC-SA 4.0",
+          "research_only": true
+        },
+        "all_chunk_seams": {
+          "seams": [
+            {
+              "frame_after": 40,
+              "root_step_m": 0.028181643537071966,
+              "mean_joint_step_m": 0.028629306419319874,
+              "root_speed_mps": 0.5636328707414393,
+              "velocity_jump_mps": 0.042772414118522464,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04706236347556114,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.3685991764068604,
+              "mean_joint_rotation_deg": 1.7485177516937256,
+              "root_angular_velocity_deg_s": 11.869456768035889
+            },
+            {
+              "frame_after": 80,
+              "root_step_m": 0.03397755111073712,
+              "mean_joint_step_m": 0.03450457212785397,
+              "root_speed_mps": 0.6795510222147425,
+              "velocity_jump_mps": 0.09267426230029045,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05929986760020256,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 15.532198905944824,
+              "mean_joint_rotation_deg": 2.3475394248962402,
+              "root_angular_velocity_deg_s": 14.61227297782898
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.018263615296012392,
+              "mean_joint_step_m": 0.022162308765765526,
+              "root_speed_mps": 0.36527230592024784,
+              "velocity_jump_mps": 0.14992876463702345,
+              "actor_index": 0,
+              "max_joint_step_m": 0.06621282547712326,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.126510143280029,
+              "mean_joint_rotation_deg": 1.6586929559707642,
+              "root_angular_velocity_deg_s": 10.347541570663452
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.0028155178944871497,
+              "mean_joint_step_m": 0.004279776984152432,
+              "root_speed_mps": 0.05631035788974299,
+              "velocity_jump_mps": 0.02681607219206279,
+              "actor_index": 0,
+              "max_joint_step_m": 0.013121284544467926,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.489471435546875,
+              "mean_joint_rotation_deg": 0.9119037389755249,
+              "root_angular_velocity_deg_s": 5.650972127914429
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.005206269029077588,
+              "mean_joint_step_m": 0.005542732074448842,
+              "root_speed_mps": 0.10412538058155175,
+              "velocity_jump_mps": 0.04903396637465852,
+              "actor_index": 0,
+              "max_joint_step_m": 0.009741215966641903,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.043921947479248,
+              "mean_joint_rotation_deg": 0.6481841802597046,
+              "root_angular_velocity_deg_s": 5.650972127914429
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.04892046847991809,
+              "mean_joint_step_m": 0.0409404505193023,
+              "root_speed_mps": 0.9784093695983619,
+              "velocity_jump_mps": 0.9134700768794074,
+              "actor_index": 0,
+              "max_joint_step_m": 0.06960847973823547,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 32.04759216308594,
+              "mean_joint_rotation_deg": 12.593128204345703,
+              "root_angular_velocity_deg_s": 42.622270584106445
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.0208286125332867,
+              "mean_joint_step_m": 0.035142595688376646,
+              "root_speed_mps": 0.416572250665734,
+              "velocity_jump_mps": 0.09279333951813197,
+              "actor_index": 0,
+              "max_joint_step_m": 0.11874143034219742,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 11.013581275939941,
+              "mean_joint_rotation_deg": 4.284470558166504,
+              "root_angular_velocity_deg_s": 39.475529193878174
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.03657620335397275,
+              "mean_joint_step_m": 0.031777327193323886,
+              "root_speed_mps": 0.7315240670794549,
+              "velocity_jump_mps": 0.09564861034186216,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04550568386912346,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 6.962381362915039,
+              "mean_joint_rotation_deg": 2.9614596366882324,
+              "root_angular_velocity_deg_s": 38.422343730926514
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.020095419358386435,
+              "mean_joint_step_m": 0.03158479833050675,
+              "root_speed_mps": 0.4019083871677287,
+              "velocity_jump_mps": 0.2816318349484823,
+              "actor_index": 0,
+              "max_joint_step_m": 0.09898708015680313,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 21.361204147338867,
+              "mean_joint_rotation_deg": 12.73719596862793,
+              "root_angular_velocity_deg_s": 263.9238739013672
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.007183423949275086,
+              "mean_joint_step_m": 0.015494738848496238,
+              "root_speed_mps": 0.14366847898550172,
+              "velocity_jump_mps": 0.10770643400303105,
+              "actor_index": 0,
+              "max_joint_step_m": 0.052012696862220764,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 8.915924072265625,
+              "mean_joint_rotation_deg": 2.8725574016571045,
+              "root_angular_velocity_deg_s": 22.007689476013184
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.015908361150814516,
+              "mean_joint_step_m": 0.01855473118301935,
+              "root_speed_mps": 0.3181672230162903,
+              "velocity_jump_mps": 0.07441626906288132,
+              "actor_index": 0,
+              "max_joint_step_m": 0.028951721265912056,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 9.353344917297363,
+              "mean_joint_rotation_deg": 2.9393138885498047,
+              "root_angular_velocity_deg_s": 29.850552082061768
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.016244643701168095,
+              "mean_joint_step_m": 0.05381905450754645,
+              "root_speed_mps": 0.3248928740233619,
+              "velocity_jump_mps": 0.0999489142300517,
+              "actor_index": 0,
+              "max_joint_step_m": 0.18649953603744507,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 27.42460060119629,
+              "mean_joint_rotation_deg": 10.88230037689209,
+              "root_angular_velocity_deg_s": 42.59286880493164
+            },
+            {
+              "frame_after": 520,
+              "root_step_m": 0.007487799382784442,
+              "mean_joint_step_m": 0.027777516327417828,
+              "root_speed_mps": 0.14975598765568884,
+              "velocity_jump_mps": 0.12761803369786257,
+              "actor_index": 0,
+              "max_joint_step_m": 0.12404182553291321,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 14.747298240661621,
+              "mean_joint_rotation_deg": 4.167448043823242,
+              "root_angular_velocity_deg_s": 17.191457748413086
+            },
+            {
+              "frame_after": 560,
+              "root_step_m": 0.018756157849543258,
+              "mean_joint_step_m": 0.02511288018284003,
+              "root_speed_mps": 0.3751231569908652,
+              "velocity_jump_mps": 0.09158766213445649,
+              "actor_index": 0,
+              "max_joint_step_m": 0.07352297008037567,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 6.587670803070068,
+              "mean_joint_rotation_deg": 2.888942003250122,
+              "root_angular_velocity_deg_s": 27.497401237487793
+            },
+            {
+              "frame_after": 40,
+              "root_step_m": 0.0015092257741406573,
+              "mean_joint_step_m": 0.004101080133803255,
+              "root_speed_mps": 0.030184515482813146,
+              "velocity_jump_mps": 0.024817619206723488,
+              "actor_index": 1,
+              "max_joint_step_m": 0.01849502883851528,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.4166133403778076,
+              "mean_joint_rotation_deg": 1.2187391519546509,
+              "root_angular_velocity_deg_s": 2.2381165623664856
+            },
+            {
+              "frame_after": 80,
+              "root_step_m": 0.0008133579371185065,
+              "mean_joint_step_m": 0.0013599798252548522,
+              "root_speed_mps": 0.01626715874237013,
+              "velocity_jump_mps": 0.01651912748853407,
+              "actor_index": 1,
+              "max_joint_step_m": 0.002745266305282712,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.1626427173614502,
+              "mean_joint_rotation_deg": 0.492244154214859,
+              "root_angular_velocity_deg_s": 4.149580895900726
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.0015291761941901888,
+              "mean_joint_step_m": 0.010501544135246751,
+              "root_speed_mps": 0.030583523883803775,
+              "velocity_jump_mps": 0.02189649395501247,
+              "actor_index": 1,
+              "max_joint_step_m": 0.037128936499357224,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 10.679326057434082,
+              "mean_joint_rotation_deg": 3.924511671066284,
+              "root_angular_velocity_deg_s": 57.512450218200684
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.002364457359793233,
+              "mean_joint_step_m": 0.006283030950117691,
+              "root_speed_mps": 0.04728914719586466,
+              "velocity_jump_mps": 0.01062704595832621,
+              "actor_index": 1,
+              "max_joint_step_m": 0.020766861736774445,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.22113561630249,
+              "mean_joint_rotation_deg": 2.091329336166382,
+              "root_angular_velocity_deg_s": 12.00061559677124
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.002005426611383353,
+              "mean_joint_step_m": 0.0024733793019196316,
+              "root_speed_mps": 0.04010853222766706,
+              "velocity_jump_mps": 0.01895851629162155,
+              "actor_index": 1,
+              "max_joint_step_m": 0.0038691118825227022,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 0.8471909165382385,
+              "mean_joint_rotation_deg": 0.43385544419288635,
+              "root_angular_velocity_deg_s": 10.527514219284058
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.041980964940189665,
+              "mean_joint_step_m": 0.036664834905879296,
+              "root_speed_mps": 0.8396192988037933,
+              "velocity_jump_mps": 0.8158977160760941,
+              "actor_index": 1,
+              "max_joint_step_m": 0.06263723224401474,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 63.076515197753906,
+              "mean_joint_rotation_deg": 13.917583465576172,
+              "root_angular_velocity_deg_s": 82.20747947692871
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.028442011147224278,
+              "mean_joint_step_m": 0.025403131620495397,
+              "root_speed_mps": 0.5688402229444856,
+              "velocity_jump_mps": 0.16882586010772024,
+              "actor_index": 1,
+              "max_joint_step_m": 0.052403125911951065,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 6.018224239349365,
+              "mean_joint_rotation_deg": 3.2478058338165283,
+              "root_angular_velocity_deg_s": 39.6220064163208
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.01946438327875427,
+              "mean_joint_step_m": 0.05490684204015658,
+              "root_speed_mps": 0.38928766557508543,
+              "velocity_jump_mps": 0.17300677003399603,
+              "actor_index": 1,
+              "max_joint_step_m": 0.1908900886774063,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 25.263504028320312,
+              "mean_joint_rotation_deg": 11.564088821411133,
+              "root_angular_velocity_deg_s": 190.78903198242188
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.0215072316438146,
+              "mean_joint_step_m": 0.04492195597790428,
+              "root_speed_mps": 0.430144632876292,
+              "velocity_jump_mps": 0.1033991699604253,
+              "actor_index": 1,
+              "max_joint_step_m": 0.10621879994869232,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 35.015804290771484,
+              "mean_joint_rotation_deg": 8.43439769744873,
+              "root_angular_velocity_deg_s": 102.96212196350098
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.019806599719679484,
+              "mean_joint_step_m": 0.027705293325154465,
+              "root_speed_mps": 0.3961319943935897,
+              "velocity_jump_mps": 0.07715791097738932,
+              "actor_index": 1,
+              "max_joint_step_m": 0.07794413715600967,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 8.69045352935791,
+              "mean_joint_rotation_deg": 2.766801118850708,
+              "root_angular_velocity_deg_s": 28.98848295211792
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.011728149411432468,
+              "mean_joint_step_m": 0.014371442845709138,
+              "root_speed_mps": 0.23456298822864935,
+              "velocity_jump_mps": 0.07320704842877736,
+              "actor_index": 1,
+              "max_joint_step_m": 0.031167348846793175,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 14.588313102722168,
+              "mean_joint_rotation_deg": 3.7100088596343994,
+              "root_angular_velocity_deg_s": 29.385406970977783
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.01180066469217297,
+              "mean_joint_step_m": 0.011647204248943176,
+              "root_speed_mps": 0.23601329384345943,
+              "velocity_jump_mps": 0.062498844414452734,
+              "actor_index": 1,
+              "max_joint_step_m": 0.021903665736317635,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.778563976287842,
+              "mean_joint_rotation_deg": 1.6795294284820557,
+              "root_angular_velocity_deg_s": 13.875954151153564
+            },
+            {
+              "frame_after": 520,
+              "root_step_m": 0.01840373294704485,
+              "mean_joint_step_m": 0.024122594534558613,
+              "root_speed_mps": 0.368074658940897,
+              "velocity_jump_mps": 0.14769417559610695,
+              "actor_index": 1,
+              "max_joint_step_m": 0.07839236408472061,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.392924785614014,
+              "mean_joint_rotation_deg": 2.12505841255188,
+              "root_angular_velocity_deg_s": 28.24446678161621
+            },
+            {
+              "frame_after": 560,
+              "root_step_m": 0.007982243004657968,
+              "mean_joint_step_m": 0.008556554575676832,
+              "root_speed_mps": 0.15964486009315937,
+              "velocity_jump_mps": 0.03548183591228663,
+              "actor_index": 1,
+              "max_joint_step_m": 0.012035062536597252,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.5587157011032104,
+              "mean_joint_rotation_deg": 0.8224913477897644,
+              "root_angular_velocity_deg_s": 10.16438364982605
+            }
+          ],
+          "passed": true
+        },
+        "beat_seams": {
+          "seams": [
+            {
+              "frame_after": 120,
+              "root_step_m": 0.018263615296012392,
+              "mean_joint_step_m": 0.022162308765765526,
+              "root_speed_mps": 0.36527230592024784,
+              "velocity_jump_mps": 0.14992876463702345,
+              "actor_index": 0,
+              "max_joint_step_m": 0.06621282547712326,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.126510143280029,
+              "mean_joint_rotation_deg": 1.6586929559707642,
+              "root_angular_velocity_deg_s": 10.347541570663452
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.005206269029077588,
+              "mean_joint_step_m": 0.005542732074448842,
+              "root_speed_mps": 0.10412538058155175,
+              "velocity_jump_mps": 0.04903396637465852,
+              "actor_index": 0,
+              "max_joint_step_m": 0.009741215966641903,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.043921947479248,
+              "mean_joint_rotation_deg": 0.6481841802597046,
+              "root_angular_velocity_deg_s": 5.650972127914429
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.04892046847991809,
+              "mean_joint_step_m": 0.0409404505193023,
+              "root_speed_mps": 0.9784093695983619,
+              "velocity_jump_mps": 0.9134700768794074,
+              "actor_index": 0,
+              "max_joint_step_m": 0.06960847973823547,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 32.04759216308594,
+              "mean_joint_rotation_deg": 12.593128204345703,
+              "root_angular_velocity_deg_s": 42.622270584106445
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.03657620335397275,
+              "mean_joint_step_m": 0.031777327193323886,
+              "root_speed_mps": 0.7315240670794549,
+              "velocity_jump_mps": 0.09564861034186216,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04550568386912346,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 6.962381362915039,
+              "mean_joint_rotation_deg": 2.9614596366882324,
+              "root_angular_velocity_deg_s": 38.422343730926514
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.020095419358386435,
+              "mean_joint_step_m": 0.03158479833050675,
+              "root_speed_mps": 0.4019083871677287,
+              "velocity_jump_mps": 0.2816318349484823,
+              "actor_index": 0,
+              "max_joint_step_m": 0.09898708015680313,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 21.361204147338867,
+              "mean_joint_rotation_deg": 12.73719596862793,
+              "root_angular_velocity_deg_s": 263.9238739013672
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.016244643701168095,
+              "mean_joint_step_m": 0.05381905450754645,
+              "root_speed_mps": 0.3248928740233619,
+              "velocity_jump_mps": 0.0999489142300517,
+              "actor_index": 0,
+              "max_joint_step_m": 0.18649953603744507,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 27.42460060119629,
+              "mean_joint_rotation_deg": 10.88230037689209,
+              "root_angular_velocity_deg_s": 42.59286880493164
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.0015291761941901888,
+              "mean_joint_step_m": 0.010501544135246751,
+              "root_speed_mps": 0.030583523883803775,
+              "velocity_jump_mps": 0.02189649395501247,
+              "actor_index": 1,
+              "max_joint_step_m": 0.037128936499357224,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 10.679326057434082,
+              "mean_joint_rotation_deg": 3.924511671066284,
+              "root_angular_velocity_deg_s": 57.512450218200684
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.002005426611383353,
+              "mean_joint_step_m": 0.0024733793019196316,
+              "root_speed_mps": 0.04010853222766706,
+              "velocity_jump_mps": 0.01895851629162155,
+              "actor_index": 1,
+              "max_joint_step_m": 0.0038691118825227022,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 0.8471909165382385,
+              "mean_joint_rotation_deg": 0.43385544419288635,
+              "root_angular_velocity_deg_s": 10.527514219284058
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.041980964940189665,
+              "mean_joint_step_m": 0.036664834905879296,
+              "root_speed_mps": 0.8396192988037933,
+              "velocity_jump_mps": 0.8158977160760941,
+              "actor_index": 1,
+              "max_joint_step_m": 0.06263723224401474,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 63.076515197753906,
+              "mean_joint_rotation_deg": 13.917583465576172,
+              "root_angular_velocity_deg_s": 82.20747947692871
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.01946438327875427,
+              "mean_joint_step_m": 0.05490684204015658,
+              "root_speed_mps": 0.38928766557508543,
+              "velocity_jump_mps": 0.17300677003399603,
+              "actor_index": 1,
+              "max_joint_step_m": 0.1908900886774063,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 25.263504028320312,
+              "mean_joint_rotation_deg": 11.564088821411133,
+              "root_angular_velocity_deg_s": 190.78903198242188
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.0215072316438146,
+              "mean_joint_step_m": 0.04492195597790428,
+              "root_speed_mps": 0.430144632876292,
+              "velocity_jump_mps": 0.1033991699604253,
+              "actor_index": 1,
+              "max_joint_step_m": 0.10621879994869232,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 35.015804290771484,
+              "mean_joint_rotation_deg": 8.43439769744873,
+              "root_angular_velocity_deg_s": 102.96212196350098
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.01180066469217297,
+              "mean_joint_step_m": 0.011647204248943176,
+              "root_speed_mps": 0.23601329384345943,
+              "velocity_jump_mps": 0.062498844414452734,
+              "actor_index": 1,
+              "max_joint_step_m": 0.021903665736317635,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.778563976287842,
+              "mean_joint_rotation_deg": 1.6795294284820557,
+              "root_angular_velocity_deg_s": 13.875954151153564
+            }
+          ],
+          "passed": true
+        },
+        "scene_collision": {
+          "visitor": {
+            "version": 1,
+            "skeleton": "core27",
+            "frames": 600,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 30,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "arch-0",
+                "kind": "arch",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.5635118980407717,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "pillar-1",
+                "kind": "pillar",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 2.3305994153580065,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "pillar-2",
+                "kind": "pillar",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 1.1789524650573728,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          },
+          "friend": {
+            "version": 1,
+            "skeleton": "core27",
+            "frames": 600,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 30,
+            "total_collision_frames": 29,
+            "per_object": [
+              {
+                "object_id": "arch-0",
+                "kind": "arch",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.7585018587112426,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "pillar-1",
+                "kind": "pillar",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.428303233708999,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "pillar-2",
+                "kind": "pillar",
+                "collision_frames": 29,
+                "first_collision_frame": 459,
+                "minimum_clearance_m": -0.13318513870239265,
+                "worst_penetration_m": 0.13318513870239265
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        "required_collision_gates": [
+          {
+            "beat_id": "cross_gate",
+            "actor_id": "visitor",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          }
+        ],
+        "floor_motion": {
+          "visitor": {
+            "toe_min_height_above_floor_m": 0.010021686553955078,
+            "toe_penetration_max_depth_m": 0.0,
+            "toe_penetration_frames": 0,
+            "low_toe_samples": 1041,
+            "low_toe_slide_mean_mps": 0.25237828801336004,
+            "low_toe_slide_peak_mps": 3.139060996410959
+          },
+          "friend": {
+            "toe_min_height_above_floor_m": -0.013099253177642822,
+            "toe_penetration_max_depth_m": 0.013099253177642822,
+            "toe_penetration_frames": 272,
+            "low_toe_samples": 1135,
+            "low_toe_slide_mean_mps": 0.12615273915674555,
+            "low_toe_slide_peak_mps": 3.227130483407043
+          }
+        },
+        "pair_separation": {
+          "min_root_separation_xz_m": 0.43156920383249936,
+          "mean_root_separation_xz_m": 2.2940918724651045,
+          "root_disc_overlap_proxy_frames": 17,
+          "root_disc_overlap_proxy_fraction": 0.028333333333333332,
+          "collision_radius_sum_m": 0.5
+        },
+        "paired_hand_gap": {
+          "min_hand_distance_m": 0.023166251564508602,
+          "near_frames": 46,
+          "longest_near_run_frames": 23,
+          "longest_near_run_s": 1.15,
+          "contact_proxy": true,
+          "tolerance_m": 0.15,
+          "minimum_duration_s": 0.35
+        },
+        "independent_quality_gates": [
+          {
+            "beat_id": "cross_gate",
+            "metric": "gate_traversal",
+            "passed": true,
+            "measurement": {
+              "traversed_proxy": true,
+              "plane_crossings": [
+                {
+                  "frame_before": 90,
+                  "frame_after": 91,
+                  "fraction_after_frame": 0.6956408985510132,
+                  "max_body_lateral_m": 0.25186286983203254,
+                  "body_low_y_m": 0.7653022949916327,
+                  "body_high_y_m": 1.7766871014338543,
+                  "clearance_proxy": true
+                }
+              ],
+              "crossing_count": 1,
+              "opening_width_m": 1.7280000000000002,
+              "body_radius_m": 0.15,
+              "skeleton": "core27",
+              "g1_head_clearance_unchecked": false
+            }
+          },
+          {
+            "beat_id": "cross_gate",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "cross_gate",
+              "actor_id": "visitor",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "meet",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 1.0715736137087202,
+              "mean_root_separation_xz_m": 1.313981246069236,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "align_handshake",
+            "metric": "continuity",
+            "passed": true,
+            "measurement": {
+              "boundary_root_steps_m": [
+                0.005206269212067127,
+                0.0020054264459758997
+              ]
+            }
+          },
+          {
+            "beat_id": "handshake",
+            "metric": "hand_contact",
+            "passed": true,
+            "measurement": {
+              "min_hand_distance_m": 0.023166251564508602,
+              "near_frames": 46,
+              "longest_near_run_frames": 23,
+              "longest_near_run_s": 1.15,
+              "contact_proxy": true,
+              "tolerance_m": 0.15,
+              "minimum_duration_s": 0.35
+            }
+          },
+          {
+            "beat_id": "handshake",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 0.4680459326291119,
+              "mean_root_separation_xz_m": 0.9585009010375941,
+              "root_disc_overlap_proxy_frames": 3,
+              "root_disc_overlap_proxy_fraction": 0.0375,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "handshake_release",
+            "metric": "hand_release",
+            "passed": true,
+            "measurement": {
+              "mean_final_hand_gap_m": 0.5821641683578491
+            }
+          },
+          {
+            "beat_id": "handshake_release",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 0.43156920383249936,
+              "mean_root_separation_xz_m": 0.5158236313796112,
+              "root_disc_overlap_proxy_frames": 14,
+              "root_disc_overlap_proxy_fraction": 0.35,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "part",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 0.5675687312186654,
+              "mean_root_separation_xz_m": 1.93981815170428,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "depart",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 3.3861570008238875,
+              "mean_root_separation_xz_m": 4.303949246626403,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          }
+        ],
+        "job_first_chunk": {
+          "samples": 6,
+          "p50_s": 0.8677926459931768,
+          "p95_s": 1.1057920942475903,
+          "max_s": 1.1696739589970093
+        },
+        "job_realtime_factor_p05": 1.4418014532757737,
+        "job_local_underruns": 0,
+        "source_quality_complete": true,
+        "independent_quality_passed": true,
+        "required_prop_clearance_proxy": true,
+        "no_pair_root_overlap_proxy": false,
+        "pair_overlap_review_required": true
+      },
+      {
+        "scenario": "staged_fight",
+        "passed": true,
+        "source_status": "complete",
+        "frames": 600,
+        "actors": 2,
+        "project_raw_exact": true,
+        "resave_exact": true,
+        "source_artifact_sha256": {
+          "report_sha256": "eb64e424236ac110ba4c27ad289a5d37a6aa630a7a0baf996334bf6fb2d34e93",
+          "project_sha256": "49fa93557830ab780dcb79a75388420814eb6d65d3353cf1c9d3d3abb7a92f4f",
+          "raw_sha256": "2858f62162a2cdbf22b89faa9b937b50d0ad0a003831bf7fb913556dd2882cac",
+          "pair_source_sha256": "d548121ad46535f80fc1fb379ca7e9764dd46cf9bda9b1ad0ec45888d5272f5d"
+        },
+        "selected_screened_candidate": {
+          "seed": 38,
+          "prompt_index": 0,
+          "passed_screening": true,
+          "same_model_source_revision": true,
+          "passed": true
+        },
+        "playback": {
+          "clock": "wall",
+          "startup_seconds": 3.87043162502232,
+          "first_pose_network_seconds": 1.0279500420147087,
+          "buffer_underrun_seconds": 0.0,
+          "buffer_underrun_events": 0,
+          "pair_prefetch_seconds": 2.6138709580118302,
+          "realtime_passed": true
+        },
+        "realtime_measured": true,
+        "pair_source_transform": {
+          "source_frames": 120,
+          "max_position_error_m": 5.9602973889738564e-08,
+          "max_rotation_matrix_error": 2.9801547007934914e-08,
+          "shared_rigid_transform_exact": true,
+          "license": "CC BY-NC-SA 4.0",
+          "research_only": true
+        },
+        "all_chunk_seams": {
+          "seams": [
+            {
+              "frame_after": 40,
+              "root_step_m": 0.014379791968934796,
+              "mean_joint_step_m": 0.013211077055460292,
+              "root_speed_mps": 0.2875958393786959,
+              "velocity_jump_mps": 0.0452190139789467,
+              "actor_index": 0,
+              "max_joint_step_m": 0.01922082155942917,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.800487041473389,
+              "mean_joint_rotation_deg": 1.528851866722107,
+              "root_angular_velocity_deg_s": 12.347790002822876
+            },
+            {
+              "frame_after": 80,
+              "root_step_m": 0.016790941137504553,
+              "mean_joint_step_m": 0.013502942423765374,
+              "root_speed_mps": 0.33581882275009106,
+              "velocity_jump_mps": 0.0599602466206845,
+              "actor_index": 0,
+              "max_joint_step_m": 0.029944228008389473,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.768221855163574,
+              "mean_joint_rotation_deg": 1.6708203554153442,
+              "root_angular_velocity_deg_s": 20.25181531906128
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.013972281551542962,
+              "mean_joint_step_m": 0.0112953575824829,
+              "root_speed_mps": 0.27944563103085923,
+              "velocity_jump_mps": 0.03397077875111473,
+              "actor_index": 0,
+              "max_joint_step_m": 0.015683233737945557,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.5840682983398438,
+              "mean_joint_rotation_deg": 1.35027015209198,
+              "root_angular_velocity_deg_s": 10.849710702896118
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.04570725652516009,
+              "mean_joint_step_m": 0.03920283470066655,
+              "root_speed_mps": 0.9141451305032018,
+              "velocity_jump_mps": 0.9248894706003343,
+              "actor_index": 0,
+              "max_joint_step_m": 0.058431897312402725,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 45.747962951660156,
+              "mean_joint_rotation_deg": 18.89117431640625,
+              "root_angular_velocity_deg_s": 48.22704315185547
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.014940560379996167,
+              "mean_joint_step_m": 0.019000833923430407,
+              "root_speed_mps": 0.29881120759992336,
+              "velocity_jump_mps": 0.12642057335251555,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04109415039420128,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 6.891021251678467,
+              "mean_joint_rotation_deg": 3.1289560794830322,
+              "root_angular_velocity_deg_s": 30.977838039398193
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.028166429893940113,
+              "mean_joint_step_m": 0.054498881243633085,
+              "root_speed_mps": 0.5633285978788023,
+              "velocity_jump_mps": 0.6760670017831166,
+              "actor_index": 0,
+              "max_joint_step_m": 0.2986682653427124,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 31.935869216918945,
+              "mean_joint_rotation_deg": 9.789758682250977,
+              "root_angular_velocity_deg_s": 227.54867553710938
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.016390693373059245,
+              "mean_joint_step_m": 0.019472957041156105,
+              "root_speed_mps": 0.3278138674611849,
+              "velocity_jump_mps": 0.1313576396271731,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05406549200415611,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 31.01496124267578,
+              "mean_joint_rotation_deg": 8.348146438598633,
+              "root_angular_velocity_deg_s": 44.66361999511719
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.009539249484404001,
+              "mean_joint_step_m": 0.018622173737523194,
+              "root_speed_mps": 0.19078498968808003,
+              "velocity_jump_mps": 0.05529398893695734,
+              "actor_index": 0,
+              "max_joint_step_m": 0.041007764637470245,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 8.242310523986816,
+              "mean_joint_rotation_deg": 3.4036495685577393,
+              "root_angular_velocity_deg_s": 36.602628231048584
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.006920314342368444,
+              "mean_joint_step_m": 0.010019187645945723,
+              "root_speed_mps": 0.1384062868473689,
+              "velocity_jump_mps": 0.07495130395166867,
+              "actor_index": 0,
+              "max_joint_step_m": 0.014872782863676548,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.557323932647705,
+              "mean_joint_rotation_deg": 1.8011245727539062,
+              "root_angular_velocity_deg_s": 40.95879077911377
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.0077790952711562725,
+              "mean_joint_step_m": 0.015152883602780174,
+              "root_speed_mps": 0.15558190542312544,
+              "velocity_jump_mps": 0.07613455544205848,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05317690968513489,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 5.150921821594238,
+              "mean_joint_rotation_deg": 2.237800359725952,
+              "root_angular_velocity_deg_s": 27.786242961883545
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.005106333470477587,
+              "mean_joint_step_m": 0.006958602041461936,
+              "root_speed_mps": 0.10212666940955173,
+              "velocity_jump_mps": 0.06879390208124542,
+              "actor_index": 0,
+              "max_joint_step_m": 0.009691244922578335,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.967418909072876,
+              "mean_joint_rotation_deg": 1.2063353061676025,
+              "root_angular_velocity_deg_s": 6.026319265365601
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.007394176953476312,
+              "mean_joint_step_m": 0.017505692707426086,
+              "root_speed_mps": 0.14788353906952625,
+              "velocity_jump_mps": 0.03809813243238011,
+              "actor_index": 0,
+              "max_joint_step_m": 0.07276686280965805,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 10.453986167907715,
+              "mean_joint_rotation_deg": 3.0014760494232178,
+              "root_angular_velocity_deg_s": 28.327484130859375
+            },
+            {
+              "frame_after": 520,
+              "root_step_m": 0.0034590219690193743,
+              "mean_joint_step_m": 0.004525603035059548,
+              "root_speed_mps": 0.06918043938038748,
+              "velocity_jump_mps": 0.06117891433326702,
+              "actor_index": 0,
+              "max_joint_step_m": 0.007668025325983763,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.5423738956451416,
+              "mean_joint_rotation_deg": 1.3578088283538818,
+              "root_angular_velocity_deg_s": 8.829241394996643
+            },
+            {
+              "frame_after": 560,
+              "root_step_m": 0.007959331807525297,
+              "mean_joint_step_m": 0.020013338792426928,
+              "root_speed_mps": 0.15918663615050593,
+              "velocity_jump_mps": 0.131448526790321,
+              "actor_index": 0,
+              "max_joint_step_m": 0.12826897203922272,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 12.58926010131836,
+              "mean_joint_rotation_deg": 3.0643625259399414,
+              "root_angular_velocity_deg_s": 26.647346019744873
+            },
+            {
+              "frame_after": 40,
+              "root_step_m": 0.020370674977392016,
+              "mean_joint_step_m": 0.01846221056329615,
+              "root_speed_mps": 0.40741349954784034,
+              "velocity_jump_mps": 0.07518127674131628,
+              "actor_index": 1,
+              "max_joint_step_m": 0.024389715865254402,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.189280033111572,
+              "mean_joint_rotation_deg": 1.5773049592971802,
+              "root_angular_velocity_deg_s": 21.010591983795166
+            },
+            {
+              "frame_after": 80,
+              "root_step_m": 0.016041957514931048,
+              "mean_joint_step_m": 0.014629656440069331,
+              "root_speed_mps": 0.320839150298621,
+              "velocity_jump_mps": 0.03187039149434792,
+              "actor_index": 1,
+              "max_joint_step_m": 0.018075719475746155,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.720165491104126,
+              "mean_joint_rotation_deg": 1.2381150722503662,
+              "root_angular_velocity_deg_s": 21.735708713531494
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.007516560329004342,
+              "mean_joint_step_m": 0.0057366578201890886,
+              "root_speed_mps": 0.15033120658008683,
+              "velocity_jump_mps": 0.03107648699046706,
+              "actor_index": 1,
+              "max_joint_step_m": 0.013144134543836117,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.9708471298217773,
+              "mean_joint_rotation_deg": 0.9666016697883606,
+              "root_angular_velocity_deg_s": 11.35724663734436
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.09640272986845834,
+              "mean_joint_step_m": 0.09934068674670146,
+              "root_speed_mps": 1.9280545973691667,
+              "velocity_jump_mps": 1.9299623913853845,
+              "actor_index": 1,
+              "max_joint_step_m": 0.13177090883255005,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 60.177734375,
+              "mean_joint_rotation_deg": 20.255970001220703,
+              "root_angular_velocity_deg_s": 63.118295669555664
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.0062372950372772745,
+              "mean_joint_step_m": 0.010695919545335393,
+              "root_speed_mps": 0.1247459007455455,
+              "velocity_jump_mps": 0.13310470500645072,
+              "actor_index": 1,
+              "max_joint_step_m": 0.041138626635074615,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 8.433494567871094,
+              "mean_joint_rotation_deg": 2.531170129776001,
+              "root_angular_velocity_deg_s": 22.742321491241455
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.054930622516919825,
+              "mean_joint_step_m": 0.045073075164715475,
+              "root_speed_mps": 1.0986124503383965,
+              "velocity_jump_mps": 0.3671225267138434,
+              "actor_index": 1,
+              "max_joint_step_m": 0.09548089653253555,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 11.273370742797852,
+              "mean_joint_rotation_deg": 4.47893762588501,
+              "root_angular_velocity_deg_s": 34.31095361709595
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.014944016363562847,
+              "mean_joint_step_m": 0.02428575836461597,
+              "root_speed_mps": 0.29888032727125696,
+              "velocity_jump_mps": 0.06593271726537428,
+              "actor_index": 1,
+              "max_joint_step_m": 0.05967508628964424,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 33.07807922363281,
+              "mean_joint_rotation_deg": 13.474231719970703,
+              "root_angular_velocity_deg_s": 162.07595825195312
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.005413332830174462,
+              "mean_joint_step_m": 0.006743408317566128,
+              "root_speed_mps": 0.10826665660348925,
+              "velocity_jump_mps": 0.034148761910331026,
+              "actor_index": 1,
+              "max_joint_step_m": 0.011356194503605366,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.0667953491210938,
+              "mean_joint_rotation_deg": 0.6890683174133301,
+              "root_angular_velocity_deg_s": 16.823283433914185
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.0066120731620132435,
+              "mean_joint_step_m": 0.005742929081476838,
+              "root_speed_mps": 0.13224146324026487,
+              "velocity_jump_mps": 0.01989655545934885,
+              "actor_index": 1,
+              "max_joint_step_m": 0.009985831566154957,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.202115297317505,
+              "mean_joint_rotation_deg": 1.0156745910644531,
+              "root_angular_velocity_deg_s": 23.626861572265625
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.0008055931922668476,
+              "mean_joint_step_m": 0.004728439281635906,
+              "root_speed_mps": 0.01611186384533695,
+              "velocity_jump_mps": 0.04066915153072625,
+              "actor_index": 1,
+              "max_joint_step_m": 0.0121108153834939,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.2834479808807373,
+              "mean_joint_rotation_deg": 1.2242215871810913,
+              "root_angular_velocity_deg_s": 24.014601707458496
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.005750973360589497,
+              "mean_joint_step_m": 0.007852527021745345,
+              "root_speed_mps": 0.11501946721178993,
+              "velocity_jump_mps": 0.013302468211751876,
+              "actor_index": 1,
+              "max_joint_step_m": 0.016371147707104683,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.751671314239502,
+              "mean_joint_rotation_deg": 0.9583699107170105,
+              "root_angular_velocity_deg_s": 7.359468936920166
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.006935313895118132,
+              "mean_joint_step_m": 0.006990781604167779,
+              "root_speed_mps": 0.13870627790236265,
+              "velocity_jump_mps": 0.04763241599034626,
+              "actor_index": 1,
+              "max_joint_step_m": 0.011559774167835712,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.4304327964782715,
+              "mean_joint_rotation_deg": 1.2851247787475586,
+              "root_angular_velocity_deg_s": 14.352859258651733
+            },
+            {
+              "frame_after": 520,
+              "root_step_m": 0.007373606123069585,
+              "mean_joint_step_m": 0.005271448715522476,
+              "root_speed_mps": 0.1474721224613917,
+              "velocity_jump_mps": 0.060878012609379424,
+              "actor_index": 1,
+              "max_joint_step_m": 0.0086350217461586,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.916851758956909,
+              "mean_joint_rotation_deg": 1.2946958541870117,
+              "root_angular_velocity_deg_s": 16.2168288230896
+            },
+            {
+              "frame_after": 560,
+              "root_step_m": 0.006162328080933598,
+              "mean_joint_step_m": 0.006153912070083056,
+              "root_speed_mps": 0.12324656161867197,
+              "velocity_jump_mps": 0.07970952701491009,
+              "actor_index": 1,
+              "max_joint_step_m": 0.011780967935919762,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.7924046516418457,
+              "mean_joint_rotation_deg": 1.197764277458191,
+              "root_angular_velocity_deg_s": 12.536510229110718
+            }
+          ],
+          "passed": true
+        },
+        "beat_seams": {
+          "seams": [
+            {
+              "frame_after": 120,
+              "root_step_m": 0.013972281551542962,
+              "mean_joint_step_m": 0.0112953575824829,
+              "root_speed_mps": 0.27944563103085923,
+              "velocity_jump_mps": 0.03397077875111473,
+              "actor_index": 0,
+              "max_joint_step_m": 0.015683233737945557,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.5840682983398438,
+              "mean_joint_rotation_deg": 1.35027015209198,
+              "root_angular_velocity_deg_s": 10.849710702896118
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.04570725652516009,
+              "mean_joint_step_m": 0.03920283470066655,
+              "root_speed_mps": 0.9141451305032018,
+              "velocity_jump_mps": 0.9248894706003343,
+              "actor_index": 0,
+              "max_joint_step_m": 0.058431897312402725,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 45.747962951660156,
+              "mean_joint_rotation_deg": 18.89117431640625,
+              "root_angular_velocity_deg_s": 48.22704315185547
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.028166429893940113,
+              "mean_joint_step_m": 0.054498881243633085,
+              "root_speed_mps": 0.5633285978788023,
+              "velocity_jump_mps": 0.6760670017831166,
+              "actor_index": 0,
+              "max_joint_step_m": 0.2986682653427124,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 31.935869216918945,
+              "mean_joint_rotation_deg": 9.789758682250977,
+              "root_angular_velocity_deg_s": 227.54867553710938
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.016390693373059245,
+              "mean_joint_step_m": 0.019472957041156105,
+              "root_speed_mps": 0.3278138674611849,
+              "velocity_jump_mps": 0.1313576396271731,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05406549200415611,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 31.01496124267578,
+              "mean_joint_rotation_deg": 8.348146438598633,
+              "root_angular_velocity_deg_s": 44.66361999511719
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.005106333470477587,
+              "mean_joint_step_m": 0.006958602041461936,
+              "root_speed_mps": 0.10212666940955173,
+              "velocity_jump_mps": 0.06879390208124542,
+              "actor_index": 0,
+              "max_joint_step_m": 0.009691244922578335,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.967418909072876,
+              "mean_joint_rotation_deg": 1.2063353061676025,
+              "root_angular_velocity_deg_s": 6.026319265365601
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.007516560329004342,
+              "mean_joint_step_m": 0.0057366578201890886,
+              "root_speed_mps": 0.15033120658008683,
+              "velocity_jump_mps": 0.03107648699046706,
+              "actor_index": 1,
+              "max_joint_step_m": 0.013144134543836117,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.9708471298217773,
+              "mean_joint_rotation_deg": 0.9666016697883606,
+              "root_angular_velocity_deg_s": 11.35724663734436
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.09640272986845834,
+              "mean_joint_step_m": 0.09934068674670146,
+              "root_speed_mps": 1.9280545973691667,
+              "velocity_jump_mps": 1.9299623913853845,
+              "actor_index": 1,
+              "max_joint_step_m": 0.13177090883255005,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 60.177734375,
+              "mean_joint_rotation_deg": 20.255970001220703,
+              "root_angular_velocity_deg_s": 63.118295669555664
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.054930622516919825,
+              "mean_joint_step_m": 0.045073075164715475,
+              "root_speed_mps": 1.0986124503383965,
+              "velocity_jump_mps": 0.3671225267138434,
+              "actor_index": 1,
+              "max_joint_step_m": 0.09548089653253555,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 11.273370742797852,
+              "mean_joint_rotation_deg": 4.47893762588501,
+              "root_angular_velocity_deg_s": 34.31095361709595
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.014944016363562847,
+              "mean_joint_step_m": 0.02428575836461597,
+              "root_speed_mps": 0.29888032727125696,
+              "velocity_jump_mps": 0.06593271726537428,
+              "actor_index": 1,
+              "max_joint_step_m": 0.05967508628964424,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 33.07807922363281,
+              "mean_joint_rotation_deg": 13.474231719970703,
+              "root_angular_velocity_deg_s": 162.07595825195312
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.005750973360589497,
+              "mean_joint_step_m": 0.007852527021745345,
+              "root_speed_mps": 0.11501946721178993,
+              "velocity_jump_mps": 0.013302468211751876,
+              "actor_index": 1,
+              "max_joint_step_m": 0.016371147707104683,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.751671314239502,
+              "mean_joint_rotation_deg": 0.9583699107170105,
+              "root_angular_velocity_deg_s": 7.359468936920166
+            }
+          ],
+          "passed": true
+        },
+        "scene_collision": {
+          "fighter_a": {
+            "version": 1,
+            "skeleton": "core27",
+            "frames": 600,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 30,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "crate-0",
+                "kind": "crate",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.8790087208615072,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "crate-1",
+                "kind": "crate",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.031127253770828,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          },
+          "fighter_b": {
+            "version": 1,
+            "skeleton": "core27",
+            "frames": 600,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 30,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "crate-0",
+                "kind": "crate",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.3946124705058724,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "crate-1",
+                "kind": "crate",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 1.0994127419255753,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        "required_collision_gates": [
+          {
+            "beat_id": "square_up",
+            "actor_id": "fighter_a",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          },
+          {
+            "beat_id": "square_up",
+            "actor_id": "fighter_b",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          },
+          {
+            "beat_id": "recover",
+            "actor_id": "fighter_a",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          },
+          {
+            "beat_id": "recover",
+            "actor_id": "fighter_b",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          }
+        ],
+        "floor_motion": {
+          "fighter_a": {
+            "toe_min_height_above_floor_m": -0.00908956304192543,
+            "toe_penetration_max_depth_m": 0.00908956304192543,
+            "toe_penetration_frames": 3,
+            "low_toe_samples": 619,
+            "low_toe_slide_mean_mps": 0.12458979706339626,
+            "low_toe_slide_peak_mps": 3.1379670950313594
+          },
+          "fighter_b": {
+            "toe_min_height_above_floor_m": -0.0012698173522949219,
+            "toe_penetration_max_depth_m": 0.0012698173522949219,
+            "toe_penetration_frames": 17,
+            "low_toe_samples": 1072,
+            "low_toe_slide_mean_mps": 0.15481566109965042,
+            "low_toe_slide_peak_mps": 4.183602429116133
+          }
+        },
+        "pair_separation": {
+          "min_root_separation_xz_m": 0.9022003603176835,
+          "mean_root_separation_xz_m": 2.732803769487741,
+          "root_disc_overlap_proxy_frames": 0,
+          "root_disc_overlap_proxy_fraction": 0.0,
+          "collision_radius_sum_m": 0.5
+        },
+        "paired_hand_gap": {
+          "min_hand_distance_m": 0.10365211593351076,
+          "near_frames": 2,
+          "longest_near_run_frames": 2,
+          "longest_near_run_s": 0.1,
+          "contact_proxy": false,
+          "tolerance_m": 0.15,
+          "minimum_duration_s": 0.35
+        },
+        "independent_quality_gates": [
+          {
+            "beat_id": "square_up",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 1.9810861814153413,
+              "mean_root_separation_xz_m": 3.8177583260077674,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "square_up",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "square_up",
+              "actor_id": "fighter_a",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "square_up",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "square_up",
+              "actor_id": "fighter_b",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "align_dodge",
+            "metric": "continuity",
+            "passed": true,
+            "measurement": {
+              "boundary_root_steps_m": [
+                0.013972281478345394,
+                0.007516560610383749
+              ]
+            }
+          },
+          {
+            "beat_id": "dodge_block_push",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 0.9943236733993817,
+              "mean_root_separation_xz_m": 1.128428204670548,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "dodge_block_push",
+            "metric": "dodge_lateral",
+            "passed": true,
+            "measurement": {
+              "relative_lateral_range_m": 0.49147194623947144
+            }
+          },
+          {
+            "beat_id": "dodge_block_push",
+            "metric": "block_guard",
+            "passed": true,
+            "measurement": {
+              "min_hand_forearm_gap_m": 0.14860941469669342,
+              "longest_near_run_s": 0.15
+            }
+          },
+          {
+            "beat_id": "dodge_block_push",
+            "metric": "push_reaction",
+            "passed": true,
+            "measurement": {
+              "first_third_mean_root_gap_m": 1.0069270133972168,
+              "last_third_mean_root_gap_m": 1.1676478385925293
+            }
+          },
+          {
+            "beat_id": "fight_release",
+            "metric": "hand_release",
+            "passed": true,
+            "measurement": {
+              "mean_final_hand_gap_m": 1.022042989730835
+            }
+          },
+          {
+            "beat_id": "fight_release",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 0.943387101559608,
+              "mean_root_separation_xz_m": 1.1676478873369203,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "recover",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 1.1740002684153361,
+              "mean_root_separation_xz_m": 2.08809228732002,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          },
+          {
+            "beat_id": "recover",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "recover",
+              "actor_id": "fighter_a",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "recover",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "recover",
+              "actor_id": "fighter_b",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "disengage",
+            "metric": "pair_separation",
+            "passed": true,
+            "measurement": {
+              "min_root_separation_xz_m": 3.0439572157849093,
+              "mean_root_separation_xz_m": 4.06088367698608,
+              "root_disc_overlap_proxy_frames": 0,
+              "root_disc_overlap_proxy_fraction": 0.0,
+              "collision_radius_sum_m": 0.5
+            }
+          }
+        ],
+        "job_first_chunk": {
+          "samples": 5,
+          "p50_s": 0.8898742079909425,
+          "p95_s": 1.7977972411958034,
+          "max_s": 1.9902590409910772
+        },
+        "job_realtime_factor_p05": 1.288759365267969,
+        "job_local_underruns": 0,
+        "source_quality_complete": true,
+        "independent_quality_passed": true,
+        "required_prop_clearance_proxy": true,
+        "no_pair_root_overlap_proxy": true,
+        "pair_overlap_review_required": false
+      },
+      {
+        "scenario": "object_reach_inspect",
+        "passed": true,
+        "source_status": "complete",
+        "frames": 600,
+        "actors": 1,
+        "project_raw_exact": true,
+        "resave_exact": true,
+        "source_artifact_sha256": {
+          "report_sha256": "1b764d830281dd4db0ee6e9510df045ec8e6a859eceaf59120cc9debed643db5",
+          "project_sha256": "27c3d5a793b55182445d24813df0467a7f4a513cde2cf991580de7e3ff61f5cb",
+          "raw_sha256": "e22b5e8adcfcd37307a6c510c4c3fca688dba0d2126ae030467e50598446db94"
+        },
+        "selected_screened_candidate": null,
+        "playback": {
+          "clock": "wall",
+          "startup_seconds": 0.7269671669928357,
+          "first_pose_network_seconds": 0.7267554579884745,
+          "buffer_underrun_seconds": 0.0,
+          "buffer_underrun_events": 0,
+          "pair_prefetch_seconds": 0.0,
+          "realtime_passed": true
+        },
+        "realtime_measured": true,
+        "pair_source_transform": null,
+        "all_chunk_seams": {
+          "seams": [
+            {
+              "frame_after": 40,
+              "root_step_m": 0.017354959965769738,
+              "mean_joint_step_m": 0.02158241319928671,
+              "root_speed_mps": 0.3470991993153948,
+              "velocity_jump_mps": 0.19577623449413972,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04199093207716942,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.455111503601074,
+              "mean_joint_rotation_deg": 1.493145227432251,
+              "root_angular_velocity_deg_s": 22.395501136779785
+            },
+            {
+              "frame_after": 80,
+              "root_step_m": 0.015666164123430627,
+              "mean_joint_step_m": 0.018618738435054336,
+              "root_speed_mps": 0.3133232824686125,
+              "velocity_jump_mps": 0.05893241287166818,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05340472608804703,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.133464813232422,
+              "mean_joint_rotation_deg": 1.234815001487732,
+              "root_angular_velocity_deg_s": 6.103748679161072
+            },
+            {
+              "frame_after": 120,
+              "root_step_m": 0.031432029421947616,
+              "mean_joint_step_m": 0.030076747855468607,
+              "root_speed_mps": 0.6286405884389523,
+              "velocity_jump_mps": 0.1579897606991552,
+              "actor_index": 0,
+              "max_joint_step_m": 0.03788188472390175,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.556007385253906,
+              "mean_joint_rotation_deg": 2.0857739448547363,
+              "root_angular_velocity_deg_s": 30.76993703842163
+            },
+            {
+              "frame_after": 160,
+              "root_step_m": 0.0014223457623255991,
+              "mean_joint_step_m": 0.008442732037420731,
+              "root_speed_mps": 0.02844691524651198,
+              "velocity_jump_mps": 0.09967669485356165,
+              "actor_index": 0,
+              "max_joint_step_m": 0.023828517645597458,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.204679012298584,
+              "mean_joint_rotation_deg": 1.8678431510925293,
+              "root_angular_velocity_deg_s": 22.493152618408203
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.0023890778301611797,
+              "mean_joint_step_m": 0.002953291796317642,
+              "root_speed_mps": 0.04778155660322359,
+              "velocity_jump_mps": 0.010700049119083527,
+              "actor_index": 0,
+              "max_joint_step_m": 0.005481052212417126,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.4298501014709473,
+              "mean_joint_rotation_deg": 0.4677995443344116,
+              "root_angular_velocity_deg_s": 5.73347270488739
+            },
+            {
+              "frame_after": 240,
+              "root_step_m": 0.00924211130986233,
+              "mean_joint_step_m": 0.012308524782781615,
+              "root_speed_mps": 0.18484222619724658,
+              "velocity_jump_mps": 0.08825652964650572,
+              "actor_index": 0,
+              "max_joint_step_m": 0.029940132051706314,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 4.905603885650635,
+              "mean_joint_rotation_deg": 2.18428111076355,
+              "root_angular_velocity_deg_s": 25.408315658569336
+            },
+            {
+              "frame_after": 280,
+              "root_step_m": 0.0013277037473107905,
+              "mean_joint_step_m": 0.003920799034124773,
+              "root_speed_mps": 0.02655407494621581,
+              "velocity_jump_mps": 0.02203524334390892,
+              "actor_index": 0,
+              "max_joint_step_m": 0.012528728693723679,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.5640323162078857,
+              "mean_joint_rotation_deg": 1.3880534172058105,
+              "root_angular_velocity_deg_s": 6.57298743724823
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.016517961838364643,
+              "mean_joint_step_m": 0.023930631496700452,
+              "root_speed_mps": 0.33035923676729284,
+              "velocity_jump_mps": 0.12746799406097709,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04070330783724785,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 14.935104370117188,
+              "mean_joint_rotation_deg": 5.538172245025635,
+              "root_angular_velocity_deg_s": 58.75699043273926
+            },
+            {
+              "frame_after": 360,
+              "root_step_m": 0.007473185901366783,
+              "mean_joint_step_m": 0.006096750309143107,
+              "root_speed_mps": 0.14946371802733566,
+              "velocity_jump_mps": 0.05039321188808354,
+              "actor_index": 0,
+              "max_joint_step_m": 0.015248212963342667,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.0968029499053955,
+              "mean_joint_rotation_deg": 1.4225878715515137,
+              "root_angular_velocity_deg_s": 58.92466068267822
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.003666879532592178,
+              "mean_joint_step_m": 0.0028957983513934332,
+              "root_speed_mps": 0.07333759065184356,
+              "velocity_jump_mps": 0.030815570579639025,
+              "actor_index": 0,
+              "max_joint_step_m": 0.00715723866596818,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.243010401725769,
+              "mean_joint_rotation_deg": 0.6878933906555176,
+              "root_angular_velocity_deg_s": 23.540568351745605
+            },
+            {
+              "frame_after": 440,
+              "root_step_m": 0.0011325074483692157,
+              "mean_joint_step_m": 0.002369919231850518,
+              "root_speed_mps": 0.022650148967384313,
+              "velocity_jump_mps": 0.026792722207612096,
+              "actor_index": 0,
+              "max_joint_step_m": 0.004086784087121487,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.308058500289917,
+              "mean_joint_rotation_deg": 0.6482555270195007,
+              "root_angular_velocity_deg_s": 25.512843132019043
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.004654388248542337,
+              "mean_joint_step_m": 0.005903981255944967,
+              "root_speed_mps": 0.09308776497084673,
+              "velocity_jump_mps": 0.07029380547980853,
+              "actor_index": 0,
+              "max_joint_step_m": 0.008501237258315086,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.4763753414154053,
+              "mean_joint_rotation_deg": 1.302864909172058,
+              "root_angular_velocity_deg_s": 16.31307363510132
+            },
+            {
+              "frame_after": 520,
+              "root_step_m": 0.019675046104159058,
+              "mean_joint_step_m": 0.019783447726574744,
+              "root_speed_mps": 0.39350092208318116,
+              "velocity_jump_mps": 0.030676950674127516,
+              "actor_index": 0,
+              "max_joint_step_m": 0.05447004362940788,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.572507381439209,
+              "mean_joint_rotation_deg": 3.0494649410247803,
+              "root_angular_velocity_deg_s": 21.18126630783081
+            },
+            {
+              "frame_after": 560,
+              "root_step_m": 0.019345045287145216,
+              "mean_joint_step_m": 0.015798871694242593,
+              "root_speed_mps": 0.3869009057429043,
+              "velocity_jump_mps": 0.044447752139524996,
+              "actor_index": 0,
+              "max_joint_step_m": 0.02129216119647026,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 2.922081708908081,
+              "mean_joint_rotation_deg": 1.4581233263015747,
+              "root_angular_velocity_deg_s": 24.53057050704956
+            }
+          ],
+          "passed": true
+        },
+        "beat_seams": {
+          "seams": [
+            {
+              "frame_after": 120,
+              "root_step_m": 0.031432029421947616,
+              "mean_joint_step_m": 0.030076747855468607,
+              "root_speed_mps": 0.6286405884389523,
+              "velocity_jump_mps": 0.1579897606991552,
+              "actor_index": 0,
+              "max_joint_step_m": 0.03788188472390175,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 7.556007385253906,
+              "mean_joint_rotation_deg": 2.0857739448547363,
+              "root_angular_velocity_deg_s": 30.76993703842163
+            },
+            {
+              "frame_after": 200,
+              "root_step_m": 0.0023890778301611797,
+              "mean_joint_step_m": 0.002953291796317642,
+              "root_speed_mps": 0.04778155660322359,
+              "velocity_jump_mps": 0.010700049119083527,
+              "actor_index": 0,
+              "max_joint_step_m": 0.005481052212417126,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.4298501014709473,
+              "mean_joint_rotation_deg": 0.4677995443344116,
+              "root_angular_velocity_deg_s": 5.73347270488739
+            },
+            {
+              "frame_after": 320,
+              "root_step_m": 0.016517961838364643,
+              "mean_joint_step_m": 0.023930631496700452,
+              "root_speed_mps": 0.33035923676729284,
+              "velocity_jump_mps": 0.12746799406097709,
+              "actor_index": 0,
+              "max_joint_step_m": 0.04070330783724785,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 14.935104370117188,
+              "mean_joint_rotation_deg": 5.538172245025635,
+              "root_angular_velocity_deg_s": 58.75699043273926
+            },
+            {
+              "frame_after": 400,
+              "root_step_m": 0.003666879532592178,
+              "mean_joint_step_m": 0.0028957983513934332,
+              "root_speed_mps": 0.07333759065184356,
+              "velocity_jump_mps": 0.030815570579639025,
+              "actor_index": 0,
+              "max_joint_step_m": 0.00715723866596818,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 1.243010401725769,
+              "mean_joint_rotation_deg": 0.6878933906555176,
+              "root_angular_velocity_deg_s": 23.540568351745605
+            },
+            {
+              "frame_after": 480,
+              "root_step_m": 0.004654388248542337,
+              "mean_joint_step_m": 0.005903981255944967,
+              "root_speed_mps": 0.09308776497084673,
+              "velocity_jump_mps": 0.07029380547980853,
+              "actor_index": 0,
+              "max_joint_step_m": 0.008501237258315086,
+              "pass_root": true,
+              "pass_mean_joint": true,
+              "pass_max_joint": true,
+              "max_joint_rotation_deg": 3.4763753414154053,
+              "mean_joint_rotation_deg": 1.302864909172058,
+              "root_angular_velocity_deg_s": 16.31307363510132
+            }
+          ],
+          "passed": true
+        },
+        "scene_collision": {
+          "inspector": {
+            "version": 1,
+            "skeleton": "core27",
+            "frames": 600,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 30,
+            "total_collision_frames": 136,
+            "per_object": [
+              {
+                "object_id": "console-0",
+                "kind": "console",
+                "collision_frames": 136,
+                "first_collision_frame": 124,
+                "minimum_clearance_m": -0.22561577796936036,
+                "worst_penetration_m": 0.22561577796936036
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        "required_collision_gates": [
+          {
+            "beat_id": "approach_console",
+            "actor_id": "inspector",
+            "frames": 0,
+            "limit": 0,
+            "passed": true
+          }
+        ],
+        "floor_motion": {
+          "inspector": {
+            "toe_min_height_above_floor_m": 0.011347711086273193,
+            "toe_penetration_max_depth_m": 0.0,
+            "toe_penetration_frames": 0,
+            "low_toe_samples": 930,
+            "low_toe_slide_mean_mps": 0.12636720552868422,
+            "low_toe_slide_peak_mps": 3.2812521892894546
+          }
+        },
+        "pair_separation": null,
+        "paired_hand_gap": null,
+        "independent_quality_gates": [
+          {
+            "beat_id": "approach_console",
+            "metric": "scene_collision",
+            "passed": true,
+            "measurement": {
+              "beat_id": "approach_console",
+              "actor_id": "inspector",
+              "frames": 0,
+              "limit": 0,
+              "passed": true
+            }
+          },
+          {
+            "beat_id": "reach_inspect",
+            "metric": "object_contact",
+            "passed": true,
+            "measurement": {
+              "min_hand_object_distance_m": 0.030392534375909927,
+              "near_frames": 70,
+              "longest_near_run_frames": 35,
+              "longest_near_run_s": 1.75,
+              "contact_proxy": true,
+              "tolerance_m": 0.12,
+              "minimum_duration_s": 0.2
+            }
+          }
+        ],
+        "job_first_chunk": {
+          "samples": 6,
+          "p50_s": 0.761871020498802,
+          "p95_s": 0.7653247597336303,
+          "max_s": 0.765372915979242
+        },
+        "job_realtime_factor_p05": 1.4464572778613225,
+        "job_local_underruns": 0,
+        "source_quality_complete": true,
+        "independent_quality_passed": true,
+        "required_prop_clearance_proxy": true,
+        "no_pair_root_overlap_proxy": true,
+        "pair_overlap_review_required": false
+      }
+    ],
+    "fight_screening": {
+      "available": true,
+      "passed": true,
+      "scope": "24 preselected seed/prompt candidates on one research model; not a reliability estimate",
+      "candidates": 24,
+      "passed_candidates": 7,
+      "passing_seed_prompt_indices": [
+        [
+          38,
+          0
+        ],
+        [
+          40,
+          1
+        ],
+        [
+          37,
+          2
+        ],
+        [
+          38,
+          2
+        ],
+        [
+          41,
+          2
+        ],
+        [
+          42,
+          2
+        ],
+        [
+          43,
+          2
+        ]
+      ],
+      "model_source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+      "sha256": "bfe370fe4ee3e47f0e432c1836701a7eadd4dcc12472f40e52ddc9bdd35bcecd"
+    },
+    "limitations": [
+      "Scene collision and hand contact use sampled geometric proxies; physical mesh collision and contact forces remain unverified.",
+      "Root-disc overlap during close contact is reported for review; this conservative proxy alone does not establish mesh collision.",
+      "Job local underruns omit client rendering and cross-job scheduling gaps; use a running viewer for final playback latency."
+    ]
+  },
+  "release": {
+    "scope": "research-preview",
+    "commercial_release_ready": false,
+    "blocking_license": "InterGen CC BY-NC-SA 4.0",
+    "reason": "The two integrated pair scenes use InterGen research motion; geometry proxies and viewer latency also require release-specific review."
+  },
+  "local_source": {
+    "scope": "local checkout at report generation; not a remote deployment attestation",
+    "sha256": {
+      "interaction_runtime.py": "ea97708884129bcfec3007b8b1fa13ae18a0f741353889f5cb60ed2847619659",
+      "motion_bridge.py": "04eca295c26f1c6fc60ee428bb552dc6f8641cd752ceffa4535c864e63651fda",
+      "realtime_backend.py": "fdf5542f2a9cccbd22a9f5cb9569316b62952a58181c4e16e35a30b4ae1c979d",
+      "realtime_client.py": "26e8f4447b899239663471038b563e62e6b29eb64fae576fc501081a74d7077b",
+      "realtime_director.py": "f56b0c3610faecf05e7edbf32df527b599aef7000671515990d10adef6370530",
+      "realtime_clip.py": "fb6e18b8503d185b3b26c1fab06923162f31fed8f3957167aacae4bdbab1aeb7",
+      "scene_beats.py": "98f9812327a2440d3b3045c6a38d45d1815026b10d660a54b5792ff5fd9beee7",
+      "experiments/generate_scene_showcase.py": "e98e41e7a5006d502cf4649522ef8f34d8cab2a7df8fef85749e5eb4f933cad7",
+      "experiments/verify_realtime_pipeline.py": "3784e972829133036cf24d35f14255c9bcd572891ab01e2e45cf8e054f9c838d"
+    }
+  }
+}

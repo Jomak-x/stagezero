@@ -221,7 +221,9 @@ class InteractionRuntime:
         return rep.normalize(world)[0]
 
     def generate(self, body: dict, *, is_cancelled: Callable[[str], bool] | None = None,
-                 deadline: float | None = None) -> tuple[dict[str, np.ndarray], dict]:
+                 deadline: float | None = None,
+                 on_window: Callable[[int, list[int], dict[str, np.ndarray]], None] | None = None
+                 ) -> tuple[dict[str, np.ndarray], dict]:
         import torch
         from ardy.tools import seed_everything
 
@@ -297,6 +299,20 @@ class InteractionRuntime:
                     if self.device == "cuda":
                         torch.cuda.synchronize()
                     step_times.append(time.perf_counter() - step_started)
+                    if on_window is not None:
+                        chunk = chunks[-1]
+                        # Decode the chronological prefix so velocity-integrated
+                        # roots keep the same origin as the final full-clip decode.
+                        decoded_prefix = self.model.motion_rep.inverse(
+                            torch.cat(chunks, dim=1), is_normalized=True)
+                        window = {
+                            "motion": chunk.detach().cpu().numpy().astype(np.float32, copy=True),
+                            "positions": decoded_prefix["posed_joints"][:, -HORIZON:].detach().cpu().numpy().astype(np.float32, copy=True),
+                            "rotations": decoded_prefix["global_rot_mats"][:, -HORIZON:].detach().cpu().numpy().astype(np.float32, copy=True),
+                        }
+                        _validate_output(window["motion"], window["positions"], window["rotations"],
+                                         len(selected), HORIZON, FEATURES)
+                        on_window(offset // HORIZON, indices, window)
                 checkpoint()
                 motion_tensor = torch.cat(chunks, dim=1)
                 decoded = self.model.motion_rep.inverse(motion_tensor, is_normalized=True)

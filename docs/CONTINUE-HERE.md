@@ -1,3 +1,5 @@
+> **2026-09-26 realtime integration:** See [REALTIME-RESULTS.md](REALTIME-RESULTS.md) and [REALTIME-DIRECTING.md](REALTIME-DIRECTING.md). Three full 600-frame scenes pass real GPU and independent artifact verification; warm Core 25/25 jobs pass. Private isolated viewer is on port 2350; the original studio remains separate. Paired InterGen is explicitly research-only. See the measured limits before making production claims.
+
 > **2026-09-26 scene interaction milestone:** The latest isolated experiments and review URLs are documented in [SCENE-INTERACTION-RESULTS.md](SCENE-INTERACTION-RESULTS.md). Branch: `codex/scene-interaction-lab`. Native Core gates/contact, real AI planning and InterGen paired motion are verified research components; they have not replaced the live studio. Experimental GPU processes have exited. The earlier scope below is historical and was superseded by the user’s explicit request to explore interactions and other models.
 
 # StageZero review handoff — 2026-09-26
