@@ -49,6 +49,9 @@ class CharacterControls:
         self._last_pose_key = None
         self._root = None
         self._controls = None
+        self._mapping_binding = None
+        self._mapping_folder = None
+        self._mapping_gui = None
         self._diagnostics = None
         self.renderer = renderer or GlbCharacterRenderer(server, on_result=self._on_result)
         self.upload_limits = None
@@ -237,7 +240,10 @@ class CharacterControls:
         gui.add_html('<div class="sz-section">Character<small>Load a rigged GLB to use its appearance with ARDY motion.</small></div>')
         upload = gui.add_upload_button('Load GLB', mime_type='.glb')
         choose = gui.add_dropdown('Character', ('G1 robot',))
-        mapping = gui.add_upload_button('Load rig mapping', mime_type='.json')
+        self._mapping_gui = gui
+        self._mapping_folder = gui.add_folder('Rig mapping')
+        with self._mapping_folder:
+            mapping = gui.add_upload_button('Load rig mapping', mime_type='.json')
         frame = gui.add_button('Frame character')
         status = gui.add_html('')
         with gui.add_folder('Rig diagnostics', expand_by_default=False):
@@ -247,6 +253,7 @@ class CharacterControls:
         self.upload_limits = ScopedUploadLimits(self.server)
         self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
+        self._bind_mapping_upload(mapping, None, self._ticket)
 
         @upload.on_upload
         def uploaded(event):
@@ -256,7 +263,7 @@ class CharacterControls:
                 self._ticket += 1
                 ticket = self._ticket
             try:
-                asset_id = self.add_file(event.target.value.content, event.target.value.name)
+                asset_id = self.add_file(event.file.content, event.file.name)
                 with self._lock:
                     if ticket == self._ticket:
                         self.select(asset_id, event.client.client_id)
@@ -272,17 +279,26 @@ class CharacterControls:
                     asset_id = self._options().get(choose.value)
                     self.select(asset_id, event.client.client_id)
 
-        @mapping.on_upload
+        @frame.on_click
+        def framed(event):
+            self.frame_character(event.client)
+
+    def _bind_mapping_upload(self, handle, asset_id, ticket):
+        """Bind each mapping upload control to one asset and selection epoch."""
+        self._mapping_binding = (asset_id, ticket)
+
+        @handle.on_upload
         def mapped(event):
             if event.client is None:
                 return
             with self._lock:
-                asset_id = self.mapping_asset_id
+                if ticket != self._ticket or asset_id != self.mapping_asset_id:
+                    return
                 if asset_id is None:
                     self._set_error('Load a rigged GLB before its mapping')
                     return
                 try:
-                    text = event.target.value.content.decode('utf-8')
+                    text = event.file.content.decode('utf-8')
                     entry = self._entry(self.entries[asset_id].asset, text)
                     if entry.retargeter is None:
                         raise ValueError(entry.reason)
@@ -293,9 +309,18 @@ class CharacterControls:
                 except (ValueError, OSError) as exc:
                     self._set_error(exc)
 
-        @frame.on_click
-        def framed(event):
-            self.frame_character(event.client)
+    def _mapping_control(self, target):
+        choose, mapping, status = self._controls
+        if self._mapping_binding != (target, self._ticket):
+            # Retire both the old UUID and its buffers. A callback already
+            # queued for that handle still fails its captured epoch check.
+            self.upload_limits.unregister(mapping, remove=True)
+            with self._mapping_folder:
+                mapping = self._mapping_gui.add_upload_button('Load rig mapping', mime_type='.json')
+            self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
+            self._bind_mapping_upload(mapping, target, self._ticket)
+            self._controls = (choose, mapping, status)
+        return mapping
 
     def _options(self):
         return {'G1 robot': None, **{f'{entry.asset.display_name} · {asset_id[:8]}': asset_id
@@ -309,6 +334,7 @@ class CharacterControls:
         if choose.options != tuple(options):
             choose.options = tuple(options)
         target = self._requested_id if self._pending is not None else self.active_id
+        mapping = self._mapping_control(target)
         label = next((label for label, value in options.items() if value == target), 'G1 robot')
         if choose.value != label:
             choose.value = label

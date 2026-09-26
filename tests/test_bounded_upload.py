@@ -86,6 +86,7 @@ class ScopedUploadLimitsTest(unittest.TestCase):
             self.completed.append((component_id, event.client_id, event.target._impl.value.content))
 
         handle = SimpleNamespace(_impl=SimpleNamespace(uuid=component_id, value=None, update_cb=[on_upload]))
+        handle.remove = lambda: self.gui._gui_input_handle_from_uuid.pop(component_id, None)
         self.gui._gui_input_handle_from_uuid[component_id] = handle
         return handle
 
@@ -123,6 +124,33 @@ class ScopedUploadLimitsTest(unittest.TestCase):
         self.assertEqual([m.transfer_uuid for m in self.rejections[1]],
                          ["oversize", "many-parts", "empty"])
         self.assertEqual(self.rejections[2], [])
+
+    def test_unregister_removes_only_target_and_discards_its_transfer_buffers(self):
+        errors = []
+        first = self.control('first')
+        self.guard(first, errors)
+        second = self.control('second')
+        self.limits.register(second, max_bytes=100_000, on_error=errors.append)
+        self.interface.dispatch(1, _start('first', 'old-mapping', 65_537, parts=2))
+        self.interface.dispatch(1, _part('first', 'old-mapping', 0, b'a' * 65_536))
+        self.interface.dispatch(2, _start('second', 'keep-mapping', 4))
+
+        self.limits.unregister(first, remove=True)
+
+        self.assertNotIn('first', self.gui._gui_input_handle_from_uuid)
+        self.assertNotIn('old-mapping', self.gui._current_file_upload_states)
+        self.assertIn('keep-mapping', self.gui._current_file_upload_states)
+        self.interface.dispatch(1, _part('first', 'old-mapping', 1, b'z'))
+        self.interface.dispatch(1, _start('first', 'stale-control', 1))
+        self.interface.dispatch(1, _part('first', 'stale-control', 0, b'x'))
+        self.interface.dispatch(2, _part('second', 'keep-mapping', 0, b'data'))
+        self.drain()
+        self.assertEqual(self.completed, [('second', 2, b'data')])
+        self.assertEqual(self.gui._current_file_upload_states, {})
+        self.assertEqual(errors, [])
+        self.assertEqual([message.transfer_uuid for message in self.rejections[1]], ['old-mapping'])
+        self.assertEqual(self.rejections[2], [])
+        self.limits.unregister(first, remove=True)
 
     def test_invalid_parts_abort_and_release_native_buffer(self):
         for bad_part in (

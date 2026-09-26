@@ -11,6 +11,7 @@ from character_controls import CharacterControls
 from character_assets import import_glb, inspect_glb
 from live_motion import MotionSession
 from retargeting import detect_rig_profile, neutral_source_pose
+from upload_events import UploadEvent, UploadFile
 from tests.glb_fixtures import base_document_and_binary, make_glb, make_humanoid_glb, make_static_glb
 
 
@@ -48,6 +49,52 @@ class BrowserBridge:
 
     def poll(self):
         pass
+
+
+class GuiHandle(SimpleNamespace):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def on_upload(self, callback):
+        self.upload = callback
+        return callback
+
+    def on_update(self, callback):
+        self.update = callback
+        return callback
+
+    def on_click(self, callback):
+        self.click = callback
+        return callback
+
+
+class CharacterGui:
+    """Public GUI surface; real transfer handling is tested separately."""
+    def __init__(self):
+        self.handles = {}
+
+    def add_html(self, content):
+        return GuiHandle(content=content)
+
+    add_markdown = add_html
+
+    def add_folder(self, label, **kwargs):
+        return GuiHandle()
+
+    def add_button(self, label, **kwargs):
+        handle = GuiHandle(visible=True, disabled=False, value=None)
+        self.handles[label] = handle
+        return handle
+
+    add_upload_button = add_button
+
+    def add_dropdown(self, label, options):
+        handle = self.add_button(label)
+        handle.options, handle.value = options, options[0]
+        return handle
 
 
 class CharacterControlsTests(unittest.TestCase):
@@ -145,6 +192,83 @@ class CharacterControlsTests(unittest.TestCase):
         expected = self.controls.active_entry.asset.bounds.mean(axis=0)
         expected[1] = 0.
         np.testing.assert_allclose(self.controls.actor_root(), expected)
+
+    def build_upload_gui(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        return gui
+
+    def mapping_payload(self):
+        profile = detect_rig_profile(self.controls.entries[self.rigged].asset)
+        return UploadFile('first.json', json.dumps({
+            'bones': dict(profile.bones), 'root_scale': 1.7,
+        }).encode())
+
+    def test_glb_callback_imports_completed_file_when_live_handle_has_newer_file(self):
+        gui = self.build_upload_gui()
+        handle = gui.handles['Load GLB']
+        document, binary = base_document_and_binary()
+        document['asset']['generator'] = 'completed first transfer'
+        payload = make_glb(document, binary)
+        expected = inspect_glb(payload)
+        handle.value = UploadFile('later.glb', make_humanoid_glb('mixamo'))
+        event = UploadEvent(SimpleNamespace(client_id=1), 1, handle, 'glb-a',
+                            UploadFile('first.glb', payload))
+
+        handle.upload(event)
+
+        self.assertEqual(self.controls.mapping_asset_id, expected.asset_id)
+        imported = self.controls.entries[expected.asset_id].asset
+        self.assertEqual(imported.display_name, 'first.glb')
+        self.assertEqual(imported.glb_bytes, payload)
+
+    def test_mapping_callback_uses_completed_file_when_live_handle_has_newer_file(self):
+        gui = self.build_upload_gui()
+        root = Path(self.directory.name)
+        import_glb(make_humanoid_glb('mixamo'), root)
+        self.controls.select(self.rigged, 1)
+        self.controls.tick()
+        handle = gui.handles['Load rig mapping']
+        handle.value = UploadFile('later.json', b'invalid later JSON')
+        event = UploadEvent(SimpleNamespace(client_id=1), 1, handle, 'mapping-a',
+                            self.mapping_payload())
+
+        handle.upload(event)
+
+        saved = json.loads((root / self.rigged / 'mapping.json').read_text())
+        self.assertEqual(saved['root_scale'], 1.7)
+        self.assertEqual(self.controls.entries[self.rigged].retargeter.profile.root_scale, 1.7)
+
+    def test_delayed_mapping_cannot_write_to_new_or_returned_selection(self):
+        gui = self.build_upload_gui()
+        root = Path(self.directory.name)
+        import_glb(make_humanoid_glb('mixamo'), root)
+        other = self.controls.add_file(make_humanoid_glb('g1'), 'Other.glb')
+        self.controls.select(self.rigged, 1)
+        self.controls.tick()
+        original = gui.handles['Load rig mapping']
+        original.value = self.mapping_payload()
+        event = UploadEvent(SimpleNamespace(client_id=1), 1, original, 'mapping-a',
+                            self.mapping_payload())
+        callback = original.upload
+        original_scale = self.controls.entries[self.rigged].retargeter.profile.root_scale
+
+        self.controls.select(other, 1)
+        self.controls.tick()
+        callback(event)
+
+        self.assertFalse((root / other / 'mapping.json').exists())
+        self.assertFalse((root / self.rigged / 'mapping.json').exists())
+        self.assertEqual(self.controls.mapping_asset_id, other)
+        self.assertIsNot(gui.handles['Load rig mapping'], original)
+
+        self.controls.select(self.rigged, 1)
+        self.controls.tick()
+        callback(event)
+
+        self.assertFalse((root / self.rigged / 'mapping.json').exists())
+        self.assertEqual(self.controls.entries[self.rigged].retargeter.profile.root_scale, original_scale)
 
     def test_full_saved_catalog_reimport_preserves_custom_mapping_and_name(self):
         with TemporaryDirectory() as directory:

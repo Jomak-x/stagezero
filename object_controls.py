@@ -5,9 +5,11 @@ import math
 from scene_composition import PRESETS, LIGHTING, make_preset
 from scene_effects import EFFECT_KINDS, make_effect
 from scene_generation import SceneGenerator, LocalSceneGenerator
+from upload_events import install_upload_snapshots
 
 
 def add_object_controls(gui, session):
+    install_upload_snapshots(gui)
     with gui.add_folder('Scene generator', expand_by_default=True):
         prompt = gui.add_text('Describe a scene', initial_value='An enchanted grove with a glowing portal and fireflies', multiline=True)
         source = gui.add_dropdown('Generation source', ('Recipes · offline', 'AI gateway · Neon', 'Local AI · Ollama'))
@@ -160,9 +162,9 @@ def add_object_controls(gui, session):
             event.client.send_file_download('scene.stagezero.json', (json.dumps(session.scene_document(), indent=2)+'\n').encode())
 
     @upload.on_upload
-    def uploaded(_):
+    def uploaded(event):
         def action():
-            data = upload.value.content
+            data = event.file.content
             if len(data) > 100000: raise ValueError('Scene file exceeds 100 KB')
             session.load_scene_document(json.loads(data))
         attempt(action)

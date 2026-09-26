@@ -6,6 +6,7 @@ import viser
 from takes import MAX_TAKES
 from duration_planning import plan_duration
 from studio_guide import GUIDE_HTML
+from upload_events import install_upload_snapshots
 from studio_navigation import navigate_tab
 
 CREATE = 'Create new'
@@ -60,6 +61,7 @@ def section(gui, title, description=''):
 
 class StudioUI:
     def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None):
+        install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.folder = project_folder
         self.folder.mkdir(parents=True, exist_ok=True)
@@ -756,7 +758,7 @@ class StudioUI:
                 try: self.open_data(path.read_bytes())
                 except OSError as exc: s.project_status = f'Open failed: {exc}'
         @self.upload.on_upload
-        def upload(_): self.open_data(self.upload.value.content)
+        def upload(event): self.open_data(event.file.content)
         @self.clear.on_click
         def clear(_):
             try:

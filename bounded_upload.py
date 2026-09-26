@@ -15,6 +15,7 @@ import time
 from typing import Callable
 
 from viser import _messages
+from upload_events import install_upload_snapshots
 
 
 _LOG = logging.getLogger(__name__)
@@ -77,6 +78,7 @@ class ScopedUploadLimits:
 
         self._server = server
         self._gui = server.gui
+        install_upload_snapshots(server)
         self._interface = self._gui._websock_interface
         self._original_start = self._gui._handle_file_transfer_start
         self._original_part = self._gui._handle_file_transfer_part
@@ -146,6 +148,32 @@ class ScopedUploadLimits:
                 )
             except Exception:
                 _LOG.exception("Could not send upload rejection to client")
+
+    def unregister(self, handle: object, *, remove: bool = False) -> None:
+        """Release one registration and its pending transfers.
+
+        With ``remove=True``, retire the GUI handle under the transfer lock so
+        a stale browser UUID cannot start an unguarded upload between removal
+        and unregistration. Other controls and transfers remain untouched.
+        """
+        component_id = handle._impl.uuid
+        dropped = []
+        with self._lock:
+            control = self._controls.get(component_id)
+            if control is None or control.handle is not handle:
+                return
+            if remove:
+                handle.remove()
+            for transfer_id, transfer in tuple(self._transfers.items()):
+                if transfer.component_id == component_id:
+                    self._drop(transfer_id)
+                    dropped.append((transfer_id, transfer))
+            self._controls.pop(component_id, None)
+        # No user callback runs while holding the transfer lock. The removed
+        # control has no on_error callback; only its uploading browser is told.
+        for transfer_id, transfer in dropped:
+            self._reject(transfer.client_id, component_id, transfer_id,
+                         'Upload target changed. Please choose the mapping file again.')
 
     def _drop(self, transfer_id: str) -> _Transfer | None:
         transfer = self._transfers.pop(transfer_id, None)
