@@ -341,6 +341,8 @@ class ActionEditingTests(unittest.TestCase):
         self.assertIs(self.session.takes[before.id], before)
         self.assertEqual(self.session.action_edit_revision, revision)
         self.assertIn('Original take preserved', self.session.status)
+        self.assertIn('action 4 "third", chunk 1/1', self.session.status)
+        self.assertIn('Selected action failed', self.session.status)
         self.backend.fail_prompt = None
         self.backend.started.clear()
         self.backend.release.clear()

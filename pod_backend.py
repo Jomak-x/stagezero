@@ -35,6 +35,29 @@ def cancelled(request_id):
         return request_id in CANCELLED
 
 
+def write_metrics(metrics):
+    with Path("metrics.jsonl").open("a") as metrics_file:
+        metrics_file.write(json.dumps(metrics) + "\n")
+    print(json.dumps(metrics), flush=True)
+
+
+def quality_failure_message(selection):
+    reasons = {reason for row in selection["assessments"] for reason in row["reasons"]}
+    descriptions = []
+    if "floor_penetration" in reasons:
+        descriptions.append("floor penetration")
+    if reasons & {"history_seam", "horizon_seam", "intra_clip_jump"}:
+        descriptions.append("motion discontinuity")
+    if "nonfinite_positions" in reasons:
+        descriptions.append("non-finite poses")
+    if "invalid_rotations" in reasons or any(reason.startswith("invalid_candidate:") for reason in reasons):
+        descriptions.append("invalid pose data")
+    detail = ", ".join(descriptions) or "invalid motion"
+    count = len(selection["assessments"])
+    attempts = "attempt" if count == 1 else "attempts"
+    return f"Motion quality rejected {count} {attempts}: {detail}. No motion committed."
+
+
 def load():
     global model
     start = time.perf_counter()
@@ -88,6 +111,11 @@ def generate(body):
         options.update(profile=profile, **PROFILES[profile])
         if supplied_options is None or "candidates" not in supplied_options:
             options["candidates"] = 2 if goal_action is None and action in ("overhead", "squat") else 1
+    initial_candidates = options["candidates"]
+    # Keep explicit comparison budgets and successful automatic requests intact.
+    # Only default automatic requests may spend additional attempts on recovery.
+    allow_recovery = automatic and (supplied_options is None or "candidates" not in supplied_options)
+    candidate_budget = 3 if allow_recovery else initial_candidates
     base_seed = options["seed"] if options["seed"] is not None else secrets.randbelow(2**32)
     queued = time.perf_counter()
     with MODEL_LOCK, torch.inference_mode():
@@ -108,14 +136,20 @@ def generate(body):
         torch.cuda.synchronize()
         encoded = time.perf_counter()
         candidates, candidate_settings, step_times = [], [], []
-        for candidate_index in range(options["candidates"]):
+        selection = None
+        for candidate_index in range(candidate_budget):
             if cancelled(request_id):
                 raise InterruptedError("Superseded instruction")
-            profile = "expressive" if automatic and goal_action is None and candidate_index == 1 else options["profile"]
+            recovery = candidate_index >= initial_candidates
+            # Longer history/carry favors a stable continuation after a rejected
+            # sample, without increasing guidance or changing native conditions.
+            profile = ("legacy" if recovery else
+                       "expressive" if automatic and goal_action is None and candidate_index == 1 else options["profile"])
             settings = PROFILES[profile]
             # Paired profile alternatives use the same seed; repeat samples
-            # requested within an explicit profile use different recorded seeds.
-            seed = (base_seed + (candidate_index if not automatic or goal_action else max(0, candidate_index - 1))) % 2**32
+            # and recovery attempts use different recorded seeds.
+            seed = (base_seed + (candidate_index if recovery or not automatic or goal_action
+                                 else max(0, candidate_index - 1))) % 2**32
             seed_everything(seed)
             current = None if history is None else torch.from_numpy(history[-settings["history_frames"]:]).unsqueeze(0).to("cuda")
             chunks, candidate_steps, goal_metadata = [], [], None
@@ -151,38 +185,43 @@ def generate(body):
                                        "pose_goal": goal_metadata,
                                        "step_seconds": candidate_steps})
             step_times.extend(candidate_steps)
+            if cancelled(request_id):
+                raise InterruptedError("Superseded instruction")
+            selection = select_candidate(prompt,
+                [{"positions": c["positions"], "rotations": c["rotations"]} for c in candidates],
+                prior_positions=prior_positions, prior_rotations=prior_rotations)
+            if candidate_index + 1 >= initial_candidates and selection["chosen_index"] is not None:
+                break
         if cancelled(request_id):
             raise InterruptedError("Superseded instruction")
-        selection = select_candidate(prompt,
-            [{"positions": c["positions"], "rotations": c["rotations"]} for c in candidates],
-            prior_positions=prior_positions, prior_rotations=prior_rotations)
         chosen = selection["chosen_index"]
-        if chosen is None:
-            raise RuntimeError("Generated candidates failed motion-quality checks; no motion committed. Retry the instruction.")
-        arrays = candidates[chosen]
-        if any(not np.isfinite(a).all() for a in arrays.values()):
-            raise RuntimeError("Model returned non-finite motion")
         torch.cuda.synchronize()
         metrics = {
             "request_id": request_id, "prompt": prompt, "model": MODEL,
-            "fps": 25, "frames": len(arrays["positions"]), "history_frames": candidate_settings[chosen]["history_frames"],
-            "motion_policy": "directed-v2", "seed": candidate_settings[chosen]["seed"], "base_seed": base_seed,
+            "fps": 25, "motion_policy": "directed-v2", "base_seed": base_seed,
             "candidate_settings": candidate_settings, "selection": selection,
-            "pose_goal": candidate_settings[chosen]["pose_goal"],
             "motion_target": target,
-            "target_error_m": None if target is None else float(np.linalg.norm(
-                arrays["positions"][target["frame"], 0, [0, 2]] - target["position_xz"])),
             "queue_seconds": start - queued, "encoding_seconds": encoded - encoding_started,
             "step_seconds": step_times, "generation_seconds": time.perf_counter() - start,
             "gpu_peak_allocated_gib": torch.cuda.max_memory_allocated() / 2**30,
             "gpu_peak_reserved_gib": torch.cuda.max_memory_reserved() / 2**30,
             "process_rss_gib": psutil.Process().memory_info().rss / 2**30,
         }
+        if chosen is None:
+            metrics.update(status="rejected", frames=0, seed=None, history_frames=None,
+                           pose_goal=None, target_error_m=None)
+            write_metrics(metrics)
+            raise RuntimeError(quality_failure_message(selection))
+        arrays = candidates[chosen]
+        if any(not np.isfinite(a).all() for a in arrays.values()):
+            raise RuntimeError("Model returned non-finite motion")
+        metrics.update(frames=len(arrays["positions"]), history_frames=candidate_settings[chosen]["history_frames"],
+                       seed=candidate_settings[chosen]["seed"], pose_goal=candidate_settings[chosen]["pose_goal"],
+                       target_error_m=None if target is None else float(np.linalg.norm(
+                           arrays["positions"][target["frame"], 0, [0, 2]] - target["position_xz"])))
         data = io.BytesIO()
         np.savez_compressed(data, **arrays, metadata=np.array(json.dumps(metrics)))
-        with Path("metrics.jsonl").open("a") as metrics_file:
-            metrics_file.write(json.dumps(metrics) + "\n")
-        print(json.dumps(metrics), flush=True)
+        write_metrics(metrics)
         return data.getvalue()
 
 
