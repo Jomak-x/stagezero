@@ -1,5 +1,7 @@
 # Joint two-character performance review
 
+**Rejected by user.** The retargeted close-exchange preview was rejected for motion quality and malformed joints. Native-source recovery and direct authored-rig experiments supersede this approach; retain the evidence as failure provenance.
+
 The previous independent Core duet was rejected by the user for excessive separation and mistimed actions. Its evidence is retained in `review/two-character/`; it is not the selected result.
 
 This replacement generates both people together in one InterGen sample, then retargets that complete sample to the existing textured studio characters. It does not stitch independently generated actions or hide a failing ending. The existing city from `review/scene-integration/live-city.json` is reused.

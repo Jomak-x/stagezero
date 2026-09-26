@@ -225,3 +225,8 @@ clearance, preserved rejected trials, and remaining transition/foot-slide limits
 ## Separate joint-pair research workflow
 
 The independent Core duet was rejected in user review for spacing and timing. A separate opt-in joint-model workflow now sits under Together, with separate paired archives and playback; it does not change the native Core contract above. See [Joint two-character performance review](TWO-CHARACTER-PAIRED.md) for the replacement, videos, rejected trials and reproduction commands.
+
+
+### Native paired recovery review
+
+The retargeted paired preview was rejected by the user. See [NATIVE-PAIR-RECOVERY.md](NATIVE-PAIR-RECOVERY.md) for the measured conversion defects, restored original InterGen preview, direct authored-rig experiment, actual InterMask trials, full captures and candid rejections. This research has not been promoted into the ready Core/G1 workflow.
