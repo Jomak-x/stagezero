@@ -96,6 +96,8 @@ class DirectorSession(MotionSession):
     def play(self):
         with self.lock:
             super().play()
+            if not self.character_motion_enabled:
+                return
             if not self.busy:
                 if self.playing:
                     self.started = time.perf_counter() - self.frame / (self.fps * self.playback_speed)
@@ -234,6 +236,9 @@ class DirectorSession(MotionSession):
 
     def submit(self, prompt, seconds=None, edit_mode=None, at_frame=None):
         with self.lock:
+            if not self.character_motion_enabled:
+                self.status = 'Select a motion-ready character before generating motion'
+                return
             if self.mode != 'Live ARDY':
                 return
             prompt = str(prompt).strip()

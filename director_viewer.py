@@ -17,6 +17,7 @@ from studio_server import create_studio_server
 from studio_camera import StudioCamera
 from studio_timeline import StudioTimeline
 from studio_ui import StudioUI, section
+from character_controls import CharacterControls
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     parser.add_argument('--port', type=int, default=2336)
     parser.add_argument('--project', type=str, help='Open a saved project at startup')
     parser.add_argument('--objects', type=str, help='Load a generated object scene JSON')
+    parser.add_argument('--characters', type=str, default=str(ROOT / '.runtime/characters'), help='Private imported GLB library')
     args = parser.parse_args()
     torch.set_num_threads(2)
     skeleton, positions, rotations = load_recording(ROOT / 'assets/recorded_g1.csv')
@@ -45,6 +47,7 @@ def main():
     for mesh in character.g1_mesh_rig.mesh_handles: mesh.color = (206, 226, 233)
     backend = Backend(ROOT / '.runtime/api-token')
     session = DirectorSession(backend, positions.numpy(), rotations.numpy(), ROOT / 'review/live-metrics.jsonl')
+    characters = CharacterControls(server, session, skeleton, args.characters)
     if args.project:
         from pathlib import Path
         session.load_project(Path(args.project).read_bytes())
@@ -53,14 +56,14 @@ def main():
     object_layer = ObjectSceneLayer(server)
     previous_objects = None
     def actor_root():
-        with session.lock:
-            return session.positions[session.frame, 0].copy()
+        return characters.actor_root()
     camera = StudioCamera(server, actor_root)
     @server.on_client_connect
     def connected(client):
         client.camera.near = .05
         client.camera.far = 250.
         camera.reset(client)
+        characters.on_client_connect(client)
 
     gate_posts = [server.scene.add_box(f'/gate/post{i}', dimensions=(.055,1.65,.08), color=(83,113,131)) for i in range(2)]
     gate_panel = server.scene.add_box('/gate/panel', dimensions=(1.6,1.25,.04), color=(65,147,138), opacity=.28)
@@ -107,7 +110,7 @@ def main():
     def move_gate(_):
         edit_gate(gizmo.position)
 
-    ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls)
+    ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls, characters.build_gui)
     timeline = StudioTimeline(server, session)
 
     @server.scene.on_keyboard_event('keydown')
@@ -115,7 +118,7 @@ def main():
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
             return
         with session.lock:
-            if session.busy or session.kind not in ('recorded', 'generated'):
+            if not session.character_motion_enabled or session.busy or session.kind not in ('recorded', 'generated'):
                 return
             if event.key == ' ':
                 session.pause() if session.playing else session.play()
@@ -127,6 +130,7 @@ def main():
             elif event.key == 'End':
                 session.seek(len(session.positions) - 1)
     previous = None
+    previous_character = -1
     last_scene = None
     render_thread = None
     last_ui = 0.
@@ -145,16 +149,20 @@ def main():
     try:
         while True:
             key = session.tick()
-            pose_changed = key != previous
+            characters.tick(key)
+            rendered_root = characters.actor_root()
+            character_changed = characters.revision != previous_character
+            pose_changed = key != previous or character_changed
             with session.lock:
-                if key != previous:
+                if pose_changed:
                     with server.atomic():
                         character.set_pose(torch.from_numpy(session.positions[session.frame]),torch.from_numpy(session.rotations[session.frame]))
-                        root = session.positions[session.frame,0].copy()
-                        if previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
+                        root = rendered_root
+                        if character_changed or previous is None or key[0] != previous[0] or not session.playing or abs(key[1]-previous[1]) > 5:
                             camera.rebase(root)
                         camera.update(root)
                     previous = key
+                    previous_character = characters.revision
                 if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                     request_id,submitted = session.needs_ack
                     session.needs_ack = None
@@ -192,6 +200,7 @@ def main():
             time.sleep(1/60)
     except KeyboardInterrupt:
         session.reset()
+        characters.close()
         server.stop()
 
 

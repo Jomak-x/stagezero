@@ -61,7 +61,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/*.test.mjs tests/*.test.mjs src/mesh/*.test.mjs"
   },
   "eslintConfig": {
     "extends": [

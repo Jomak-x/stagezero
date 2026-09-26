@@ -34,4 +34,4 @@ jobs:
           cache-dependency-path: studio_client/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: node --experimental-strip-types --test src/*.test.mjs tests/*.test.mjs
+      - run: npm test

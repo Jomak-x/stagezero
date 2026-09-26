@@ -48,13 +48,23 @@ class Handle:
         self.callbacks['update'](SimpleNamespace(client=object()))
 
 
+class ButtonGroupHandle(Handle):
+    @property
+    def disabled(self):
+        return False
+
+    @disabled.setter
+    def disabled(self, disabled):
+        assert not disabled, 'Button groups cannot be disabled.'
+
+
 class Gui:
     def __init__(self):
         self.handles = []
 
-    def _handle(self, **values):
+    def _handle(self, handle_type=Handle, **values):
         values.setdefault('visible', True)
-        handle = Handle(**values)
+        handle = handle_type(**values)
         self.handles.append(handle)
         return handle
 
@@ -65,7 +75,8 @@ class Gui:
         return self._handle(content=content)
 
     def add_button_group(self, label, options):
-        return self._handle(label=label, options=options, value=options[0], disabled=False)
+        return self._handle(handle_type=ButtonGroupHandle, label=label,
+                            options=options, value=options[0], disabled=False)
 
     def add_text(self, label, initial_value='', **kwargs):
         return self._handle(label=label, value=initial_value, disabled=False)
@@ -154,6 +165,50 @@ class StudioUITests(unittest.TestCase):
         self.ui.seek_go.click()
         self.assertEqual(self.session.frame, 119)
         self.assertIn('2.00 s', self.session.status)
+
+    def test_static_character_hides_motion_groups_then_restores_selected_take(self):
+        take = self._seed_take(100)
+        self.session.seek(25)
+        self.ui.update()
+        source_positions = self.session.positions
+        self.assertIsInstance(self.ui.transport, ButtonGroupHandle)
+        self.assertIsInstance(self.ui.frames, ButtonGroupHandle)
+        self.assertTrue(self.ui.transport.visible)
+        self.assertTrue(self.ui.frames.visible)
+
+        self.ui.transport.writes.clear()
+        self.ui.frames.writes.clear()
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.assertFalse(self.ui.frames.visible)
+        self.assertTrue(self.ui.generate.disabled)
+        self.assertEqual(self.ui.transport.writes, [('visible', False)])
+        self.assertEqual(self.ui.frames.writes, [('visible', False)])
+        self.assertEqual(self.session.active_take, take.id)
+        self.assertIs(self.session.takes[take.id], take)
+        self.assertIs(self.session.positions, source_positions)
+        self.assertEqual(self.session.frame, 25)
+
+        # Delayed clicks from a hidden browser control must not move the clip.
+        self.ui.transport.click('Play')
+        self.ui.frames.click('End')
+        self.assertFalse(self.session.playing)
+        self.assertEqual(self.session.frame, 25)
+
+        self.session.set_character_motion_enabled(True)
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        self.assertTrue(self.ui.frames.visible)
+        self.assertFalse(self.ui.generate.disabled)
+        self.assertEqual(self.session.active_take, take.id)
+        self.assertIs(self.session.positions, source_positions)
+        self.assertEqual(self.session.frame, 25)
+        self.ui.transport.click('Play')
+        self.assertTrue(self.session.playing)
+        self.ui.transport.click('Pause')
+        self.ui.frames.click('+1 frame')
+        self.assertEqual(self.session.frame, 26)
 
     def test_create_switches_to_live_and_requires_valid_prompt(self):
         self.assertEqual(self.ui.edit_action.value, CREATE)

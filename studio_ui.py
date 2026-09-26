@@ -74,7 +74,7 @@ def step(gui, number, title):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None):
         self.server, self.session, self.camera = server, session, camera
         self.folder = project_folder
         self.folder.mkdir(parents=True, exist_ok=True)
@@ -133,6 +133,9 @@ class StudioUI:
             self.loop = gui.add_checkbox('Loop playback', initial_value=False)
         with tabs.add_tab('Scene'):
             scene_controls(gui)
+        if character_controls is not None:
+            with tabs.add_tab('Character'):
+                character_controls(gui)
         with tabs.add_tab('Camera'):
             section(gui, 'Camera')
             camera.build_gui(gui)
@@ -258,7 +261,7 @@ class StudioUI:
             preview = f'<div class="sz-preview">{escape(estimate)}. {escape(outcome)}</div>'
         self._set(self.duration_preview, 'content', preview)
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
-        disabled = busy or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
+        disabled = busy or not self.session.character_motion_enabled or not self._valid_prompt(self.prompt.value) or error is not None or at_limit
         self._set(self.generate, 'disabled', disabled)
         self._set(self.generate, 'label', 'Generating…' if busy else 'Take limit reached' if at_limit else 'Generate motion')
 
@@ -281,6 +284,8 @@ class StudioUI:
 
         def transport_command(value):
             with s.lock:
+                if not s.character_motion_enabled and value != 'Pause':
+                    return
                 if s.busy and value not in ('Play', 'Pause'):
                     return
                 if s.kind == 'reference' and value not in ('Play', 'Pause'):
@@ -357,7 +362,7 @@ class StudioUI:
         @self.generate.on_click
         def generate(_):
             with s.lock:
-                if s.busy or not self._valid_prompt(self.prompt.value):
+                if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
                     return
                 take = s.takes.get(s.active_take)
                 plan, error = self._generation_plan(take)
@@ -490,6 +495,10 @@ class StudioUI:
         s = self.session
         with s.lock:
             live = s.mode == 'Live ARDY'
+            # Viser button groups cannot be disabled; static previews hide
+            # motion controls while their callbacks remain guarded as well.
+            self._set(self.transport, 'visible', s.character_motion_enabled)
+            self._set(self.frames, 'visible', s.character_motion_enabled)
             take = s.takes.get(s.active_take)
             has_clip = s.kind in ('recorded', 'generated')
             last_frame = len(s.positions)-1

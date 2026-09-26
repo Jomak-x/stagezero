@@ -70,6 +70,7 @@ class MotionSession:
         self.fps = 60
         self.frame = 0
         self.playing = False
+        self.character_motion_enabled = True
         self.mode = "Recorded preview"
         self.kind = "recorded"
         self.status = "Recorded playback — no AI generation"
@@ -121,6 +122,9 @@ class MotionSession:
 
     def submit(self, prompt):
         with self.lock:
+            if not self.character_motion_enabled:
+                self.status = 'Select a motion-ready character before generating motion'
+                return
             prompt = prompt.strip()
             if self.mode != "Live ARDY":
                 return
@@ -143,6 +147,21 @@ class MotionSession:
             self.pending = (self.version, request_id, prompt, history, time.perf_counter())
             self.wake.set()
 
+    def set_character_motion_enabled(self, enabled):
+        """Suspend static previews without replacing the displayed source clip."""
+        with self.lock:
+            enabled = bool(enabled)
+            if self.character_motion_enabled == enabled:
+                return
+            self.character_motion_enabled = enabled
+            if not enabled:
+                self._invalidate()
+                self.playing = False
+                self.resume_after_generation = False
+                self.status = 'Static character preview · select a motion-ready character to play'
+            else:
+                self.status = 'Motion-ready character selected · playback available'
+
     def pause(self):
         with self.lock:
             self.playing = False
@@ -150,6 +169,9 @@ class MotionSession:
 
     def play(self):
         with self.lock:
+            if not self.character_motion_enabled:
+                self.status = 'Select a motion-ready character before playing motion'
+                return
             if self.busy:
                 self.resume_after_generation = True
             elif self.kind in ("generated", "recorded"):

@@ -55,6 +55,7 @@ import { IcosphereMesh } from "./mesh/IcosphereMesh";
 import { SkinnedMesh } from "./mesh/SkinnedMesh";
 import { BatchedMesh } from "./mesh/BatchedMesh";
 import { SingleGlbAsset } from "./mesh/SingleGlbAsset";
+import { ActorGlbAsset } from "./mesh/ActorGlbAsset";
 import { BatchedGlbAsset } from "./mesh/BatchedGlbAsset";
 
 function rgbToInt(rgb: [number, number, number]): number {
@@ -462,6 +463,15 @@ function createObjectFactory(
           <SingleGlbAsset ref={ref} {...message}>
             {children}
           </SingleGlbAsset>
+        ),
+      };
+    }
+    case "ActorGlbLoadMessage": {
+      return {
+        makeObject: (ref, children) => (
+          <ActorGlbAsset ref={ref} {...message}>
+            {children}
+          </ActorGlbAsset>
         ),
       };
     }
