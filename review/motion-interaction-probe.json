@@ -1,0 +1,386 @@
+{
+  "schema": 1,
+  "status": "complete",
+  "model": "ARDY-G1-RP-25FPS-Horizon52",
+  "experiment": "independent_two_actor_batch_and_root2d_approach",
+  "caveat": "Two batch samples are independent single-actor motions, not learned joint interaction.",
+  "seeds": [
+    0,
+    1
+  ],
+  "target_offset_xz_m": [
+    0.0,
+    0.8
+  ],
+  "cases": [
+    {
+      "name": "seed0_sequential_0",
+      "seed": 0,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person waves their right hand while standing in place."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.2830001921392977,
+      "condition_build_seconds": 6.19795173406601e-07,
+      "generation_decode_seconds": 0.20279295812360942,
+      "total_seconds": 0.4860242430586368,
+      "gpu_peak_allocated_gib": 14.948615074157715,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03486402705311775,
+          "boundary_max_joint_jump_m": 0.052564602345228195,
+          "boundary_root_jump_m": 0.041593167930841446
+        }
+      ],
+      "array_prefixes": [
+        "seed0_sequential_0_actor0"
+      ]
+    },
+    {
+      "name": "seed0_sequential_1",
+      "seed": 0,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person raises both arms overhead while standing in place."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.04893536516465247,
+      "condition_build_seconds": 3.490131348371506e-07,
+      "generation_decode_seconds": 0.07128767995163798,
+      "total_seconds": 0.12033134512603283,
+      "gpu_peak_allocated_gib": 14.948615074157715,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03514574095606804,
+          "boundary_max_joint_jump_m": 0.05262734740972519,
+          "boundary_root_jump_m": 0.04205372557044029
+        }
+      ],
+      "array_prefixes": [
+        "seed0_sequential_1_actor0"
+      ]
+    },
+    {
+      "name": "seed0_batched",
+      "seed": 0,
+      "status": "ok",
+      "actor_count": 2,
+      "prompts": [
+        "A person waves their right hand while standing in place.",
+        "A person raises both arms overhead while standing in place."
+      ],
+      "actors": 2,
+      "text_encoding_seconds": 0.08733001491054893,
+      "condition_build_seconds": 3.6996789276599884e-07,
+      "generation_decode_seconds": 0.0713076600804925,
+      "total_seconds": 0.15895319893024862,
+      "gpu_peak_allocated_gib": 14.955028533935547,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03486401215195656,
+          "boundary_max_joint_jump_m": 0.05256460979580879,
+          "boundary_root_jump_m": 0.04159315302968025
+        },
+        {
+          "boundary_mean_joint_jump_m": 0.034576550126075745,
+          "boundary_max_joint_jump_m": 0.05211061239242554,
+          "boundary_root_jump_m": 0.04173092544078827
+        }
+      ],
+      "array_prefixes": [
+        "seed0_batched_actor0",
+        "seed0_batched_actor1"
+      ]
+    },
+    {
+      "name": "seed0_approach_baseline",
+      "seed": 1000,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person walks to the marked location and stops there."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.04775143996812403,
+      "condition_build_seconds": 4.100147634744644e-07,
+      "generation_decode_seconds": 0.07190801715478301,
+      "total_seconds": 0.11977080907672644,
+      "gpu_peak_allocated_gib": 14.948616027832031,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03483075276017189,
+          "boundary_max_joint_jump_m": 0.052378132939338684,
+          "boundary_root_jump_m": 0.04156999662518501
+        }
+      ],
+      "target_xz_m": [
+        0.3774278163909912,
+        2.7505667209625244
+      ],
+      "endpoint_root_xz_m": [
+        0.5246055722236633,
+        3.381585121154785
+      ],
+      "endpoint_root_error_m": 0.6479548811912537,
+      "array_prefixes": [
+        "seed0_approach_baseline_actor0"
+      ]
+    },
+    {
+      "name": "seed0_approach_root2d",
+      "seed": 1000,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person walks to the marked location and stops there."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.047853390919044614,
+      "condition_build_seconds": 0.010005057090893388,
+      "generation_decode_seconds": 0.07269561802968383,
+      "total_seconds": 0.13082563993521035,
+      "gpu_peak_allocated_gib": 14.949261665344238,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 2,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03397533297538757,
+          "boundary_max_joint_jump_m": 0.05182076245546341,
+          "boundary_root_jump_m": 0.04056496173143387
+        }
+      ],
+      "target_xz_m": [
+        0.3774278163909912,
+        2.7505667209625244
+      ],
+      "endpoint_root_xz_m": [
+        0.3729124665260315,
+        2.755615472793579
+      ],
+      "endpoint_root_error_m": 0.006773350760340691,
+      "array_prefixes": [
+        "seed0_approach_root2d_actor0"
+      ]
+    },
+    {
+      "name": "seed1_batched",
+      "seed": 1,
+      "status": "ok",
+      "actor_count": 2,
+      "prompts": [
+        "A person waves their right hand while standing in place.",
+        "A person raises both arms overhead while standing in place."
+      ],
+      "actors": 2,
+      "text_encoding_seconds": 0.08334690309129655,
+      "condition_build_seconds": 3.6996789276599884e-07,
+      "generation_decode_seconds": 0.07019094610586762,
+      "total_seconds": 0.153806712012738,
+      "gpu_peak_allocated_gib": 14.955029487609863,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03505408763885498,
+          "boundary_max_joint_jump_m": 0.052668750286102295,
+          "boundary_root_jump_m": 0.04154990240931511
+        },
+        {
+          "boundary_mean_joint_jump_m": 0.03515419363975525,
+          "boundary_max_joint_jump_m": 0.05284656584262848,
+          "boundary_root_jump_m": 0.041706737130880356
+        }
+      ],
+      "array_prefixes": [
+        "seed1_batched_actor0",
+        "seed1_batched_actor1"
+      ]
+    },
+    {
+      "name": "seed1_sequential_0",
+      "seed": 1,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person waves their right hand while standing in place."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.05551225785166025,
+      "condition_build_seconds": 3.702007234096527e-07,
+      "generation_decode_seconds": 0.07297697081230581,
+      "total_seconds": 0.1285960809327662,
+      "gpu_peak_allocated_gib": 14.948616027832031,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.035054054111242294,
+          "boundary_max_joint_jump_m": 0.052668750286102295,
+          "boundary_root_jump_m": 0.04154990240931511
+        }
+      ],
+      "array_prefixes": [
+        "seed1_sequential_0_actor0"
+      ]
+    },
+    {
+      "name": "seed1_sequential_1",
+      "seed": 1,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person raises both arms overhead while standing in place."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.04795252112671733,
+      "condition_build_seconds": 3.1082890927791595e-07,
+      "generation_decode_seconds": 0.07138311094604433,
+      "total_seconds": 0.11943583399988711,
+      "gpu_peak_allocated_gib": 14.948616027832031,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03520391508936882,
+          "boundary_max_joint_jump_m": 0.05321135371923447,
+          "boundary_root_jump_m": 0.04192163422703743
+        }
+      ],
+      "array_prefixes": [
+        "seed1_sequential_1_actor0"
+      ]
+    },
+    {
+      "name": "seed1_approach_baseline",
+      "seed": 1001,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person walks to the marked location and stops there."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.048064793925732374,
+      "condition_build_seconds": 4.0908344089984894e-07,
+      "generation_decode_seconds": 0.07701370306313038,
+      "total_seconds": 0.1251817080192268,
+      "gpu_peak_allocated_gib": 14.948616027832031,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 0,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.034807004034519196,
+          "boundary_max_joint_jump_m": 0.05289158970117569,
+          "boundary_root_jump_m": 0.0417419970035553
+        }
+      ],
+      "target_xz_m": [
+        0.3774278163909912,
+        2.7505667209625244
+      ],
+      "endpoint_root_xz_m": [
+        0.5938910841941833,
+        3.8185579776763916
+      ],
+      "endpoint_root_error_m": 1.0897071361541748,
+      "array_prefixes": [
+        "seed1_approach_baseline_actor0"
+      ]
+    },
+    {
+      "name": "seed1_approach_root2d",
+      "seed": 1001,
+      "status": "ok",
+      "actor_count": 1,
+      "prompts": [
+        "A person walks to the marked location and stops there."
+      ],
+      "actors": 1,
+      "text_encoding_seconds": 0.04936203989200294,
+      "condition_build_seconds": 0.000668408116325736,
+      "generation_decode_seconds": 0.07201604987494648,
+      "total_seconds": 0.12214610888622701,
+      "gpu_peak_allocated_gib": 14.949261665344238,
+      "gpu_peak_reserved_gib": 15.009765625,
+      "conditioned_channels": 2,
+      "actor_metrics": [
+        {
+          "boundary_mean_joint_jump_m": 0.03358766809105873,
+          "boundary_max_joint_jump_m": 0.05197422578930855,
+          "boundary_root_jump_m": 0.040472619235515594
+        }
+      ],
+      "target_xz_m": [
+        0.3774278163909912,
+        2.7505667209625244
+      ],
+      "endpoint_root_xz_m": [
+        0.37308380007743835,
+        2.7597618103027344
+      ],
+      "endpoint_root_error_m": 0.01016956940293312,
+      "array_prefixes": [
+        "seed1_approach_root2d_actor0"
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "seed": 0,
+      "status": "ok",
+      "sequential_total_seconds": 0.6063555881846696,
+      "batched_total_seconds": 0.15895319893024862,
+      "sequential_peak_allocated_gib": 14.948615074157715,
+      "batched_peak_allocated_gib": 14.955028533935547,
+      "speedup_sequential_over_batch": 3.814679995529683
+    },
+    {
+      "seed": 0,
+      "kind": "root2d_approach",
+      "status": "ok",
+      "requested_frame_in_window": 103,
+      "baseline_error_m": 0.6479548811912537,
+      "conditioned_error_m": 0.006773350760340691,
+      "error_reduction_m": 0.641181530430913
+    },
+    {
+      "seed": 1,
+      "status": "ok",
+      "sequential_total_seconds": 0.2480319149326533,
+      "batched_total_seconds": 0.153806712012738,
+      "sequential_peak_allocated_gib": 14.948616027832031,
+      "batched_peak_allocated_gib": 14.955029487609863,
+      "speedup_sequential_over_batch": 1.6126208777684017
+    },
+    {
+      "seed": 1,
+      "kind": "root2d_approach",
+      "status": "ok",
+      "requested_frame_in_window": 103,
+      "baseline_error_m": 1.0897071361541748,
+      "conditioned_error_m": 0.01016956940293312,
+      "error_reduction_m": 1.0795375667512417
+    }
+  ],
+  "npz_path": "motion-research/interaction-v2.npz",
+  "gpu": "NVIDIA RTX 6000 Ada Generation",
+  "torch_version": "2.8.0+cu128",
+  "history_frames": 52,
+  "source_frame": 104,
+  "model_load_seconds": 72.90436424687505,
+  "horizon_frames": 52,
+  "checkpoint_cfg_wrapper": "AutoLatentClassifierFreeGuidedModelSeparated",
+  "successful_cases": 10,
+  "failed_cases": 0,
+  "archived_arrays": 39
+}

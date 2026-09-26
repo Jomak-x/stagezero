@@ -1,0 +1,119 @@
+{
+  "transform": {
+    "rotation_y_rad": 1.5707963267948966,
+    "translation_xz_m": [
+      2,
+      -1
+    ]
+  },
+  "seed": 303,
+  "cases": {
+    "overhead": {
+      "status": "ok",
+      "request_id": "f6468609-83d9-4d28-a16d-b989e8dd3c37",
+      "seed": 303,
+      "profile": "responsive",
+      "chosen_index": 0,
+      "candidate_count": 1,
+      "action_proxy_met": true,
+      "pose_goal": {
+        "mode": "reference_assisted_native_ardy_conditioning",
+        "action": "overhead",
+        "source": "overhead__h4cfg2__seed33.npz",
+        "source_seed": 33,
+        "asset_sha256": "8783253dc9cb9158eee30f9786ff49f9a374436fa1ec8edbfa47856f504987db",
+        "reference_keyframes": [
+          80,
+          90,
+          100
+        ],
+        "constraint_kind": "both_hands",
+        "world_xz_translation_m": [
+          4.013600826263428,
+          -3.987433433532715
+        ],
+        "world_yaw_rotation_rad": 1.403422623872757,
+        "current_root_xz_m": [
+          4.340237140655518,
+          -1.4114035367965698
+        ],
+        "reference_root_xz_m": [
+          0.3266364634037018,
+          2.5760297775268555
+        ],
+        "reference_profile": "responsive",
+        "reference_cfg_weight": [
+          2.0,
+          2.0
+        ],
+        "caveat": "Generated reference goals are soft ARDY inference conditions, not learned joint interaction or exact pose guarantees.",
+        "window_keyframes": [
+          32,
+          42,
+          52
+        ],
+        "conditioned_channels": 105,
+        "history_frames": 4
+      },
+      "source_seam_m": 0.03526373207569122,
+      "mean_seam_m": 0.0352637296239201,
+      "floor_penetration_m": 0.0026715993881225586,
+      "backend_generation_seconds": 0.207488029031083,
+      "round_trip_seconds": 0.4377567920018919
+    },
+    "squat": {
+      "status": "ok",
+      "request_id": "7b00a8f2-42ee-4e72-9ee7-88275373ad80",
+      "seed": 303,
+      "profile": "expressive",
+      "chosen_index": 0,
+      "candidate_count": 1,
+      "action_proxy_met": true,
+      "pose_goal": {
+        "mode": "reference_assisted_native_ardy_conditioning",
+        "action": "squat",
+        "source": "squat__h12cfg4__seed33.npz",
+        "source_seed": 33,
+        "asset_sha256": "8783253dc9cb9158eee30f9786ff49f9a374436fa1ec8edbfa47856f504987db",
+        "reference_keyframes": [
+          88,
+          96,
+          103
+        ],
+        "constraint_kind": "full_body",
+        "world_xz_translation_m": [
+          4.227356910705566,
+          -4.173772811889648
+        ],
+        "world_yaw_rotation_rad": 1.3183145076036453,
+        "current_root_xz_m": [
+          4.64727783203125,
+          -1.4994179010391235
+        ],
+        "reference_root_xz_m": [
+          0.41992083191871643,
+          2.6743550300598145
+        ],
+        "reference_profile": "expressive",
+        "reference_cfg_weight": [
+          4.0,
+          2.0
+        ],
+        "caveat": "Generated reference goals are soft ARDY inference conditions, not learned joint interaction or exact pose guarantees.",
+        "window_keyframes": [
+          48,
+          56,
+          63
+        ],
+        "conditioned_channels": 312,
+        "history_frames": 12
+      },
+      "source_seam_m": 0.03563869372010231,
+      "mean_seam_m": 0.03563869588890482,
+      "floor_penetration_m": 0.0017066597938537598,
+      "backend_generation_seconds": 0.21902992413379252,
+      "round_trip_seconds": 0.5093985839921515
+    }
+  },
+  "status": "passed"
+}
