@@ -353,6 +353,8 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             display: "flex",
             position: "relative",
             flexDirection: "column",
+            minWidth: 0,
+            minHeight: 0,
           }}
         >
           {!welcomeVisible && <Titlebar />}
@@ -361,6 +363,8 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
               width: "100%",
               position: "relative",
               flexGrow: 1,
+              minWidth: 0,
+              minHeight: 0,
               overflow: "hidden",
               display: "flex",
               // Keep the panel's measurable parent and mounted state while
@@ -369,24 +373,52 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             }}
           >
             <Box
-              className={welcomeVisible ? "sz-welcome-scene" : undefined}
-              style={(theme) => ({
-                backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
-                flexGrow: 1,
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: "1 1 0",
+                minWidth: 0,
+                minHeight: 0,
                 overflow: "hidden",
-                height: "100%",
-                visibility: welcomeVisible ? "hidden" : "visible",
-              })}
+              }}
             >
-              {canvases}
-              {!welcomeVisible && showLogo && messageSource === "websocket" && <ViserLogo />}
+              <Box
+                data-testid="studio-viewport"
+                className={welcomeVisible ? "sz-welcome-scene" : undefined}
+                style={(theme) => ({
+                  position: "relative",
+                  backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
+                  flex: "1 1 0",
+                  minWidth: 0,
+                  minHeight: 0,
+                  overflow: "hidden",
+                })}
+              >
+                {canvases}
+                {!welcomeVisible && showLogo && messageSource === "websocket" && <ViserLogo />}
+                {messageSource === "websocket" && controlLayout === "floating" && (
+                  <ControlPanel control_layout={controlLayout} />
+                )}
+              </Box>
+              <Box
+                data-testid="studio-timeline-dock"
+                style={{
+                  flex: "0 1 auto",
+                  maxHeight: "48%",
+                  minHeight: 0,
+                  minWidth: 0,
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                }}
+              >
+                <TimelineWithState />
+              </Box>
             </Box>
-            {messageSource === "websocket" && (
+            {messageSource === "websocket" && controlLayout !== "floating" && (
               <ControlPanel control_layout={controlLayout} />
             )}
           </Box>
           <div style={{ display: welcomeVisible ? "none" : "contents" }}>
-            <TimelineWithState />
             <ArrowKeyOverlay />
           </div>
           {welcomeVisible ? (

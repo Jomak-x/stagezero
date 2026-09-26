@@ -74,6 +74,31 @@ class StudioTimelineTest(unittest.TestCase):
         self.assertEqual(len([c for c in self.timeline.calls if c[0] == "clear_prompts"]), before)
         self.assertEqual([c[1][0] for c in self.timeline.calls if c[0] == "set_current_frame"][-1], 10)
 
+    def test_action_ids_address_the_current_take_and_disable_while_busy(self):
+        timeline = FakeTimeline()
+        adapter = StudioTimeline(SimpleNamespace(timeline=timeline), self.session, "command-control")
+        prompts = [c for c in timeline.calls if c[0] == "add_prompt"]
+        self.assertEqual([c[2]["uuid"] for c in prompts], [
+            "stagezero|one|0|command-control", "stagezero|one|1|command-control",
+        ])
+
+        self.session.busy = True
+        adapter.update()
+        prompts = [c for c in timeline.calls if c[0] == "add_prompt"][-2:]
+        self.assertEqual([c[2]["uuid"] for c in prompts], [
+            "stagezero|one|0|", "stagezero|one|1|",
+        ])
+        self.session.busy = False
+        adapter.update()
+        prompts = [c for c in timeline.calls if c[0] == "add_prompt"][-2:]
+        self.assertEqual(prompts[0][2]["uuid"], "stagezero|one|0|command-control")
+
+    def test_legacy_call_keeps_legacy_prompt_ids(self):
+        prompts = [c for c in self.timeline.calls if c[0] == "add_prompt"]
+        self.assertEqual([c[2]["uuid"] for c in prompts], [
+            "stagezero-segment-0", "stagezero-segment-1",
+        ])
+
     def test_ruler_fits_the_exact_take_length(self):
         zoom = [c for c in self.timeline.calls if c[0] == "set_zoom_settings"][-1]
         self.assertEqual(zoom[2], {"default_num_frames_zoom": 100, "max_frames_zoom": 100})
