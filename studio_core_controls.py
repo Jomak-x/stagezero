@@ -7,9 +7,13 @@ owned by StudioUI.  This panel only operates on CoreStudioSession.
 from __future__ import annotations
 
 from html import escape
+import math
 from pathlib import Path
+import re
+import threading
 import time
 
+from core_choreography import choreography_preset, validate_plan
 from studio_interaction_scene import adapt_studio_scene, recommend_placements
 
 MAX_STUDIO_ARCHIVE_BYTES = 64_000_000
@@ -29,6 +33,12 @@ EXAMPLES = {
 }
 DURATIONS = {"2 seconds": 2, "6 seconds": 6, "12 seconds": 12}
 ACTOR_COUNTS = {"One actor": 1, "Two actors": 2}
+TOGETHER_PRESETS = {
+    "Feint and dodge": "feint_dodge",
+    "Dance and answer": "dance_response",
+    "Surprise and celebrate": "surprise_celebration",
+    "Pose duet": "pose_duet",
+}
 
 
 class CoreStudioControls:
@@ -47,6 +57,14 @@ class CoreStudioControls:
         self._last_actor_count = None
         self._saved_map = {}
         self._saved_checked_at = 0.0
+        self._together_plan = None
+        self._together_key = None
+        self._ai_pending = False
+        self._ai_result = None
+        self._ai_request = 0
+        self._ai_state = None
+        self._ai_lock = threading.Lock()
+        self._together_message = "Choose a preset or describe a shared scene for AI planning."
         with gui.add_folder("Scene direction · Core", expand_by_default=False):
             self.enabled = gui.add_checkbox("Use Core scene direction", initial_value=False)
             self.status = gui.add_markdown("Core scene direction is off.")
@@ -58,6 +76,17 @@ class CoreStudioControls:
             self.actor_two = gui.add_text("Actor 2 direction", initial_value=EXAMPLES["Dance"][1], multiline=True)
             self.duration = gui.add_dropdown("Length", tuple(DURATIONS), initial_value="6 seconds")
             self.generate = gui.add_button("Generate / redirect")
+            with gui.add_folder("Together · experimental", expand_by_default=False):
+                gui.add_markdown("Two actors required. A new performance places them at least 2.25 m apart. Shared beats coordinate timing and directions; physical interaction quality is still experimental.")
+                self.together_start = gui.add_button("New two-person performance", color="gray")
+                self.together_preset = gui.add_dropdown("Shared preset", tuple(TOGETHER_PRESETS),
+                                                        initial_value="Pose duet")
+                self.together_swap = gui.add_checkbox("Swap actor roles", initial_value=False)
+                self.together_preview_preset = gui.add_button("Preview shared preset", color="gray")
+                self.together_direction = gui.add_text("Shared direction for AI", initial_value="", multiline=True)
+                self.together_plan_ai = gui.add_button("Plan shared scene with AI", color="gray")
+                self.together_preview = gui.add_markdown("Choose a preset or describe a shared scene for AI planning.")
+                self.together_generate = gui.add_button("Generate shared sequence")
             self.play = gui.add_button("Play", color="gray")
             self.pause = gui.add_button("Pause", color="gray")
             self.restart = gui.add_button("Restart", color="gray")
@@ -119,6 +148,15 @@ class CoreStudioControls:
     def _placements(self, count):
         points = recommend_placements(self._scene_document(), count)
         return {f"actor_{index + 1}": point for index, point in enumerate(points)}
+
+    @staticmethod
+    def _face_each_other(placements):
+        """Orient two existing anchors toward one another without moving them."""
+        first, second = placements["actor_1"], placements["actor_2"]
+        ax, az = first["position_xz"]
+        bx, bz = second["position_xz"]
+        return {"actor_1": {**first, "yaw": math.atan2(bx - ax, bz - az)},
+                "actor_2": {**second, "yaw": math.atan2(ax - bx, az - bz)}}
 
     def _backup(self):
         if self._snapshot().get("total_frames", 0) <= 0:
@@ -198,6 +236,107 @@ class CoreStudioControls:
             self._notice = str(exc)[:240]
         self.tick()
 
+    def _together_state(self, snapshot=None):
+        snapshot = self._snapshot() if snapshot is None else snapshot
+        return (bool(snapshot.get("active")), bool(snapshot.get("initialized")),
+                tuple(snapshot.get("actor_ids") or ()), snapshot.get("epoch"),
+                self.together_preset.value, bool(self.together_swap.value),
+                self.together_direction.value.strip())
+
+    @staticmethod
+    def _swap_plan(plan, ids):
+        result = {**plan, "beats": []}
+        for beat in plan["beats"]:
+            swapped = {**beat, "actor_prompts": {
+                ids[0]: beat["actor_prompts"][ids[1]],
+                ids[1]: beat["actor_prompts"][ids[0]]}}
+            if "root_offsets" in beat:
+                swapped["root_offsets"] = {
+                    ids[0]: beat["root_offsets"][ids[1]],
+                    ids[1]: beat["root_offsets"][ids[0]]}
+            if "headings" in beat:
+                swapped["headings"] = {
+                    ids[0]: beat["headings"][ids[1]],
+                    ids[1]: beat["headings"][ids[0]]}
+            result["beats"].append(swapped)
+        return validate_plan(result, ids)
+
+    def _set_together_plan(self, plan, state):
+        ids = state[2]
+        normalized = validate_plan(plan, ids)
+        self._together_plan = self._swap_plan(normalized, ids) if state[5] else normalized
+        self._together_key = state
+        self._together_message = "Candidate plan ready. Generate to try it in Core."
+
+    @staticmethod
+    def _mdx_text(value):
+        """Keep model/user text literal in the studio client's MDX renderer."""
+        safe = re.sub(r"([\\`*_\[\]()#+.!|~-])", r"\\\1", str(value))
+        return escape(safe, quote=False).replace("{", "&#123;").replace("}", "&#125;")
+
+    def _together_preview_text(self):
+        plan = self._together_plan
+        if plan is None:
+            return self._mdx_text(self._together_message)
+        rows = [f"**{self._mdx_text(plan['name'])} · {sum(b['seconds'] for b in plan['beats'])} seconds**",
+                "Candidate directions. Motion has not been generated or visually verified."]
+        for index, beat in enumerate(plan["beats"], 1):
+            rows.append(f"**{index}. {self._mdx_text(beat['name'])} · {beat['seconds']} s**\n\n"
+                        f"**Actor 1:** {self._mdx_text(beat['actor_prompts']['actor_1'])}\n\n"
+                        f"**Actor 2:** {self._mdx_text(beat['actor_prompts']['actor_2'])}")
+        return "\n\n".join(rows)
+
+    def _start_ai_plan(self, intent, ids, state):
+        with self._ai_lock:
+            if self._ai_pending:
+                raise ValueError("AI planning is still running. Wait for it to finish before retrying.")
+            self._ai_request += 1
+            request = self._ai_request
+            self._ai_pending = True
+            self._ai_state = state
+            self._ai_result = None
+        self._together_plan = None
+        self._together_key = None
+        self._together_message = "AI is drafting a shared plan…"
+
+        def work():
+            try:
+                from core_choreography_ai import ChoreographyPlanner
+                plan = ChoreographyPlanner.from_env().generate(
+                    intent, ids, seed=int(time.time_ns() % (2**31)))
+                result = (request, state, plan, None)
+            except Exception as exc:
+                result = (request, state, None, str(exc)[:240])
+            with self._ai_lock:
+                self._ai_pending = False
+                self._ai_state = None
+                if self._ai_request == request:
+                    self._ai_result = result
+
+        threading.Thread(target=work, name="core-choreography-plan", daemon=True).start()
+
+    def _collect_ai_plan(self, state):
+        with self._ai_lock:
+            if self._ai_pending and self._ai_state is not None and self._ai_state != state:
+                self._ai_request += 1
+                self._ai_state = None
+                self._ai_result = None
+                self._together_message = "Scene or direction changed; the old AI plan will be ignored when planning finishes."
+            result, self._ai_result = self._ai_result, None
+        if result is None:
+            return
+        _, submitted_state, plan, error = result
+        if submitted_state != state:
+            self._together_message = "Scene or direction changed; the old AI plan was ignored."
+            return
+        if error:
+            self._together_message = f"AI planning failed: {error}"
+            return
+        try:
+            self._set_together_plan(plan, state)
+        except Exception as exc:
+            self._together_message = f"AI plan rejected: {str(exc)[:200]}"
+
     def _bind(self):
         @self.enabled.on_update
         def enabled_changed(event):
@@ -243,6 +382,78 @@ class CoreStudioControls:
                     prompts["actor_2"] = self.actor_two.value.strip()
                 self.core.direct(prompts, DURATIONS[self.duration.value])
             self._run(action)
+
+        @self.together_preview_preset.on_click
+        def preset_clicked(_):
+            def action():
+                state = self._together_state()
+                if not state[0] or len(state[2]) != 2:
+                    raise ValueError("Start a two-actor Core cast to preview shared choreography.")
+                with self._ai_lock:
+                    self._ai_request += 1
+                    self._ai_state = None
+                    self._ai_result = None
+                name = TOGETHER_PRESETS[self.together_preset.value]
+                self._set_together_plan(choreography_preset(name, state[2]), state)
+            self._run(action)
+
+        @self.together_start.on_click
+        def start_together_clicked(_):
+            def action():
+                snapshot = self._snapshot()
+                self._backup()
+                was_active = bool(snapshot.get("active"))
+                self.on_active(True)
+                try:
+                    points = sorted(recommend_placements(self._scene_document(), 2,
+                                                          minimum_separation_m=2.25),
+                                    key=lambda point: tuple(point["position_xz"]))
+                    placements = {f"actor_{index + 1}": point
+                                  for index, point in enumerate(points)}
+                    if TOGETHER_PRESETS[self.together_preset.value] in ("feint_dodge", "pose_duet"):
+                        placements = self._face_each_other(placements)
+                    self.core.reset(actor_count=2, scene_document=self._scene_document(),
+                                    placements=placements)
+                except Exception:
+                    self.on_active(was_active)
+                    raise
+            self._run(action)
+
+        @self.together_plan_ai.on_click
+        def ai_clicked(_):
+            def action():
+                state = self._together_state()
+                if not state[0] or len(state[2]) != 2:
+                    raise ValueError("Start a two-actor Core cast to plan shared choreography.")
+                intent = state[6]
+                if not 1 <= len(intent) <= 1600:
+                    raise ValueError("Describe a shared scene in 1–1600 characters.")
+                self._start_ai_plan(intent, state[2], state)
+            self._run(action)
+
+        @self.together_generate.on_click
+        def together_generate_clicked(_):
+            def action():
+                state = self._together_state()
+                if self._together_plan is None or self._together_key != state:
+                    raise ValueError("Preview a current shared plan first.")
+                if len(state[2]) != 2:
+                    raise ValueError("Shared choreography requires two actors.")
+                self._backup()
+                self.core.choreograph(self._together_plan)
+                self._together_plan = None
+                self._together_key = None
+                self._together_message = "Shared sequence submitted to Core. Review the actual motion."
+            self._run(action)
+
+        def together_input_changed(event):
+            if event.client is not None and not self._syncing:
+                self.tick()
+
+        self.together_preset.on_update(together_input_changed)
+        self.together_swap.on_update(together_input_changed)
+        self.together_direction.on_update(together_input_changed)
+        self.cast.on_update(together_input_changed)
 
         @self.play.on_click
         def play_clicked(_):
@@ -347,6 +558,14 @@ class CoreStudioControls:
         frames = int(snapshot.get("total_frames") or 0)
         current = int(snapshot.get("frame") or 0)
         phase = snapshot.get("phase")
+        together_state = self._together_state(snapshot)
+        if self._together_key is not None and self._together_key != together_state:
+            self._together_plan = None
+            self._together_key = None
+            self._together_message = "Scene or direction changed. Preview a shared plan again."
+        self._collect_ai_plan(together_state)
+        with self._ai_lock:
+            ai_pending = self._ai_pending
         self._syncing = True
         try:
             self._set(self.enabled, "value", active)
@@ -369,6 +588,13 @@ class CoreStudioControls:
             self._set(self.frame, "value", min(current, max(frames - 1, 1)))
             self._set(self.start, "disabled", not active)
             self._set(self.generate, "disabled", not active or not available or not ids)
+            together_ready = active and available and len(ids) == 2
+            self._set(self.together_start, "disabled", False)
+            self._set(self.together_preview_preset, "disabled", not together_ready)
+            self._set(self.together_plan_ai, "disabled", not together_ready or ai_pending)
+            self._set(self.together_generate, "disabled", not together_ready or
+                      self._together_plan is None or self._together_key != together_state)
+            self._set(self.together_preview, "content", self._together_preview_text())
             self._set(self.navigate, "disabled", not active or not available or not targets or not verbs or not ids)
             self._set(self.play, "disabled", not active or frames == 0)
             self._set(self.pause, "disabled", not active or frames == 0)

@@ -229,6 +229,51 @@ class CoreStudioSession:
             self._run_generation()
             return result
 
+    def choreograph(self, plan, *, queued=False):
+        """Schedule a bounded shared beat plan without replacing committed poses.
+
+        Validation and capacity checks finish before pending work is cancelled.
+        All output still passes the existing native history, collision and floor
+        checks. A spatial plan cannot queue behind unresolved motion because its
+        sequence-start roots would then be unknown.
+        """
+        from core_choreography import build_choreography
+        from realtime_clip import MAX_CLIP_FRAMES
+        if type(queued) is not bool:
+            raise ValueError("queued must be a boolean")
+        with self._lock:
+            self._require_active(inference=True)
+            stages, report = build_choreography(plan, self._director.actor_ids,
+                initial_placements=self._placements, last_clip=self._director.timeline_clip())
+            pending = self._director.snapshot()
+            spatial = bool(report["plan"].get("recipe")) or any("root_offsets" in beat for beat in report["plan"]["beats"])
+            if queued and spatial and (pending["queued_stages"] or pending["inflight_request_id"]):
+                raise ValueError("Spatial choreography must start from known committed roots; wait for pending motion")
+            if self._director.total_frames + report["frames"] > MAX_CLIP_FRAMES:
+                raise ValueError("timeline exceeds the 15000-frame limit")
+            if spatial:
+                from studio_interaction_scene import adapt_studio_scene
+                from realtime_navigation import validate_ground_path
+                scene = adapt_studio_scene(self._scene)["scene"]
+                for actor_id in self._director.actor_ids:
+                    path = [report["origins_xz"][actor_id]]
+                    for stage in stages:
+                        path.extend(target["position_xz"] for target in stage.metadata.get("root_targets", {}).get(actor_id, []))
+                    validate_ground_path(scene, path, actor_radius_m=.28)
+            # A fresh director validates the complete native sequence before the
+            # existing queue can be changed. queue_sequence itself is atomic.
+            RealtimeDirector(self._director.actor_ids).queue_sequence(stages)
+            if not queued:
+                self._invalidate()
+            stage_ids = self._director.queue_sequence(stages)
+            report["stage_ids"] = list(stage_ids)
+            report["submitted_after_committed_frame"] = self._director.total_frames
+            report["queued"] = queued
+            self._director.project_metadata["studio_core"]["last_choreography"] = _copy(report)
+            self._route = None
+            self._run_generation()
+            return _copy(report)
+
     def navigate(self, actor_id, target_id, verb="approach"):
         from studio_interaction_scene import adapt_studio_scene
         with self._lock:
@@ -266,12 +311,23 @@ class CoreStudioSession:
                             or self._director is not director or not self._generation_enabled)
 
             try:
-                clips = client.wait(request_body(request), cancelled=cancelled)
+                body = request_body(request)
+                clips = client.wait(body, cancelled=cancelled)
                 if len(clips) != 1 or not isinstance(clips[0], CanonicalClip) or clips[0].native_features is None:
                     raise ValueError("Core service must return one native 40-frame horizon")
                 if not cancelled():
                     self._check_geometry(clips[0], scene, history=request.history)
                     self._check_continuity(request.history, clips[0])
+                    if request.metadata.get("pose_cue_profile"):
+                        separation = np.linalg.norm(clips[0].positions[0, :, :, None, :] - clips[0].positions[1, :, None, :, :], axis=-1)
+                        if float(separation.min()) < .15:
+                            raise ValueError("Pose duet joint clearance below 0.15 m; last good motion retained (proxy, not mesh contact)")
+                        from core_pose_cues import measure_cue_result
+                        clip = clips[0]
+                        audit = {"minimum_cross_actor_joint_distance_m": float(separation.min()),
+                                 "clearance_proxy_only": True, "cue_result": measure_cue_result(body, clip)}
+                        clips = [CanonicalClip(clip.positions, clip.rotations, clip.fps, clip.actor_ids,
+                                 clip.source, {**clip.metadata, "pose_cue_audit": audit}, clip.native_features)]
                 with self._lock:
                     if not cancelled():
                         director.complete(request.request_id, clips[0])

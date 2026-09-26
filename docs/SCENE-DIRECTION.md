@@ -212,3 +212,11 @@ Open Motion → Scene direction · Core → Play included motion example.
 `--reference-only` starts G1 on a static reference pose; it does not pretend that
 pose is generated animation. Live Core direction additionally needs the existing
 service URL and token described above.
+
+## Two-character choreography update
+
+The integrated **Together · experimental** controls now include a reviewed
+`pose_duet_v1` recipe and separate AI candidate planning. See the
+[two-character review](TWO-CHARACTER-REVIEW.md) for the complete selected video,
+UI steps, reproduction commands, 730-test verification, measured timing and
+clearance, preserved rejected trials, and remaining transition/foot-slide limits.

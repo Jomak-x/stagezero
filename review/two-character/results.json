@@ -1,0 +1,129 @@
+{
+  "milestone": "experimental directed partner rehearsal",
+  "selected_video": "ui-pose-duet-capture/performance.mp4",
+  "selected_archive": "ui-pose-duet.core.stagezero.npz",
+  "visual_review": "Watched model playback and reviewed 24 evenly spaced frames; accepted as staged rehearsal only. First duck late; some limb changes abrupt. Not reactive combat/contact.",
+  "tests": {
+    "python_unittest_passed": 731,
+    "client_changed": false,
+    "ui_archive_save_open": "passed",
+    "real_ai_ui_preview": "passed after invalid MDX formatting fix; live 12-second three-beat candidate shown without executing it"
+  },
+  "resources": {
+    "new_pods": 0,
+    "existing_core_service": "127.0.0.1:8769",
+    "ui_jobs": 4
+  },
+  "cases": [
+    {
+      "report": "athletic-h4-stride.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.8636219170002732,
+      "generation_seconds": 7.861768124974333
+    },
+    {
+      "report": "athletic-h4.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.9451338750077412,
+      "generation_seconds": 7.848536667006556
+    },
+    {
+      "report": "dance-baseline-6201.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.9700894999841694,
+      "generation_seconds": 7.842952874983894
+    },
+    {
+      "report": "feint-ai-v1.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 2.4838689590105787,
+      "generation_seconds": 9.47407050000038
+    },
+    {
+      "report": "feint-ai-v2-h4.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.8700108329940122,
+      "generation_seconds": 7.686844832991483
+    },
+    {
+      "report": "feint-ai-v2-h40.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.9461116249731276,
+      "generation_seconds": 7.803555624996079
+    },
+    {
+      "report": "feint-baseline-6201.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 1.2256754170230124,
+      "generation_seconds": 8.171836167020956
+    },
+    {
+      "report": "pose-duet-integrated-6201.json",
+      "status": "complete",
+      "gpu_jobs": 4,
+      "first_commit_seconds": 0.9680397079791874,
+      "generation_seconds": 3.888930665998487
+    },
+    {
+      "report": "pose-duet-spaced-6201.json",
+      "status": "complete",
+      "gpu_jobs": 4,
+      "first_commit_seconds": 0.8519930419861339,
+      "generation_seconds": 3.680573416990228
+    },
+    {
+      "report": "pose-duet-spaced-6202.json",
+      "status": "complete",
+      "gpu_jobs": 4,
+      "first_commit_seconds": 0.92693116699229,
+      "generation_seconds": 3.7898212500149384
+    },
+    {
+      "report": "pose-duet-v1.json",
+      "status": "complete",
+      "gpu_jobs": 4,
+      "first_commit_seconds": 1.159170458005974,
+      "generation_seconds": 4.09276741699432
+    },
+    {
+      "report": "staged-reference-finish-v2.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.9226395830046386,
+      "generation_seconds": 7.831514833000256
+    },
+    {
+      "report": "staged-reference-finish.json",
+      "status": "failed",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.8584952920209616,
+      "generation_seconds": 7.747900292015402
+    },
+    {
+      "report": "surprise-baseline-6202.json",
+      "status": "complete",
+      "gpu_jobs": 6,
+      "first_commit_seconds": 0.9396215419983491,
+      "generation_seconds": 7.844765582995024
+    }
+  ],
+  "rejections": {
+    "pose-duet-integrated-6201": "1.8m initial spacing gave 0.062m joint clearance; rejected; replaced by minimum2.25m layout and 0.15m joint proxy guard",
+    "staged-reference-finish": "Existing worker failed combining root targets and fullbody targets (CPU/CUDA); failure and committed prefix preserved",
+    "prompt_only": "Free prompts and AI sharedplans did not reliably time reactions or sharedfinish; not accepted as coordination proof"
+  },
+  "limitations": [
+    "Independent actor generation with shared soft pose goals",
+    "No learned pair interaction or mesh contact verification",
+    "No complete foot locking",
+    "8-second reviewed recipe; arbitrary prompts remain experimental",
+    "Core27/20fps separate fromG134/25fps"
+  ]
+}
