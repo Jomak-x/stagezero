@@ -22,6 +22,12 @@ cd ..
 
 Open `http://127.0.0.1:2341`. The lab requires no token, private CSV or Pod. Its
 joint sweep is deterministic **synthetic test motion**, not ARDY inference.
+**Stand pose** uses a separate FK standing input with relaxed forearms. The sweep
+opens both arms outward and returns along the same path; it does not deliberately
+move them across the torso. The robot's identity-local calibration pose remains
+the production retargeting reference. The lab places its floor at the standing
+mesh's lowest rendered vertex once per character selection, keeping it fixed
+during playback. This presentation alignment is not foot-contact IK.
 It generates two simple textured test figures with different proportions and
 G1/Mixamo names. These are technical fixtures, not production character artwork.
 Use an unused port and separate runtime folder when sharing a machine.
@@ -135,3 +141,13 @@ decisions are in [the integration plan](GLB-INTEGRATION-PLAN.md).
 - Small-fixture retargeting measurements were approximately 2.3 ms median and
   4.2 ms p95 on this machine. These 16-node/180-triangle fixtures do not establish
   performance or deformation quality for production artwork.
+
+### TASM pose regression
+
+Real-character review exposed two gaps in the initial tests: terminal hip/shoulder
+motor positions were used as anatomical centers, and the original signed sweep
+deliberately crossed inward. Position landmarks now use hip/shoulder pitch while
+rotation still comes from the complete motor chain. Independent G1 anatomy tests
+cover this distinction and terminal-axis twist. Lab tests check sagittal knee
+alignment, relaxed forearms, full-clip outward clearance and FK consistency.
+The TASM asset itself does not require another export for these motion fixes.

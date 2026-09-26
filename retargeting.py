@@ -39,6 +39,15 @@ SOURCE_NAMES = {
     "right_thigh": "right_hip_yaw_skel", "right_shin": "right_knee_skel", "right_foot": "right_ankle_roll_skel",
     "left_hand": "left_wrist_yaw_skel", "right_hand": "right_wrist_yaw_skel", "head": "waist_pitch_skel",
 }
+# Motor origins in G1's multi-axis chains are not coincident. The terminal
+# motor supplies the aggregate rotation, but the hip/shoulder segment starts
+# at the first anatomical joint, not partway down the thigh/upper arm.
+# Ankle-roll and wrist-yaw remain G1's declared foot and hand landmarks.
+SOURCE_POSITION_NAMES = {
+    **SOURCE_NAMES,
+    "left_thigh": "left_hip_pitch_skel", "right_thigh": "right_hip_pitch_skel",
+    "left_upper_arm": "left_shoulder_pitch_skel", "right_upper_arm": "right_shoulder_pitch_skel",
+}
 LIMB_ENDS = {
     f"{side}_{start}": f"{side}_{end}"
     for side in ("left", "right")
@@ -197,7 +206,8 @@ def neutral_source_pose(skeleton: Any = None) -> tuple[np.ndarray, np.ndarray]:
     """
     if skeleton is None:
         skeleton = _default_skeleton()
-    if len(skeleton.bone_order_names) != 34 or skeleton.bone_order_names[0] != "pelvis_skel" or not set(SOURCE_NAMES.values()).issubset(skeleton.bone_order_names):
+    required_names = set(SOURCE_NAMES.values()) | set(SOURCE_POSITION_NAMES.values())
+    if len(skeleton.bone_order_names) != 34 or skeleton.bone_order_names[0] != "pelvis_skel" or not required_names.issubset(skeleton.bone_order_names):
         raise RigMappingError("Retargeting requires the ARDY G1 34-joint source skeleton")
     import torch
     neutral = _array(skeleton.neutral_joints)
@@ -259,7 +269,10 @@ class HumanoidRetargeter:
         self.profile = profile
         self.skeleton = _default_skeleton() if skeleton is None else skeleton
         self.source_positions, self.source_rotations = neutral_source_pose(self.skeleton)
+        # Keep source_indices as the rotation endpoint API; geometric callers
+        # must use source_position_indices for segment endpoints and lengths.
         self.source_indices = {role: self.skeleton.bone_index[name] for role, name in SOURCE_NAMES.items()}
+        self.source_position_indices = {role: self.skeleton.bone_index[name] for role, name in SOURCE_POSITION_NAMES.items()}
         self.rest_local = np.stack([node.local_matrix for node in asset.nodes]).copy()
         self.rest_world = np.stack([node.world_matrix for node in asset.nodes]).copy()
         # All node paths are checked, because helpers/armature roots participate
@@ -271,7 +284,7 @@ class HumanoidRetargeter:
             rotation, _ = _similarity(self.rest_world[index], f"Node {index} world bind")
             self.local_scales.append(scale)
             self.world_rotations.append(rotation)
-        source = {role: self.source_positions[index] for role, index in self.source_indices.items()}
+        source = {role: self.source_positions[index] for role, index in self.source_position_indices.items()}
         target = {role: self.rest_world[index, :3, 3] for role, index in profile.bones.items()}
         source_basis = _anatomical_basis(source, "Source")
         target_basis = _anatomical_basis(target, "Target")
@@ -348,8 +361,9 @@ class HumanoidRetargeter:
                 delta = self.basis @ rotations[source_index] @ self.source_rotations[source_index].T @ self.basis.T
                 target_rotation = delta @ self.calibrated_rotations[index]
                 if role in LIMB_ENDS:
-                    source_end = self.source_indices[LIMB_ENDS[role]]
-                    direction = _unit(self.basis @ (positions[source_end] - positions[source_index]), f"{role} source pose segment")
+                    source_start = self.source_position_indices[role]
+                    source_end = self.source_position_indices[LIMB_ENDS[role]]
+                    direction = _unit(self.basis @ (positions[source_end] - positions[source_start]), f"{role} source pose segment")
                     posed_axis = _unit(target_rotation @ self.limb_axes[role], f"{role} posed axis")
                     target_rotation = _swing(posed_axis, direction) @ target_rotation
                 parent_rotation, _ = _similarity(parent_world, f"Node {index} posed parent")

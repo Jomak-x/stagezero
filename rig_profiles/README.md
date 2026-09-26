@@ -73,7 +73,13 @@ the global position data. The actual posed parent transform converts the desired
 world orientation into a local rotation. This handles intermediate unmapped nodes
 and differing local bone axes while retaining local translations and uniform
 scales. G1 terminal axis joints aggregate its shoulder, hip, waist, ankle and wrist
-chains. Pelvis/torso/foot orientation follows calibrated global rotation deltas.
+chains for **orientation**. Segment positions use anatomical landmarks separately:
+shoulder pitch and hip pitch are the shoulder/hip centers; elbow, knee,
+ankle roll and wrist yaw provide the other endpoints. The shoulder/hip yaw
+motors sit farther along each limb and must not be treated as the anatomical
+joint center. Doing so shortens measured limbs, distorts limb directions, and
+overestimates root travel. Pelvis/torso/foot orientation follows calibrated global
+rotation deltas.
 
 G1 neutral deliberately does **not** leave a T-pose target in a T-pose: G1's upper
 arms point mostly down and its forearms point forward. For the synthetic T-pose
@@ -86,7 +92,9 @@ the target's own segment lengths stay unchanged.
 Bind correctness means those node transforms still reproduce the mesh's inverse
 bind relationship; it does not mean two different skeleton neutral poses are the
 same human posture. `neutral_source_pose()` returns the actual G1 calibration
-pose, which can be passed to `retarget()` to preview a neutral humanoid posture.
+pose; this has bent robot legs and forward forearms and is not a relaxed human
+standing pose. The character lab uses a separate, FK-consistent standing test
+pose without changing that production calibration reference.
 Limb direction matching does not solve body contacts, balance or twist distribution;
 those require a more specific solver and visual evaluation.
 

@@ -97,6 +97,41 @@ class RetargetingTests(unittest.TestCase):
         self.assertAlmostEqual(float(np.min(positions[:, 1])), 0)
         np.testing.assert_allclose(rotations, np.tile(np.eye(3), (34, 1, 1)), atol=1e-10)
 
+    def test_anatomical_segments_start_at_hip_and_shoulder_not_terminal_motors(self):
+        asset = with_hands(self.assets["mixamo"], "mixamo")
+        target = self.target(asset=asset)
+        # G1 declares the hip, foot and hand landmarks. Its shoulder is the
+        # first arm joint attached to the torso, before the roll/yaw motors.
+        hips = dict(zip(("right", "left"), self.skeleton.hip_joint_names))
+        for changes in ({}, {"left_hip_roll_skel": X90,
+                             "left_shoulder_roll_skel": Z90,
+                             "left_shoulder_yaw_skel": Y90}):
+            positions, rotations = self.pose_from_locals(target, changes)
+            pose = target.retarget(positions, rotations)
+            source_lengths, target_lengths = [], []
+            for side in ("left", "right"):
+                shoulder = f"{side}_elbow_skel"
+                while self.skeleton.bone_parents[shoulder] != "waist_pitch_skel":
+                    shoulder = self.skeleton.bone_parents[shoulder]
+                foot = getattr(self.skeleton, f"{side}_foot_joint_names")[0]
+                hand = getattr(self.skeleton, f"{side}_hand_joint_names")[0]
+                segments = (("thigh", "shin", hips[side], f"{side}_knee_skel"),
+                            ("shin", "foot", f"{side}_knee_skel", foot),
+                            ("upper_arm", "forearm", shoulder, f"{side}_elbow_skel"),
+                            ("forearm", "hand", f"{side}_elbow_skel", hand))
+                for start, end, source_start, source_end in segments:
+                    a, b = target.profile.bones[f"{side}_{start}"], target.profile.bones[f"{side}_{end}"]
+                    source_segment = positions[self.skeleton.bone_index[source_end]] - positions[self.skeleton.bone_index[source_start]]
+                    actual = pose.world_matrices[b, :3, 3] - pose.world_matrices[a, :3, 3]
+                    expected = target.basis @ source_segment
+                    with self.subTest(side=side, segment=start, changes=tuple(changes)):
+                        np.testing.assert_allclose(actual / np.linalg.norm(actual), expected / np.linalg.norm(expected), atol=1e-9)
+                    if not changes and start in ("thigh", "shin"):
+                        source_lengths.append(np.linalg.norm(source_segment))
+                        target_lengths.append(np.linalg.norm(actual))
+            if not changes:
+                self.assertAlmostEqual(target.root_scale, sum(target_lengths) / sum(source_lengths))
+
     def test_upper_and_lower_arm_segments_follow_source_from_lowered_to_raised(self):
         for scheme, base in self.assets.items():
             asset = with_hands(base, scheme)
@@ -117,7 +152,7 @@ class RetargetingTests(unittest.TestCase):
                             start_role, end_role = f"{side}_{role}", f"{side}_{end}"
                             start_node, end_node = target.profile.bones[start_role], target.profile.bones[end_role]
                             target_segment = posed.world_matrices[end_node, :3, 3] - posed.world_matrices[start_node, :3, 3]
-                            source_segment = target.basis @ (positions[target.source_indices[end_role]] - positions[target.source_indices[start_role]])
+                            source_segment = target.basis @ (positions[target.source_position_indices[end_role]] - positions[target.source_position_indices[start_role]])
                             np.testing.assert_allclose(target_segment / np.linalg.norm(target_segment), source_segment / np.linalg.norm(source_segment), atol=1e-9)
                             bind_length = np.linalg.norm(asset.nodes[end_node].world_matrix[:3, 3] - asset.nodes[start_node].world_matrix[:3, 3])
                             self.assertAlmostEqual(float(np.linalg.norm(target_segment)), float(bind_length))
@@ -134,7 +169,7 @@ class RetargetingTests(unittest.TestCase):
         pose = custom.retarget(positions, rotations)
         for side in ("left", "right"):
             role = f"{side}_forearm"
-            direction = custom.basis @ (positions[custom.source_indices[f"{side}_hand"]] - positions[custom.source_indices[role]])
+            direction = custom.basis @ (positions[custom.source_position_indices[f"{side}_hand"]] - positions[custom.source_position_indices[role]])
             direction /= np.linalg.norm(direction)
             np.testing.assert_allclose(pose.world_matrices[custom.profile.bones[role], :3, :3] @ [0, 0, 1], direction, atol=1e-9)
 
@@ -149,20 +184,46 @@ class RetargetingTests(unittest.TestCase):
                 np.testing.assert_allclose(pose.world_matrices[index] @ inverse_bind, np.eye(4), atol=1e-7)
 
     def test_shoulder_aggregates_all_three_g1_axis_joints(self):
-        target = self.target(mapping=mapping_for(self.assets["g1"], source_to_target_basis=np.eye(3).tolist()))
-        pose = target.retarget(*self.pose_from_locals(target, {
+        asset = with_hands(self.assets["g1"], "g1")
+        target = self.target(asset=asset, mapping=mapping_for(asset, source_to_target_basis=np.eye(3).tolist()))
+        positions, rotations = self.pose_from_locals(target, {
             "left_shoulder_pitch_skel": X90,
             "left_shoulder_roll_skel": Y90,
             "left_shoulder_yaw_skel": Z90,
-        }))
+        })
+        pose = target.retarget(positions, rotations)
         arm = target.profile.bones["left_upper_arm"]
         elbow = target.profile.bones["left_forearm"]
+        hand = target.profile.bones["left_hand"]
         neutral = target.retarget(*target.neutral_source_pose())
-        expected_rotation = X90 @ Y90 @ Z90 @ neutral.world_matrices[arm, :3, :3]
-        np.testing.assert_allclose(pose.world_matrices[arm, :3, :3], expected_rotation, atol=1e-10)
-        expected_elbow = pose.world_matrices[arm, :3, 3] + expected_rotation @ target.rest_local[elbow, :3, 3]
-        np.testing.assert_allclose(pose.world_matrices[elbow, :3, 3], expected_elbow, atol=1e-10)
-        self.assertFalse(np.allclose(expected_elbow, target.rest_world[elbow, :3, 3]))
+        # The hand inherits every motor rotation. The upper-arm direction also
+        # includes the noncoincident pitch/roll/yaw origins, so its geometric
+        # swing must not be equated to a terminal motor matrix alone.
+        np.testing.assert_allclose(pose.world_matrices[hand, :3, :3], X90 @ Y90 @ Z90 @ neutral.world_matrices[hand, :3, :3], atol=1e-10)
+        expected = positions[self.skeleton.bone_index["left_elbow_skel"]] - positions[self.skeleton.bone_index["left_shoulder_pitch_skel"]]
+        actual = pose.world_matrices[elbow, :3, 3] - pose.world_matrices[arm, :3, 3]
+        np.testing.assert_allclose(actual / np.linalg.norm(actual), expected / np.linalg.norm(expected), atol=1e-10)
+        self.assertFalse(np.allclose(pose.world_matrices[elbow, :3, 3], target.rest_world[elbow, :3, 3]))
+
+    def test_terminal_motor_axial_rotation_survives_anatomical_position_mapping(self):
+        target = self.target(mapping=mapping_for(self.assets["g1"], source_to_target_basis=np.eye(3).tolist()))
+        positions, rotations = target.neutral_source_pose()
+        neutral = target.retarget(positions, rotations)
+        for role, start, end, motor in (
+            ("left_upper_arm", "left_shoulder_pitch_skel", "left_elbow_skel", "left_shoulder_yaw_skel"),
+            ("left_thigh", "left_hip_pitch_skel", "left_knee_skel", "left_hip_yaw_skel"),
+        ):
+            # Pose input contains independent position and orientation channels.
+            # A half-turn about an unchanged segment must remain visible even
+            # though its rotation endpoint differs from its position landmark.
+            axis = positions[self.skeleton.bone_index[end]] - positions[self.skeleton.bone_index[start]]
+            axis /= np.linalg.norm(axis)
+            half_turn = 2 * axis[:, None] @ axis[None, :] - np.eye(3)
+            turned = rotations.copy()
+            turned[self.skeleton.bone_index[motor]] = half_turn
+            pose = target.retarget(positions, turned)
+            node = target.profile.bones[role]
+            np.testing.assert_allclose(pose.world_matrices[node, :3, :3], half_turn @ neutral.world_matrices[node, :3, :3], atol=1e-9)
 
     def test_parent_global_rotation_is_removed_when_computing_child_local(self):
         target = self.target(mapping=mapping_for(self.assets["g1"], source_to_target_basis=np.eye(3).tolist()))
@@ -173,10 +234,10 @@ class RetargetingTests(unittest.TestCase):
         arm = target.profile.bones["left_upper_arm"]
         elbow = target.profile.bones["left_forearm"]
         neutral = target.retarget(*target.neutral_source_pose())
-        arm_bind = neutral.world_matrices[arm, :3, :3]
         elbow_bind = neutral.world_matrices[elbow, :3, :3]
         np.testing.assert_allclose(pose.world_matrices[elbow, :3, :3], Y90 @ Z90 @ X90 @ Z90 @ elbow_bind, atol=1e-10)
-        np.testing.assert_allclose(pose.local_matrices[elbow, :3, :3], arm_bind.T @ Z90 @ elbow_bind, atol=1e-10)
+        expected_local = pose.world_matrices[arm, :3, :3].T @ Y90 @ Z90 @ X90 @ Z90 @ elbow_bind
+        np.testing.assert_allclose(pose.local_matrices[elbow, :3, :3], expected_local, atol=1e-10)
         np.testing.assert_allclose(pose.world_matrices[arm] @ pose.local_matrices[elbow], pose.world_matrices[elbow], atol=1e-10)
 
     def test_root_translation_applies_once_in_target_basis_and_units(self):
