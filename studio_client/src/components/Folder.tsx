@@ -30,11 +30,11 @@ export default function FolderComponent({
   return (
     <Paper
       withBorder
-      className={folderWrapper}
+      className={`${folderWrapper} sz-control-folder`}
       mb={nextGuiType === "GuiFolderMessage" ? "md" : undefined}
     >
       <Paper
-        className={folderLabel}
+        className={`${folderLabel} sz-control-folder-label`}
         style={{
           cursor: isEmpty ? undefined : "pointer",
         }}
@@ -60,7 +60,7 @@ export default function FolderComponent({
           </GuiComponentContext.Provider>
         </Box>
       </Collapse>
-      <Collapse in={!(opened && !isEmpty)}>
+      <Collapse className="sz-control-folder-spacer" in={!(opened && !isEmpty)}>
         <Box p="xs"></Box>
       </Collapse>
     </Paper>

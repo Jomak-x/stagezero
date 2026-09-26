@@ -21,29 +21,39 @@ export default function TabGroupComponent({
     }
   }, [navigation?.nonce]);
   if (!visible) return null;
+  // Group the Studio navigation only; arbitrary Viser tab groups stay flat.
+  // Character is optional when the server has no character controls.
+  const studioLabels = ["Motion", "Takes", "Scene", "Character", "View", "Project", "Guide"];
+  const isStudioNavigation = [studioLabels, studioLabels.filter((label) => label !== "Character")]
+    .some((labels) => labels.length === tab_labels.length && labels.every((label, index) => label === tab_labels[index]));
+  const tabs = tab_labels.map((label, index) => (
+    <Tabs.Tab
+      value={index.toString()}
+      key={index}
+      styles={{ tabSection: { marginRight: "0.5em" }, tab: { padding: "0.75em" } }}
+      leftSection={tab_icons_html[index] == null ? undefined : (
+        <div className={htmlIconWrapper} dangerouslySetInnerHTML={{ __html: tab_icons_html[index]! }} />
+      )}
+    >
+      {label}
+    </Tabs.Tab>
+  ));
+  const controllerStart = tab_labels.indexOf("View");
   return (
     <Tabs radius="xs" value={activeTab} onChange={setActiveTab} style={{ marginTop: "-0.55em" }}>
-      <Tabs.List>
-        {tab_labels.map((label, index) => (
-          <Tabs.Tab
-            value={index.toString()}
-            key={index}
-            styles={{
-              tabSection: { marginRight: "0.5em" },
-              tab: { padding: "0.75em" },
-            }}
-            leftSection={
-              tab_icons_html[index] === null ? undefined : (
-                <div
-                  className={htmlIconWrapper}
-                  dangerouslySetInnerHTML={{ __html: tab_icons_html[index]! }}
-                />
-              )
-            }
-          >
-            {label}
-          </Tabs.Tab>
-        ))}
+      <Tabs.List className={isStudioNavigation ? "sz-grouped-tabs" : undefined} aria-label={isStudioNavigation ? "Studio sections" : undefined}>
+        {isStudioNavigation ? (
+          <>
+            <div className="sz-tab-row" role="presentation">
+              <span className="sz-tab-row-label" aria-hidden="true">Generative</span>
+              <div className="sz-tab-row-buttons" role="presentation">{tabs.slice(0, controllerStart)}</div>
+            </div>
+            <div className="sz-tab-row" role="presentation">
+              <span className="sz-tab-row-label" aria-hidden="true">Controller</span>
+              <div className="sz-tab-row-buttons" role="presentation">{tabs.slice(controllerStart)}</div>
+            </div>
+          </>
+        ) : tabs}
       </Tabs.List>
       {tab_container_ids.map((containerUuid, index) => (
         <Tabs.Panel value={index.toString()} key={containerUuid}>

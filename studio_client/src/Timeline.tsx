@@ -52,6 +52,7 @@ import {
   interactionReducer,
 } from "./timeline/interactions";
 import { formatSeconds, frameSeconds } from "./timeline/time";
+import "./Timeline.css";
 import { CameraTimelineToolbar, CameraTimelineTrack } from "./CameraTimeline";
 import { getCameraStore } from "./cameraStore";
 import type { CameraStoreState } from "./cameraStore";
@@ -2695,7 +2696,7 @@ export function Timeline({
       }
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "#FFFFFF";
+      ctx.fillStyle = darkMode ? "#14251f" : "#ffffff";
       ctx.font = "bold 11px Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -3125,69 +3126,38 @@ export function Timeline({
   const cameraCoords = cameraTrackVisible && canvasSize.width > 0
     ? calculateTimelineCoordinates(canvasSize.width, timelineState, zoomLevel, panOffset)
     : null;
-  const studioButtonStyle: React.CSSProperties = {
-    border: `1px solid ${darkMode ? "#526078" : "#b9c6d6"}`,
-    borderRadius: 5,
-    background: darkMode ? "#283344" : "#ffffff",
-    color: darkMode ? "#f2f5f9" : "#26354a",
-    height: 24,
-    padding: "0 7px",
-    fontSize: 11,
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-    cursor: "pointer",
-    flexShrink: 0,
-  };
-  const studioTransportButtonStyle: React.CSSProperties = {
-    ...studioButtonStyle,
-    width: 25,
-    padding: 0,
-    fontSize: 13,
-  };
-
   return (
     <>
     {studioActions.length > 0 && (
-      <div style={{
-        background: darkMode ? "#1e2734" : "#edf2f7",
-        color: darkMode ? "#e3eaf4" : "#26354a",
-        borderTop: `1px solid ${darkMode ? "#405069" : "#ccd7e2"}`,
-        boxSizing: "border-box",
-        height: 33,
-        padding: "3px 7px",
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        minWidth: 0,
-        flexShrink: 0,
-        zIndex: 5,
-      }}>
-        <div aria-label="Playback controls" style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
-          <button type="button" aria-label="Start sequence" title="Start sequence" disabled={!studioCommandsEnabled}
-            onClick={() => sendStudioTransport("start")} style={studioTransportButtonStyle}>↤</button>
-          <button type="button" aria-label="Play sequence" title="Play sequence" disabled={!studioCommandsEnabled}
-            onClick={() => sendStudioTransport("play")} style={studioTransportButtonStyle}>▶</button>
-          <button type="button" aria-label="Pause sequence" title="Pause sequence" disabled={!studioCommandsEnabled}
-            onClick={() => sendStudioTransport("pause")} style={studioTransportButtonStyle}>Ⅱ</button>
+      <div className="sz-studio-toolbar" data-theme={darkMode ? "dark" : "light"}>
+        <div className="sz-studio-transport" role="group" aria-label="Playback controls">
+          <button className="sz-studio-transport-button" type="button" aria-label="Start sequence" title="Start sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("start")}>↤</button>
+          <button className="sz-studio-transport-button" type="button" aria-label="Play sequence" title="Play sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("play")}>▶</button>
+          <button className="sz-studio-transport-button" type="button" aria-label="Pause sequence" title="Pause sequence" disabled={!studioCommandsEnabled}
+            onClick={() => sendStudioTransport("pause")}>Ⅱ</button>
         </div>
-        <span style={{ borderLeft: `1px solid ${darkMode ? "#46546a" : "#c4cfda"}`, height: 17, margin: "0 3px", flexShrink: 0 }} />
-        <span style={{ fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
-          Sequence <span style={{ fontWeight: 500, opacity: 0.72 }}>· {studioActions.length} {studioActions.length === 1 ? "action" : "actions"}</span>
+        <span className="sz-studio-toolbar-divider" aria-hidden="true" />
+        <span className="sz-studio-toolbar-title">
+          Sequence <span>· {studioActions.length} {studioActions.length === 1 ? "action" : "actions"}</span>
         </span>
-        <span style={{ fontSize: 11, opacity: selectedAction ? 1 : 0.7, minWidth: 0, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", paddingLeft: 6 }}>
+        <span className="sz-studio-toolbar-selection">
           {selectedAction ? `Action ${selectedAction.index + 1}` : "Click a clip to edit"}
         </span>
+        <div className="sz-studio-command-group">
         {selectedAction && selectedPrompt && <>
-          <button type="button" style={studioButtonStyle} disabled={!selectedAction.commandUuid}
+          <button className="sz-studio-command-button" type="button" disabled={!selectedAction.commandUuid}
             aria-label={`Add before action ${selectedAction.index + 1}`}
             onClick={() => sendStudioAction(selectedPrompt, "insert_before")}>Add before</button>
-          <button type="button" style={studioButtonStyle} disabled={!selectedAction.commandUuid}
+          <button className="sz-studio-command-button" type="button" disabled={!selectedAction.commandUuid}
             aria-label={`Add after action ${selectedAction.index + 1}`}
             onClick={() => sendStudioAction(selectedPrompt, "insert_after")}>Add after</button>
         </>}
-        {lastStudioPrompt && <button type="button" style={studioButtonStyle}
+        {lastStudioPrompt && <button className="sz-studio-command-button" type="button"
           disabled={!studioCommandsEnabled} aria-label="Add action to end"
           onClick={() => sendStudioAction(lastStudioPrompt, "insert_after")}>Add to end</button>}
+        </div>
       </div>
     )}
     {viewer && cameraTrackVisible && <CameraTimelineToolbar
@@ -3208,8 +3178,7 @@ export function Timeline({
         zIndex: 5,
         margin: 0,
         padding: 0,
-        borderTop: `2px solid ${darkMode ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.1)"}`,
-        boxShadow: darkMode ? "0 -2px 8px 0 rgba(0,0,0,0.15)" : "0 -2px 8px 0 rgba(0,0,0,0.08)",
+        boxShadow: `inset 0 1px 0 ${theme.topBorderColor}`,
         backgroundColor: theme.backgroundColor,
       }}
     >
@@ -3264,7 +3233,7 @@ export function Timeline({
         const visibleLeft = Math.max(studioCoords.timelineStartX, left);
         const visibleRight = Math.min(canvasSize.width, right);
         if (visibleRight <= visibleLeft) return null;
-        return <button key={prompt.uuid} type="button"
+        return <button className="sz-studio-clip-button" key={prompt.uuid} type="button"
           aria-label={`Edit action ${action.index + 1}: ${prompt.text}`}
           aria-pressed={selectedStudioPromptUuid === prompt.uuid}
           title={`Edit action ${action.index + 1}`}
@@ -3281,35 +3250,26 @@ export function Timeline({
           top: FRAME_LABELS_HEIGHT + 1,
           width: Math.max(0, Math.min(canvasSize.width, selectedRight) - Math.max(studioCoords.timelineStartX, selectedLeft)),
           height: TRACK_HEIGHT - 2,
-          border: "2px solid #fbbf24",
-          borderRadius: 5,
+          border: "1px solid #a1e5d0",
+          borderRadius: 6,
           boxSizing: "border-box",
-          boxShadow: "0 0 0 2px rgba(251,191,36,0.24)",
+          boxShadow: "inset 0 0 0 1px rgba(161,229,208,0.18), 0 0 0 1px rgba(161,229,208,0.1)",
           pointerEvents: "none",
           zIndex: 3,
         }} />
       )}
       <div
+        className="sz-studio-time-counter"
         aria-live="off"
         style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
           width: `${TRACK_LABEL_WIDTH}px`,
           height: `${FRAME_LABELS_HEIGHT}px`,
-          pointerEvents: "none",
           background: theme.backgroundColor,
-          color: hoveredRulerFrame !== null && !isDraggingCursor ? "#facc15" : theme.frameLabelColor,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontVariantNumeric: "tabular-nums",
-          lineHeight: 1.25,
+          color: hoveredRulerFrame !== null && !isDraggingCursor ? theme.timeCursorColor : theme.frameLabelColor,
         }}
       >
-        <strong style={{ fontSize: "11px" }}>{formatSeconds(frameSeconds(counterFrame, timelineState.fps), 3)}</strong>
-        <span style={{ fontSize: "9px" }}>F {counterFrame} / {timelineState.end_frame}</span>
+        <strong>{formatSeconds(frameSeconds(counterFrame, timelineState.fps), 3)}</strong>
+        <span>F {counterFrame} / {timelineState.end_frame}</span>
       </div>
       
       {/* Prompt text editing overlay */}
@@ -3366,7 +3326,7 @@ export function Timeline({
                 boxShadow: `inset 0 0 0 2px ${borderColor}`,
                 borderRadius: "5px",
                 outline: "none",
-                backgroundColor: darkMode ? "rgba(44, 46, 51, 0.95)" : "rgba(44, 46, 51, 0.95)",
+                backgroundColor: darkMode ? "rgba(28, 32, 40, 0.97)" : "rgba(44, 46, 51, 0.95)",
                 color: theme.promptTextColor,
                 padding: 0,
                 zIndex: 10,

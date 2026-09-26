@@ -125,7 +125,8 @@ class Gui:
 
 class StudioUITests(unittest.TestCase):
     def setUp(self):
-        # Real transfer handlers are covered in tests.test_upload_events.
+        # Transport is tested with real GuiApi handlers in test_upload_events;
+        # this fixture models only the public layout and callback surface.
         upload_installer = patch('studio_ui.install_upload_snapshots')
         upload_installer.start()
         self.addCleanup(upload_installer.stop)
@@ -316,6 +317,84 @@ class StudioUITests(unittest.TestCase):
         wait_until(lambda: not self.session.busy)
         self.assertEqual(self.session.kind, 'reference')
 
+    def test_first_motion_examples_fill_draft_without_submitting(self):
+        self.assertTrue(self.ui.motion_intro.visible)
+        self.assertIn('Create your first motion', self.ui.motion_intro.content)
+        self.assertTrue(self.ui.ideas_folder.visible)
+        self.assertLess(self.gui.handles.index(self.ui.ideas_folder),
+                        self.gui.handles.index(self.ui.prompt))
+        self.ui.ideas.click('Walk')
+        self.assertEqual(self.ui.prompt.value, 'A person walks forward at a relaxed pace.')
+        self.assertEqual(self.session.prompt, self.ui.prompt.value)
+        self.assertFalse(self.session.busy)
+        self.assertFalse(self.ui.generate.disabled)
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertTrue(self.ui.generate.disabled)
+        self.assertIn('motion-ready character', self.ui.motion_intro.content)
+
+    def test_generation_progress_and_retry_use_current_draft(self):
+        self.ui.ideas.click('Wave')
+        submitted = []
+
+        def start(prompt, **kwargs):
+            submitted.append((prompt, kwargs))
+            self.session.busy = True
+            self.session.status = 'Generating 4.16 s new take · 0/2 chunks'
+
+        self.session.submit = Mock(side_effect=start)
+        self.ui.generate.click()
+        self.assertEqual(len(submitted), 1)
+        self.assertIn('0/2 chunks', self.ui.motion_progress.content)
+        self.assertIn('s elapsed', self.ui.motion_progress.content)
+        self.assertTrue(self.ui.motion_progress.visible)
+        self.session.status = 'Generating 4.16 s · 1/2 chunks received; holding pose'
+        self.ui.update()
+        self.assertIn('1/2 chunks received', self.ui.motion_progress.content)
+
+        self.session.busy = False
+        self.session.status = 'Generation failed · BackendError. Original take preserved; retry.'
+        self.ui.update()
+        self.assertEqual(self.ui.generate.label, 'Retry generation')
+        self.assertEqual(self.ui.prompt.value, submitted[0][0])
+        self.assertIn('Review the direction and length', self.ui.motion_progress.content)
+        self.ui.generate.click()
+        self.assertEqual(len(submitted), 2)
+        self.assertEqual(submitted[1], submitted[0])
+
+        self.session.busy = False
+        self.session.status = 'Generation failed · BackendError. Original take preserved; retry.'
+        self.ui.update()
+        self.ui.prompt.edit('Turn slowly')
+        self.assertEqual(self.ui.generate.label, 'Generate motion')
+        self.assertFalse(self.ui.motion_progress.visible)
+        self.ui.prompt.edit(submitted[0][0])
+        self.assertEqual(self.ui.generate.label, 'Retry generation')
+        self.session.project_revision += 1
+        self.ui.update()
+        self.assertEqual(self.ui.generate.label, 'Generate motion')
+        self.assertFalse(self.ui.motion_progress.visible)
+
+    def test_project_save_and_real_status_are_available_above_tabs(self):
+        self.assertLess(self.gui.handles.index(self.ui.project_name),
+                        self.gui.handles.index(self.ui.motion_intro))
+        self.assertLess(self.gui.handles.index(self.ui.save),
+                        self.gui.handles.index(self.ui.motion_intro))
+        self.assertIn('No project save in this session', self.ui.files.content)
+        self.session.project_status = 'Unsaved changes · Save project stores every take'
+        self.ui.update()
+        self.assertIn('Unsaved changes', self.ui.files.content)
+        client = SimpleNamespace(send_file_download=Mock())
+        self.ui.save.callbacks['click'](SimpleNamespace(client=client))
+        self.assertIn('Saved ', self.ui.files.content)
+        self.assertNotIn('Unsaved changes', self.ui.files.content)
+        client.send_file_download.assert_called_once()
+        client.send_file_download.side_effect = OSError('download channel closed')
+        self.ui.save.callbacks['click'](SimpleNamespace(client=client))
+        self.assertIn('Saved ', self.ui.files.content)
+        self.assertIn('Download failed', self.ui.files.content)
+        self.assertNotIn('Save failed', self.ui.files.content)
+
     def _seed_take(self, length=100):
         positions = np.zeros((length, 34, 3), dtype=np.float32)
         rotations = np.tile(np.eye(3, dtype=np.float32), (length, 34, 1, 1))
@@ -351,14 +430,14 @@ class StudioUITests(unittest.TestCase):
             navigate.assert_called_once_with(self.ui.tabs, 0, client)
         self.assertEqual(self.ui.action_edit, (take.id, 1, 'replace'))
         self.assertIn('Edit action 2', self.ui.action_heading.content)
-        self.assertIn('Later actions regenerate', self.ui.action_note.content)
+        self.assertIn('No following actions need regeneration', self.ui.action_note.content)
         self.assertEqual(self.ui.action_prompt.value, 'Wave once')
         self.assertEqual(self.ui.action_duration.value, '2.00')
         self.assertEqual(self.session.frame, 50)
         self.assertFalse(self.ui.prompt.visible)
         self.assertFalse(self.ui.ideas_folder.visible)
         self.assertFalse(self.ui.advanced_folder.visible)
-        self.assertEqual(self.ui.save_action.label, 'Save action')
+        self.assertEqual(self.ui.save_action.label, 'Update motion')
 
         self.ui.action_prompt.edit('Wave twice')
         self.ui.action_duration.edit('3.00')
@@ -366,6 +445,29 @@ class StudioUITests(unittest.TestCase):
         self.ui.save_action.click()
         self.session.submit_action_edit.assert_called_once_with(
             'Wave twice', 1, 'replace', seconds=3.0)
+
+    def test_action_edit_explains_exact_following_regeneration(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'replace-first')
+        self.assertIn('1 following action will regenerate', self.ui.action_note.content)
+        self.assertEqual(self.ui.save_action.label, 'Update motion')
+        self._timeline_edit(take.id, 0, 'insert_before', 'before-first')
+        self.assertIn('2 following actions will regenerate', self.ui.action_note.content)
+        self._timeline_edit(take.id, 1, 'insert_after', 'after-last')
+        self.assertIn('No following actions need regeneration', self.ui.action_note.content)
+
+    def test_action_editor_rejects_replaced_source_with_same_take_id(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'original')
+        self.ui.action_prompt.edit('Wave twice')
+        replacement = Take(take.id, take.name, take.positions.copy(), take.rotations.copy(),
+                           take.motion.copy(), segments=list(take.segments))
+        self.session.takes[take.id] = replacement
+        self.session.submit_action_edit = Mock(return_value=True)
+        self.ui.save_action.click()
+        self.session.submit_action_edit.assert_not_called()
+        self.ui.update()
+        self.assertIsNone(self.ui.action_edit)
 
     def test_timeline_command_rejects_stale_invalid_and_busy_input(self):
         take = self._seed_segmented_take()
@@ -451,15 +553,20 @@ class StudioUITests(unittest.TestCase):
 
         def start(*_args, **_kwargs):
             self.session.busy = True
+            self.session.status = 'Regenerating 2 actions · 0/2 chunks'
             return True
 
         self.session.submit_action_edit = Mock(side_effect=start)
         self.ui.save_action.click()
         self.assertTrue(self.ui.save_action.disabled)
+        self.assertIn('0/2 chunks', self.ui.action_progress.content)
         self.session.busy = False
+        self.session.status = 'Action edit failed · BackendError. Original take preserved; retry.'
         self.ui.update()
         self.assertEqual(self.ui.action_edit, (take.id, 0, 'replace'))
         self.assertEqual(self.ui.action_prompt.value, 'Step left')
+        self.assertEqual(self.ui.save_action.label, 'Retry update motion')
+        self.assertTrue(self.ui.action_progress.visible)
 
         self.ui.save_action.click()
         self.session.busy = False

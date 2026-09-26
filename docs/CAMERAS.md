@@ -7,7 +7,7 @@ transitions and video export are outside this version.
 
 ## Create and edit cameras
 
-Open **View → Camera** in the inspector. In the camera
+Open **Controller → View** (or **View** in the ungrouped inspector). In the camera
 panel, **Add camera** captures the current viewport. Cameras are named Camera 1,
 Camera 2, and so on. Select a camera to rename it, change its world position,
 rotation or vertical field of view, duplicate it, or delete it.

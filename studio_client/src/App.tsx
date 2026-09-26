@@ -6,6 +6,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./App.css";
 import "./index.css";
+import "./StudioLayout.css";
 
 import { useInView } from "react-intersection-observer";
 import { Notifications } from "@mantine/notifications";
@@ -361,6 +362,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
         >
           {!welcomeVisible && <Titlebar />}
           <Box
+            className="sz-workspace"
             style={{
               width: "100%",
               position: "relative",
@@ -375,6 +377,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             }}
           >
             <Box
+              className="sz-workspace-stack"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -386,7 +389,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
             >
               <Box
                 data-testid="studio-viewport"
-                className={welcomeVisible ? "sz-welcome-scene" : undefined}
+                className={welcomeVisible ? "sz-scene sz-welcome-scene" : "sz-scene"}
                 style={(theme) => ({
                   position: "relative",
                   backgroundColor: darkMode ? theme.colors.dark[9] : "#fff",
@@ -398,27 +401,24 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
               >
                 {canvases}
                 {!welcomeVisible && showLogo && messageSource === "websocket" && <ViserLogo />}
-                {messageSource === "websocket" && controlLayout === "floating" && (
+                {messageSource === "websocket" && (
                   <ControlPanel control_layout={controlLayout} />
                 )}
               </Box>
               <Box
                 data-testid="studio-timeline-dock"
+                data-studio-timeline-dock
+                className="sz-timeline-dock"
                 style={{
                   flex: "0 1 auto",
                   maxHeight: "48%",
                   minHeight: 0,
                   minWidth: 0,
-                  overflowX: "hidden",
-                  overflowY: "auto",
                 }}
               >
                 <TimelineWithState />
               </Box>
             </Box>
-            {messageSource === "websocket" && controlLayout !== "floating" && (
-              <ControlPanel control_layout={controlLayout} />
-            )}
           </Box>
           <div style={{ display: welcomeVisible ? "none" : "contents" }}>
             <ArrowKeyOverlay />
