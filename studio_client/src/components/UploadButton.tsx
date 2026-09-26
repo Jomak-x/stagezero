@@ -120,7 +120,7 @@ function useFileUpload({
       const isDone = progressValue === 1.0;
       notifications.update({
         id: notificationId,
-        title: "Uploading " + `${filename} (${totalBytesString})`,
+        title: (isDone ? "Transferred " : "Uploading ") + `${filename} (${totalBytesString})`,
         message: !isDone ? (
           <Progress
             size="sm"
@@ -128,7 +128,9 @@ function useFileUpload({
             value={100 * progressValue}
           />
         ) : (
-          "File uploaded successfully."
+          label === "Load GLB"
+            ? "File transferred. Check the GLB import result before selecting the character."
+            : "File uploaded successfully."
         ),
         autoClose: isDone,
         withCloseButton: isDone,
@@ -136,7 +138,7 @@ function useFileUpload({
         icon: isDone ? <IconCheck /> : undefined,
       });
     }
-  }, [uploadState, totalBytesString]);
+  }, [uploadState, totalBytesString, label]);
 
   const isUploading =
     uploadState !== undefined &&
