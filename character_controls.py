@@ -343,8 +343,9 @@ class CharacterControls:
             self._diagnostics = gui.add_html('')
         gui.add_markdown('Motion needs a humanoid skeleton and skin weights. A mapping file assigns existing bones; it cannot rig a static mesh. Technical compatibility does not guarantee natural deformation. Selection is shared between connected viewers.')
         self._controls = (choose, mapping, status, preview, another)
-        self.upload_limits = ScopedUploadLimits(self.server)
-        self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
+        self.upload_limits = ScopedUploadLimits(
+            self.server, max_total_bytes=DEFAULT_LIMITS.max_file_bytes + 1024 * 1024)
+        self.upload_limits.register(upload, max_bytes=DEFAULT_LIMITS.max_file_bytes, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
         self._bind_mapping_upload(mapping, None, self._ticket)
 

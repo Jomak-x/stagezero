@@ -9,7 +9,7 @@ import unittest
 import numpy as np
 
 from character_controls import CharacterControls
-from character_assets import import_glb, inspect_glb
+from character_assets import DEFAULT_LIMITS, import_glb, inspect_glb
 from character_diagnostics import standing_reference
 from character_geometry import posed_minimum_y
 from live_motion import MotionSession
@@ -112,6 +112,19 @@ def upload_event(handle, client, file):
 
 
 class CharacterControlsTests(unittest.TestCase):
+    def test_gui_upload_budget_can_hold_the_full_glb_and_mapping(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True) as limiter:
+            self.controls.build_gui(gui)
+        limiter.assert_called_once_with(
+            self.server, max_total_bytes=DEFAULT_LIMITS.max_file_bytes + 1024 * 1024)
+        registrations = limiter.return_value.register.call_args_list
+        self.assertEqual(len(registrations), 2)
+        self.assertIs(registrations[0].args[0], gui.handles['Load GLB'])
+        self.assertEqual(registrations[0].kwargs['max_bytes'], DEFAULT_LIMITS.max_file_bytes)
+        self.assertIs(registrations[1].args[0], gui.handles['Load rig mapping'])
+        self.assertEqual(registrations[1].kwargs['max_bytes'], 1024 * 1024)
+
     def setUp(self):
         self.directory = TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

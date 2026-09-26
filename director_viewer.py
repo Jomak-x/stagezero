@@ -20,9 +20,10 @@ from studio_camera_protocol import CameraStudioController
 from studio_timeline import StudioTimeline
 from studio_ui import StudioUI, section
 from character_controls import CharacterControls
+from character_assets import DEFAULT_LIMITS, GLB_FILE_LIMIT_LABEL
 
 
-MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
+MAX_STARTUP_GLB_BYTES = DEFAULT_LIMITS.max_file_bytes
 
 
 def build_parser():
@@ -47,11 +48,13 @@ def load_startup_glb(parser, controls, path):
     if path is None:
         return
     try:
+        if path.stat().st_size > MAX_STARTUP_GLB_BYTES:
+            raise ValueError(f'GLB exceeds the {GLB_FILE_LIMIT_LABEL} import limit')
         # Bound the read even if a local file changes after startup begins.
         with path.open('rb') as source:
             data = source.read(MAX_STARTUP_GLB_BYTES + 1)
         if len(data) > MAX_STARTUP_GLB_BYTES:
-            raise ValueError('GLB exceeds the 32 MiB import limit')
+            raise ValueError(f'GLB exceeds the {GLB_FILE_LIMIT_LABEL} import limit')
         asset_id = controls.add_file(data, path.name)
     except (OSError, ValueError) as exc:
         parser.error(f'Cannot load startup GLB: {exc}')

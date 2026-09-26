@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / 'vendor/ardy'))
 from ardy.skeleton import G1Skeleton34
 from ardy.viz.viser_utils import Character
 from character_controls import CharacterControls
+from character_assets import DEFAULT_LIMITS, GLB_FILE_LIMIT_LABEL
 from character_diagnostics import diagnostic_clip
 from live_motion import MotionSession
 from studio_server import create_studio_server
@@ -82,9 +83,16 @@ def main():
             session.frame = 0
 
     if args.glb is not None:
-        if args.glb.stat().st_size > 32 * 1024 * 1024:
-            parser.error('GLB exceeds the 32 MiB import limit')
-        controls.set_initial_asset(controls.add_file(args.glb.read_bytes(), args.glb.name))
+        try:
+            if args.glb.stat().st_size > DEFAULT_LIMITS.max_file_bytes:
+                parser.error(f'GLB exceeds the {GLB_FILE_LIMIT_LABEL} import limit')
+            with args.glb.open('rb') as source:
+                data = source.read(DEFAULT_LIMITS.max_file_bytes + 1)
+        except OSError as exc:
+            parser.error(f'Cannot load GLB: {exc}')
+        if len(data) > DEFAULT_LIMITS.max_file_bytes:
+            parser.error(f'GLB exceeds the {GLB_FILE_LIMIT_LABEL} import limit')
+        controls.set_initial_asset(controls.add_file(data, args.glb.name))
 
     @server.on_client_connect
     def connected(client):

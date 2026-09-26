@@ -10,9 +10,9 @@ import { notifications } from "@mantine/notifications";
 import { htmlIconWrapper } from "./ComponentStyles.css";
 import { toMantineColor } from "./colorUtils";
 
-const scopedUploadLimits: Record<string, { extension: string; maxBytes: number }> = {
-  "Load GLB": { extension: ".glb", maxBytes: 32 * 1024 * 1024 },
-  "Load rig mapping": { extension: ".json", maxBytes: 1 * 1024 * 1024 },
+const scopedUploadLimits: Record<string, { extension: string; maxBytes: number; sizeLabel: string }> = {
+  "Load GLB": { extension: ".glb", maxBytes: 500_000_000, sizeLabel: "500 MB" },
+  "Load rig mapping": { extension: ".json", maxBytes: 1 * 1024 * 1024, sizeLabel: "1 MiB" },
 };
 
 export default function UploadButtonComponent({
@@ -145,7 +145,6 @@ function useFileUpload({
   async function upload(file: File) {
     const limit = scopedUploadLimits[label];
     if (limit !== undefined) {
-      const maxMiB = limit.maxBytes / (1024 * 1024);
       if (
         !file.name.toLowerCase().endsWith(limit.extension) ||
         file.size === 0 ||
@@ -154,7 +153,7 @@ function useFileUpload({
         notifications.show({
           color: "red",
           title: "Upload rejected",
-          message: `Choose a non-empty ${limit.extension} file up to ${maxMiB} MiB.`,
+          message: `Choose a non-empty ${limit.extension} file up to ${limit.sizeLabel}.`,
         });
         return;
       }
