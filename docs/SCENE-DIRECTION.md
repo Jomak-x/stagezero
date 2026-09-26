@@ -230,3 +230,7 @@ The independent Core duet was rejected in user review for spacing and timing. A 
 ### Native paired recovery review
 
 The retargeted paired preview was rejected by the user. See [NATIVE-PAIR-RECOVERY.md](NATIVE-PAIR-RECOVERY.md) for the measured conversion defects, restored original InterGen preview, direct authored-rig experiment, actual InterMask trials, full captures and candid rejections. This research has not been promoted into the ready Core/G1 workflow.
+
+## Native cast integration review
+
+See [NATIVE-CAST.md](NATIVE-CAST.md) for native InterGen cast selection, exact archives, studio video export and optional ARDY approach/exit. The approved native character rendering is retained. Sparring is a research preview; physical strikes, foot locking and multi-party joint generation are not solved. ARDY composition explicitly labels its model sources and authored transitions. All earlier rejected arch/platform and paired-rendering evidence remains preserved.

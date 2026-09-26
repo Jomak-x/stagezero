@@ -222,3 +222,15 @@ class CoreTimelineTests(unittest.TestCase):
         state['frame']=17;adapter.update()
         self.assertEqual(sum(c[0]=='clear_prompts' for c in timeline.calls),count)
         self.assertEqual(timeline.current_frame,17)
+
+
+class NativePairFrameRateTests(unittest.TestCase):
+    def test_native_pair_uses_30fps_and_refreshes_on_rate_change(self):
+        state = dict(active=True, total_frames=210, frame=30, fps=30, segments=[])
+        pair = SimpleNamespace(snapshot=lambda: dict(state), seek=lambda f: None)
+        ruler = FakeTimeline()
+        adapter = StudioTimeline(SimpleNamespace(timeline=ruler), FakeSession(), paired_session=pair)
+        self.assertIn(('set_fps', (30.0,), {}), ruler.calls)
+        state['fps'] = 20
+        adapter.update()
+        self.assertEqual([c for c in ruler.calls if c[0] == 'set_fps'][-1][1], (20.0,))

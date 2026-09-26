@@ -125,14 +125,15 @@ class StudioTimeline:
         length = state['total_frames']
         segments = tuple((x['start'], x['end'], x['prompt'])
                          for x in state.get('segments', ()))
-        layout = (mode, length, segments)
+        fps = float(state.get('fps', 20.))
+        layout = (mode, length, segments, fps)
         if layout != self._layout:
             self.timeline.clear_prompts()
             for index, (start, end, prompt) in enumerate(segments):
                 self.timeline.add_prompt(prompt, start, end,
                     color=SEGMENT_COLORS[index % len(SEGMENT_COLORS)],
                     uuid=f'{mode}-scene-{index}')
-            self.timeline.set_fps(20.)
+            self.timeline.set_fps(fps)
             self.timeline.set_zoom_settings(default_num_frames_zoom=max(1, length),
                                              max_frames_zoom=max(1, length))
             self.timeline.set_frame_range(0, max(0, length-1))

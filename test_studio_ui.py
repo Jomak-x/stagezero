@@ -882,7 +882,7 @@ class StudioUITests(unittest.TestCase):
         self.assertEqual(paired.calls, [('play',)])
         self.assertEqual(core.calls, [])
         self.ui.update()
-        self.assertIn('Joint pair · InterGen research', self.ui.status.content)
+        self.assertIn('Cast performance', self.ui.status.content)
         self.assertTrue(np.array_equal(self.session.positions, before))
 
         paired.active = False

@@ -191,6 +191,29 @@ class NativePairRigTests(unittest.TestCase):
         self.actor.set_frame(0);self.actor.set_frame(3)
         np.testing.assert_array_equal(self.actor.vertices[0],expected)
 
+    def test_explicit_fist_preserves_body_and_finger_lengths(self):
+        poses = np.repeat(self.asset.rest[None], 8, axis=0)
+        self.actor.prepare_clip(poses)
+        self.actor.set_frame(3)
+        baseline = self.actor.vertices[0].copy()
+        weights = np.zeros((8, 2)); weights[:, 0] = 1.
+        self.actor.prepare_clip(poses, hand_pose='fist', contact_weights=weights)
+        self.actor.set_frame(3)
+        np.testing.assert_array_equal(self.actor.joint_positions, poses[3])
+        np.testing.assert_array_equal(self.actor.vertices[0][:4], baseline[:4])
+        self.assertGreater(np.linalg.norm(self.actor.vertices[0][5]-baseline[5]), .05)
+        self.assertEqual(self.actor.provenance['authored_hand_pose']['name'], 'fist')
+        self.assertEqual(self.actor.provenance['authored_hand_pose']['finger_curl_degrees_mcp_pip_dip'], [70., 85., 60.])
+        warps = self.asset.finger_warps([1., 0.], 'fist')
+        pivots = np.array([node.world_matrix[:3,3] for node in self.asset.nodes])
+        moved = np.einsum('nij,nj->ni', warps[:,:3,:3], pivots)+warps[:,:3,3]
+        np.testing.assert_allclose(moved[self.asset.mapped_nodes, :], pivots[self.asset.mapped_nodes, :], atol=1e-12)
+        for a,b in ((22,23), (23,24), (24,25)):
+            self.assertAlmostEqual(np.linalg.norm(moved[b]-moved[a]), np.linalg.norm(pivots[b]-pivots[a]), places=12)
+        self.actor.prepare_clip(poses)
+        self.actor.set_frame(3)
+        np.testing.assert_array_equal(self.actor.vertices[0], baseline)
+
     def test_finger_weights_are_validated_before_replacing_prepared_motion(self):
         poses=np.repeat(self.asset.rest[None],8,axis=0)
         self.actor.prepare_clip(poses);self.actor.set_frame(0);before=self.actor.vertices[0].copy()

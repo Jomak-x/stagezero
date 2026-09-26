@@ -78,6 +78,7 @@ class NativeRigAsset:
             if ancestor is not None:
                 self.ancestor[node.index] = mapped[ancestor]
         self.finger_controls = {}
+        self.fist_controls = {}
         for side_index, side in enumerate(('Left', 'Right')):
             for finger in ('Index', 'Middle', 'Ring', 'Pinky', 'Thumb'):
                 angles = (10., 15., 10.) if finger == 'Thumb' else (25., 35., 20.)
@@ -88,6 +89,8 @@ class NativeRigAsset:
                         # This is a disclosed manual curl, not source inference.
                         axis = np.array([0., 0., -1. if side == 'Left' else 1.])
                         self.finger_controls[node] = (side_index, axis, np.deg2rad(degrees))
+                        fist_angle = ((25., 30., 20.) if finger == 'Thumb' else (70., 85., 60.))[segment-1]
+                        self.fist_controls[node] = (side_index, axis, np.deg2rad(fist_angle))
         self.parts = []
         for node in nodes:
             raw = doc['nodes'][node.index]
@@ -134,9 +137,12 @@ class NativeRigAsset:
                             'Mesh skin blending can change visible surface contact despite exact joint endpoints.'],
         }
 
-    def finger_warps(self, weights):
+    def finger_warps(self, weights, hand_pose='handshake'):
         """Authored finger-local rotations about actual GLB pivots, in bind world."""
         from scipy.spatial.transform import Rotation
+        if hand_pose not in ('handshake', 'fist'):
+            raise ValueError('Unknown authored finger pose')
+        controls = self.fist_controls if hand_pose == 'fist' else self.finger_controls
         weights = np.asarray(weights, dtype=float)
         if weights.shape != (2,) or not np.isfinite(weights).all() or np.any((weights < 0) | (weights > 1)):
             raise ValueError('Finger contact weights must be two finite values in [0,1]')
@@ -148,7 +154,7 @@ class NativeRigAsset:
             node = self.nodes[index]
             parent = np.eye(4) if node.parent is None else pose(node.parent)
             local = np.eye(4)
-            control = self.finger_controls.get(index)
+            control = controls.get(index)
             if control is not None:
                 side, axis, angle = control
                 rotation = Rotation.from_rotvec(axis * angle * weights[side]).as_matrix()
@@ -162,9 +168,9 @@ class NativeRigAsset:
             pose(index)
         return transforms
 
-    def skin(self, linear, translations, finger_weights=None):
+    def skin(self, linear, translations, finger_weights=None, hand_pose='handshake'):
         outputs = []
-        finger = None if finger_weights is None or not np.any(finger_weights) else self.finger_warps(finger_weights)
+        finger = None if finger_weights is None or not np.any(finger_weights) else self.finger_warps(finger_weights, hand_pose)
         for part in self.parts:
             ids = part['bones']
             bind_world = part['bind_world']
@@ -297,8 +303,8 @@ class NativeRigActor:
         }
         return linear, target.copy(), metrics
 
-    def _publish_pose(self, linear, target, metrics, finger_weights=None):
-        vertices = self.asset.skin(linear, target, finger_weights)
+    def _publish_pose(self, linear, target, metrics, finger_weights=None, hand_pose='handshake'):
+        vertices = self.asset.skin(linear, target, finger_weights, hand_pose)
         if any(not np.isfinite(v).all() for v in vertices):
             raise ValueError('Native rig skinning produced nonfinite vertices')
         for handle, points in zip(self.handles, vertices):
@@ -361,16 +367,16 @@ class NativeRigActor:
         positions = np.array(joints, dtype=float, copy=True)
         if positions.ndim != 3 or positions.shape[1:] != (22, 3) or not 4 <= len(positions) <= 1000 or not np.isfinite(positions).all():
             raise ValueError('Expected 4–1000 finite native poses[T,22,3]')
-        if hand_pose not in (None, 'handshake'):
-            raise ValueError('Only the explicit authored handshake finger pose is supported')
+        if hand_pose not in (None, 'handshake', 'fist'):
+            raise ValueError('Only explicit authored handshake or fist finger poses are supported')
         weights = None
         if hand_pose is None:
             if contact_weights is not None:
-                raise ValueError('Contact weights require explicit hand_pose=handshake')
+                raise ValueError('Contact weights require an explicit authored hand pose')
         else:
             weights = np.array(contact_weights, dtype=float, copy=True)
             if weights.shape != (len(positions), 2) or not np.isfinite(weights).all() or np.any((weights < 0) | (weights > 1)):
-                raise ValueError('Authored handshake requires finite contact_weights[T,2] in [0,1]')
+                raise ValueError('Authored hand pose requires finite contact_weights[T,2] in [0,1]')
             available_sides = {control[0] for control in self.asset.finger_controls.values()}
             if any(np.any(weights[:, side]) and side not in available_sides for side in range(2)):
                 raise ValueError('Asset lacks authored finger joints for a selected hand')
@@ -379,7 +385,7 @@ class NativeRigActor:
         self.reset_pose_history()
         try:
             prepared = [(*self._solve_pose(pose, None if prior is None else prior[index]),
-                         None if weights is None else weights[index].copy())
+                         None if weights is None else weights[index].copy(), hand_pose or 'handshake')
                         for index, pose in enumerate(positions)]
         except Exception:
             self._scale, self._previous_normals = previous_scale, previous_normals
@@ -393,11 +399,11 @@ class NativeRigActor:
             'weight_columns': ['SMPL left wrist20', 'SMPL right wrist21'],
             'nonzero_frames_per_hand': [int(np.count_nonzero(weights[:, side])) for side in range(2)],
             'max_weights_per_hand': weights.max(axis=0).tolist(),
-            'finger_curl_degrees_mcp_pip_dip': [25., 35., 20.],
-            'thumb_curl_degrees': [10., 15., 10.],
+            'finger_curl_degrees_mcp_pip_dip': [70., 85., 60.] if hand_pose == 'fist' else [25., 35., 20.],
+            'thumb_curl_degrees': [25., 30., 20.] if hand_pose == 'fist' else [10., 15., 10.],
             'body_wrist_root_positions': 'unchanged native source coordinates',
             'contact_verified': False,
-            'limitations': 'Partial rest-to-grasp curl only; no palm alignment, finger collision, force, or partner-contact solve.',
+            'limitations': 'Authored finger pose only; no palm alignment, finger collision, force, or partner-contact solve.',
         }
         return deepcopy(self.provenance)
 

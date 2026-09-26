@@ -580,7 +580,7 @@ class StudioUI:
                 elif value == 'Start': motion.seek(0)
                 elif value == 'End': motion.seek(max(0, state['total_frames']-1))
                 elif value == '−1 frame': motion.seek(max(0, state['frame']-1))
-                elif value == '+1 frame': motion.seek(state['frame']+1)
+                elif value == '+1 frame': motion.seek(min(max(0, state['total_frames']-1), state['frame']+1))
                 return
             with s.lock:
                 if not s.character_motion_enabled and value != 'Pause':
@@ -914,6 +914,18 @@ class StudioUI:
             try:
                 with s.lock:
                     if s.busy: return
+                motion = self._active_motion_session()
+                if motion is self.paired_session and motion is not None and motion.snapshot().get('fps') == 30:
+                    data = motion.save()
+                    native_folder = self.folder.parent / 'native-pair-projects'
+                    native_folder.mkdir(parents=True, exist_ok=True)
+                    path = native_folder / f'native-{time.time_ns()}.native-pair.stagezero.npz'
+                    path.write_bytes(data)
+                    s.project_status = f'Saved native performance: {path.name}'
+                    if e.client is not None:
+                        e.client.send_file_download(path.name, data)
+                    self.update()
+                    return
                 path, data = s.save_project(self.folder, self.project_name.value)
             except Exception as exc:
                 s.project_status = f'Save failed: {exc}'
@@ -1071,7 +1083,11 @@ class StudioUI:
             for control in (self.prepare_extend, self.prepare_replace):
                 self._set(control, 'disabled', take is None or s.busy)
             self._set(self.trim, 'disabled', not live or take is None or s.busy or s.frame < 3 or s.frame >= last_frame)
-            self._set(self.save, 'disabled', s.busy)
+            active_motion = self._active_motion_session()
+            native_save = active_motion is not None and active_motion is self.paired_session and active_motion.snapshot().get('fps') == 30
+            native_state = active_motion.snapshot() if native_save else {}
+            self._set(self.save, 'label', 'Save native performance + download' if native_save else 'Save project + download')
+            self._set(self.save, 'disabled', s.busy or (native_save and (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
             self._set(self.open, 'disabled', not self.saved_map or s.busy)
             self._set(self.upload, 'disabled', s.busy)
             self._set(self.clear, 'disabled', s.busy)
@@ -1098,7 +1114,7 @@ class StudioUI:
                             self._core_visibility.append((handle, handle.visible))
                         if handle.visible:
                             handle.visible = False
-                    label = ('Joint pair · InterGen research · ' if motion_session is self.paired_session
+                    label = ('Cast performance · ' if motion_session is self.paired_session
                              else 'Scene direction · ')
                     self._set(self.status, 'content', '<div class="sz-status">' + label
                               + escape(str(motion['status'])) + '</div>')
