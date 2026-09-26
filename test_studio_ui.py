@@ -125,6 +125,10 @@ class Gui:
 
 class StudioUITests(unittest.TestCase):
     def setUp(self):
+        # Real transfer handlers are covered in tests.test_upload_events.
+        upload_installer = patch('studio_ui.install_upload_snapshots')
+        upload_installer.start()
+        self.addCleanup(upload_installer.stop)
         self.temp = TemporaryDirectory()
         self.backend = ControlledBackend()
         self.session = DirectorSession(
