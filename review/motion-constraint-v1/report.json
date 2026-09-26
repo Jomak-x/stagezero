@@ -1,0 +1,763 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "started_utc": "2026-09-26T06:53:13.982837+00:00",
+  "model": "ARDY-G1-RP-25FPS-Horizon52",
+  "original_prefix": {
+    "file": "StageZero-two-endings-20260926-015459-6a268b.stagezero.npz",
+    "take_key": "t0",
+    "source_frames": 104
+  },
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "actions": {
+    "overhead": {
+      "profile": "h4cfg2",
+      "history": 4,
+      "cfg": 2.0,
+      "exemplar": "overhead__h4cfg2__seed33.npz",
+      "keyframes": [
+        80,
+        90,
+        100
+      ],
+      "constraint": "both_hands"
+    },
+    "squat": {
+      "profile": "h12cfg4",
+      "history": 12,
+      "cfg": 4.0,
+      "exemplar": "squat__h12cfg4__seed33.npz",
+      "keyframes": [
+        88,
+        96,
+        103
+      ],
+      "constraint": "full_body"
+    }
+  },
+  "design": "Paired second-horizon unconditioned vs native pose-conditioned inference; same first horizon and second-horizon RNG state",
+  "caveat": "Geometric action proxies are not human ratings; pose constraints are soft model inputs and are not exact guarantees.",
+  "cases": [
+    {
+      "action": "overhead",
+      "seed": 101,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07160193403251469,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.944324493408203,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 16,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.201454758644104,
+            "prefix_seam_mean_joint_m": 0.03546570986509323,
+            "horizon_seam_mean_joint_m": 0.0026312004774808884,
+            "floor_penetration_max_depth_m": 0.003126800060272217,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed101__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07216758094727993,
+          "conditioned_channels": 105,
+          "gpu_peak_allocated_gib": 14.9447603225708,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 23,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.21988976001739502,
+            "prefix_seam_mean_joint_m": 0.03546570986509323,
+            "horizon_seam_mean_joint_m": 0.0026012412272393703,
+            "floor_penetration_max_depth_m": 0.003126800060272217,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed101__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          32,
+          42,
+          52
+        ],
+        "original_clip_frames": [
+          80,
+          90,
+          100
+        ],
+        "world_xz_translation_m": [
+          0.1269373595714569,
+          0.20039796829223633
+        ],
+        "target_root_y_m": [
+          0.783867597579956,
+          0.783461332321167,
+          0.7844330668449402
+        ],
+        "target_left_hand_y_m": [
+          1.2498842477798462,
+          1.2848398685455322,
+          1.3228205442428589
+        ],
+        "target_right_hand_y_m": [
+          1.2329685688018799,
+          1.267965316772461,
+          1.3192849159240723
+        ]
+      }
+    },
+    {
+      "action": "overhead",
+      "seed": 102,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07070551300421357,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.944411754608154,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 89,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.3819420337677002,
+            "prefix_seam_mean_joint_m": 0.035026706755161285,
+            "horizon_seam_mean_joint_m": 0.00494542857632041,
+            "floor_penetration_max_depth_m": 0.004090487957000732,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed102__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07087156502529979,
+          "conditioned_channels": 105,
+          "gpu_peak_allocated_gib": 14.9447603225708,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 64,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.3698340654373169,
+            "prefix_seam_mean_joint_m": 0.035026706755161285,
+            "horizon_seam_mean_joint_m": 0.0039926012977957726,
+            "floor_penetration_max_depth_m": 0.004090487957000732,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed102__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          32,
+          42,
+          52
+        ],
+        "original_clip_frames": [
+          80,
+          90,
+          100
+        ],
+        "world_xz_translation_m": [
+          0.05935755372047424,
+          -0.13341188430786133
+        ],
+        "target_root_y_m": [
+          0.783867597579956,
+          0.783461332321167,
+          0.7844330668449402
+        ],
+        "target_left_hand_y_m": [
+          1.2498842477798462,
+          1.2848398685455322,
+          1.3228205442428589
+        ],
+        "target_right_hand_y_m": [
+          1.2329685688018799,
+          1.267965316772461,
+          1.3192849159240723
+        ]
+      }
+    },
+    {
+      "action": "overhead",
+      "seed": 103,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07103310711681843,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.944411754608154,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 0,
+            "minimum_run_frames": 5,
+            "action_proxy_met": false,
+            "max_simultaneous_margin_m": -0.028810858726501465,
+            "prefix_seam_mean_joint_m": 0.03614077717065811,
+            "horizon_seam_mean_joint_m": 0.0022181023377925158,
+            "floor_penetration_max_depth_m": 0.0045670270919799805,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed103__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.0710091560613364,
+          "conditioned_channels": 105,
+          "gpu_peak_allocated_gib": 14.9447603225708,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 23,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.22548675537109375,
+            "prefix_seam_mean_joint_m": 0.03614077717065811,
+            "horizon_seam_mean_joint_m": 0.0020450467709451914,
+            "floor_penetration_max_depth_m": 0.0045670270919799805,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed103__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          32,
+          42,
+          52
+        ],
+        "original_clip_frames": [
+          80,
+          90,
+          100
+        ],
+        "world_xz_translation_m": [
+          0.09385484457015991,
+          0.10540342330932617
+        ],
+        "target_root_y_m": [
+          0.783867597579956,
+          0.783461332321167,
+          0.7844330668449402
+        ],
+        "target_left_hand_y_m": [
+          1.2498842477798462,
+          1.2848398685455322,
+          1.3228205442428589
+        ],
+        "target_right_hand_y_m": [
+          1.2329685688018799,
+          1.267965316772461,
+          1.3192849159240723
+        ]
+      }
+    },
+    {
+      "action": "overhead",
+      "seed": 104,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07091973512433469,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.944411754608154,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 0,
+            "minimum_run_frames": 5,
+            "action_proxy_met": false,
+            "max_simultaneous_margin_m": -0.05571305751800537,
+            "prefix_seam_mean_joint_m": 0.03730457276105881,
+            "horizon_seam_mean_joint_m": 0.001633343519642949,
+            "floor_penetration_max_depth_m": 0.002428114414215088,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed104__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07113617798313498,
+          "conditioned_channels": 105,
+          "gpu_peak_allocated_gib": 14.9447603225708,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 22,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.2188873291015625,
+            "prefix_seam_mean_joint_m": 0.03730457276105881,
+            "horizon_seam_mean_joint_m": 0.0016650480683892965,
+            "floor_penetration_max_depth_m": 0.002428114414215088,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed104__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          32,
+          42,
+          52
+        ],
+        "original_clip_frames": [
+          80,
+          90,
+          100
+        ],
+        "world_xz_translation_m": [
+          0.0416104793548584,
+          -0.23085880279541016
+        ],
+        "target_root_y_m": [
+          0.783867597579956,
+          0.783461332321167,
+          0.7844330668449402
+        ],
+        "target_left_hand_y_m": [
+          1.2498842477798462,
+          1.2848398685455322,
+          1.3228205442428589
+        ],
+        "target_right_hand_y_m": [
+          1.2329685688018799,
+          1.267965316772461,
+          1.3192849159240723
+        ]
+      }
+    },
+    {
+      "action": "overhead",
+      "seed": 105,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07088334485888481,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.944411754608154,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 0,
+            "minimum_run_frames": 5,
+            "action_proxy_met": false,
+            "max_simultaneous_margin_m": -0.14658570289611816,
+            "prefix_seam_mean_joint_m": 0.03675951436161995,
+            "horizon_seam_mean_joint_m": 0.0019272121135145426,
+            "floor_penetration_max_depth_m": 0.0016266703605651855,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed105__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07434285897761583,
+          "conditioned_channels": 105,
+          "gpu_peak_allocated_gib": 14.9447603225708,
+          "metrics": {
+            "longest_both_hands_above_shoulders_15cm_frames": 23,
+            "minimum_run_frames": 5,
+            "action_proxy_met": true,
+            "max_simultaneous_margin_m": 0.22863101959228516,
+            "prefix_seam_mean_joint_m": 0.03675951436161995,
+            "horizon_seam_mean_joint_m": 0.0018689155112951994,
+            "floor_penetration_max_depth_m": 0.0016266703605651855,
+            "quality_guard_met": true
+          },
+          "npz": "overhead__seed105__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          32,
+          42,
+          52
+        ],
+        "original_clip_frames": [
+          80,
+          90,
+          100
+        ],
+        "world_xz_translation_m": [
+          0.09845149517059326,
+          0.23118305206298828
+        ],
+        "target_root_y_m": [
+          0.783867597579956,
+          0.783461332321167,
+          0.7844330668449402
+        ],
+        "target_left_hand_y_m": [
+          1.2498842477798462,
+          1.2848398685455322,
+          1.3228205442428589
+        ],
+        "target_right_hand_y_m": [
+          1.2329685688018799,
+          1.267965316772461,
+          1.3192849159240723
+        ]
+      }
+    },
+    {
+      "action": "squat",
+      "seed": 101,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07058769091963768,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.945003032684326,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.1272103190422058,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": false,
+            "prefix_seam_mean_joint_m": 0.03527987748384476,
+            "horizon_seam_mean_joint_m": 0.002615397796034813,
+            "floor_penetration_max_depth_m": 0.0010009407997131348,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed101__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07096400600858033,
+          "conditioned_channels": 312,
+          "gpu_peak_allocated_gib": 14.945411205291748,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.2423226237297058,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03527987748384476,
+            "horizon_seam_mean_joint_m": 0.0030304223764687777,
+            "floor_penetration_max_depth_m": 0.0010009407997131348,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed101__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          48,
+          56,
+          63
+        ],
+        "original_clip_frames": [
+          88,
+          96,
+          103
+        ],
+        "world_xz_translation_m": [
+          0.10446181893348694,
+          0.1560530662536621
+        ],
+        "target_root_y_m": [
+          0.6163783073425293,
+          0.5277784466743469,
+          0.5047189593315125
+        ],
+        "target_left_hand_y_m": [
+          0.7526137828826904,
+          0.6806276440620422,
+          0.659470796585083
+        ],
+        "target_right_hand_y_m": [
+          0.7780096530914307,
+          0.7175572514533997,
+          0.7001174092292786
+        ]
+      }
+    },
+    {
+      "action": "squat",
+      "seed": 102,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07594588003121316,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.945014953613281,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.1474982500076294,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": false,
+            "prefix_seam_mean_joint_m": 0.03624522686004639,
+            "horizon_seam_mean_joint_m": 0.0019831445533782244,
+            "floor_penetration_max_depth_m": 0.0017619729042053223,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed102__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.0712722500320524,
+          "conditioned_channels": 312,
+          "gpu_peak_allocated_gib": 14.945411205291748,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.24432331323623657,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03624522686004639,
+            "horizon_seam_mean_joint_m": 0.001890594488941133,
+            "floor_penetration_max_depth_m": 0.0017619729042053223,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed102__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          48,
+          56,
+          63
+        ],
+        "original_clip_frames": [
+          88,
+          96,
+          103
+        ],
+        "world_xz_translation_m": [
+          0.006197184324264526,
+          0.10756897926330566
+        ],
+        "target_root_y_m": [
+          0.6163783073425293,
+          0.5277784466743469,
+          0.5047189593315125
+        ],
+        "target_left_hand_y_m": [
+          0.7526137828826904,
+          0.6806276440620422,
+          0.659470796585083
+        ],
+        "target_right_hand_y_m": [
+          0.7780096530914307,
+          0.7175572514533997,
+          0.7001174092292786
+        ]
+      }
+    },
+    {
+      "action": "squat",
+      "seed": 103,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.0708005940541625,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.945014953613281,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.2989119589328766,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03543544188141823,
+            "horizon_seam_mean_joint_m": 0.002167773898690939,
+            "floor_penetration_max_depth_m": 0.003847360610961914,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed103__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07112986803986132,
+          "conditioned_channels": 312,
+          "gpu_peak_allocated_gib": 14.945411205291748,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.24521440267562866,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03543544188141823,
+            "horizon_seam_mean_joint_m": 0.0025413003750145435,
+            "floor_penetration_max_depth_m": 0.003847360610961914,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed103__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          48,
+          56,
+          63
+        ],
+        "original_clip_frames": [
+          88,
+          96,
+          103
+        ],
+        "world_xz_translation_m": [
+          0.09077981114387512,
+          0.15050125122070312
+        ],
+        "target_root_y_m": [
+          0.6163783073425293,
+          0.5277784466743469,
+          0.5047189593315125
+        ],
+        "target_left_hand_y_m": [
+          0.7526137828826904,
+          0.6806276440620422,
+          0.659470796585083
+        ],
+        "target_right_hand_y_m": [
+          0.7780096530914307,
+          0.7175572514533997,
+          0.7001174092292786
+        ]
+      }
+    },
+    {
+      "action": "squat",
+      "seed": 104,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07456817105412483,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.945014953613281,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.011245191097259521,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": false,
+            "prefix_seam_mean_joint_m": 0.03623741865158081,
+            "horizon_seam_mean_joint_m": 0.0019192759646102786,
+            "floor_penetration_max_depth_m": 0.002881467342376709,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed104__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07114024786278605,
+          "conditioned_channels": 312,
+          "gpu_peak_allocated_gib": 14.945411205291748,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.24332350492477417,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03623741865158081,
+            "horizon_seam_mean_joint_m": 0.0020325984805822372,
+            "floor_penetration_max_depth_m": 0.002881467342376709,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed104__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          48,
+          56,
+          63
+        ],
+        "original_clip_frames": [
+          88,
+          96,
+          103
+        ],
+        "world_xz_translation_m": [
+          -0.014898031949996948,
+          -0.3352773189544678
+        ],
+        "target_root_y_m": [
+          0.6163783073425293,
+          0.5277784466743469,
+          0.5047189593315125
+        ],
+        "target_left_hand_y_m": [
+          0.7526137828826904,
+          0.6806276440620422,
+          0.659470796585083
+        ],
+        "target_right_hand_y_m": [
+          0.7780096530914307,
+          0.7175572514533997,
+          0.7001174092292786
+        ]
+      }
+    },
+    {
+      "action": "squat",
+      "seed": 105,
+      "status": "ok",
+      "variants": {
+        "baseline": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.07213576114736497,
+          "conditioned_channels": 0,
+          "gpu_peak_allocated_gib": 14.945014953613281,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.009629249572753906,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": false,
+            "prefix_seam_mean_joint_m": 0.03563585877418518,
+            "horizon_seam_mean_joint_m": 0.0028550319839268923,
+            "floor_penetration_max_depth_m": 0.003115057945251465,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed105__baseline.npz"
+        },
+        "conditioned": {
+          "status": "ok",
+          "seconds_second_horizon_and_decode": 0.0709324050694704,
+          "conditioned_channels": 312,
+          "gpu_peak_allocated_gib": 14.945411205291748,
+          "metrics": {
+            "pelvis_drop_from_prefix_m": 0.24795150756835938,
+            "minimum_drop_m": 0.15,
+            "action_proxy_met": true,
+            "prefix_seam_mean_joint_m": 0.03563585877418518,
+            "horizon_seam_mean_joint_m": 0.0026293862611055374,
+            "floor_penetration_max_depth_m": 0.003115057945251465,
+            "quality_guard_met": true
+          },
+          "npz": "squat__seed105__conditioned.npz"
+        }
+      },
+      "target": {
+        "window_indices": [
+          48,
+          56,
+          63
+        ],
+        "original_clip_frames": [
+          88,
+          96,
+          103
+        ],
+        "world_xz_translation_m": [
+          0.06215396523475647,
+          0.34180688858032227
+        ],
+        "target_root_y_m": [
+          0.6163783073425293,
+          0.5277784466743469,
+          0.5047189593315125
+        ],
+        "target_left_hand_y_m": [
+          0.7526137828826904,
+          0.6806276440620422,
+          0.659470796585083
+        ],
+        "target_right_hand_y_m": [
+          0.7780096530914307,
+          0.7175572514533997,
+          0.7001174092292786
+        ]
+      }
+    }
+  ],
+  "gpu": "NVIDIA RTX 6000 Ada Generation",
+  "model_load_seconds": 67.24524389300495,
+  "checkpoint_cfg_wrapper": "AutoLatentClassifierFreeGuidedModelSeparated",
+  "diffusion_base_steps": 10,
+  "completed_utc": "2026-09-26T06:54:27.978708+00:00"
+}

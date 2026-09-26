@@ -1,4 +1,4 @@
-# StageZero — Milestone 2
+# StageZero — Single-actor directing
 
 Real ARDY G1 generation is connected to the existing viewer. The original recorded preview is retained in a separate, clearly labeled mode. This is **complete-segment generation, not streaming**: each instruction produces 104 fresh frames (4.16 seconds at 25 fps), then playback begins.
 
@@ -31,8 +31,9 @@ Python packages and the pinned viewer fork, not model weights. The viewer uses
 Torch for skeleton/rendering utilities; this does not run local inference.
 Do not install all upstream ARDY inference dependencies for this viewer.
 
-Both viewers load `assets/recorded_g1.csv` at startup, including Live ARDY's
-reference pose. See [CONTRIBUTING.md](CONTRIBUTING.md#viewer-and-private-demo-prerequisites)
+The standalone preview, live viewer and directing viewer load
+`assets/recorded_g1.csv` at startup, including Live ARDY's reference pose.
+See [CONTRIBUTING.md](CONTRIBUTING.md#viewer-and-private-demo-prerequisites)
 for the authorized source member. Without that private file, viewer startup
 is expected to fail; passing controller tests does not make a demo runnable.
 Once it is present, `./run-preview.command` opens standalone recorded playback
@@ -40,8 +41,9 @@ at http://127.0.0.1:2334/ with no token, SSH configuration or Pod.
 
 ### Existing private live demo
 
-The live viewer additionally reads `.runtime/api-token` at startup, even in
-Recorded preview mode. `run-live.command` also requires SSH configuration.
+Both the live and directing viewers additionally read `.runtime/api-token` at
+startup, even in Recorded preview mode. Their launchers (`run-live.command` and
+`run-director.command`) also require SSH configuration.
 For an existing authorized installation, prepare the configuration directory:
 
 ```sh
@@ -55,13 +57,21 @@ must privately provision matching local/Pod bearer tokens and verified
 not supply them. Existing installations retain their private files. The
 addresses below are placeholders, not public demo endpoints.
 
-## Try it now
+## Directing demo
 
-On the MacBook, connect Tailscale with the existing account and open:
+The current viewer adds stored takes, exact-prefix alternate endings, scrubbing,
+project save/load, automatic backups and a deterministic gate reaction.
+Run `./run-director.command` and open http://127.0.0.1:2336/.
+For the private remote demo, use the existing Tailscale address on port 2334.
+See [the directing guide](docs/DIRECTING.md) for the workflow and
+[measured results and screenshots](review/DIRECTING-RESULTS.md) for verification.
 
-**http://YOUR-MINI.YOUR-TAILNET.ts.net:2334/**
+## Earlier live viewer (retained locally)
 
-Private IP alternative: http://YOUR-TAILSCALE-IP:2334/. On the mini directly: http://127.0.0.1:2335/.
+The earlier live viewer remains available on the mini at http://127.0.0.1:2335/.
+Start it with `./run-live.command`. The private Tailscale address on port 2334
+now opens the directing viewer described above; it no longer routes to this
+earlier viewer.
 
 1. Select **Live ARDY** under Motion source.
 2. Enter `A person waves with their right hand.` and click **Generate next 4 seconds**.
@@ -87,7 +97,7 @@ This reuses/starts the backend on the existing Pod, restores an SSH tunnel if ab
 The existing private Tailscale forwarding is configured as:
 
 ```sh
-/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --http=2334 http://127.0.0.1:2335
+/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --http=2334 http://127.0.0.1:2336
 ```
 
 The Pod listens only on 127.0.0.1:8765 and requires a bearer token stored in private `.runtime/api-token` files. The Mac's tunnel also binds only loopback. Browser clients never receive the backend token. No public inference endpoint or Tailscale Funnel is used. `.runtime` must not be committed or shared.
@@ -128,7 +138,7 @@ Official upstream source: `vendor/ardy`, commit `693f74d13b3d04a0a22ce127ee79c92
 
 Model: [nvidia/ARDY-G1-RP-25FPS-Horizon52](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon52), 34 G1 joints, 25 fps, 414 motion features, four frames per token. Each request freshly encodes the instruction and generates two 52-frame horizons. Follow-up history ends at the displayed pose (up to 52 frames, aligned to four-frame tokens). In the first three frames there is not yet sufficient history, so an immediate replacement starts fresh.
 
-Pod: Python 3.12.3, torch 2.14.0+cu130, RTX 6000 Ada. Exact installed packages are recorded in `review/pod-packages.txt`. The existing isolated environment is `/workspace/stagezero/.venv`, with official source in `/workspace/stagezero/ardy`. `start-backend.sh` sets PYTHONPATH explicitly to avoid an editable-install assets namespace collision. Checkpoints and the local Llama/LLM2Vec encoder are cached. Required gated access was verified; no terms were accepted by this implementation.
+Pod: Python 3.12.3, torch 2.8.0+cu128, RTX 6000 Ada. Exact installed packages are recorded in `review/pod-packages.txt`. The existing isolated environment is `/workspace/stagezero/.venv`, with official source in `/workspace/stagezero/ardy`. `start-backend.sh` sets PYTHONPATH explicitly to avoid an editable-install assets namespace collision. Checkpoints and the local Llama/LLM2Vec encoder are cached. Required gated access was verified; no terms were accepted by this implementation.
 
 Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating that environment. The Mac renders and manages playback; it does not run inference. No new local inference compatibility investigation was performed.
 
@@ -138,4 +148,14 @@ Mac: Python 3.11 in `.venv`; install `requirements-live.txt` when recreating tha
 .venv/bin/python measure_backend.py
 ```
 
-See `review/MILESTONE-2.md` for measurements, visual evidence, and limitations. Milestone 3 (glasses) is not started and requires review approval.
+See `review/MILESTONE-2.md` for measurements, visual evidence, and limitations. Glasses and multiple actors are not started and require review approval.
+
+## Scene generation
+
+The studio's **Scene → Scene generator** composes 16 procedural prop types,
+six animated effects, five lighting palettes and five complete starter sets.
+Use instant offline recipes, the connected Neon AI gateway, or an optional local
+Ollama model. Move/duplicate props and import/export standalone scene JSON.
+See [scene generation and setup](docs/OBJECTS.md) for examples, the UI-independent
+integration API and current contact limitations. Reusable examples live in
+`examples/scenes/`; `ai-observatory.json` was generated through Neon.

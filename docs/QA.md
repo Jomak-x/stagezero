@@ -11,17 +11,22 @@ Follow [CONTRIBUTING.md](../CONTRIBUTING.md#offline-controller-checks) to create
 `.venv-tests` with Python 3.11, NumPy 1.26.4 and requests 2.34.2. From the clone root:
 
 ```sh
-.venv-tests/bin/python -m unittest discover -v -p 'test_*.py'
+.venv-tests/bin/python -m unittest -v test_live_motion test_directing test_director_edges tests.test_controller_edges
 .venv-tests/bin/python -m unittest -v tests.test_controller_edges
 .venv-tests/bin/python -m compileall -q live_motion.py live_viewer.py preview.py pod_backend.py measure_backend.py test_live_motion.py tests
 ```
 
-The first command is the CI test command. It includes the original eight tests
-in `test_live_motion.py` and the additional cases in `tests/test_controller_edges.py`.
+The first command runs the lightweight controller and directing suite. It includes
+the original tests in `test_live_motion.py`, directing/persistence tests and the
+additional cases in `tests/test_controller_edges.py`.
 Keep `tests/__init__.py` so Python 3.11 discovery descends into `tests/`.
 The test environment deliberately has no viewer or inference dependencies.
-All controller responses and failures are simulated; no test needs the ARDY
+All controller responses and failures are simulated; these tests need no ARDY
 submodule, recording, token, SSH, network service or GPU.
+
+CI additionally runs motion and studio regressions through root discovery and
+builds/tests the frontend. For those dependencies and commands, follow
+[full regression checks](../CONTRIBUTING.md#full-regression-checks).
 
 The original tests cover basic stale results, draft editing, pause, reset,
 recorded-mode switching, retry, history length, wrong skeleton and non-finite
@@ -59,8 +64,9 @@ git check-ignore .runtime/pod.env .runtime/api-token .runtime/known_hosts assets
 ```
 
 Expected: ARDY resolves to `693f74d13b3d04a0a22ce127ee79c929dd89756b`
-(no leading `-` or `+` in submodule status), the parent repository tracks only
-`assets/source_path.txt` under `assets/`, the private-file listing is empty,
+(no leading `-` or `+` in submodule status), the parent repository tracks
+`assets/source_path.txt` and the public `assets/motion-goals.npz` under `assets/`,
+the private-file listing is empty,
 and all representative private paths are ignored. These filename checks are
 not a complete secret scan or a check of Git history.
 
@@ -79,7 +85,7 @@ recordings. On a fresh clone without the CSV, `.venv/bin/python preview.py` and
 That verifies imports and the private-asset boundary, not successful rendering.
 Do not fabricate a recording or fetch gated assets just to make this check pass.
 
-## Results from this QA pass
+## Historical results from the original QA pass
 
 Base revision: `8e9ae12`. Environment: macOS arm64, CPython 3.11.15,
 uv 0.11.24. A new recursive clone was fetched from GitHub independently of the

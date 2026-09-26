@@ -197,16 +197,16 @@ class MotionSession:
                 with self.lock:
                     if version != self.version or request_id != self.current_id:
                         continue
-                    self.positions, self.rotations, self.motion = (result[k] for k in ("positions", "rotations", "motion"))
+                    first_frame = self._install_result(result)
                     self.fps = 25
-                    self.frame = 0
+                    self.frame = first_frame
                     self.kind = "generated"
                     self.clip_revision += 1
                     self.busy = False
                     self.status = "Fresh ARDY motion · complete segment received (not streaming)"
                     self.metrics = {**result["metadata"], "command_to_received_seconds": time.perf_counter() - submitted}
                     self.needs_ack = (request_id, submitted)
-                    self.started = time.perf_counter()
+                    self.started = time.perf_counter() - self.frame / self.fps
                     self.playing = self.resume_after_generation
             except Exception as exc:
                 with self.lock:
@@ -215,6 +215,11 @@ class MotionSession:
                     self.busy = False
                     self.playing = False
                     self.status = f"Generation failed · {type(exc).__name__}: {str(exc)[:200]}. Retry or use Recorded preview."
+
+    def _install_result(self, result):
+        """Install a validated result while locked; return its playback start frame."""
+        self.positions, self.rotations, self.motion = (result[k] for k in ("positions", "rotations", "motion"))
+        return 0
 
     def record_ack(self, request_id, elapsed, screenshot=None):
         with self.lock:
