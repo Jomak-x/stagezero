@@ -6,8 +6,12 @@ details keep their own colors when an interaction changes the main material.
 
 import json
 import math
+import hashlib
+import inspect
 
 import numpy as np
+
+from asset_geometry import compile_asset, mesh_to_glb, validate_assets
 
 
 def _shade(color, factor):
@@ -20,6 +24,16 @@ class ObjectSceneLayer:
         self.signature = None
         self.handles = {}
         self._atmosphere = None
+        self._assets = {}
+        self._asset_digests = {}
+        self._object_signatures = {}
+        self._object_snapshot = None
+        self._asset_snapshot = None
+        self._state_snapshot = {}
+        self._mesh_cache = {}
+        self._glb_cache = {}
+        self._glb_shadow_argument = None
+        self._target_layer = None
 
     def update(self, objects, states):
         """Draw a state list or an object/effect/lighting playback bundle.
@@ -28,35 +42,78 @@ class ObjectSceneLayer:
         'seconds': elapsed, 'lighting': preset}. A legacy list clears effects.
         """
         bundle = isinstance(states, dict)
+        targets=states.get('targets',[]) if bundle else []
+        if targets or self._target_layer is not None:
+            if self._target_layer is None:
+                from scene_targets import TargetLayer
+                self._target_layer=TargetLayer(self.server)
+            self._target_layer.update(targets,objects)
         if bundle:
             effect_specs = states.get('effects', [])
             seconds = states.get('seconds', 0.0)
             lighting = states.get('lighting', 'neutral')
+            raw_assets = states.get('assets', [])
             states = states['objects']
         else:
             effect_specs, seconds, lighting = [], 0.0, 'neutral'
+            raw_assets = []
         if self._atmosphere is None and bundle:
             from scene_atmosphere import SceneAtmosphereLayer
             self._atmosphere = SceneAtmosphereLayer(self.server)
         if self._atmosphere is not None:
             self._atmosphere.update(effect_specs, seconds, lighting)
 
-        signature = json.dumps(objects, sort_keys=True)
-        if signature != self.signature:
-            for parts in self.handles.values():
-                for handle, _, _ in parts:
+        # Keep detached snapshots so edits made in place are still detected.
+        # Equality is much cheaper than serializing every asset each frame.
+        if objects != self._object_snapshot or raw_assets != self._asset_snapshot:
+            assets = validate_assets(raw_assets)
+            available = {asset['id'] for asset in assets}
+            for obj in objects:
+                if obj['kind'] == 'custom' and obj['asset'] not in available:
+                    raise ValueError(f"custom object {obj['id']} references missing asset {obj['asset']}")
+            asset_digests = {
+                asset['id']: hashlib.sha256(json.dumps(asset, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+                for asset in assets
+            }
+            signatures = {}
+            for obj in objects:
+                # Position and interaction affect state, not mesh geometry.
+                shape = (obj['kind'], tuple(obj['size']), obj.get('yaw', 0))
+                if obj['kind'] == 'custom':
+                    shape += (obj['asset'], asset_digests[obj['asset']])
+                else:
+                    shape += (tuple(obj['color']),)
+                signatures[obj['id']] = shape
+            changed = {identifier for identifier, shape in signatures.items()
+                       if self._object_signatures.get(identifier) != shape}
+            for identifier in set(self.handles) - set(signatures) | changed:
+                for handle, _, _ in self.handles.pop(identifier, []):
                     handle.remove()
-            self.handles = {obj['id']: self._build(obj) for obj in objects}
-            self.signature = signature
+                self._state_snapshot.pop(identifier, None)
+            self._assets = {asset['id']: asset for asset in assets}
+            self._asset_digests = asset_digests
+            for obj in objects:
+                if obj['id'] in changed:
+                    self.handles[obj['id']] = self._build(obj)
+            self._object_signatures = signatures
+            self._object_snapshot = json.loads(json.dumps(objects))
+            self._asset_snapshot = json.loads(json.dumps(raw_assets))
+            self.signature = (self._object_snapshot, self._asset_snapshot)
         for state in states:
+            current = (tuple(state['position']), tuple(state['color']), state['active'])
+            if self._state_snapshot.get(state['id']) == current:
+                continue
             for handle, offset, role in self.handles.get(state['id'], []):
                 handle.position = tuple(a + b for a, b in zip(state['position'], offset))
                 if role == 'body':
                     handle.color = tuple(state['color'])
                 elif role == 'screen':
                     handle.color = (87, 242, 222) if state['active'] else (34, 88, 110)
+            self._state_snapshot[state['id']] = current
 
     def _build(self, obj):
+        if obj['kind'] == 'custom':
+            return self._build_custom(obj)
         x, y, z = obj['size']
         name = '/objects/' + obj['id']
         main = tuple(obj['color'])
@@ -200,4 +257,52 @@ class ObjectSceneLayer:
             box('trim_back', (x, y * .16, z * .03), (0, -y * .42, z * .485), light)
         else:
             raise ValueError(f'unsupported object kind: {kind}')
+        if obj.get('yaw', 0):
+            angle = math.radians(obj['yaw'])
+            c, s = math.cos(angle), math.sin(angle)
+            rotated = []
+            for handle, offset, role in parts:
+                handle.wxyz = (math.cos(angle / 2), 0., math.sin(angle / 2), 0.)
+                dx, dy, dz = offset
+                rotated.append((handle, (c*dx+s*dz, dy, -s*dx+c*dz), role))
+            parts = rotated
         return parts
+
+    def _build_custom(self, obj):
+        """Create one colored GLB handle from a validated asset recipe."""
+        asset = self._assets.get(obj['asset'])
+        if asset is None:
+            raise ValueError(f"custom object {obj['id']} references missing asset {obj['asset']}")
+        digest = self._asset_digests[obj['asset']]
+        if digest not in self._mesh_cache:
+            self._mesh_cache[digest] = compile_asset(asset)
+            if len(self._mesh_cache) > 32:
+                oldest = next(iter(self._mesh_cache))
+                if oldest != digest:
+                    del self._mesh_cache[oldest]
+        size = tuple(obj['size'])
+        glb_key = (digest, size)
+        if glb_key not in self._glb_cache:
+            vertices, faces, colors = self._mesh_cache[digest]
+            lower, upper = vertices.min(axis=0), vertices.max(axis=0)
+            normalized = (vertices - (lower + upper) / 2) / np.maximum(upper - lower, 1e-6)
+            self._glb_cache[glb_key] = mesh_to_glb(normalized * np.asarray(size, dtype=np.float32), faces, colors)
+            if len(self._glb_cache) > 64:
+                oldest = next(iter(self._glb_cache))
+                if oldest != glb_key:
+                    del self._glb_cache[oldest]
+        yaw = math.radians(obj.get('yaw', 0)) / 2
+        kwargs = {'wxyz': (math.cos(yaw), 0., math.sin(yaw), 0.)}
+        # Large compound assets have many intersecting box faces. Viser's
+        # shadow receiver produces visible self-shadow stripes on their broad
+        # horizontal or vertical surfaces; they still cast shadows on the
+        # floor and smaller props.
+        if self._glb_shadow_argument is None:
+            parameters = inspect.signature(self.server.scene.add_glb).parameters
+            self._glb_shadow_argument = ('receive_shadow' in parameters or any(
+                parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in parameters.values()))
+        if self._glb_shadow_argument:
+            broadest_face = max(size[0] * size[1], size[0] * size[2], size[1] * size[2])
+            kwargs['receive_shadow'] = broadest_face < 4.0
+        handle = self.server.scene.add_glb('/objects/' + obj['id'], self._glb_cache[glb_key], **kwargs)
+        return [(handle, (0, 0, 0), 'custom')]

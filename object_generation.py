@@ -11,6 +11,7 @@ import requests
 from scene_objects import make_object, validate_objects
 
 MAX_RESPONSE_BYTES = 100_000
+DEFAULT_SCENE_MODEL = 'gpt-5-6-sol'
 
 
 def validate_prompt(prompt):
@@ -53,12 +54,18 @@ class GatewayGenerator:
         self.transport = transport or requests
 
     @classmethod
-    def from_env(cls):
+    def from_env(cls, stage=None):
         config = gateway_config()
         base = config.get('STAGEZERO_OBJECT_API_BASE')
         if not base and config.get('NEON_AI_GATEWAY_BASE_URL'):
             base = config['NEON_AI_GATEWAY_BASE_URL'].rstrip('/') + '/v1'
         model = config.get('STAGEZERO_OBJECT_MODEL')
+        if stage in ('assets', 'layout'):
+            override = ('STAGEZERO_SCENE_ASSET_MODEL' if stage == 'assets'
+                        else 'STAGEZERO_SCENE_LAYOUT_MODEL')
+            model = config.get(override) or (DEFAULT_SCENE_MODEL if config.get('NEON_AI_GATEWAY_BASE_URL') else model)
+        elif stage is not None:
+            raise ValueError('Unknown gateway generation stage')
         token = config.get('STAGEZERO_OBJECT_API_KEY') or config.get('NEON_AI_GATEWAY_TOKEN')
         if not base or not model or not token:
             raise ValueError('Configure gateway URL, model and token in .runtime/objects.env or the environment')
@@ -81,7 +88,7 @@ class GatewayGenerator:
             raise ValueError('Expected a nonempty objects array')
         return validate_objects(doc['objects'])
 
-    def request_json(self, system, prompt, max_tokens=3000):
+    def request_json(self, system, prompt, max_tokens=3000, timeout_seconds=45):
         prompt = validate_prompt(prompt)
         try:
             with self.transport.post(self.url, headers={'Authorization': 'Bearer ' + self._api_key},
@@ -89,7 +96,7 @@ class GatewayGenerator:
                                          {'role': 'system', 'content': system},
                                          {'role': 'user', 'content': prompt}],
                                            'response_format': {'type': 'json_object'},
-                                           'max_tokens': max_tokens}, timeout=(10, 45),
+                                           'max_tokens': max_tokens}, timeout=(10, timeout_seconds),
                                      stream=True, allow_redirects=False) as response:
                 if response.status_code != 200:
                     raise ValueError(f'Object gateway returned HTTP {response.status_code}; existing scene preserved')
@@ -113,7 +120,8 @@ def gateway_config():
     Process environment takes precedence. AWS credentials are never loaded here.
     """
     names = ('STAGEZERO_OBJECT_API_BASE', 'STAGEZERO_OBJECT_MODEL', 'STAGEZERO_OBJECT_API_KEY',
-             'NEON_AI_GATEWAY_BASE_URL', 'NEON_AI_GATEWAY_TOKEN', 'STAGEZERO_LOCAL_MODEL')
+             'NEON_AI_GATEWAY_BASE_URL', 'NEON_AI_GATEWAY_TOKEN', 'STAGEZERO_LOCAL_MODEL',
+             'STAGEZERO_SCENE_ASSET_MODEL', 'STAGEZERO_SCENE_LAYOUT_MODEL')
     values = {}
     path = Path(__file__).resolve().parent / '.runtime' / 'objects.env'
     if path.is_file():
