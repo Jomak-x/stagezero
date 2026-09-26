@@ -13,6 +13,7 @@ from ardy.viz.viser_utils import Character
 from live_motion import Backend
 from object_directing import ObjectDirectorSession as DirectorSession
 from object_scene import ObjectSceneLayer
+from scene_ground import studio_surface_visibility
 from object_controls import add_object_controls
 from studio_server import create_studio_server
 from studio_camera import StudioCamera
@@ -75,7 +76,7 @@ def main():
     server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
     server.scene.configure_default_lights(enabled=True, cast_shadow=True)
     server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
-    server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
+    floor = server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
     grid = server.scene.add_grid('/ground-grid', plane='xz', width=200, height=200, cell_size=.5, section_size=2., cell_color=(44, 57, 70), section_color=(68, 87, 100), position=(0, .008, 0), fade_distance=30., fade_strength=2., shadow_opacity=0.)
     stage = trimesh.creation.cylinder(radius=2., height=.035, sections=96)
     stage.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2, (1,0,0)))
@@ -112,6 +113,22 @@ def main():
     gate_zone = server.scene.add_mesh_simple('/gate/zone', vertices=np.asarray(zone_mesh.vertices,dtype=np.float32), faces=np.asarray(zone_mesh.faces,dtype=np.uint32), color=(53,156,141), opacity=.22)
     gizmo = server.scene.add_transform_controls('/gate-edit', scale=.7, active_axes=(True,False,True), disable_rotations=True, translation_limits=((-100,100),(0,0),(-100,100)), visible=False)
     gate_ui = {}
+    surface_state = None
+    def update_studio_surfaces():
+        nonlocal surface_state
+        visibility = studio_surface_visibility(
+            session.scene.get('objects', []),
+            show_grid=bool(gate_ui['grid'].value),
+            show_platform=bool(gate_ui['stage'].value),
+        )
+        if visibility == surface_state:
+            return
+        surface_state = visibility
+        floor.visible, grid.visible, platform.visible = visibility
+        gate_ui['grid'].disabled = gate_ui['stage'].disabled = not floor.visible
+        gate_ui['surface_note'].content = ('Scene ground is active; studio grid and platform are hidden to prevent overlap.'
+                                           if not floor.visible else '')
+
     def edit_gate(position=None):
         with session.lock:
             gate = session.scene['gate']
@@ -128,6 +145,7 @@ def main():
         section(gui, 'Stage & interaction', 'Move the gate in the viewport or enter its floor coordinates.')
         gate_ui['grid'] = gui.add_checkbox('Show floor grid', initial_value=True)
         gate_ui['stage'] = gui.add_checkbox('Show platform', initial_value=True)
+        gate_ui['surface_note'] = gui.add_markdown('')
         section(gui, 'Activation gate', 'The teal area triggers a recorded gate event when the actor enters it.')
         gate = session.scene['gate']
         gate_ui['enabled'] = gui.add_checkbox('Enable gate', initial_value=gate['enabled'])
@@ -142,9 +160,9 @@ def main():
             def changed(e):
                 if e.client is not None: edit_gate()
         @gate_ui['grid'].on_update
-        def grid_changed(_): grid.visible = gate_ui['grid'].value
+        def grid_changed(_): update_studio_surfaces()
         @gate_ui['stage'].on_update
-        def stage_changed(_): platform.visible = gate_ui['stage'].value
+        def stage_changed(_): update_studio_surfaces()
 
     @gizmo.on_update
     def move_gate(_):
@@ -221,6 +239,7 @@ def main():
                 object_key = (key, session.project_revision)
                 if object_key != previous_objects:
                     object_layer.update(session.scene.get('objects', []), session.object_states())
+                    update_studio_surfaces()
                     previous_objects = object_key
                 gate = session.scene['gate']
                 gate_open = session.gate_open()

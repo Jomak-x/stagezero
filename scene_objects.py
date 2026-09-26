@@ -14,7 +14,7 @@ from numbers import Integral, Real
 import numpy as np
 
 
-MAX_OBJECTS = 40
+MAX_OBJECTS = 64
 KINDS = {
     "door": {"action": "open", "trigger": "proximity", "size": [0.9, 2.0, 0.12], "color": [122, 91, 68], "radius": 0.8},
     "lamp": {"action": "switch_on", "trigger": "proximity", "size": [0.35, 1.4, 0.35], "color": [142, 149, 168], "radius": 0.7},
@@ -34,6 +34,7 @@ KINDS = {
     "platform": {"action": "none", "trigger": "none", "size": [3.0, 0.3, 2.0], "color": [87, 95, 105], "radius": 0},
 }
 _FIELDS = frozenset(("id", "name", "kind", "position", "size", "color", "interaction"))
+_CUSTOM_FIELDS = _FIELDS | {"asset"}
 _INTERACTION_FIELDS = frozenset(("action", "trigger", "radius"))
 _ID_PATTERN = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
 
@@ -95,10 +96,14 @@ def validate_objects(value: object) -> list[dict]:
     result = []
     seen_ids = set()
     for i, item in enumerate(value):
-        if not isinstance(item, dict) or set(item) != _FIELDS:
-            raise ValueError(f"objects[{i}] has missing or unknown fields")
-        kind = item["kind"]
-        if not isinstance(kind, str) or kind not in KINDS:
+        kind = item.get("kind") if isinstance(item, dict) else None
+        fields = set(item) if isinstance(item, dict) else set()
+        if not isinstance(item, dict) or (fields not in (_FIELDS, _FIELDS | {"yaw"}) if kind != "custom" else
+                                           fields not in (_CUSTOM_FIELDS, _CUSTOM_FIELDS | {"yaw"})):
+            expected = _CUSTOM_FIELDS if kind == "custom" else _FIELDS
+            extra = fields - expected - {"yaw"}
+            raise ValueError(f"objects[{i}] has missing or unknown fields: missing {sorted(expected-fields)}, extra {sorted(extra)}")
+        if not isinstance(kind, str) or (kind not in KINDS and kind != "custom"):
             raise ValueError(f"objects[{i}].kind is unsupported")
         identifier = item["id"]
         if not isinstance(identifier, str) or not _ID_PATTERN.fullmatch(identifier) or identifier in seen_ids:
@@ -107,8 +112,8 @@ def validate_objects(value: object) -> list[dict]:
         name = item["name"]
         if not isinstance(name, str) or not 1 <= len(name) <= 80 or not name.strip() or any(ord(c) < 32 for c in name):
             raise ValueError(f"objects[{i}].name is invalid")
-        position = _vector(item["position"], f"objects[{i}].position", -20, 20)
-        size = _vector(item["size"], f"objects[{i}].size", 0.05, 12)
+        position = _vector(item["position"], f"objects[{i}].position", -100, 100)
+        size = _vector(item["size"], f"objects[{i}].size", 0.05, 60)
         if kind == "ball" and max(size) - min(size) > 1e-6:
             raise ValueError(f"objects[{i}].size must be equal on all axes for a ball")
         color = item["color"]
@@ -119,20 +124,37 @@ def validate_objects(value: object) -> list[dict]:
         interaction = item["interaction"]
         if not isinstance(interaction, dict) or set(interaction) != _INTERACTION_FIELDS:
             raise ValueError(f"objects[{i}].interaction has missing or unknown fields")
-        if interaction["action"] != KINDS[kind]["action"]:
+        action = interaction["action"]
+        if kind == "custom":
+            if action not in ("none", "open", "switch_on", "pick_up", "activate", "sit"):
+                raise ValueError(f"objects[{i}].interaction.action is invalid for custom asset")
+        elif action != KINDS[kind]["action"]:
             raise ValueError(f"objects[{i}].interaction.action does not match kind")
         trigger = interaction["trigger"]
-        allowed_triggers = ("proximity", "touch") if kind in ("door", "lamp") else (KINDS[kind]["trigger"],)
+        if kind == "custom":
+            allowed_triggers = {"none": ("none",), "open": ("proximity", "touch"),
+                                "switch_on": ("proximity", "touch"), "pick_up": ("touch",),
+                                "activate": ("proximity", "touch"), "sit": ("proximity",)}[action]
+        else:
+            allowed_triggers = ("proximity", "touch") if kind in ("door", "lamp") else (KINDS[kind]["trigger"],)
         if trigger not in allowed_triggers:
             raise ValueError(f"objects[{i}].interaction.trigger is invalid for kind")
         max_radius = 0 if trigger == "none" else (0.15 if trigger == "touch" else 5.0)
         radius = _real(interaction["radius"], f"objects[{i}].interaction.radius", 0, max_radius,
                        positive=trigger != "none")
-        result.append({
+        clean = {
             "id": identifier, "name": name.strip(), "kind": kind,
             "position": position, "size": size, "color": [int(c) for c in color],
             "interaction": {"action": interaction["action"], "trigger": trigger, "radius": radius},
-        })
+        }
+        if kind == "custom":
+            asset = item["asset"]
+            if not isinstance(asset, str) or not _ID_PATTERN.fullmatch(asset):
+                raise ValueError(f"objects[{i}].asset is invalid")
+            clean["asset"] = asset
+        if "yaw" in item:
+            clean["yaw"] = _real(item["yaw"], f"objects[{i}].yaw", -360, 360)
+        result.append(clean)
     return result
 
 
@@ -183,17 +205,20 @@ def evaluate_objects(objects: object, positions: object, frame: int, hand_indice
         centre = np.asarray(obj["position"], dtype=np.float64)
         size = np.asarray(obj["size"], dtype=np.float64)
         radius = obj["interaction"]["radius"]
+        angle = math.radians(obj.get("yaw", 0))
+        c, s = math.cos(angle), math.sin(angle)
+        rotation = np.asarray(((c, 0, s), (0, 1, 0), (-s, 0, c)))
         if obj["interaction"]["trigger"] == "proximity":
             # Ground-plane footprint distance keeps tall props reachable when
             # the root is at floor height. Joint 0 is the character root.
-            outside = np.maximum(np.abs(root_xz - centre[[0, 2]]) - size[[0, 2]] / 2, 0)
+            outside = np.maximum(np.abs((root_xz - centre[[0, 2]]) @ rotation[np.ix_([0, 2], [0, 2])]) - size[[0, 2]] / 2, 0)
             active[i] = bool(np.any(np.linalg.norm(outside, axis=-1) <= radius))
         else:
             contact_points = trajectory[:, hands, :]
             if obj["kind"] == "ball":
                 surface_distance = np.linalg.norm(contact_points - centre, axis=-1) - size[0] / 2
             else:
-                outside = np.maximum(np.abs(contact_points - centre) - size / 2, 0)
+                outside = np.maximum(np.abs((contact_points - centre) @ rotation) - size / 2, 0)
                 surface_distance = np.linalg.norm(outside, axis=-1)
             touches = np.argwhere(surface_distance <= radius)
             if touches.size:
@@ -205,13 +230,13 @@ def evaluate_objects(objects: object, positions: object, frame: int, hand_indice
         position = obj["position"].copy()
         color = obj["color"].copy()
         if active[i]:
-            if obj["kind"] == "door":
+            if obj["interaction"]["action"] == "open":
                 position[1] += obj["size"][1]
-            elif obj["kind"] == "lamp":
+            elif obj["interaction"]["action"] == "switch_on" and obj["kind"] != "custom":
                 color = [min(255, round(0.35 * channel + 0.65 * 255)) for channel in color]
-            elif obj["kind"] == "ball":
+            elif obj["interaction"]["action"] == "pick_up":
                 position = trajectory[-1, holders[i], :].tolist()
-            elif obj["kind"] == "chair":
+            elif obj["interaction"]["action"] == "sit" and obj["kind"] != "custom":
                 color = [min(255, round(0.65 * channel + 0.35 * 255)) for channel in color]
         states.append({"id": obj["id"], "position": position, "color": color, "active": active[i]})
     return states
