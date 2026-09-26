@@ -1,5 +1,6 @@
 """Sidebar state and transport tests with counted Viser-style handles."""
 from pathlib import Path
+from functools import partial
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import json
@@ -13,9 +14,16 @@ import viser
 from viser._gui_handles import GuiButtonGroupHandle
 
 from directing import DirectorSession
+from prompt_assistant import PromptAssistantResult
+from prompt_assistant_ui import PromptAssistantUI
 from studio_ui import StudioUI, CREATE, EXTEND, REPLACE, AUTO, SET_DURATION, TARGET_TOTAL
 from takes import Take
 from test_live_motion import ControlledBackend, wait_until
+
+
+def ready_refiner(prompt, _answers, **_kwargs):
+    """Keep Studio transport tests independent of the text provider."""
+    return PromptAssistantResult(prompt, 'Direction is ready.', (), True, 'test')
 
 
 class Handle:
@@ -130,6 +138,10 @@ class StudioUITests(unittest.TestCase):
         upload_installer = patch('studio_ui.install_upload_snapshots')
         upload_installer.start()
         self.addCleanup(upload_installer.stop)
+        assistant_factory = patch('studio_ui.PromptAssistantUI',
+                                  partial(PromptAssistantUI, refiner=ready_refiner))
+        assistant_factory.start()
+        self.addCleanup(assistant_factory.stop)
         self.temp = TemporaryDirectory()
         self.backend = ControlledBackend()
         self.session = DirectorSession(
@@ -145,6 +157,12 @@ class StudioUITests(unittest.TestCase):
     def tearDown(self):
         self.backend.release.set()
         self.temp.cleanup()
+
+    def _wait_for(self, predicate):
+        def after_update():
+            self.ui.update()
+            return predicate()
+        wait_until(after_update)
 
     def test_idle_updates_publish_nothing_and_seek_draft_is_stable(self):
         for handle in self.gui.handles:
@@ -304,6 +322,7 @@ class StudioUITests(unittest.TestCase):
         self.ui.update()
         self.assertFalse(self.ui.generate.disabled)
         self.ui.generate.click()
+        self._wait_for(lambda: self.session.busy)
         self.assertEqual(self.session.mode, 'Live ARDY')
         self.assertTrue(self.session.busy)
         self.ui.update()
@@ -344,6 +363,7 @@ class StudioUITests(unittest.TestCase):
 
         self.session.submit = Mock(side_effect=start)
         self.ui.generate.click()
+        self._wait_for(lambda: len(submitted) == 1)
         self.assertEqual(len(submitted), 1)
         self.assertIn('0/2 chunks', self.ui.motion_progress.content)
         self.assertIn('s elapsed', self.ui.motion_progress.content)
@@ -359,6 +379,7 @@ class StudioUITests(unittest.TestCase):
         self.assertEqual(self.ui.prompt.value, submitted[0][0])
         self.assertIn('Review the direction and length', self.ui.motion_progress.content)
         self.ui.generate.click()
+        self._wait_for(lambda: len(submitted) == 2)
         self.assertEqual(len(submitted), 2)
         self.assertEqual(submitted[1], submitted[0])
 
@@ -549,7 +570,7 @@ class StudioUITests(unittest.TestCase):
     def test_action_edit_keeps_draft_on_failure_and_closes_after_commit(self):
         take = self._seed_segmented_take()
         self._timeline_edit(take.id, 0, 'replace')
-        self.ui.action_prompt.edit('Step left')
+        self.ui.action_prompt.edit("Step to the character's left")
 
         def start(*_args, **_kwargs):
             self.session.busy = True
@@ -564,7 +585,7 @@ class StudioUITests(unittest.TestCase):
         self.session.status = 'Action edit failed · BackendError. Original take preserved; retry.'
         self.ui.update()
         self.assertEqual(self.ui.action_edit, (take.id, 0, 'replace'))
-        self.assertEqual(self.ui.action_prompt.value, 'Step left')
+        self.assertEqual(self.ui.action_prompt.value, "Step to the character's left")
         self.assertEqual(self.ui.save_action.label, 'Retry update motion')
         self.assertTrue(self.ui.action_progress.visible)
 
@@ -665,6 +686,7 @@ class StudioUITests(unittest.TestCase):
         self.assertIn('4.00 seconds → 9.00 seconds total', self.ui.duration_preview.content)
         self.session.submit = Mock()
         self.ui.generate.click()
+        self._wait_for(lambda: self.session.submit.call_count == 1)
         self.session.submit.assert_called_once_with(
             'A person waves with their right hand.', seconds=5.0,
             edit_mode='extend', at_frame=None)
@@ -681,6 +703,7 @@ class StudioUITests(unittest.TestCase):
         self.assertIn('Original stays available', self.ui.duration_preview.content)
         self.session.submit = Mock()
         self.ui.generate.click()
+        self._wait_for(lambda: self.session.submit.call_count == 1)
         self.session.submit.assert_called_once_with(
             'A person waves with their right hand.', seconds=2.0,
             edit_mode='replace', at_frame=25)
@@ -723,6 +746,7 @@ class StudioUITests(unittest.TestCase):
         self.assertIn('1.16 seconds total', self.ui.duration_preview.content)
         self.session.submit = Mock()
         self.ui.generate.click()
+        self._wait_for(lambda: self.session.submit.call_count == 1)
         self.session.submit.assert_called_once_with(
             'A person waves with their right hand.', seconds=0.16,
             edit_mode='extend', at_frame=None)
@@ -753,6 +777,7 @@ class StudioUITests(unittest.TestCase):
         self.assertFalse(self.ui.transport.visible)
         self.ui.prompt.edit('Wave gently')
         self.ui.generate.click()
+        self._wait_for(lambda: self.session.busy)
         self.assertTrue(self.session.busy)
         self.ui.update()
         self.assertFalse(self.ui.transport.visible)
