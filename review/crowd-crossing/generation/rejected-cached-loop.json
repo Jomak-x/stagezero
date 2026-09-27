@@ -1,0 +1,24 @@
+{
+  "status": "rejected for repeat playback",
+  "reason": "Cached 40-frame Core approach sources have large endpoint pose and foot jumps when looped.",
+  "prior_manifest_sha256": "c8f26ff45dcf3f5754b045988e541eae01bd0fa7bcaf6c3ace77593cbcdccbeb",
+  "prior_affine_sha256": "b77ab46be0432cb922d3e5e33e1d96ccc5b9647dcfc5677c5f366bd4b68a1f37",
+  "measure_definition": "RMS over all 22 joints and xyz components after horizontal root travel removal; max is largest joint Euclidean endpoint distance.",
+  "sources": [
+    {
+      "path": "review/main-cast-ui/generation/core-002.npz",
+      "actor_index": 0,
+      "sha256": "fb7c363006ef649d280d2ae374284c717c2418777cb1e9d6fa3d765406e8c887",
+      "loop_seam_rms_m": 0.16,
+      "max_foot_jump_m": 0.602
+    },
+    {
+      "path": "review/main-cast-ui/generation/core-002.npz",
+      "actor_index": 1,
+      "sha256": "fb7c363006ef649d280d2ae374284c717c2418777cb1e9d6fa3d765406e8c887",
+      "loop_seam_rms_m": 0.199,
+      "max_foot_jump_m": 0.672
+    }
+  ],
+  "next_step": "Use fresh continuous two-horizon Core walks and select intervals with near-matching foot phase."
+}

@@ -1,0 +1,422 @@
+{
+  "schema": "stagezero.demo-gait-proxies.v1",
+  "scene": "city",
+  "actors": 112,
+  "sample_fps": 30,
+  "metrics": {
+    "low_foot_proxy": {
+      "height_ceiling_m": 0.06,
+      "vertical_speed_ceiling_mps": 0.25,
+      "candidate_fraction": 0.500616939484127,
+      "uses_horizontal_speed_to_select": false
+    },
+    "proxy_world_xz_speed_mps": {
+      "samples": 807395,
+      "mean": 0.37939045692439943,
+      "median": 0.026843546918702138,
+      "p95": 2.743824136222493,
+      "max": 9.4501131359294
+    },
+    "proxy_bout_endpoint_drift_m": {
+      "samples": 55778,
+      "mean": 0.14417993934696827,
+      "median": 0.11137143025300295,
+      "p95": 0.5115686774209734,
+      "max": 1.3179000603236606
+    },
+    "proxy_bout_path_length_m": {
+      "samples": 55778,
+      "mean": 0.1830578113046216,
+      "median": 0.1222807524925483,
+      "p95": 0.5594294533466159,
+      "max": 10.263442158472172
+    },
+    "proxy_bout_duration_s": {
+      "samples": 55778,
+      "mean": 0.4825050497806781,
+      "median": 0.16666666666666785,
+      "p95": 0.5,
+      "max": 120.0
+    },
+    "transition_proxy_world_xz_speed_mps": {
+      "samples": 43258,
+      "mean": 0.4859037251181898,
+      "median": 0.21924011670296578,
+      "p95": 2.0266557246764703,
+      "max": 7.574192773653186
+    },
+    "transition_all_feet_world_xz_speed_mps": {
+      "samples": 107264,
+      "mean": 0.5542979039011866,
+      "median": 0.2758513786426671,
+      "p95": 2.1581520739331412,
+      "max": 8.219903509168606
+    },
+    "stopped_proxy_world_xz_speed_mps": {
+      "samples": 431650,
+      "mean": 0.08104254460932592,
+      "median": 0.008644500800295475,
+      "p95": 0.7219949106221567,
+      "max": 9.4501131359294
+    },
+    "full_walk_proxy_world_xz_speed_mps": {
+      "samples": 332487,
+      "mean": 0.7528616765368183,
+      "median": 0.1305369489429951,
+      "p95": 4.145195094661782,
+      "max": 7.817040555450934
+    },
+    "worst_proxy_interval": {
+      "time_start_s": 34.96666666666667,
+      "time_end_s": 35.0,
+      "actor_index": 38,
+      "foot": "right_toe",
+      "xz_speed_mps": 9.4501131359294,
+      "blend_start": 0.0,
+      "blend_end": 0.0,
+      "start_xyz_m": [
+        -65.32027141156244,
+        0.0002708465576870367,
+        -58.985354300593514
+      ],
+      "end_xyz_m": [
+        -65.56798642093166,
+        0.00033927903772564607,
+        -58.79076588880613
+      ]
+    },
+    "all_endpoint_frame_step_m": {
+      "samples": 1612800,
+      "mean": 0.03687070576876781,
+      "median": 0.007967917139498477,
+      "p95": 0.15003235714635504,
+      "max": 0.31500377863087986
+    },
+    "minimum_endpoint_y_m": -0.0028028342252278318,
+    "endpoint_samples_below_y_minus_1cm": 0,
+    "feet": {
+      "left_ankle": {
+        "samples": 125495,
+        "mean": 0.11314965057218575,
+        "median": 0.010263406133139644,
+        "p95": 0.909765252744801,
+        "max": 4.549971664084453
+      },
+      "right_ankle": {
+        "samples": 120944,
+        "mean": 0.09176197233014005,
+        "median": 0.009178227720227645,
+        "p95": 0.7126363522047492,
+        "max": 6.17721571553322
+      },
+      "left_toe": {
+        "samples": 280559,
+        "mean": 0.48539866154816713,
+        "median": 0.09534343576900893,
+        "p95": 3.4931362630423584,
+        "max": 7.817040555450934
+      },
+      "right_toe": {
+        "samples": 280397,
+        "mean": 0.516543399191611,
+        "median": 0.05690855859331307,
+        "p95": 3.6767352230754065,
+        "max": 9.4501131359294
+      }
+    }
+  },
+  "source_loops": [
+    {
+      "id": "walk-relaxed",
+      "frames": 73,
+      "loop_endpoint_discontinuity_rms_m": 0.010858255438506603,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.011789584998041391,
+        "median": 0.011148239951580763,
+        "p95": 0.015983457444235682,
+        "max": 0.01642504334449768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.24689835547046227,
+        "median": 0.18688078224658966,
+        "p95": 0.6105589002370834,
+        "max": 0.9834091663360596
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1584,
+        "mean": 0.014507353586528975,
+        "median": 0.006592961261048913,
+        "p95": 0.04171322267502546,
+        "max": 0.09942567348480225
+      }
+    },
+    {
+      "id": "walk-brisk",
+      "frames": 49,
+      "loop_endpoint_discontinuity_rms_m": 0.014318078756332397,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.014599478570744395,
+        "median": 0.015229490119963884,
+        "p95": 0.020782661344856023,
+        "max": 0.021116426214575768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.31408259306441655,
+        "median": 0.22003816813230515,
+        "p95": 0.9858781963586805,
+        "max": 1.0311684608459473
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1056,
+        "mean": 0.021990485632572512,
+        "median": 0.014684042427688837,
+        "p95": 0.05962672829627991,
+        "max": 0.10345882177352905
+      }
+    },
+    {
+      "id": "idle",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.00553074711933732,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.005105656455270946,
+        "median": 0.004991476656869054,
+        "p95": 0.006349978735670447,
+        "max": 0.006492822431027889
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.1497837117957798,
+        "median": 0.16787390410900116,
+        "p95": 0.23758517801761628,
+        "max": 0.2848610281944275
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.00028844730454187425,
+        "median": 0.0002504111616872251,
+        "p95": 0.0006264716212172061,
+        "max": 0.0014013457112014294
+      }
+    },
+    {
+      "id": "wave",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.1250009834766388,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.005686075892299414,
+        "median": 0.005679697031155229,
+        "p95": 0.006278677750378847,
+        "max": 0.006359724327921867
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 1.3388569605621425,
+        "median": 0.19529233127832413,
+        "p95": 7.05419614911079,
+        "max": 15.853941917419434
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.001830488141455893,
+        "median": 0.0003670468577183783,
+        "p95": 0.009045442566275597,
+        "max": 0.05795099213719368
+      }
+    },
+    {
+      "id": "look",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.004581711255013943,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.008676081662997603,
+        "median": 0.008375192526727915,
+        "p95": 0.009571760613471269,
+        "max": 0.009774066507816315
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.1035281195813282,
+        "median": 0.06994002312421799,
+        "p95": 0.25261032283306123,
+        "max": 0.29322201013565063
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.0002497564828238617,
+        "median": 0.00021749224106315523,
+        "p95": 0.000583426546654664,
+        "max": 0.0016192658804357052
+      }
+    },
+    {
+      "id": "listen",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.18031743168830872,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.00544600177090615,
+        "median": 0.005386096891015768,
+        "p95": 0.005933826556429267,
+        "max": 0.006015496328473091
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 2.41252722625028,
+        "median": 0.20210355520248413,
+        "p95": 15.929985022544853,
+        "max": 17.13609504699707
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.002029039244310363,
+        "median": 0.0005947239988017827,
+        "p95": 0.010385157307609916,
+        "max": 0.02844802662730217
+      }
+    },
+    {
+      "id": "greeting-role-0",
+      "frames": 120,
+      "loop_endpoint_discontinuity_rms_m": 0.10208525508642197,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.1332263182848692,
+        "median": 0.13669899478554726,
+        "p95": 0.16707134023308753,
+        "max": 0.16871535778045654
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 2.6172932982444763,
+        "median": 2.6234651803970337,
+        "p95": 5.048568820953369,
+        "max": 6.588374614715576
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 2618,
+        "mean": 0.005632716539222987,
+        "median": 0.0035014216555282474,
+        "p95": 0.016322303097695143,
+        "max": 0.08842558413743973
+      }
+    },
+    {
+      "id": "greeting-role-1",
+      "frames": 120,
+      "loop_endpoint_discontinuity_rms_m": 0.09355321526527405,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.0505402316339314,
+        "median": 0.052167102694511414,
+        "p95": 0.07202233746647835,
+        "max": 0.07204492390155792
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 1.5872526676817373,
+        "median": 0.8733248114585876,
+        "p95": 5.2091428160667395,
+        "max": 10.977496147155762
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 2618,
+        "mean": 0.0025997200690778067,
+        "median": 0.001682736270595342,
+        "p95": 0.00810753251425922,
+        "max": 0.040008850395679474
+      }
+    },
+    {
+      "id": "dance-knee-step",
+      "frames": 179,
+      "loop_endpoint_discontinuity_rms_m": 0.14572879672050476,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.18436704203486443,
+        "median": 0.18592002242803574,
+        "p95": 0.20362930744886398,
+        "max": 0.20561125874519348
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 3.965408157218586,
+        "median": 3.3506855964660645,
+        "p95": 6.204856491088867,
+        "max": 9.838191986083984
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 3916,
+        "mean": 0.018345474469539897,
+        "median": 0.014302555471658707,
+        "p95": 0.046101885847747326,
+        "max": 0.09763054549694061
+      }
+    },
+    {
+      "id": "dance-sway",
+      "frames": 179,
+      "loop_endpoint_discontinuity_rms_m": 0.08264970034360886,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.10153339244425297,
+        "median": 0.08899036422371864,
+        "p95": 0.17043728120625018,
+        "max": 0.18051819503307343
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 1.8265092508359388,
+        "median": 1.217759132385254,
+        "p95": 5.319726896286009,
+        "max": 6.266504287719727
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 3916,
+        "mean": 0.011337377100272395,
+        "median": 0.009000280406326056,
+        "p95": 0.030862278770655394,
+        "max": 0.05935846269130707
+      }
+    },
+    {
+      "id": "flashmob-routine",
+      "frames": 751,
+      "loop_endpoint_discontinuity_rms_m": 0.0,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 16500,
+        "mean": 0.013099860061833831,
+        "median": 0.010162744205445051,
+        "p95": 0.0381229892373085,
+        "max": 0.09763054549694061
+      }
+    }
+  ],
+  "limitations": [
+    "Endpoint foot proxies, not deformed sole contacts or physical ground forces.",
+    "Matches explicit action cue interpolation, pair endpoint blends, shared pair yaw and unit scale for featured pairs and flagged formation actors.",
+    "Gesture and pair clips are one-shot; their endpoint differences are not played as looping seams.",
+    "No threshold here establishes visual acceptance."
+  ]
+}

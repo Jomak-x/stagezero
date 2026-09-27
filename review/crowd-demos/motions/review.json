@@ -1,0 +1,100 @@
+{
+  "generation": [
+    {
+      "name": "wave",
+      "status": "complete",
+      "generation_seconds": 0.908559791976586
+    },
+    {
+      "name": "look",
+      "status": "complete",
+      "generation_seconds": 0.9411172079853714
+    },
+    {
+      "name": "listen",
+      "status": "complete",
+      "generation_seconds": 0.8473102080170065
+    }
+  ],
+  "health_after": {
+    "ready": true,
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "joints": 27,
+    "horizon": 40,
+    "pair_research_enabled": true,
+    "queue_depth": 0
+  },
+  "clips": [
+    {
+      "id": "walk-relaxed",
+      "type": "walk",
+      "frames": 73,
+      "seamRmsMeters": 0.0062690158728122706,
+      "observedAction": null
+    },
+    {
+      "id": "walk-brisk",
+      "type": "walk",
+      "frames": 49,
+      "seamRmsMeters": 0.008266546879551627,
+      "observedAction": null
+    },
+    {
+      "id": "idle",
+      "type": "idle",
+      "frames": 59,
+      "seamRmsMeters": 0.0031931818282982458,
+      "observedAction": null
+    },
+    {
+      "id": "wave",
+      "type": "gesture",
+      "frames": 59,
+      "seamRmsMeters": 0.07216935604810715,
+      "observedAction": "Raised hand greeting gesture; hand has not fully lowered by sample end"
+    },
+    {
+      "id": "look",
+      "type": "idle",
+      "frames": 59,
+      "seamRmsMeters": 0.002645252039656043,
+      "observedAction": "Very subtle upright idle; leftward look is not visually established"
+    },
+    {
+      "id": "listen",
+      "type": "gesture",
+      "frames": 59,
+      "seamRmsMeters": 0.10410632193088531,
+      "observedAction": "Both hands rise while gesturing; conversational gesture, not quiet listening"
+    },
+    {
+      "id": "greeting-role-0",
+      "type": "pair",
+      "frames": 120,
+      "seamRmsMeters": 0.058938946574926376,
+      "observedAction": null
+    },
+    {
+      "id": "greeting-role-1",
+      "type": "pair",
+      "frames": 120,
+      "seamRmsMeters": 0.0540129691362381,
+      "observedAction": null
+    }
+  ],
+  "pose_sheet": "generated-pose-contact-sheet.png",
+  "visual_review": "Skeleton contact sheet reviewed: wave clearly raises hand, look remains subtle idle, listen raises both hands, pair reaches and retains wrist proximity. Final mesh/browser review remains root integration responsibility.",
+  "existing_mesh_video_review": {
+    "source": "review/interaction-quality/video/after-market-three-s48-fixed-plan/playback.mp4",
+    "source_sha256": "1c3a225e60bb8dd7ff28758244fa53e8144a84c35a3e0b7d854ba1863d9d1313",
+    "sample_seconds": [
+      12,
+      13,
+      14,
+      15
+    ],
+    "contact_sheet": "reused-greeting-video-contact.png",
+    "observation": "Existing mesh playback shows the greeting pair reaching and holding hands in close proximity. Exact palm/finger grasp is not established; one source role leans/bends during the greeting."
+  }
+}

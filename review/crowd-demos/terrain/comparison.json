@@ -1,0 +1,119 @@
+{
+  "source": "studio_client/src/environments/EnvironmentScene.ts:639-642",
+  "scope": "one-actor CPU route feasibility; authored station geometry proxy",
+  "scene3_valid": true,
+  "coordinates": {
+    "start_xyz": [
+      32.0,
+      0.0,
+      -8.0
+    ],
+    "goal_xyz": [
+      50.0,
+      0.0,
+      -8.0
+    ]
+  },
+  "baseline": {
+    "method": "straight line on Y=0",
+    "sample_count": 181,
+    "collision_or_support_failure_count": 161,
+    "first_failures": [
+      {
+        "sample": 10,
+        "xyz": [
+          33.0,
+          0.0,
+          -8.0
+        ],
+        "support_y": 0.0,
+        "body_blocked": true
+      },
+      {
+        "sample": 11,
+        "xyz": [
+          33.1,
+          0.0,
+          -8.0
+        ],
+        "support_y": 0.0,
+        "body_blocked": true
+      },
+      {
+        "sample": 12,
+        "xyz": [
+          33.2,
+          0.0,
+          -8.0
+        ],
+        "support_y": 0.0,
+        "body_blocked": true
+      }
+    ]
+  },
+  "terrain": {
+    "method": "scene_navigation.plan_navigation_route over Scene3 rendered boxes",
+    "waypoints_xyz": [
+      [
+        32.0,
+        0.0,
+        -8.0
+      ],
+      [
+        32.75,
+        0.0,
+        -1.0
+      ],
+      [
+        33.4318,
+        0.0,
+        -0.3182
+      ],
+      [
+        33.5,
+        0.25,
+        -0.25
+      ],
+      [
+        48.5,
+        0.25,
+        -0.25
+      ],
+      [
+        48.5682,
+        0.0,
+        -0.3182
+      ],
+      [
+        49.25,
+        0.0,
+        -1.0
+      ],
+      [
+        50.0,
+        0.0,
+        -8.0
+      ]
+    ],
+    "path_length_m": 31.201448183888363,
+    "waypoint_failures": [],
+    "swept_sample_count": 315,
+    "swept_failures": []
+  },
+  "stairs": {
+    "detected_tread_heights_m": [],
+    "recognized_stair_flights": 0,
+    "last_tread_back_z": -3.15,
+    "terrace_front_z": -3.5,
+    "gap_m": 0.35,
+    "elevated_gap_support_y": null,
+    "claim": "rendered station boxes are not recognized as a stair flight or certified connected to terrace"
+  },
+  "provenance": {
+    "geometry": "hand-transcribed exact station box dimensions from source",
+    "vision_or_learned_scene_reconstruction": false,
+    "native_motion_generated": false,
+    "human17_display_solved": false,
+    "multi_actor_terrain": false
+  }
+}

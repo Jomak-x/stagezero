@@ -1,0 +1,51 @@
+{
+  "schema": "stagezero.environment-source.v1",
+  "base_crowd_commit": "dc8b6a1",
+  "neon": {
+    "model": "gpt-6-astra",
+    "prompt_tokens": 260,
+    "completion_tokens": 3164,
+    "input": "Standalone generic architectural brief only; no internal project documents.",
+    "output": "neon-design-review.md"
+  },
+  "image_generation": {
+    "mode": "built-in tool",
+    "prompts": [
+      "billboard-prompt.txt",
+      "window-prompt.txt"
+    ]
+  },
+  "code_and_assets": {
+    "studio_client/src/environments/EnvironmentScene.ts": {
+      "sha256": "36249f204b54567779b4c2c81b0c56de57845073001f4d7d58fdd5c98df83ed2",
+      "bytes": 49369
+    },
+    "studio_client/src/environments/main.ts": {
+      "sha256": "6832a5a8bd00e0c63c14a3a9bfa628446d190143c3197380b7346ba4a3acb0a3",
+      "bytes": 10398
+    },
+    "studio_client/environments.html": {
+      "sha256": "423da95f54c5be14cc67e17cae9af86315dc621a88adb0be759fda053d799fbb",
+      "bytes": 3904
+    },
+    "studio_client/environments.vite.config.mts": {
+      "sha256": "7d9113480227e832758d4d0e40b58b654265d27571e955ece8b9edc8cd2e44ef",
+      "bytes": 1770
+    },
+    "studio_client/src/environments/assets/billboards.png": {
+      "sha256": "152e61646e7a4e7c4c5e65fe70ace93158e702f403611db57c57ebc9baca973f",
+      "bytes": 2638082
+    },
+    "studio_client/src/environments/assets/windows.png": {
+      "sha256": "839cf981bb2d167c2d1e2eb05a15f910ce52e434ed87a5d07c4191f47eacb3cf",
+      "bytes": 1750104
+    },
+    "studio_client/src/environments/StreetDressing.ts": {
+      "sha256": "0cfc453eb18edb859fbd249a4c116fc1d4acc15a46c86546705689ebef235d63",
+      "bytes": 12533
+    }
+  },
+  "no_motion_jobs_or_pods": true,
+  "capture_note": "Revised compact crossing, colorful street dressing and warm cafe. Crossing capture preceded cafe-only refinement; crossing geometry is unchanged. Selected captures supersede previous studies; raw trials remain local.",
+  "refinement": "Compact crossing and saturated palette; Neon GPT-6 Astra design review plus GPT-6 Sol high-effort bounded street-dressing worker. Actual browser captures regenerated after final changes."
+}

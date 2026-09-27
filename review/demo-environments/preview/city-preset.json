@@ -1,0 +1,274 @@
+{
+  "scene": "city",
+  "cameras": [
+    {
+      "id": "hero",
+      "label": "High street \u00b7 hero",
+      "position": [
+        6,
+        13,
+        10
+      ],
+      "target": [
+        -25,
+        5,
+        -25
+      ],
+      "fov": 62
+    },
+    {
+      "id": "street",
+      "label": "Neighborhood walk",
+      "position": [
+        -2,
+        1.7,
+        -8
+      ],
+      "target": [
+        -29,
+        2.5,
+        -19
+      ],
+      "fov": 65
+    },
+    {
+      "id": "cafe",
+      "label": "Inside Koma Coffee",
+      "position": [
+        -29,
+        1.65,
+        -18.3
+      ],
+      "target": [
+        -29,
+        1.5,
+        -23
+      ],
+      "fov": 79
+    },
+    {
+      "id": "bookshop",
+      "label": "Inside Sen Books",
+      "position": [
+        -20,
+        1.65,
+        -18.1
+      ],
+      "target": [
+        -15.4,
+        1.4,
+        -22.2
+      ],
+      "fov": 70
+    },
+    {
+      "id": "courtyard",
+      "label": "Rear courtyard",
+      "position": [
+        -48,
+        3.2,
+        -45
+      ],
+      "target": [
+        -49,
+        3,
+        -74
+      ],
+      "fov": 65
+    },
+    {
+      "id": "overhead",
+      "label": "Street & courtyard plan",
+      "position": [
+        -14,
+        99,
+        13
+      ],
+      "target": [
+        -18,
+        0,
+        -30
+      ],
+      "fov": 58
+    }
+  ],
+  "metadata": {
+    "title": "Mori High Street",
+    "description": "A connected neighborhood street with open furnished coffee shop and bookshop, a side street and a quiet planted rear courtyard.",
+    "units": "metres; Y up; public ground Y=0",
+    "provenance": "Original procedural geometry and original canvas graphics authored in EnvironmentScene.ts. No scanned, generated or third-party geometry. Advertising photographs and upper-floor window detail use original AI-generated raster atlases; other surfaces and signs use original canvas graphics. Upper-floor glazing detail is a baked reflection/interior texture, not simulated rooms. All business names and advertisements are fictional.",
+    "bounds": {
+      "min": [
+        -115,
+        0,
+        -115
+      ],
+      "max": [
+        115,
+        35,
+        115
+      ]
+    },
+    "walkableRects": [
+      {
+        "id": "street",
+        "min": [
+          -100,
+          -16
+        ],
+        "max": [
+          100,
+          16
+        ],
+        "y": 0
+      },
+      {
+        "id": "side-street",
+        "min": [
+          -11.5,
+          -102
+        ],
+        "max": [
+          11.5,
+          12
+        ],
+        "y": 0
+      },
+      {
+        "id": "cafe",
+        "min": [
+          -34.5,
+          -24
+        ],
+        "max": [
+          -23.5,
+          -16
+        ],
+        "y": 0
+      },
+      {
+        "id": "bookshop",
+        "min": [
+          -22.5,
+          -24
+        ],
+        "max": [
+          -11.5,
+          -16
+        ],
+        "y": 0
+      },
+      {
+        "id": "courtyard-alley",
+        "min": [
+          -40,
+          -66
+        ],
+        "max": [
+          -35,
+          -12
+        ],
+        "y": 0
+      },
+      {
+        "id": "courtyard",
+        "min": [
+          -67,
+          -66
+        ],
+        "max": [
+          -29,
+          -46
+        ],
+        "y": 0
+      }
+    ],
+    "spawnExitGates": [
+      {
+        "id": "west",
+        "position": [
+          -100,
+          0,
+          -13.5
+        ],
+        "width": 5,
+        "direction": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "east",
+        "position": [
+          100,
+          0,
+          13.5
+        ],
+        "width": 5,
+        "direction": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "north",
+        "position": [
+          0,
+          0,
+          -100
+        ],
+        "width": 10,
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    ],
+    "interactionAnchors": [
+      {
+        "id": "cafe",
+        "label": "Koma Coffee counter",
+        "position": [
+          -29,
+          0,
+          -21.6
+        ]
+      },
+      {
+        "id": "books",
+        "label": "Sen Books display",
+        "position": [
+          -17,
+          0,
+          -20.1
+        ]
+      },
+      {
+        "id": "courtyard",
+        "label": "Mori courtyard",
+        "position": [
+          -49,
+          0,
+          -55
+        ]
+      }
+    ],
+    "clearWidths": {
+      "mainRoad": 24,
+      "sidewalk": 5,
+      "shopDoorway": 2.3,
+      "sideStreet": 23,
+      "courtyardAlley": 5
+    },
+    "limitations": [
+      "Fictional architectural study inspired by Japanese urban districts; not a survey or reconstruction of a real place.",
+      "Visual environment only: no actors, traffic, crowd generation, navigation mesh, collision physics or automatic door behavior.",
+      "Walkable rectangles and gates are broad planning regions and do not subtract furniture or building footprints; they are not a baked navigation solution. Public circulation is flat at Y=0; station steps are visual geometry alongside a level bypass."
+    ]
+  },
+  "geometry_source": "studio_client/src/environments/EnvironmentScene.ts",
+  "geometry_seed": 827
+}

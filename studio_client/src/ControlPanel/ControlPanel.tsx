@@ -100,6 +100,20 @@ export default function ControlPanel(props: {
 
   const panelContents = (
     <>
+      {studioLabel.startsWith("StageZero") && !showSettings && (
+        <Box p="xs" pb={0}>
+          <Button
+            component="a"
+            href="demos.html?scene=city&count=112"
+            target="_blank"
+            rel="noopener"
+            variant="light"
+            fullWidth
+          >
+            Crowd demos
+          </Button>
+        </Box>
+      )}
       {studioLabel.startsWith("StageZero") && !showSettings && <VoiceDirector />}
       <Collapse in={!showGenerated || showSettings}>
         <Box p="xs" pt="0.375em">
