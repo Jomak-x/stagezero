@@ -218,6 +218,49 @@ class PairedDirectionControlsTests(unittest.TestCase):
         ui.retry.click()
         self.assertTrue(self.job.retried)
 
+    def test_failed_job_error_replaces_submission_notice(self):
+        ui = self.controls
+        ui.generate.click()
+        self.assertIn("Scene submitted", ui.status.content)
+        self.job.state = {"status": "failed", "error": "Native provider unavailable",
+                          "progress": "old progress"}
+        ui.tick()
+        self.assertIn("Native provider unavailable", ui.status.content)
+        self.assertNotIn("Scene submitted", ui.status.content)
+        self.assertNotIn("old progress", ui.status.content)
+
+    def test_readiness_callback_blocks_only_the_route_it_reports(self):
+        ui = PairedDirectionControls(Gui(), self.session,
+            on_generate=lambda request, _client: self.generated.append(request),
+            on_preview=lambda *_: None,
+            on_frame_cast=lambda *_: None, on_active=lambda *_: None,
+            generation_readiness=lambda source: (
+                "Configure the native pair provider" if source == "generate" else None))
+        ui.source.edit("Describe another interaction")
+        self.assertTrue(ui.generate.disabled)
+        self.assertIn("Configure the native pair provider", ui.source_note.content)
+        ui.generate.click()
+        self.assertEqual(self.generated, [])
+        self.assertIn("Configure the native pair provider", ui.status.content)
+        ui.source.edit("Handshake")
+        self.assertFalse(ui.generate.disabled)
+        self.assertNotIn("Configure the native pair provider", ui.status.content)
+        ui.generate.click()
+        self.assertEqual(self.generated[0]["source"], "handshake")
+
+    def test_request_fields_freeze_while_scene_is_running(self):
+        ui = self.controls
+        ui.generate.click()
+        for handle in (ui.first, ui.second, ui.source, ui.place, ui.prompt,
+                       ui.first_x, ui.first_z, ui.second_x, ui.second_z,
+                       ui.meet_x, ui.meet_z, ui.meet_yaw, ui.seed):
+            self.assertTrue(handle.disabled)
+        self.job.state = {"status": "ready", "total_frames": 210}
+        ui.tick()
+        self.assertFalse(ui.first.disabled)
+        self.assertFalse(ui.source.disabled)
+        self.assertFalse(ui.seed.disabled)
+
     def test_source_choice_keeps_custom_story_text_visible(self):
         ui = self.controls
         self.assertTrue(ui.prompt.disabled)

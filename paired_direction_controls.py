@@ -53,7 +53,8 @@ class PairedDirectionControls:
     """
 
     def __init__(self, gui, session, *, on_generate, on_preview, on_frame_cast,
-                 on_active, scene_provider=None, on_export=None, on_edit=None):
+                 on_active, scene_provider=None, on_export=None, on_edit=None,
+                 generation_readiness=None):
         self.session = session
         self.on_edit = on_edit or (lambda: None)
         self.on_generate = on_generate
@@ -61,6 +62,10 @@ class PairedDirectionControls:
         self.on_frame_cast = on_frame_cast
         self.on_active = on_active
         self.on_export = on_export
+        # Callback receives the source key and returns an actionable reason
+        # when that route cannot generate. Reviewed and fresh routes may need
+        # different providers, so the host owns this decision.
+        self.generation_readiness = generation_readiness
         native_scene = session.scene_document
         self.scene_provider = (scene_provider if scene_provider is not None else
                                native_scene if callable(native_scene) else
@@ -75,6 +80,7 @@ class PairedDirectionControls:
         self._selected_pair = None
         self._previous_source = "handshake"
         self._custom_prompt = DEFAULT_PROMPTS["generate"]
+        self._readiness_reason = ""
         with gui.add_folder("Direct a scene with two people", expand_by_default=True):
             gui.add_markdown("Place each start and the meeting point. The scene follows those marks; choose their interaction below.")
             self.first = gui.add_dropdown("First person", ("Loading cast",))
@@ -226,6 +232,11 @@ class PairedDirectionControls:
             self._notice = str(exc)[:240]
         self.tick()
 
+    def _generation_issue(self, source):
+        if self.generation_readiness is None:
+            return ""
+        return str(self.generation_readiness(source) or "")
+
     def _bind(self):
         @self.preview.on_click
         def preview_clicked(event):
@@ -248,6 +259,9 @@ class PairedDirectionControls:
         def generate_clicked(event):
             def action():
                 request = self._request()
+                issue = self._generation_issue(request["source"])
+                if issue:
+                    raise ValueError(issue)
                 self._job = self.on_generate(request, getattr(event, "client", None))
                 self._notice = "Scene submitted."
             self._run(action)
@@ -292,6 +306,8 @@ class PairedDirectionControls:
         def source_changed(_):
             if self._syncing:
                 return
+            if self._notice == self._readiness_reason:
+                self._notice = ""
             current = SOURCES.get(self.source.value)
             if self._previous_source == "generate":
                 self._custom_prompt = self.prompt.value
@@ -361,10 +377,12 @@ class PairedDirectionControls:
             operating = busy or capturing
             frames = int(job_state.get("total_frames") or 0)
             failed = phase in ("failed", "generation_failed") or bool(job_state.get("error"))
-            if not operating and frames and self._notice == "Scene submitted.":
+            if failed or (not operating and frames and self._notice == "Scene submitted."):
                 self._notice = ""
                 self._preview_summary = ""
-            self._set(self.generate, "disabled", operating or len(cast) < 2)
+            source = SOURCES.get(self.source.value)
+            self._readiness_reason = self._generation_issue(source) if source else ""
+            self._set(self.generate, "disabled", operating or len(cast) < 2 or bool(self._readiness_reason))
             self._set(self.preview, "disabled", operating or len(cast) < 2)
             self._set(self.cancel, "disabled", not busy)
             self._set(self.retry, "disabled", operating or not failed)
@@ -372,22 +390,29 @@ class PairedDirectionControls:
             for handle in (self.play, self.pause):
                 self._set(handle, "disabled", operating or frames <= 0)
             self._set(self.export, "disabled", operating or frames <= 0 or self.on_export is None)
-            source = SOURCES.get(self.source.value)
             source_note = (
                 "The handshake is a fixed reviewed interaction. Start and meeting marks control the approach."
                 if source == "handshake" else
                 "The sparring is a fixed reviewed, non-contact interaction. Start and meeting marks control the approach."
                 if source == "sparring" else
-                "Describe what they do at the meeting point. Start and meeting marks control the approach."
+                "Describe a fresh two-person interaction to generate at the meeting point. Start and meeting marks control the approach."
             )
+            if self._readiness_reason:
+                source_note += " " + self._readiness_reason
             self._set(self.source_note, "content", source_note)
             self._set(self.prompt, "disabled", operating or source != "generate")
+            for handle in (self.first, self.second, self.source, self.place,
+                           self.first_x, self.first_z, self.second_x, self.second_z,
+                           self.meet_x, self.meet_z, self.meet_yaw, self.seed):
+                self._set(handle, "disabled", operating)
             status_text = str(job_state.get("status") or "")
-            detail = self._notice or self._preview_summary or str(job_state.get("error") or "")
+            error = str(job_state.get("error") or "")
+            detail = (error if failed and error else
+                      self._notice or self._preview_summary or self._readiness_reason)
             if status_text and status_text != phase:
                 detail = (detail + " · " if detail else "") + status_text
             progress = job_state.get("progress")
-            if isinstance(progress, str) and progress:
+            if isinstance(progress, str) and progress and not failed:
                 detail = progress
             if isinstance(progress, dict) and progress.get("total_steps"):
                 detail += f" · {progress.get('completed_steps', 0)}/{progress['total_steps']} steps"

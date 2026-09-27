@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "prompt": "Two people meet and shake hands for four seconds.",
+  "seed": 42,
+  "status": "rejected",
+  "sources": [],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 2.1994837910169736
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.00103554199449718
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Two People Meet and Shake Hands",
+    "prompt": "Two people meet and shake hands for four seconds.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Face each other and shake hands.",
+        "seconds": 4.0
+      }
+    ],
+    "warnings": [],
+    "raw_plan": {
+      "version": 1,
+      "title": "Two People Meet and Shake Hands",
+      "prompt": "Two people meet and shake hands for four seconds.",
+      "actor_count": 2,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person 1",
+          "start": null
+        },
+        {
+          "id": "actor_2",
+          "name": "Person 2",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "Face each other and shake hands.",
+          "seconds": 4
+        }
+      ],
+      "warnings": []
+    },
+    "planning_seconds": 2.1994279170176014,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol",
+    "planner_cache_hit": false
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.9,
+        "z": -1.5
+      },
+      "actor_2": {
+        "x": 0.9,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 1,
+    "core_horizons": "sequential native330 history"
+  },
+  "error": "<urlopen error [Errno 61] Connection refused>",
+  "wall_seconds": 2.2055514159728773
+}
