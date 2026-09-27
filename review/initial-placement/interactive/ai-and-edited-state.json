@@ -1,0 +1,266 @@
+{
+  "plan": {
+    "version": 1,
+    "title": "Alice, Bob and Carol Wave Hello",
+    "prompt": "Three people named Alice, Bob and Carol stand on a stage. Alice is on the left facing Bob, Bob is on the right facing Alice, and Carol stands behind them facing the audience (+Z). Choose their exact starting positions with comfortable space between them. Each waves hello in turn.",
+    "actor_count": 3,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Alice",
+        "start": {
+          "x": -4.1,
+          "z": 0.0
+        },
+        "start_yaw_degrees": 4.0
+      },
+      {
+        "id": "actor_2",
+        "name": "Bob",
+        "start": {
+          "x": 2.0,
+          "z": 0.0
+        },
+        "start_yaw_degrees": -90.0
+      },
+      {
+        "id": "actor_3",
+        "name": "Carol",
+        "start": {
+          "x": 0.0,
+          "z": -2.0
+        },
+        "start_yaw_degrees": 0.0
+      }
+    ],
+    "meeting": {
+      "x": 0.0,
+      "z": -0.75
+    },
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "Alice remains standing in place facing Bob, raises one hand, waves hello, then lowers her hand.",
+        "seconds": 4
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_2"
+        ],
+        "prompt": "Bob remains standing in place facing Alice, raises one hand, waves hello, then lowers his hand.",
+        "seconds": 4
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_3"
+        ],
+        "prompt": "Carol remains standing behind Alice and Bob facing the audience (+Z), raises one hand, waves hello, then lowers her hand.",
+        "seconds": 4
+      }
+    ],
+    "warnings": [
+      "No stage is present in the scene inventory; the requested formation is staged in open space, with desired positions subject to geometry validation."
+    ]
+  },
+  "ai_plan": {
+    "version": 1,
+    "title": "Alice, Bob and Carol Wave Hello",
+    "prompt": "Three people named Alice, Bob and Carol stand on a stage. Alice is on the left facing Bob, Bob is on the right facing Alice, and Carol stands behind them facing the audience (+Z). Choose their exact starting positions with comfortable space between them. Each waves hello in turn.",
+    "actor_count": 3,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Alice",
+        "start": {
+          "x": -2.0,
+          "z": 0.0
+        },
+        "start_yaw_degrees": 90.0
+      },
+      {
+        "id": "actor_2",
+        "name": "Bob",
+        "start": {
+          "x": 2.0,
+          "z": 0.0
+        },
+        "start_yaw_degrees": -90.0
+      },
+      {
+        "id": "actor_3",
+        "name": "Carol",
+        "start": {
+          "x": 0.0,
+          "z": -2.0
+        },
+        "start_yaw_degrees": 0.0
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "Alice remains standing in place facing Bob, raises one hand, waves hello, then lowers her hand.",
+        "seconds": 4
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_2"
+        ],
+        "prompt": "Bob remains standing in place facing Alice, raises one hand, waves hello, then lowers his hand.",
+        "seconds": 4
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_3"
+        ],
+        "prompt": "Carol remains standing behind Alice and Bob facing the audience (+Z), raises one hand, waves hello, then lowers her hand.",
+        "seconds": 4
+      }
+    ],
+    "warnings": [
+      "No stage is present in the scene inventory; the requested formation is staged in open space, with desired positions subject to geometry validation."
+    ],
+    "raw_plan": {
+      "version": 1,
+      "title": "Alice, Bob and Carol Wave Hello",
+      "prompt": "Three people named Alice, Bob and Carol stand on a stage. Alice is on the left facing Bob, Bob is on the right facing Alice, and Carol stands behind them facing the audience (+Z). Choose their exact starting positions with comfortable space between them. Each waves hello in turn.",
+      "actor_count": 3,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Alice",
+          "start": {
+            "x": -2,
+            "z": 0
+          },
+          "start_yaw_degrees": 90
+        },
+        {
+          "id": "actor_2",
+          "name": "Bob",
+          "start": {
+            "x": 2,
+            "z": 0
+          },
+          "start_yaw_degrees": -90
+        },
+        {
+          "id": "actor_3",
+          "name": "Carol",
+          "start": {
+            "x": 0,
+            "z": -2
+          },
+          "start_yaw_degrees": 0
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "prompt": "Alice remains standing in place facing Bob, raises one hand, waves hello, then lowers her hand.",
+          "seconds": 4
+        },
+        {
+          "id": "beat-2",
+          "actor_ids": [
+            "actor_2"
+          ],
+          "prompt": "Bob remains standing in place facing Alice, raises one hand, waves hello, then lowers his hand.",
+          "seconds": 4
+        },
+        {
+          "id": "beat-3",
+          "actor_ids": [
+            "actor_3"
+          ],
+          "prompt": "Carol remains standing behind Alice and Bob facing the audience (+Z), raises one hand, waves hello, then lowers her hand.",
+          "seconds": 4
+        }
+      ],
+      "warnings": [
+        "No stage is present in the scene inventory; the requested formation is staged in open space, with desired positions subject to geometry validation."
+      ]
+    },
+    "planning_seconds": 9.967856957984623,
+    "planning_attempts": 1,
+    "planner_model": "gpt-6-astra",
+    "planner_cache_hit": false
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -4.1,
+        "z": 0.0,
+        "yaw_degrees": 4.0
+      },
+      "actor_2": {
+        "x": 2.0,
+        "z": 0.0,
+        "yaw_degrees": -90.0
+      },
+      "actor_3": {
+        "x": 0.0,
+        "z": -2.0,
+        "yaw_degrees": 0.0
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": -0.75,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -4.1,
+          0.0
+        ],
+        [
+          -0.9,
+          -0.75
+        ]
+      ],
+      "actor_2": [
+        [
+          2.0,
+          0.0
+        ],
+        [
+          0.9,
+          -0.75
+        ]
+      ],
+      "actor_3": [
+        [
+          0.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -2.55
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "changed_actor_ids": [
+    "actor_1"
+  ]
+}

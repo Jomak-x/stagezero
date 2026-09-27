@@ -52,3 +52,27 @@ Cast archives use `.cast.stagezero.npz`, 1–3 native22 display tracks at 30 fps
 ARDY Core generates solo actions and travel. InterGen generates each active pair together. Three-person scenes sequence pairs while nonparticipants receive labeled authored observer continuation: initial meeting-facing staging, eased arm relaxation, small attention turns, and upper-body settling. Pelvis, legs, and feet remain exact during each waiting span; active InterGen frames are unchanged. Authored transitions remain labeled and are not learned contact dynamics. Waiting stance, foot glide and contact remain variable. See [interaction quality evidence](../review/interaction-quality/README.md) for complete before/after captures and rejected ankle-planting trials. Complex dance/fall/help-up/hug composition is still unvalidated. InterGen's noncommercial research license continues to apply.
 
 Full earlier source archives, failed cases, visual captures and timings are preserved in `review/prompt-scenes/`. Main-UI integration verification is in `review/main-cast-ui/`. Do not treat numerical gates as animation quality guarantees.
+
+## Interactive starting-mark demo
+
+`initial_placement_demo.py` uses the real studio character mesh and the same Neon
+planner/placement validation as AI cast. Click **Place with Neon**, select a
+character (or click its mesh), then drag the **Move** arrows on the floor. Switch
+**Handle → Turn** to drag the facing ring, or use the position and facing fields.
+**Restore AI placement** restores the original accepted marks. Invalid moves
+leave every character at its previous accepted mark.
+
+```sh
+python initial_placement_demo.py --port 24995 \
+  --client-build /path/to/studio_client/build \
+  --gateway-env /path/to/private/.env.neon-worker
+```
+
+This requires the project's pinned Viser, numpy, scipy, Pillow and requests;
+no Torch or motion provider is needed for this initial-pose editor. It uses the
+existing reviewed pose and Xbot mesh and serves only on loopback. Gateway keys
+stay in the Python process. **Export edited plan** downloads a validated v1
+plan with all displayed starts and headings pinned. Use that plan with
+`experiments/trial_prompt_scene.py --plan character-start-plan.json` and the
+usual motion-provider arguments to generate a complete performance. The editor
+itself previews placement and does not generate new body motion.
