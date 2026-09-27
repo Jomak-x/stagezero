@@ -10,7 +10,9 @@ from PIL import Image, ImageDraw
 from experiments.capture_core_performance import get_render_with_timeout
 
 
-def capture_pair(session, renderer, client, output_dir, *, flush=None, render_lock=None, render_frame=None):
+def capture_pair(session, renderer, client, output_dir, *, flush=None, render_lock=None, render_frame=None, archive_name="scene.native-pair.stagezero.npz"):
+    if archive_name not in ("scene.native-pair.stagezero.npz", "scene.cast.stagezero.npz"):
+        raise ValueError("Unsupported capture archive name")
     if client is None:
         raise ValueError('Connect a browser to export playback.')
     state = session.snapshot()
@@ -23,13 +25,13 @@ def capture_pair(session, renderer, client, output_dir, *, flush=None, render_lo
     with render_lock or nullcontext():
         state = session.begin_capture()
     try:
-        return _capture_locked(session, renderer, client, output, state, flush, render_lock, render_frame)
+        return _capture_locked(session, renderer, client, output, state, flush, render_lock, render_frame, archive_name)
     finally:
         with render_lock or nullcontext():
             session.end_capture(state['frame'])
 
 
-def _capture_locked(session, renderer, client, output, state, flush, render_lock, render_frame):
+def _capture_locked(session, renderer, client, output, state, flush, render_lock, render_frame, archive_name="scene.native-pair.stagezero.npz"):
     clip = session.timeline_clip()
     with render_lock or nullcontext():
         renderer.sync_cast(state)
@@ -38,7 +40,7 @@ def _capture_locked(session, renderer, client, output, state, flush, render_lock
     if local_playback is not None:
         local_playback.require_ready(client)
     archive = session.save()
-    (output / 'scene.native-pair.stagezero.npz').write_bytes(archive)
+    (output / archive_name).write_bytes(archive)
     frames, fps = state['total_frames'], state['fps']
     encoder = subprocess.Popen(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-f', 'rawvideo',
         '-pix_fmt', 'rgb24', '-s', '1280x720', '-r', str(fps), '-i', '-', '-an',

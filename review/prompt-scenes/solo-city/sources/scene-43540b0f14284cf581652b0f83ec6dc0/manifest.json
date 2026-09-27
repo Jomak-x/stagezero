@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "prompt": "One person waves hello, then celebrates.",
+  "seed": 42,
+  "status": "complete",
+  "sources": [
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/solo-city/sources/scene-43540b0f14284cf581652b0f83ec6dc0/core-000.npz",
+      "seconds": 0.8291486669913866,
+      "sha256": "c86e375f7711fd45938cae7c6a36ecdb4f22755d36260054e5ae68b51032fb0f"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/solo-city/sources/scene-43540b0f14284cf581652b0f83ec6dc0/core-001.npz",
+      "seconds": 0.8951015840284526,
+      "sha256": "af41cf040ab9a6692a9880ae7973c2f92e0fb12628e20435e2508d48ab7f3803"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/solo-city/sources/scene-43540b0f14284cf581652b0f83ec6dc0/core-002.npz",
+      "seconds": 0.8369491249904968,
+      "sha256": "ed964e4a0cd56d8843def255fa754c645341c009ecf8ced0045de43298f4a4e6"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/solo-city/sources/scene-43540b0f14284cf581652b0f83ec6dc0/core-003.npz",
+      "seconds": 0.8563229999854229,
+      "sha256": "e144e78aa543acafd2acaf36849e3430a83e5b1a6f455bd520641f231d9b02f7"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 3.283186917018611
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.010633750003762543
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-bc1523d02a27402eb9d92bec799c25f9",
+      "seconds": 0.8291486669913866
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-a5ff63973ad740bb90107b5729cda0ea",
+      "seconds": 0.8951015840284526
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.0121913340408355
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-1",
+      "seconds": 1.7953492910019122
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-cb30da2fef1b47adb0cad09a4df85cd2",
+      "seconds": 0.8369491249904968
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-71bb1a6e7c5446cea7fa43f5d8163202",
+      "seconds": 0.8563229999854229
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.012919707980472594
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-2",
+      "seconds": 1.8100142500479706
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "beat-1",
+      "requested_seconds": 4,
+      "source_seconds": 4.0,
+      "duration_policy": "complete sequential 40-frame Core horizons at 20 fps",
+      "refinement": null
+    },
+    {
+      "beat_id": "beat-2",
+      "requested_seconds": 4,
+      "source_seconds": 4.0,
+      "duration_policy": "complete sequential 40-frame Core horizons at 20 fps",
+      "refinement": {
+        "source": "ARDY Core",
+        "method": "Core world bone directions with native actor median segment lengths",
+        "reference_frames": 1,
+        "median_lengths_m": [
+          [
+            0.09888557764236075,
+            0.09888555388214097,
+            0.08531834408118588,
+            0.41211791148586946,
+            0.41211798189845344,
+            0.094652103920427,
+            0.45609088856978036,
+            0.4560909630028191,
+            0.09465219197811967,
+            0.1709689216491365,
+            0.17096898896937843,
+            0.34483234449512595,
+            0.2741836444918339,
+            0.27453389962480224,
+            0.1301469835772775,
+            0.15890800151468237,
+            0.15890800328951082,
+            0.29543603139045665,
+            0.29543595244868365,
+            0.23265192930040243,
+            0.23265196544136826
+          ],
+          [
+            0.09888557764236075,
+            0.09888555388214097,
+            0.08531834408118588,
+            0.41211791148586946,
+            0.41211798189845344,
+            0.094652103920427,
+            0.45609088856978036,
+            0.4560909630028191,
+            0.09465219197811967,
+            0.1709689216491365,
+            0.17096898896937843,
+            0.34483234449512595,
+            0.2741836444918339,
+            0.27453389962480224,
+            0.1301469835772775,
+            0.15890800151468237,
+            0.15890800328951082,
+            0.29543603139045665,
+            0.29543595244868365,
+            0.23265192930040243,
+            0.23265196544136826
+          ]
+        ],
+        "core_endpoint_displacement_m": {
+          "mean": 9.469320682009758e-05,
+          "max": 0.005947726610413241,
+          "per_actor_max": [
+            0.005947726610413241,
+            0.005947726610413241
+          ]
+        },
+        "root_xz_modified": false,
+        "native_pair_modified": false,
+        "root_y_correction_range_m": [
+          -3.703238042676582e-07,
+          1.080478254676491e-05
+        ],
+        "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+        "foot_lock": false,
+        "limitations": [
+          "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+          "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+          "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+          "Native source lengths vary while Core display lengths use actor-specific medians."
+        ]
+      }
+    }
+  ],
+  "plan": {
+    "version": 1,
+    "title": "Wave and Celebrate",
+    "prompt": "One person waves hello, then celebrates.",
+    "actor_count": 1,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "Wave hello.",
+        "seconds": 4
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "Celebrate with upbeat gestures.",
+        "seconds": 4
+      }
+    ],
+    "warnings": [],
+    "raw_plan": {
+      "version": 1,
+      "title": "Wave and Celebrate",
+      "prompt": "One person waves hello, then celebrates.",
+      "actor_count": 1,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "prompt": "Wave hello.",
+          "seconds": 4
+        },
+        {
+          "id": "beat-2",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "prompt": "Celebrate with upbeat gestures.",
+          "seconds": 4
+        }
+      ],
+      "warnings": []
+    },
+    "planning_seconds": 3.2751439579878934,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol"
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": 0.0,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          0.0,
+          -1.5
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "frames": 240,
+  "duration_seconds": 8.0,
+  "wall_seconds": 6.900469415995758
+}

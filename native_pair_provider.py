@@ -1,8 +1,9 @@
 """Bounded remote InterGen sampling of exact native 30 fps paired motion.
 
 The published checkpoint and probe must already be installed on the selected
-host.  Each request creates one temporary remote process and one unique file;
-it never contacts the older 20 fps retargeting service.
+host. An optional authenticated warm worker retains the exact native model;
+unconfigured installations retain the isolated per-request SSH sampler.
+Neither path contacts the older 20 fps retargeting service.
 """
 from __future__ import annotations
 
@@ -17,6 +18,9 @@ import subprocess
 import threading
 import time
 import uuid
+from urllib.error import HTTPError
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from native_pair_clip import MAX_BYTES, NativePairClip, load_source
 
@@ -123,6 +127,8 @@ class NativePairConfig:
     min_free_disk_mib: int = 64
     generation_timeout: int = 90
     transfer_timeout: int = 30
+    worker_url: str | None = None
+    worker_token_path: str | None = None
 
     def __post_init__(self):
         if not re.fullmatch(r'[a-zA-Z0-9_.@:-]{1,255}', self.ssh_host):
@@ -135,7 +141,15 @@ class NativePairConfig:
             if (not isinstance(value, str) or not value.startswith('/') or
                     not re.fullmatch(r'[a-zA-Z0-9_./-]+', value) or '..' in Path(value).parts):
                 raise ValueError(f'Invalid {name}')
-        for name in ('known_hosts', 'identity_file'):
+        if bool(self.worker_url) != bool(self.worker_token_path):
+            raise ValueError('Native worker URL and token path must be configured together')
+        if self.worker_url is not None:
+            url = urlsplit(self.worker_url)
+            if (url.scheme != 'http' or url.hostname not in ('127.0.0.1', 'localhost', '::1')
+                    or url.username or url.password or url.query or url.fragment or url.path not in ('', '/')
+                    or url.port is None):
+                raise ValueError('Native worker URL must be a loopback HTTP URL with an explicit port')
+        for name in ('known_hosts', 'identity_file', 'worker_token_path'):
             value = getattr(self, name)
             if value is not None and (not isinstance(value, str) or not Path(value).is_absolute()):
                 raise ValueError(f'{name} must be an absolute path')
@@ -163,6 +177,8 @@ class NativePairConfig:
             remote_clip_cache=env.get('STAGEZERO_NATIVE_PAIR_REMOTE_CLIP_CACHE', cls.remote_clip_cache),
             remote_deps=env.get('STAGEZERO_NATIVE_PAIR_REMOTE_DEPS', cls.remote_deps),
             remote_output_dir=env.get('STAGEZERO_NATIVE_PAIR_REMOTE_OUTPUT_DIR', cls.remote_output_dir),
+            worker_url=env.get('STAGEZERO_NATIVE_PAIR_WORKER_URL') or None,
+            worker_token_path=env.get('STAGEZERO_NATIVE_PAIR_WORKER_TOKEN_PATH') or None,
         )
 
 
@@ -280,6 +296,96 @@ class NativePairProvider:
             raise RuntimeError('Insufficient free disk space for native generation')
         return {'free_gpu_mib': free_gpu, 'free_disk_mib': free_disk}
 
+    def _worker_request(self, method, path, *, token, body=None, max_bytes=8192, timeout=2,
+                        deadline=None, cancelled=None):
+        class NoRedirect(HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        data = None if body is None else json.dumps(body, allow_nan=False).encode()
+        request = Request(self.config.worker_url.rstrip('/') + path, data=data, method=method,
+                          headers={'Authorization': 'Bearer '+token, 'Content-Type': 'application/json'})
+        # A tunnel endpoint must never receive configured HTTP proxy routing.
+        with build_opener(ProxyHandler({}), NoRedirect()).open(request, timeout=timeout) as response:
+            content = bytearray()
+            while True:
+                self._check_cancel(cancelled)
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeoutError('Native worker request timed out')
+                block = response.read1(min(65536, max_bytes+1-len(content)))
+                if not block:
+                    break
+                content.extend(block)
+                if len(content) > max_bytes:
+                    raise ValueError('Native worker response exceeds its size bound')
+            expected = 'application/octet-stream' if path.endswith('/result') else 'application/json'
+            if response.headers.get_content_type() != expected:
+                raise ValueError('Native worker returned an unexpected response type')
+            return bytes(content)
+
+    def _generate_worker(self, prompt, seed, frames, cancelled):
+        token_path = Path(self.config.worker_token_path)
+        if token_path.stat().st_size > 4096:
+            raise ValueError('Native worker token exceeds its size bound')
+        token = token_path.read_text().strip()
+        if not 16 <= len(token) <= 4096 or any(ord(c) < 33 or ord(c) > 126 for c in token):
+            raise ValueError('Native worker token is invalid')
+        request_id = 'native-'+uuid.uuid4().hex
+        path = '/v1/native/jobs/'+request_id
+        body = dict(request_id=request_id, prompt=prompt, seed=seed, frames=frames)
+        started = time.perf_counter()
+        deadline = time.monotonic()+self.config.generation_timeout
+        submission_attempted = accepted = False
+        def request(method, route, **kwargs):
+            self._check_cancel(cancelled)
+            remaining = deadline-time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('Native worker request timed out')
+            return self._worker_request(method, route, token=token, timeout=min(2, remaining),
+                                        deadline=deadline, cancelled=cancelled, **kwargs)
+        try:
+            submission_attempted = True
+            state = json.loads(request('POST', '/v1/native/jobs', body=body))
+            accepted = True
+            while True:
+                if (state.get('request_id') != request_id or state.get('frames') != frames
+                        or state.get('seed') != seed or state.get('status') not in
+                        ('queued', 'running', 'complete', 'cancelled', 'failed')):
+                    raise ValueError('Native worker returned a different request')
+                if state['status'] == 'complete':
+                    transfer_started = time.perf_counter()
+                    content = request('GET', path+'/result', max_bytes=MAX_BYTES)
+                    transfer_seconds = time.perf_counter()-transfer_started
+                    if type(state.get('bytes')) is not int or len(content) != state['bytes']:
+                        raise ValueError('Incomplete native worker transfer')
+                    clip = load_source(content)
+                    if (clip.frames != frames or clip.features is None
+                            or clip.metadata.get('model') != 'InterGen'
+                            or clip.metadata.get('request_id') != request_id
+                            or clip.metadata.get('prompt') != prompt or clip.metadata.get('seed') != seed):
+                        raise ValueError('Native worker returned incompatible arrays or provenance')
+                    self._check_cancel(cancelled)
+                    timings = dict(state.get('timings') or {}, transfer_seconds=transfer_seconds,
+                                   provider_wall_seconds=time.perf_counter()-started)
+                    result = NativePairClip(clip.joints, clip.features,
+                        dict(clip.metadata, provider='intergen_warm_native', provider_timings=timings))
+                    self.last_raw_archive = content
+                    return result
+                if state['status'] in ('failed', 'cancelled'):
+                    raise RuntimeError('Native paired generation '+state['status'])
+                time.sleep(min(.025, max(0, deadline-time.monotonic())))
+                state = json.loads(request('GET', path))
+        except BaseException as exc:
+            # An explicit HTTP rejection did not create this request. A lost POST
+            # acknowledgement may have; cancel only our fresh unpredictable ID.
+            if submission_attempted and (accepted or not isinstance(exc, HTTPError)):
+                try:
+                    self._worker_request('DELETE', path, token=token, timeout=3)
+                except Exception:
+                    pass
+            if isinstance(exc, HTTPError):
+                raise RuntimeError(f'Native worker returned HTTP {exc.code}') from None
+            raise
+
     def generate(self, prompt: str, seed: int, frames: int = 210, cancelled=None) -> NativePairClip:
         if (not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 500
                 or any(ord(ch) < 32 for ch in prompt)):
@@ -294,7 +400,11 @@ class NativePairProvider:
             raise RuntimeError('A native pair generation is already running')
         try:
             self._check_cancel(cancelled)
+            if self.config.worker_url:
+                return self._generate_worker(prompt.strip(), seed, frames, cancelled)
+            started = time.perf_counter()
             health = self._health(cancelled)
+            health_seconds = time.perf_counter()-started
             c = self.config
             output = c.remote_output_dir.rstrip('/') + '/native-pair-' + uuid.uuid4().hex + '.npz'
             payload = {'python': c.remote_python, 'probe': c.remote_probe,
@@ -305,15 +415,19 @@ class NativePairProvider:
                        'max_bytes': MAX_BYTES}
             command = shlex.quote(c.remote_python) + ' -c ' + shlex.quote(_REMOTE_SAMPLE)
             try:
+                sample_started = time.perf_counter()
                 result = self._run(self._ssh(command), input_bytes=(json.dumps(payload) + '\n').encode(),
                                    timeout=c.generation_timeout + 20, max_bytes=8192,
                                    cancelled=cancelled, keep_stdin=True)
+                sample_process_seconds = time.perf_counter()-sample_started
                 record = json.loads(result)
                 if record.get('output') != output or not 0 < record.get('bytes', 0) <= MAX_BYTES:
                     raise ValueError('Unexpected native sample output')
+                transfer_started = time.perf_counter()
                 content = self._run(self._ssh('cat -- ' + shlex.quote(output)),
                                     timeout=c.transfer_timeout, max_bytes=MAX_BYTES,
                                     cancelled=cancelled)
+                transfer_seconds = time.perf_counter()-transfer_started
                 if len(content) != record['bytes']:
                     raise ValueError('Incomplete native pair transfer')
                 clip = load_source(content)
@@ -324,7 +438,11 @@ class NativePairProvider:
                     raise ValueError('Native InterGen returned incomplete arrays')
                 metadata = dict(clip.metadata, provider='intergen_ssh_native',
                                 free_gpu_before_mib=health['free_gpu_mib'],
-                                free_disk_before_mib=health['free_disk_mib'])
+                                free_disk_before_mib=health['free_disk_mib'],
+                                provider_timings={'health_seconds': health_seconds,
+                                    'sample_process_seconds': sample_process_seconds,
+                                    'transfer_seconds': transfer_seconds,
+                                    'provider_wall_seconds': time.perf_counter()-started})
                 result = NativePairClip(clip.joints, clip.features, metadata)
                 self.last_raw_archive = content
                 return result

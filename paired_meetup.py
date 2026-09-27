@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 import math
 import uuid
+from dataclasses import replace
 from collections.abc import Mapping
 import numpy as np
-from interaction_planner import _obstacles, _path, _intersects
+from interaction_planner import _obstacles, _path, _intersects, _inside
 from interaction_scene import scene_objects
+from interaction_scene_collision import scene_collision
 from native_pair_clip import NativePairClip, MAX_FRAMES
 from native_pair_geometry import check_native_pair_geometry
 from native_pair_transition import shared_place_pair, core_to_pair_anatomy, authored_direction_bridge, core27_to_native22
@@ -17,6 +19,22 @@ FPS, HORIZON, BLEND_FRAMES = 20, 40, 21
 # Acceptance bounds, not expected model precision or collision radii.
 MAX_TARGET_ERROR_M, MAX_ARRIVAL_ERROR_M, MIN_ROUTE_SEPARATION_M = .8, .4, .55
 MAX_ENTRY_ROOT_HEIGHT_GAP_M = .30
+
+
+def _checked_generated_geometry(world, scene, actor_ids, *, context):
+    """Keep the existing gate, attaching precise idle collisions for bounded retries."""
+    try:
+        return check_native_pair_geometry(world, scene, actor_ids=actor_ids)
+    except ValueError as exc:
+        if 'scene-idle-' in str(exc):
+            adapted = adapt_studio_scene(scene)
+            collisions = []
+            for index, aid in enumerate(actor_ids):
+                report = scene_collision(world[:, index], 'native22', adapted['scene'], adapted['affordances'])
+                collisions.extend(dict(item, actor_id=aid, context=context) for item in report['per_object']
+                                  if item['object_id'].startswith('scene-idle-') and item['collision_frames'])
+            exc.idle_collision_report = collisions
+        raise
 
 
 def _number(v, name, lo, hi):
@@ -53,7 +71,7 @@ def _minimum_separation(paths):
     return minimum
 
 
-def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled'):
+def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled', initial_heading_ramp_seconds=0.):
     """Keep the same common duration and model target sampling for every route."""
     travel_windows = max(1, math.ceil(max(r['distance_m'] for r in routes)/speed/2.))
     arrival_seconds, windows = travel_windows*2., travel_windows+1
@@ -100,6 +118,15 @@ def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_poli
                     delta = math.atan2(math.sin(route['arrival_yaw']-prior), math.cos(route['arrival_yaw']-prior))
                     heading = prior+min(1., (second-arrival_seconds)/1.)*delta
                 heading = route['arrival_yaw'] if heading is None else math.atan2(math.sin(heading), math.cos(heading))
+                if initial_heading_ramp_seconds and second <= initial_heading_ramp_seconds+1/FPS:
+                    # The first Core target is at t=1/FPS. Match the actual
+                    # supplied prior heading there, then turn smoothly onto the
+                    # route instead of requesting a frame-zero yaw discontinuity.
+                    alpha = max(0., min(1., (second-1/FPS)/initial_heading_ramp_seconds))
+                    smooth = alpha*alpha*(3-2*alpha)
+                    prior = route['initial_yaw']
+                    delta = math.atan2(math.sin(heading-prior), math.cos(heading-prior))
+                    heading = math.atan2(math.sin(prior+smooth*delta), math.cos(prior+smooth*delta))
                 targets[aid].append({'frame': local, 'position_xz': point, 'heading': heading})
             if entry_policy == 'continuous':
                 prompts[aid] = ('A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.'
@@ -127,6 +154,41 @@ def _route_separation(routes):
                 times.add(min(1., distance/route['distance_m']))
     paths = [[_sample(r['points'], r['distance_m']*t)[0] for r in routes] for t in sorted(times)]
     return _minimum_separation(np.asarray(paths))
+
+
+def _idle_clearance_path(start, end, physical_obstacles, routing_obstacles):
+    """Depart a safe close start outward before using extra idle routing margin.
+
+    This only changes route targets. The short departure clears the original
+    physical obstacles and monotonically increases distance from its idle actor.
+    Every generated pose still passes the original scene/body collision checks.
+    """
+    enclosing = [box for box in routing_obstacles if _inside(start, box, .34)]
+    if not enclosing:
+        return _path(start, end, routing_obstacles, .34), []
+    if (len(enclosing) != 1 or not enclosing[0].object_id.startswith('scene-idle-')
+            or any(_inside(start, box, .34) for box in physical_obstacles)):
+        raise ValueError('Actor or route target overlaps scene geometry')
+    box = enclosing[0]
+    direction = np.asarray(start)-box.center
+    length = float(np.linalg.norm(direction))
+    if length < .05:
+        raise ValueError('Cannot leave an ambiguous idle-actor overlap')
+    direction /= length
+    for distance in (.15, .30, .45, .60, .80, 1.):
+        exit_point = tuple(np.asarray(start)+direction*distance)
+        if any(_inside(exit_point, obstacle, .34) for obstacle in routing_obstacles):
+            continue
+        if any(_intersects(start, exit_point, obstacle, .34) for obstacle in physical_obstacles):
+            continue
+        try:
+            tail = _path(exit_point, end, routing_obstacles, .34)
+        except ValueError:
+            continue
+        return [start]+tail, [{'idle_object_id': box.object_id, 'start': list(start),
+                               'exit': list(exit_point), 'distance_m': distance,
+                               'physical_clearance_preserved': True}]
+    raise ValueError('No bounded outward departure clears the padded idle route')
 
 
 def _entry_route(points, arrival_yaw, scene, obstacles):
@@ -175,6 +237,10 @@ def _alternate_routes(routes, starts, scene, obstacles):
     """
     choices = [[route] for route in routes]
     for index, route in enumerate(routes):
+        if route.get('idle_departure'):
+            # Do not replace a verified outward departure with a shortcut through
+            # the extra routing envelope. The other actor can still be rerouted.
+            continue
         start, end = np.asarray(route['points'][0]), np.asarray(route['points'][-1])
         delta = end-start
         length = float(np.linalg.norm(delta))
@@ -208,12 +274,15 @@ def _alternate_routes(routes, starts, scene, obstacles):
 
 
 def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
-                meeting, speed_mps=.65, max_seconds=20, entry_policy='settled'):
+                meeting, speed_mps=.65, max_seconds=20, entry_policy='settled', arrival_standoff_m=None,
+                idle_route_padding_m=0., initial_heading_ramp_seconds=0.):
     """CPU-only JSON plan. Starts are two world {x,z,yaw_degrees?} anchors.
 
     Meeting XZ anchors the native first-frame root midpoint, with optional yaw.
     Routes share a travel duration and real Core settle horizon. max_seconds
     bounds the approach; the complete take, including pair, has a 1000-frame cap.
+    Optional arrival_standoff_m moves only Core arrival targets outward when
+    native entry roots are closer. The native frames and every gate are unchanged.
     """
     if not isinstance(pair_clip, NativePairClip) or pair_clip.metadata.get('model') != 'InterGen' or pair_clip.segments is not None:
         raise ValueError('Meeting requires an original native InterGen pair')
@@ -231,6 +300,10 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     meeting = anchor(meeting, 'Meeting')
     speed = _number(speed_mps, 'Walking speed', .2, 1.5)
     maximum = _number(max_seconds, 'Maximum approach seconds', 4, 20)
+    standoff = None if arrival_standoff_m is None else _number(
+        arrival_standoff_m, 'Core arrival standoff', MIN_ROUTE_SEPARATION_M, .80)
+    idle_padding = _number(idle_route_padding_m, 'Extra idle route clearance', 0., .60)
+    heading_ramp = _number(initial_heading_ramp_seconds, 'Initial heading ramp seconds', 0., 1.)
     if entry_policy not in ('settled', 'continuous'):
         raise ValueError('Unknown meeting entry policy')
     yaw = math.radians(meeting.get('yaw_degrees', 0.))
@@ -238,18 +311,43 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     center = rotated[0, :, 0].mean(axis=0)
     offset = [meeting['x']-float(center[0]), 0., meeting['z']-float(center[2])]
     pair = rotated+offset
+    native_entry = pair[0, :, 0][:, [0, 2]].copy()
+    arrivals = native_entry.copy()
+    axis = native_entry[1]-native_entry[0]
+    native_separation = float(np.linalg.norm(axis))
+    if standoff is not None and native_separation < standoff:
+        if native_separation < .05:
+            raise ValueError('Native entry roots are too close to define safe Core standoff directions')
+        shift = axis/native_separation*(standoff-native_separation)/2
+        arrivals[0] -= shift
+        arrivals[1] += shift
+    arrival_standoff = {'requested_minimum_separation_m': standoff,
+        'native_entry_root_separation_m': native_separation,
+        'core_arrival_root_separation_m': float(np.linalg.norm(arrivals[1]-arrivals[0])),
+        'native_entry_roots_xz': native_entry.tolist(), 'core_arrival_targets_xz': arrivals.tolist(),
+        'target_offsets_xz': (arrivals-native_entry).tolist(),
+        'maximum_target_offset_m': float(np.linalg.norm(arrivals-native_entry, axis=-1).max()),
+        'source_pair_frames_modified': False}
     placement = {'x': offset[0], 'z': offset[2], 'yaw_degrees': meeting.get('yaw_degrees', 0.)}
     adapted = adapt_studio_scene(scene)['scene']
     geometry = check_native_pair_geometry(pair, scene, actor_ids=actor_ids)
-    obstacles = _obstacles(scene_objects(adapted), None, 1.65, .34)
+    physical_obstacles = _obstacles(scene_objects(adapted), None, 1.65, .34)
+    obstacles = [replace(box, half_width=box.half_width+idle_padding, half_depth=box.half_depth+idle_padding)
+                 if box.object_id.startswith('scene-idle-') else box for box in physical_obstacles]
     routes = []
     for i, aid in enumerate(actor_ids):
         start = [starts[i]['x'], starts[i]['z']]
-        end = pair[0, i, 0, [0, 2]].tolist()
-        points = [list(p) for p in _path(tuple(start), tuple(end), obstacles, .34)]
+        end = arrivals[i].tolist()
+        routed, departure = _idle_clearance_path(tuple(start), tuple(end), physical_obstacles, obstacles)
+        points = [list(p) for p in routed]
         arrival = _heading(pair[0, i])
         if entry_policy == 'continuous':
-            points = _entry_route(points, arrival, adapted, obstacles)
+            if departure:
+                # Preserve the physically checked outward prefix exactly; round
+                # only the route after it has left the larger planning envelope.
+                points = points[:1]+_entry_route(points[1:], arrival, adapted, obstacles)
+            else:
+                points = _entry_route(points, arrival, adapted, obstacles)
         if any(abs(v) > 25 for p in points for v in p):
             raise ValueError('Meeting route exceeds the Core worker ±25 m bounds')
         ground = validate_ground_path(adapted, points)
@@ -258,8 +356,9 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
         initial = math.radians(starts[i]['yaw_degrees']) if 'yaw_degrees' in starts[i] else (arrival if first is None else first)
         routes.append({'actor_id': aid, 'points': points, 'distance_m': length,
                        'initial_yaw': initial, 'arrival_yaw': arrival, 'ground': ground,
+                       'idle_departure': departure,
                        **({'entry_policy': entry_policy} if entry_policy == 'continuous' else {})})
-    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy)
+    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
     minimum = min(minimum, _route_separation(routes))
     rerouted = False
     if minimum < MIN_ROUTE_SEPARATION_M:
@@ -267,7 +366,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
             if _route_separation(candidate) < MIN_ROUTE_SEPARATION_M:
                 continue
             try:
-                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy)
+                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
             except ValueError:
                 continue
             if scheduled[-1] < MIN_ROUTE_SEPARATION_M:
@@ -285,6 +384,9 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
             'entry_policy': entry_policy, 'total_frames': frames, 'blend_frames': BLEND_FRAMES,
             'minimum_planned_root_separation_m': minimum, 'native_geometry': geometry,
             'approach_rerouted': rerouted,
+            'arrival_standoff': arrival_standoff,
+            'idle_route_padding_m': idle_padding,
+            'initial_heading_ramp_seconds': heading_ramp,
             'source_sha256': hashlib.sha256(pair_clip.joints.tobytes()).hexdigest(), 'planned_only': True,
             'limits': {'max_target_error_m': MAX_TARGET_ERROR_M, 'max_arrival_error_m': MAX_ARRIVAL_ERROR_M,
                        'minimum_route_root_separation_m': MIN_ROUTE_SEPARATION_M,
@@ -293,7 +395,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
 
 def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                  meeting, speed_mps=.65, max_seconds=20, seed=92642,
-                 cancelled=lambda: False, on_progress=None, on_core_chunk=None, entry_policy='settled'):
+                 cancelled=lambda: False, on_progress=None, on_core_chunk=None, entry_policy='settled',
+                 arrival_standoff_m=None, idle_route_padding_m=0., initial_heading_ramp_seconds=0.):
     """Return local clip, playback placement, world joints, plan and metadata.
 
     on_progress(dict) reports windows. on_core_chunk('approach', index, clip,
@@ -304,7 +407,7 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         raise RuntimeError('Configure ARDY Core before generating a meeting')
     if type(seed) is not int or not 0 <= seed < 2**32:
         raise ValueError('Seed must be a uint32 integer')
-    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds, entry_policy=entry_policy)
+    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds, entry_policy=entry_policy, arrival_standoff_m=arrival_standoff_m, idle_route_padding_m=idle_route_padding_m, initial_heading_ramp_seconds=initial_heading_ramp_seconds)
     ids, placement = plan['actor_ids'], plan['placement']
     yaw = math.radians(placement['yaw_degrees']); offset = [placement['x'], 0., placement['z']]
     pair = shared_place_pair(pair_clip.joints, yaw=yaw, translation=offset)
@@ -340,13 +443,15 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         worst = max(errors); measured.append({'window': index, 'maximum_target_error_m': worst})
         if worst > MAX_TARGET_ERROR_M:
             raise ValueError(f'Core missed the planned route by {worst:.2f} m; meeting rejected')
-        check_native_pair_geometry(core27_to_native22(clip.positions).transpose(1, 0, 2, 3), scene, actor_ids=ids)
+        _checked_generated_geometry(core27_to_native22(clip.positions).transpose(1, 0, 2, 3), scene, ids,
+                                    context={'stage': 'core_window', 'window': index, 'source_fps': 20})
         clips.append(clip)
     core = np.concatenate([c.positions for c in clips], axis=1).transpose(1, 0, 2, 3)
     generated_core_frames = len(core)
     if entry_policy == 'continuous':
         core = core[:round(plan['approach_seconds']*FPS)]
     errors = np.linalg.norm(core[-1, :, 0][:, [0, 2]]-pair[0, :, 0][:, [0, 2]], axis=-1)
+    target_errors = np.linalg.norm(core[-1, :, 0][:, [0, 2]]-np.asarray(plan['arrival_standoff']['core_arrival_targets_xz']), axis=-1)
     if float(errors.max()) > MAX_ARRIVAL_ERROR_M:
         raise ValueError('Core did not reach both meeting entry positions; meeting rejected')
     if _minimum_separation(core[:, :, 0][:, :, [0, 2]]) < MIN_ROUTE_SEPARATION_M:
@@ -379,7 +484,7 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
     plan['blend_frames'] = len(entry)
     plan['total_frames'] = len(approach)+len(entry)+len(pair)
     world = np.concatenate([approach, entry, pair])
-    geometry = check_native_pair_geometry(world, scene, actor_ids=ids)
+    geometry = _checked_generated_geometry(world, scene, ids, context={'stage': 'composed_meetup', 'fps': 30})
     check_cancel(); start = len(approach)+len(entry)
     segments = [{'source': 'ardy_core', 'kind': 'approach', 'label': 'Core approach from independent starts', 'start_frame': 0, 'end_frame_exclusive': len(approach)},
                 {'source': 'authored_transition', 'kind': 'transition', 'label': 'Authored entry transition', 'start_frame': len(approach), 'end_frame_exclusive': start},
@@ -393,6 +498,8 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
                 'transition_provenance': {'source_pair_frames_modified': False, 'all_mechanical_gates_passed': True,
                     'boundaries': {'entry': entry_report}, 'refinement': {'approach': refinement}, 'gpu_jobs': len(clips), 'visual_acceptance': 'unverified'},
                 'approach_measurements': measured, 'arrival_errors_m': errors.tolist(),
+                'arrival_standoff': plan['arrival_standoff'], 'arrival_target_errors_m': target_errors.tolist(),
+                'actual_arrival_native_offsets_xz': (core[-1, :, 0][:, [0, 2]]-pair[0, :, 0][:, [0, 2]]).tolist(),
                 'core_playback_selection': {'generated_frames': generated_core_frames, 'retained_frames': len(core),
                     'source_fps': FPS, 'selection': 'contiguous prefix; raw horizons archived separately'},
                 'entry_root_height_gaps_m': entry_height_gaps.tolist(),

@@ -12,7 +12,8 @@ from native_pair_clip import NativePairClip, load_source
 from native_pair_transition import CORE_TO_NATIVE, shared_place_pair
 from scene_objects import make_object
 from realtime_backend import validate_job
-from paired_meetup import plan_meetup, build_meetup, _minimum_separation, _route_separation
+from paired_meetup import plan_meetup, build_meetup, _minimum_separation, _route_separation, _idle_clearance_path
+from interaction_planner import _Obstacle, _intersects
 from test_native_pair_rig import fixture_glb
 
 SCENE = {'version': 2, 'name': 'Stage', 'objects': [], 'effects': [], 'lighting': 'neutral'}
@@ -62,6 +63,101 @@ class MeetupTests(unittest.TestCase):
         for i, aid in enumerate(IDS):
             np.testing.assert_allclose(plan['horizons'][-2]['root_targets'][aid][-1]['position_xz'], plan['routes'][i]['points'][-1])
             np.testing.assert_allclose(plan['horizons'][-1]['root_targets'][aid][-1]['position_xz'], plan['routes'][i]['points'][-1])
+
+    def test_optional_standoff_preserves_close_native_pair_and_keeps_default_rejection(self):
+        close = self.pair.joints.copy()
+        close[:, 0, :, 0] += .73
+        close[:, 1, :, 0] -= .73
+        pair = NativePairClip(close, metadata={'model': 'InterGen'})
+        starts = [{'x': -.8, 'z': -1.5}, {'x': .8, 'z': -1.5}]
+        with self.assertRaisesRegex(ValueError, 'routes cross too closely'):
+            plan_meetup(pair, SCENE, actor_ids=IDS, starts=starts, meeting=MEETING)
+        plan = plan_meetup(pair, SCENE, actor_ids=IDS, starts=starts, meeting=MEETING,
+                           arrival_standoff_m=.60, entry_policy='continuous', speed_mps=.85)
+        report = plan['arrival_standoff']
+        self.assertAlmostEqual(report['native_entry_root_separation_m'], .54)
+        self.assertAlmostEqual(report['core_arrival_root_separation_m'], .60)
+        self.assertAlmostEqual(report['maximum_target_offset_m'], .03)
+        self.assertGreaterEqual(plan['minimum_planned_root_separation_m'], .55)
+        original = pair.joints.copy()
+        placement = plan['placement']
+        placed = shared_place_pair(pair.joints, translation=[placement['x'], 0, placement['z']])
+        archived = []
+        result = build_meetup(pair, Client(placed), SCENE, actor_ids=IDS, starts=starts, meeting=MEETING,
+                              arrival_standoff_m=.60, entry_policy='continuous', speed_mps=.85,
+                              on_core_chunk=lambda *args: archived.append(args))
+        self.assertTrue(archived)
+        np.testing.assert_array_equal(pair.joints, original)
+        np.testing.assert_array_equal(result['joints'][-pair.frames:], placed)
+        np.testing.assert_array_equal(result['clip'].joints[-pair.frames:], pair.joints)
+        np.testing.assert_allclose(result['metadata']['arrival_errors_m'], [.03, .03], atol=1e-12)
+        np.testing.assert_allclose(result['metadata']['arrival_target_errors_m'], [0., 0.], atol=1e-12)
+        self.assertTrue(result['metadata']['transition_provenance']['all_mechanical_gates_passed'])
+
+    def test_standoff_does_not_weaken_generated_approach_clearance(self):
+        close = self.pair.joints.copy(); close[:, 0, :, 0] += .73; close[:, 1, :, 0] -= .73
+        pair = NativePairClip(close, metadata={'model': 'InterGen'})
+        client = Client(close)
+        original = client.wait
+        def too_close(*args, **kwargs):
+            result = original(*args, **kwargs)
+            result[0].positions[0, :, :, 0] += .04
+            result[0].positions[1, :, :, 0] -= .04
+            return result
+        client.wait = too_close
+        with self.assertRaisesRegex(ValueError, 'Generated actor approaches cross too closely'):
+            build_meetup(pair, client, SCENE, actor_ids=IDS,
+                          starts=[{'x': -.8, 'z': -1.5}, {'x': .8, 'z': -1.5}], meeting=MEETING,
+                          arrival_standoff_m=.60, entry_policy='continuous', speed_mps=.85)
+
+    def test_standoff_option_validation_and_default_route_compatibility(self):
+        default = self.plan()
+        explicit_none = self.plan(arrival_standoff_m=None)
+        self.assertEqual(default, explicit_none)
+        self.assertEqual(default['horizons'], self.plan(arrival_standoff_m=.60)['horizons'])
+        for invalid in (True, .54, .81, float('nan'), '0.60'):
+            with self.assertRaises(ValueError):
+                self.plan(arrival_standoff_m=invalid)
+
+    def test_extra_idle_routing_margin_preserves_safe_close_start_with_outward_departure(self):
+        physical = [_Obstacle('scene-idle-waiter', (0., 0.), .25, .25, 0.)]
+        padded = [_Obstacle('scene-idle-waiter', (0., 0.), .50, .50, 0.)]
+        start, end = (.3, .685), (2., 0.)
+        path, departure = _idle_clearance_path(start, end, physical, padded)
+        self.assertEqual(path[0], start)
+        self.assertEqual(path[-1], end)
+        self.assertEqual(len(departure), 1)
+        self.assertGreater(np.linalg.norm(path[1]), np.linalg.norm(path[0]))
+        self.assertFalse(_intersects(path[0], path[1], physical[0], .34))
+        self.assertTrue(all(not _intersects(a, b, padded[0], .34) for a, b in zip(path[1:], path[2:])))
+        self.assertEqual(physical[0].half_width, .25)
+        with self.assertRaisesRegex(ValueError, 'overlaps scene geometry'):
+            _idle_clearance_path((.1, .1), end, physical, padded)
+
+    def test_idle_routing_padding_is_opt_in_and_bounded(self):
+        self.assertEqual(self.plan(), self.plan(idle_route_padding_m=0.))
+        self.assertEqual(self.plan()['horizons'], self.plan(idle_route_padding_m=.25)['horizons'])
+        for invalid in (-.1, .61, True, float('nan')):
+            with self.assertRaises(ValueError):
+                self.plan(idle_route_padding_m=invalid)
+
+    def test_opt_in_initial_heading_ramp_matches_prior_yaw_at_first_core_target(self):
+        starts = [dict(STARTS[0], yaw_degrees=180.), dict(STARTS[1], yaw_degrees=-90.)]
+        base = plan_meetup(self.pair, SCENE, actor_ids=IDS, starts=starts, meeting=MEETING,
+                           entry_policy='continuous', speed_mps=.85)
+        ramp = plan_meetup(self.pair, SCENE, actor_ids=IDS, starts=starts, meeting=MEETING,
+                           entry_policy='continuous', speed_mps=.85, initial_heading_ramp_seconds=1.)
+        for index, aid in enumerate(IDS):
+            targets = ramp['horizons'][0]['root_targets'][aid]
+            self.assertAlmostEqual(targets[0]['heading'], math.radians(starts[index]['yaw_degrees']))
+            self.assertNotAlmostEqual(base['horizons'][0]['root_targets'][aid][0]['heading'], targets[0]['heading'])
+            self.assertLess(abs(targets[1]['heading']), abs(targets[0]['heading']))
+            self.assertAlmostEqual(targets[-1]['heading'], base['horizons'][0]['root_targets'][aid][-1]['heading'])
+            self.assertEqual([t['position_xz'] for t in targets],
+                             [t['position_xz'] for t in base['horizons'][0]['root_targets'][aid]])
+        self.assertEqual(base['total_frames'], ramp['total_frames'])
+        self.assertEqual(base, plan_meetup(self.pair, SCENE, actor_ids=IDS, starts=starts, meeting=MEETING,
+                                          entry_policy='continuous', speed_mps=.85, initial_heading_ramp_seconds=0.))
     def test_meeting_anchors_root_midpoint_and_rigid_yaw(self):
         p = plan_meetup(self.pair, SCENE, actor_ids=IDS, starts=STARTS,
                         meeting={'x': 3, 'z': 2, 'yaw_degrees': 75})['placement']

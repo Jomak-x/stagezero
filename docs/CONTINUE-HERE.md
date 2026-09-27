@@ -1,3 +1,30 @@
+# Latest prompt-scene milestone — 2026-09-26
+
+Work continues in `/Users/jakob/.codex/worktrees/motion-performance/Shellhacks`,
+branch `codex/two-character-performance`, draft PR #21. Preserve the dirty original
+workspace and other agents' running studios/workers. Main was fetched at `058d9a5`.
+
+Read `review/prompt-scenes/README.md` and `review/prompt-scenes/review-results.json`
+for the new standalone one-prompt, automatic-duration 1–3 actor testing UI,
+fresh-model timings, full playback captures and rejected complex-action trials.
+`prompt_scene_viewer.py` is separate from main's existing UI. Native Core/G1/paired
+archives stay separate; cast scenes use `.cast.stagezero.npz`.
+
+The warm native worker runs in its own process on the existing Pod, remote
+loopback 8772 through local 8782. Private configuration is
+`.runtime/prompt-native-provider.json`; do not commit its token or restart other
+workers. No new Pod was rented. The normal user test link remains private Tailscale
+port 2380; inspect process/registry state before changing it. Do not expose new
+review routes without the outstanding user approval for that route.
+
+The next boundary is user review. This is a tested research milestone, not general
+contact or commercially cleared production animation. Three-person partner
+changes work in the recorded scene; simultaneous three-person interaction and
+dance/fall/help-up/hug remain unsolved. Preserve all failures and existing arch
+platform provenance.
+
+---
+
 # Ready scene direction integration — 2026-09-26
 
 The main studio now includes an additive **Motion → Scene direction · Core** panel.
