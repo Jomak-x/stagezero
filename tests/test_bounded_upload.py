@@ -11,7 +11,8 @@ from viser import _messages
 from viser._gui_api import GuiApi
 from viser._viser import ViserServer
 
-from bounded_upload import ScopedUploadLimits, UploadRejectedMessage
+from bounded_upload import (ScopedUploadLimits, UploadRejectedMessage,
+                            acquire_scoped_upload_limits, release_scoped_upload_limits)
 from character_assets import DEFAULT_LIMITS
 
 
@@ -108,6 +109,34 @@ class ScopedUploadLimitsTest(unittest.TestCase):
     def guard(self, handle, errors, *, max_bytes=100_000, **kwargs):
         self.limits = ScopedUploadLimits(self.server, **kwargs)
         self.limits.register(handle, max_bytes=max_bytes, on_error=errors.append)
+
+    def test_scene_and_character_controls_share_one_transfer_wrapper(self):
+        file_cap = DEFAULT_LIMITS.max_file_bytes
+        scene = self.control('scene')
+        character = self.control('character')
+        scene_limits = acquire_scoped_upload_limits(self.server, gui=self.gui)
+        character_limits = acquire_scoped_upload_limits(
+            self.server, gui=self.gui, max_total_bytes=file_cap + 1024 * 1024)
+        self.assertIs(scene_limits, character_limits)
+        self.assertEqual(character_limits._max_total, file_cap + 1024 * 1024)
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferStartUpload]), 1)
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferPart]), 1)
+        errors = []
+        scene_limits.register(scene, max_bytes=1_000_000, on_error=errors.append)
+        character_limits.register(character, max_bytes=file_cap, on_error=errors.append)
+        self.interface.dispatch(1, _start('scene', 'too-large', 1_000_001))
+        self.assertNotIn('too-large', self.gui._current_file_upload_states)
+        self.interface.dispatch(1, _start('character', 'rig', 4))
+        self.interface.dispatch(1, _part('character', 'rig', 0, b'data'))
+        release_scoped_upload_limits(self.gui)
+        self.interface.dispatch(1, _start('scene', 'valid', 4))
+        self.interface.dispatch(1, _part('scene', 'valid', 0, b'json'))
+        self.drain()
+        self.assertEqual(self.completed, [('character', 1, b'data'), ('scene', 1, b'json')])
+        self.assertEqual(len(errors), 1)
+        release_scoped_upload_limits(self.gui)
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferStartUpload]), 1)
+        self.assertEqual(len(self.interface.handlers[_messages.FileTransferPart]), 1)
 
     def drain(self):
         self.loop.run_until_complete(asyncio.sleep(0))

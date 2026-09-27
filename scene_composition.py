@@ -5,25 +5,79 @@ import re
 from scene_objects import KINDS, make_object, validate_objects
 from scene_effects import make_effect, validate_effects
 
+MAX_SCENE_TRIANGLES = 250_000
+MAX_SCENE_FILE_BYTES = 1_000_000
+
 LIGHTING = ('neutral', 'warm', 'moonlight', 'neon', 'sunset')
-PRESETS = ('Neon research lab', 'Enchanted grove', 'Cozy living room', 'Industrial yard', 'Winter plaza')
+PRESETS = ('Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Residential neighborhood', 'Market square', 'Warehouse workshop', 'Designed apartment', 'Neon research lab', 'Enchanted grove', 'Cozy living room', 'Industrial yard', 'Winter plaza')
 COLORS = {'red': [218, 70, 72], 'blue': [58, 120, 210], 'teal': [47, 177, 159],
           'green': [80, 150, 87], 'purple': [153, 88, 212], 'yellow': [232, 190, 70],
           'orange': [223, 129, 59], 'white': [220, 226, 231], 'black': [36, 43, 54]}
 
 
 def validate_scene(value):
-    if not isinstance(value, dict) or set(value) != {'version', 'name', 'objects', 'effects', 'lighting'}:
-        raise ValueError('Scene requires version, name, objects, effects and lighting')
-    if type(value['version']) is not int or value['version'] != 2:
+    if not isinstance(value, dict):
+        raise ValueError('Scene must be an object')
+    version = value.get('version')
+    required = {'version', 'name', 'objects', 'effects', 'lighting'}
+    optional = set()
+    if type(version) is not int or version not in (2, 3):
         raise ValueError('Unsupported scene version')
+    if version == 3:
+        required.add('assets')
+        optional.update(('camera','targets'))
+    if not required <= set(value) or set(value) - required - optional:
+        raise ValueError('Scene has missing or unsupported fields')
     name = value['name']
     if not isinstance(name, str) or not name.strip() or len(name) > 80 or any(ord(c) < 32 for c in name):
         raise ValueError('Scene name must contain 1–80 printable characters')
     if not isinstance(value['lighting'], str) or value['lighting'] not in LIGHTING:
         raise ValueError('Unknown lighting preset')
-    return {'version': 2, 'name': name.strip(), 'objects': validate_objects(value['objects']),
-            'effects': validate_effects(value['effects']), 'lighting': value['lighting']}
+    result = {'version': version, 'name': name.strip(), 'objects': validate_objects(value['objects']),
+              'effects': validate_effects(value['effects']), 'lighting': value['lighting']}
+    from asset_geometry import validate_assets, expanded_count, triangle_count
+    assets = validate_assets(value.get('assets', []))
+    lookup = {a['id']: a for a in assets}
+    budget = 0
+    triangles = 0
+    for obj in result['objects']:
+        if obj['kind'] == 'custom':
+            if obj['asset'] not in lookup:
+                raise ValueError('Custom prop references a missing asset')
+            budget += expanded_count(lookup[obj['asset']])
+            triangles += triangle_count(lookup[obj['asset']])
+    if budget > 12000:
+        raise ValueError('Scene exceeds 12000 generated shape instances')
+    if triangles > MAX_SCENE_TRIANGLES:
+        raise ValueError('Scene exceeds 250000 generated triangles; use fewer curved details or instances')
+    if version == 3:
+        result['assets'] = assets
+    if 'camera' in value:
+        camera = value['camera']
+        if not isinstance(camera, dict) or set(camera) != {'position', 'look_at'}:
+            raise ValueError('Camera requires position and look_at')
+        clean = {}
+        for key in ('position', 'look_at'):
+            v = camera[key]
+            if not isinstance(v, (list, tuple)) or len(v) != 3 or any(type(x) not in (float, int) or not math.isfinite(x) or abs(x) > 200 for x in v):
+                raise ValueError('Invalid scene camera coordinates')
+            clean[key] = [float(x) for x in v]
+        if sum((a-b)**2 for a,b in zip(clean['position'], clean['look_at'])) < .01:
+            raise ValueError('Scene camera must be separated from target')
+        result['camera'] = clean
+    if 'targets' in value:
+        from scene_targets import validate_targets
+        result['targets']=validate_targets(value['targets'],result['objects'])
+    return result
+
+
+def encode_scene(value):
+    """Portable compact export using the same document budget as imports."""
+    import json
+    payload=(json.dumps(validate_scene(value),separators=(',',':'),allow_nan=False)+'\n').encode('utf-8')
+    if len(payload)>MAX_SCENE_FILE_BYTES:
+        raise ValueError('Scene file exceeds 1 MB')
+    return payload
 
 
 def make_preset(name, seed=0):
@@ -31,6 +85,18 @@ def make_preset(name, seed=0):
         raise ValueError('Unknown scene preset')
     if type(seed) is not int or not 0 <= seed <= 1_000_000:
         raise ValueError('Seed must be an integer from 0 to 1000000')
+    if name in ('Rooftop swing district','Harbor chase','Jungle temple'):
+        from cinematic_scenes import make_cinematic
+        return make_cinematic(name,seed)
+    if name == 'Residential neighborhood':
+        from scene_environments import make_residential
+        return validate_scene(make_residential(seed))
+    if name in ('Market square','Warehouse workshop'):
+        from scene_sets import make_market,make_workshop
+        return (make_market if name == 'Market square' else make_workshop)(seed)
+    if name in ('City boulevard', 'Designed apartment'):
+        from scene_environments import make_city, make_room
+        return validate_scene((make_city if name == 'City boulevard' else make_room)(seed))
     objects, effects = [], []
 
     def prop(kind, x, z, size=None, color=None, y=None):
@@ -107,7 +173,14 @@ def make_preset(name, seed=0):
 def generate_recipe(prompt, seed=0):
     """Transparent keyword recipes plus counted catalog props; not language-model inference."""
     text = prompt.lower()
-    matches = [('Neon research lab', ('neon', 'sci-fi', 'scifi', 'laboratory', 'research lab', 'spaceship')),
+    matches = [('Rooftop swing district', ('spider-man','spider man','swing district','rooftop city','swinging city')),
+               ('Harbor chase', ('dockyard','harbor chase','container port')),
+               ('Jungle temple', ('jungle temple','temple ruin','ancient temple')),
+               ('Residential neighborhood', ('residential','neighborhood','neighbourhood','suburb','houses')),
+               ('Market square', ('market','bazaar')),
+               ('Warehouse workshop', ('warehouse','workshop','factory')),('City boulevard', ('city', 'urban', 'downtown', 'skyline', 'street', 'boulevard', 'town')),
+               ('Designed apartment', ('room', 'apartment', 'interior', 'bedroom', 'living room', 'lounge')),
+               ('Neon research lab', ('neon', 'sci-fi', 'scifi', 'laboratory', 'research lab', 'spaceship')),
                ('Enchanted grove', ('forest', 'grove', 'enchanted', 'fantasy')),
                ('Cozy living room', ('cozy', 'living room', 'lounge')),
                ('Industrial yard', ('industrial', 'warehouse', 'factory')),

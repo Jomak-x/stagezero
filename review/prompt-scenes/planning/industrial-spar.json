@@ -1,0 +1,148 @@
+{
+  "case": "industrial-spar",
+  "background": "industrial",
+  "plan": {
+    "version": 1,
+    "title": "Controlled Sparring Exchange",
+    "prompt": "Two people meet and perform a short controlled sparring exchange.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "The two people approach each other and meet.",
+        "seconds": 3.0
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "They perform a short, controlled sparring exchange, alternating measured strikes, guards, and evasive movements.",
+        "seconds": 7.0
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "They stop the exchange and separate.",
+        "seconds": 3.0
+      }
+    ],
+    "warnings": [],
+    "raw_plan": {
+      "version": 1,
+      "title": "Controlled Sparring Exchange",
+      "prompt": "Two people meet and perform a short controlled sparring exchange.",
+      "actor_count": 2,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person 1",
+          "start": null
+        },
+        {
+          "id": "actor_2",
+          "name": "Person 2",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "The two people approach each other and meet.",
+          "seconds": 3
+        },
+        {
+          "id": "beat-2",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "They perform a short, controlled sparring exchange, alternating measured strikes, guards, and evasive movements.",
+          "seconds": 7
+        },
+        {
+          "id": "beat-3",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "They stop the exchange and separate.",
+          "seconds": 3
+        }
+      ],
+      "warnings": []
+    },
+    "planning_seconds": 4.382673999993131,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol"
+  },
+  "staging": {
+    "starts": {
+      "actor_1": {
+        "x": -0.9,
+        "z": -1.5
+      },
+      "actor_2": {
+        "x": 0.9,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "wall_seconds": 4.389142833009828
+}

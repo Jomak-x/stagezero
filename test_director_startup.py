@@ -131,3 +131,21 @@ class DirectorStartupTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OfflineCoreStartupTests(unittest.TestCase):
+    def test_reference_viewer_does_not_need_private_g1_token(self):
+        from director_viewer import create_motion_backend, UnconfiguredMotionBackend
+        with TemporaryDirectory() as directory:
+            args=build_parser().parse_args(['--reference-only','--token-path',str(Path(directory)/'absent')])
+            backend=create_motion_backend(args)
+            self.assertIsInstance(backend,UnconfiguredMotionBackend)
+            self.assertIsNone(backend.cancel('no-job'))
+            with self.assertRaisesRegex(RuntimeError,'not configured'):
+                backend.generate('id','walk',None)
+
+    def test_default_g1_startup_still_requires_configured_token(self):
+        from director_viewer import create_motion_backend
+        with TemporaryDirectory() as directory:
+            args=build_parser().parse_args(['--token-path',str(Path(directory)/'absent')])
+            with self.assertRaises(FileNotFoundError):create_motion_backend(args)

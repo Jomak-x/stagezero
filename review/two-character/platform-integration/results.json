@@ -1,0 +1,240 @@
+{
+  "milestone": "Native paired motion integrated into existing studio; ARDY context experimental",
+  "ready_for_review": [
+    "cast add/name/select pair, shared placement, native 30 fps playback",
+    "reviewed handshake library and native generation provider",
+    "exact separate native archives and full-frame video export"
+  ],
+  "visual_decisions": {
+    "sparring": "Accepted as noncontact sparring preview, not verified strikes. Shared timing and attack/defense motion; authored closed fists. Extra cast members remain static.",
+    "ardy": "Experimental only. Original paired interaction retained exactly; approach/exit and anatomy transitions visibly softer, with foot glide.",
+    "footplant": "Not promoted; optional comparison only.",
+    "rejected": "Earlier approximate retarget, direct anatomy seams, and cropped camera evidence retained."
+  },
+  "successful_actual_model_work": {
+    "native_intergen_samples": 4,
+    "ardy_core_requests": 8,
+    "new_pod": false,
+    "existing_workers_restarted": false
+  },
+  "measurements": {
+    "approach_root_xz_error_m": [
+      0.018479918459831608,
+      0.00388334723626979
+    ],
+    "exit_root_xz_error_m": [
+      0.08801743483953209,
+      0.011246522768358616
+    ],
+    "source_pair_bit_exact": true,
+    "frames": 492,
+    "sources": [
+      "ardy_core",
+      "authored_transition",
+      "intergen",
+      "authored_transition",
+      "ardy_core"
+    ]
+  },
+  "model_trials": {
+    "box42": {
+      "version": 1,
+      "source": "InterGen published research checkpoint",
+      "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+      "prompt": "Two people box with each other.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "joints_shape": [
+        210,
+        2,
+        22,
+        3
+      ],
+      "features_shape": [
+        210,
+        2,
+        262
+      ],
+      "raw_file": "box42.native.npz",
+      "sha256": "879ac20ca757477c202d1ae9680d09418223b0cf0a4aeec82053c4f7aef8d719",
+      "bytes": 607174,
+      "wall_seconds": 13.81,
+      "metadata": {
+        "model": "InterGen",
+        "source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+        "checkpoint": "/workspace/stagezero/intergen-lab/intergen.ckpt",
+        "clip_file": null,
+        "text_only_clip_from_checkpoint": true,
+        "checkpoint_state_keys": 346,
+        "prompt": "Two people box with each other.",
+        "seed": 42,
+        "frames": 210,
+        "fps": 30,
+        "feature_shape": [
+          210,
+          2,
+          262
+        ],
+        "joint_shape": [
+          210,
+          2,
+          22,
+          3
+        ],
+        "generation_seconds": 0.8746753069572151,
+        "peak_cuda_bytes": 1280301056,
+        "peak_cuda_reserved_bytes": 1356857344,
+        "cuda_memory_fraction": 0.08,
+        "missing_checkpoint_keys": 0,
+        "unexpected_checkpoint_keys": 0,
+        "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+        "source_sha256": "879ac20ca757477c202d1ae9680d09418223b0cf0a4aeec82053c4f7aef8d719",
+        "provider": "intergen_ssh_native",
+        "free_gpu_before_mib": 14062,
+        "free_disk_before_mib": 719
+      }
+    },
+    "push37": {
+      "version": 1,
+      "source": "InterGen published research checkpoint",
+      "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+      "prompt": "One person pushes the other person backwards.",
+      "seed": 37,
+      "frames": 210,
+      "fps": 30,
+      "joints_shape": [
+        210,
+        2,
+        22,
+        3
+      ],
+      "features_shape": [
+        210,
+        2,
+        262
+      ],
+      "raw_file": "push37.native.npz",
+      "sha256": "81b01fc5e87109e029f878c21453d3df4aacf24c072b22f1e77a90ab94cfacb5",
+      "bytes": 613047,
+      "wall_seconds": 13.826,
+      "metadata": {
+        "model": "InterGen",
+        "source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+        "checkpoint": "/workspace/stagezero/intergen-lab/intergen.ckpt",
+        "clip_file": null,
+        "text_only_clip_from_checkpoint": true,
+        "checkpoint_state_keys": 346,
+        "prompt": "One person pushes the other person backwards.",
+        "seed": 37,
+        "frames": 210,
+        "fps": 30,
+        "feature_shape": [
+          210,
+          2,
+          262
+        ],
+        "joint_shape": [
+          210,
+          2,
+          22,
+          3
+        ],
+        "generation_seconds": 0.8696042480878532,
+        "peak_cuda_bytes": 1280301056,
+        "peak_cuda_reserved_bytes": 1356857344,
+        "cuda_memory_fraction": 0.08,
+        "missing_checkpoint_keys": 0,
+        "unexpected_checkpoint_keys": 0,
+        "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+        "source_sha256": "81b01fc5e87109e029f878c21453d3df4aacf24c072b22f1e77a90ab94cfacb5",
+        "provider": "intergen_ssh_native",
+        "free_gpu_before_mib": 14062,
+        "free_disk_before_mib": 719
+      }
+    },
+    "block37": {
+      "version": 1,
+      "source": "InterGen published research checkpoint",
+      "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+      "prompt": "Two people fight. One person punches and the other person blocks the punch.",
+      "seed": 37,
+      "frames": 210,
+      "fps": 30,
+      "joints_shape": [
+        210,
+        2,
+        22,
+        3
+      ],
+      "features_shape": [
+        210,
+        2,
+        262
+      ],
+      "raw_file": "block37.native.npz",
+      "sha256": "965287c8c6d36ec25c81403ff062e7c5cab6c31b748117cdbacd9cf334c7d17a",
+      "bytes": 612916,
+      "wall_seconds": 13.918,
+      "metadata": {
+        "model": "InterGen",
+        "source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+        "checkpoint": "/workspace/stagezero/intergen-lab/intergen.ckpt",
+        "clip_file": null,
+        "text_only_clip_from_checkpoint": true,
+        "checkpoint_state_keys": 346,
+        "prompt": "Two people fight. One person punches and the other person blocks the punch.",
+        "seed": 37,
+        "frames": 210,
+        "fps": 30,
+        "feature_shape": [
+          210,
+          2,
+          262
+        ],
+        "joint_shape": [
+          210,
+          2,
+          22,
+          3
+        ],
+        "generation_seconds": 0.9002673258073628,
+        "peak_cuda_bytes": 1280301056,
+        "peak_cuda_reserved_bytes": 1356857344,
+        "cuda_memory_fraction": 0.08,
+        "missing_checkpoint_keys": 0,
+        "unexpected_checkpoint_keys": 0,
+        "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+        "source_sha256": "965287c8c6d36ec25c81403ff062e7c5cab6c31b748117cdbacd9cf334c7d17a",
+        "provider": "intergen_ssh_native",
+        "free_gpu_before_mib": 14062,
+        "free_disk_before_mib": 719
+      }
+    }
+  },
+  "videos": {
+    "sparring": "sparring-studio-capture/playback.mp4",
+    "ardy": "ardy-studio-capture/playback.mp4"
+  },
+  "limitations": [
+    "Only two actors jointly generated at once; other cast members are static.",
+    "ARDY context is composed from separately generated sources and authored transitions, not one continuous learned rollout.",
+    "No verified fist/palm contact, physical reactions, arbitrary object transfer or partner mesh collision guarantee.",
+    "Foot locking and reliable fighting with target constraints remain unfinished.",
+    "InterGen noncommercial research license applies."
+  ],
+  "validation": {
+    "python_tests": 909,
+    "result": "passed",
+    "ui_checks": [
+      "add third actor and select pair",
+      "actual native generation",
+      "actual four-request ARDY build",
+      "native save and reopen",
+      "30 fps timeline",
+      "full-frame export and download"
+    ],
+    "client_tests": 29,
+    "typecheck": "passed"
+  }
+}

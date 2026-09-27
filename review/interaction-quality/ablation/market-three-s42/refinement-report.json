@@ -1,0 +1,430 @@
+{
+  "version": 1,
+  "observer_motion": {
+    "source": "authored bounded observer continuation",
+    "model_generated": false,
+    "version": 1,
+    "seed": 42,
+    "fps": 30,
+    "spans": [
+      {
+        "actor_id": "actor_1",
+        "start_frame": 222,
+        "end_frame_exclusive": 478,
+        "reenters_active_motion": false,
+        "applied_frames": 254,
+        "maximum_joint_correction_m": 0.09775845007236761,
+        "maximum_attention_yaw_degrees": 12.000000000000002
+      },
+      {
+        "actor_id": "actor_3",
+        "start_frame": 0,
+        "end_frame_exclusive": 222,
+        "reenters_active_motion": true,
+        "applied_frames": 218,
+        "maximum_joint_correction_m": 0.09583528102863045,
+        "maximum_attention_yaw_degrees": 12.000000000000002
+      }
+    ],
+    "method": "whole inactive span easing; length-preserving torso/arm rotations; attention to active roots",
+    "active_frames_modified": false,
+    "lower_body_modified": false,
+    "source_pair_frames_modified": false,
+    "physical_contact_verified": false,
+    "visual_acceptance": "unverified",
+    "applied_actor_frames": 472,
+    "maximum_joint_correction_m": 0.09775845007236761,
+    "maximum_bone_length_error_m": 9.783840404509192e-16,
+    "limits": {
+      "upright_correction_degrees": 12,
+      "attention_yaw_degrees": 12,
+      "arm_rotation_degrees_per_joint": 92,
+      "preserved_boundary_frames": 2
+    },
+    "limitations": [
+      "Authored observation, not generated contextual acting or a learned idle model.",
+      "No stepping or lower-body weight transfer; existing foot positions remain exact.",
+      "No finger, eye or palm contact solve; positional head motion is not eye gaze.",
+      "Arm relaxation can change body clearance; caller must check final scene and cast geometry.",
+      "Exact reentry endpoints can require anticipatory return toward the incoming pose."
+    ]
+  },
+  "foot_planting": [
+    {
+      "source": "authored heuristic ankle plant refinement",
+      "model_contacts": false,
+      "method": "low/slow ankle XZ anchors; bounded two-bone IK; original toe offset",
+      "applied_foot_frames": 111,
+      "unreachable_foot_frames_skipped": 0,
+      "maximum_joint_correction_m": 0.02261126128076572,
+      "intervals": [
+        {
+          "segment_start": 0,
+          "actor": "actor_1",
+          "ankle_joint": 7,
+          "start_frame": 2,
+          "end_frame_exclusive": 16,
+          "anchor_xz_m": [
+            0.04197078675953296,
+            -1.031299733246004
+          ],
+          "applied_frames": 12,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 0,
+          "actor": "actor_1",
+          "ankle_joint": 7,
+          "start_frame": 34,
+          "end_frame_exclusive": 50,
+          "anchor_xz_m": [
+            0.07039718246701335,
+            -0.514113538833818
+          ],
+          "applied_frames": 14,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 0,
+          "actor": "actor_1",
+          "ankle_joint": 7,
+          "start_frame": 64,
+          "end_frame_exclusive": 88,
+          "anchor_xz_m": [
+            0.09457795874516037,
+            -0.19019080997203797
+          ],
+          "applied_frames": 22,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 0,
+          "actor": "actor_1",
+          "ankle_joint": 8,
+          "start_frame": 14,
+          "end_frame_exclusive": 36,
+          "anchor_xz_m": [
+            -0.05613209341338238,
+            -0.6944598912169111
+          ],
+          "applied_frames": 20,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 0,
+          "actor": "actor_1",
+          "ankle_joint": 8,
+          "start_frame": 49,
+          "end_frame_exclusive": 88,
+          "anchor_xz_m": [
+            -0.06153881563843511,
+            -0.25632322642159144
+          ],
+          "applied_frames": 37,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 90,
+          "actor": "actor_1",
+          "ankle_joint": 8,
+          "start_frame": 92,
+          "end_frame_exclusive": 100,
+          "anchor_xz_m": [
+            -0.09531343979088126,
+            -0.2695112439403673
+          ],
+          "applied_frames": 6,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        }
+      ],
+      "max_bone_length_error_m": 2.220446049250313e-16,
+      "root_positions_modified": false,
+      "native_pair_modified": false,
+      "visual_acceptance": "unverified",
+      "thresholds": {
+        "speed_limit_m_s": 0.25,
+        "height_band_m": 0.05,
+        "max_ankle_xz_correction_m": 0.08
+      },
+      "limitations": [
+        "Heuristic contact; no vertical ground solve or collision checks.",
+        "Toe orientation retains source motion, so an anchored ankle can still have toe drift.",
+        "Transition endpoints remain unchanged; incompatible source foot placements cannot both lock.",
+        "IK can alter knee bend; full sequence visual comparison is required."
+      ],
+      "actor_id": "actor_1"
+    },
+    {
+      "source": "authored heuristic ankle plant refinement",
+      "model_contacts": false,
+      "method": "low/slow ankle XZ anchors; bounded two-bone IK; original toe offset",
+      "applied_foot_frames": 40,
+      "unreachable_foot_frames_skipped": 22,
+      "maximum_joint_correction_m": 0.016670364120201932,
+      "intervals": [
+        {
+          "segment_start": 0,
+          "actor": "actor_2",
+          "ankle_joint": 7,
+          "start_frame": 2,
+          "end_frame_exclusive": 12,
+          "anchor_xz_m": [
+            -0.3266656468790604,
+            0.9779933994599451
+          ],
+          "applied_frames": 8,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 0,
+          "actor": "actor_2",
+          "ankle_joint": 8,
+          "start_frame": 10,
+          "end_frame_exclusive": 35,
+          "anchor_xz_m": [
+            -0.12785441302084755,
+            0.7674335626720932
+          ],
+          "applied_frames": 0,
+          "unreachable_frames": 4,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": true
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_2",
+          "ankle_joint": 7,
+          "start_frame": 267,
+          "end_frame_exclusive": 288,
+          "anchor_xz_m": [
+            0.9536082602080994,
+            -0.11462647601676329
+          ],
+          "applied_frames": 0,
+          "unreachable_frames": 4,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": true
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_2",
+          "ankle_joint": 7,
+          "start_frame": 310,
+          "end_frame_exclusive": 344,
+          "anchor_xz_m": [
+            1.1802236962119073,
+            -1.267782143399872
+          ],
+          "applied_frames": 32,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_2",
+          "ankle_joint": 8,
+          "start_frame": 243,
+          "end_frame_exclusive": 263,
+          "anchor_xz_m": [
+            0.6939624096647112,
+            0.5273519396404822
+          ],
+          "applied_frames": 0,
+          "unreachable_frames": 9,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": true
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_2",
+          "ankle_joint": 8,
+          "start_frame": 295,
+          "end_frame_exclusive": 312,
+          "anchor_xz_m": [
+            1.28527352709199,
+            -0.7974122139610345
+          ],
+          "applied_frames": 0,
+          "unreachable_frames": 5,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": true
+        }
+      ],
+      "max_bone_length_error_m": 2.220446049250313e-16,
+      "root_positions_modified": false,
+      "native_pair_modified": false,
+      "visual_acceptance": "unverified",
+      "thresholds": {
+        "speed_limit_m_s": 0.25,
+        "height_band_m": 0.05,
+        "max_ankle_xz_correction_m": 0.08
+      },
+      "limitations": [
+        "Heuristic contact; no vertical ground solve or collision checks.",
+        "Toe orientation retains source motion, so an anchored ankle can still have toe drift.",
+        "Transition endpoints remain unchanged; incompatible source foot placements cannot both lock.",
+        "IK can alter knee bend; full sequence visual comparison is required."
+      ],
+      "actor_id": "actor_2"
+    },
+    {
+      "source": "authored heuristic ankle plant refinement",
+      "model_contacts": false,
+      "method": "low/slow ankle XZ anchors; bounded two-bone IK; original toe offset",
+      "applied_foot_frames": 126,
+      "unreachable_foot_frames_skipped": 0,
+      "maximum_joint_correction_m": 0.06937145239756853,
+      "intervals": [
+        {
+          "segment_start": 234,
+          "actor": "actor_3",
+          "ankle_joint": 7,
+          "start_frame": 236,
+          "end_frame_exclusive": 244,
+          "anchor_xz_m": [
+            -0.08037839812292824,
+            -3.330646941557511
+          ],
+          "applied_frames": 6,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_3",
+          "ankle_joint": 7,
+          "start_frame": 271,
+          "end_frame_exclusive": 293,
+          "anchor_xz_m": [
+            1.075521930028582,
+            -2.9740963303018573
+          ],
+          "applied_frames": 20,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_3",
+          "ankle_joint": 7,
+          "start_frame": 312,
+          "end_frame_exclusive": 344,
+          "anchor_xz_m": [
+            1.394921441358239,
+            -2.3151528614395067
+          ],
+          "applied_frames": 30,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_3",
+          "ankle_joint": 8,
+          "start_frame": 244,
+          "end_frame_exclusive": 271,
+          "anchor_xz_m": [
+            0.42188601994282837,
+            -3.0719041365951707
+          ],
+          "applied_frames": 25,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        },
+        {
+          "segment_start": 234,
+          "actor": "actor_3",
+          "ankle_joint": 8,
+          "start_frame": 297,
+          "end_frame_exclusive": 344,
+          "anchor_xz_m": [
+            1.2016035623114965,
+            -2.412117221084047
+          ],
+          "applied_frames": 45,
+          "unreachable_frames": 0,
+          "over_correction_limit_frames": 0,
+          "rejected_whole_interval": false
+        }
+      ],
+      "max_bone_length_error_m": 4.718447854656915e-16,
+      "root_positions_modified": false,
+      "native_pair_modified": false,
+      "visual_acceptance": "unverified",
+      "thresholds": {
+        "speed_limit_m_s": 0.25,
+        "height_band_m": 0.05,
+        "max_ankle_xz_correction_m": 0.08
+      },
+      "limitations": [
+        "Heuristic contact; no vertical ground solve or collision checks.",
+        "Toe orientation retains source motion, so an anchored ankle can still have toe drift.",
+        "Transition endpoints remain unchanged; incompatible source foot placements cannot both lock.",
+        "IK can alter knee bend; full sequence visual comparison is required."
+      ],
+      "actor_id": "actor_3"
+    }
+  ],
+  "body_clearance": [
+    {
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "unintended_frames": 346,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 0.10609099750970813,
+      "minimum_refined_clearance_m": 0.10609099750970813
+    },
+    {
+      "actor_ids": [
+        "actor_1",
+        "actor_3"
+      ],
+      "unintended_frames": 478,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 1.343213397379421,
+      "minimum_refined_clearance_m": 1.3294210437526504
+    },
+    {
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "unintended_frames": 346,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 0.565747615016394,
+      "minimum_refined_clearance_m": 0.565747615016394
+    }
+  ],
+  "body_clearance_proxy": "named joint and limb midpoint spheres, all frames; intended contact excluded",
+  "source_pair_frames_modified": false,
+  "root_positions_modified": false,
+  "physical_contact_verified": false,
+  "visual_acceptance": "unverified"
+}

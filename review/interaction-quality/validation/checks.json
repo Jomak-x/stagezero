@@ -1,0 +1,25 @@
+{
+  "full_python_suite": {
+    "tests": 1273,
+    "seconds": 72.348,
+    "result": "passed",
+    "log": "python-tests.txt"
+  },
+  "after_descriptive_label_edits": {
+    "command": "PYTHONPATH=.:vendor/ardy .venv/bin/python -m unittest test_studio_cast_controls test_prompt_scene_builder -q",
+    "tests": 36,
+    "result": "passed"
+  },
+  "capture_manifest_portability": "6 archives resolved; new output-root resolves safely through macOS /tmp symlink",
+  "shell_launcher_syntax": "passed",
+  "main_ui": {
+    "archive": "final/market-three-s48-fixed-plan/scene.cast.stagezero.npz",
+    "port": 24971,
+    "play": "frame advanced from 0 to 269",
+    "pause": "held frame 393 after pause",
+    "start": "verified timeline returned to frame 0",
+    "screenshot": "../inspection/main-ui-replay.png"
+  },
+  "ui_layout_changed": false,
+  "live_demo_port_2380_replaced": false
+}

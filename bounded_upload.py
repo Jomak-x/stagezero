@@ -344,3 +344,41 @@ class ScopedUploadLimits:
             )
             self._interface.register_handler(_messages.FileTransferPart, self._original_part)
             self._server._client_disconnect_cb.remove(self._on_disconnect)
+
+
+_shared_limits_lock = threading.RLock()
+
+
+def acquire_scoped_upload_limits(server, *, gui=None, factory=None, max_total_bytes=None):
+    """Share one transfer wrapper across controls on the same Viser GUI."""
+    gui = server.gui if gui is None else gui
+    with _shared_limits_lock:
+        current = getattr(gui, '_stagezero_shared_upload_limits', None)
+        if current is None:
+            if factory is None and max_total_bytes is not None:
+                limits = ScopedUploadLimits(server, max_total_bytes=max_total_bytes)
+            else:
+                limits = (factory or ScopedUploadLimits)(server)
+                if max_total_bytes is not None and limits._max_total < max_total_bytes:
+                    limits._max_total = max_total_bytes
+            gui._stagezero_shared_upload_limits = (limits, 1)
+        else:
+            limits, owners = current
+            if max_total_bytes is not None and limits._max_total < max_total_bytes:
+                limits._max_total = max_total_bytes
+            gui._stagezero_shared_upload_limits = (limits, owners + 1)
+        return limits
+
+
+def release_scoped_upload_limits(gui):
+    """Release one owner; restore native handlers after the last one leaves."""
+    with _shared_limits_lock:
+        current = getattr(gui, '_stagezero_shared_upload_limits', None)
+        if current is None:
+            return
+        limits, owners = current
+        if owners > 1:
+            gui._stagezero_shared_upload_limits = (limits, owners - 1)
+        else:
+            delattr(gui, '_stagezero_shared_upload_limits')
+            limits.close()

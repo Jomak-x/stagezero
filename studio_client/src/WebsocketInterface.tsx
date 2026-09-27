@@ -5,8 +5,13 @@ import { notifications } from "@mantine/notifications";
 import { ViewerContext } from "./ViewerContext";
 import { syncSearchParamServer } from "./SearchParamsUtils";
 import { WsWorkerIncoming, WsWorkerOutgoing } from "./WebsocketServerWorker";
+import { resetNativePairPlayback } from "./mesh/NativePairPlayback";
 import { resetActorGlbProtocol } from "./mesh/ActorGlbProtocol";
 import { resetCameraState } from "./cameraStore";
+import { resetVoiceCommands } from "./VoiceCommands";
+
+import { voicePlayback } from "./VoicePlayback";
+import { resetDialogueState } from "./ControlPanel/DialogueState";
 
 /** Component for handling websocket connections. */
 export function WebsocketMessageProducer() {
@@ -24,8 +29,12 @@ export function WebsocketMessageProducer() {
     worker.onmessage = (event) => {
       const data: WsWorkerOutgoing = event.data;
       if (data.type === "connected") {
+        resetVoiceCommands();
+        voicePlayback.reset();
+        resetDialogueState();
         resetCameraState(viewer);
         resetActorGlbProtocol();
+        resetNativePairPlayback();
         resetGui();
         resetScene();
         viewer.useGui.setState({ websocketConnected: true });
@@ -33,6 +42,10 @@ export function WebsocketMessageProducer() {
           postToWorker({ type: "send", message: message });
         };
       } else if (data.type === "closed") {
+        resetVoiceCommands();
+        voicePlayback.reset();
+        resetDialogueState();
+        resetNativePairPlayback();
         resetCameraState(viewer);
         resetGui();
         viewer.useGui.setState({ websocketConnected: false });
@@ -62,6 +75,10 @@ export function WebsocketMessageProducer() {
     }
     postToWorker({ type: "set_server", server: server });
     return () => {
+      resetVoiceCommands();
+        voicePlayback.reset();
+        resetDialogueState();
+      resetNativePairPlayback();
       resetCameraState(viewer);
       postToWorker({ type: "close" });
       viewerMutable.sendMessage = (message) =>

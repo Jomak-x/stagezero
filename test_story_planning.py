@@ -1,0 +1,482 @@
+"""Offline contract tests for one-prompt story planning."""
+
+import copy
+import unittest
+from unittest.mock import Mock, patch
+
+from story_planning import (MULTI_ACTOR_WARNING, STUNT_WARNING, StoryPlanner,
+                            explicit_scene_timing, fit_story_duration, recovery_timing_flags,
+                            story_beat_timing_flags, story_system_prompt, validate_story_plan)
+
+
+STORY = 'The actor walks up the stairs, then fights the other guy, then they make up.'
+
+
+def plan(prompt=STORY):
+    return {
+        'version': 1, 'title': 'Stairs and reconciliation', 'prompt': prompt,
+        'beats': [
+            {'id': 'beat-1', 'prompt': 'The actor walks up the stairs to the upper landing.', 'seconds': 5},
+            {'id': 'beat-2', 'prompt': 'The actor squares up and throws a controlled punch toward the other guy.', 'seconds': 3},
+            {'id': 'beat-3', 'prompt': 'The actor relaxes, approaches the other guy, and extends a hand in reconciliation.', 'seconds': 4},
+        ],
+        'warnings': [],
+    }
+
+
+class StoryPlanValidationTests(unittest.TestCase):
+    def test_auto_gives_recovery_time_and_a_separate_upright_transition(self):
+        source = plan('Fall, get up again and start dancing at the end doing a backflip.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls to the floor.', seconds=2.4),
+            dict(id='beat-2', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=6),
+            dict(id='beat-4', prompt='A person does a backflip.', seconds=3),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual([b['seconds'] for b in result['beats']], [2.4, 6, 1, 6, 3])
+        self.assertEqual(result['beats'][2]['prompt'], 'A person stands upright.')
+        self.assertEqual(fit_story_duration(result), result)
+        self.assertEqual(source['beats'][1]['seconds'], 2)
+        # Both duration-field and prose timing are preserved.
+        self.assertEqual(len(fit_story_duration(source, 13.4)['beats']), 4)
+        source['prompt'] = 'Fall, get up in 2 seconds and dance before a backflip.'
+        self.assertEqual(fit_story_duration(source)['beats'][1]['seconds'], 2)
+
+    def test_unrelated_action_timing_keeps_get_up_automatic(self):
+        source = plan('Run for five seconds, then fall and get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person runs.', seconds=5),
+            dict(id='beat-2', prompt='A person falls.', seconds=2),
+            dict(id='beat-3', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-4', prompt='A person dances.', seconds=4),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual([b['seconds'] for b in result['beats']], [5, 2, 6, 1, 4])
+        self.assertEqual(result['beats'][0]['seconds'], 5)
+
+    def test_whole_scene_timing_keeps_planned_recovery_length(self):
+        source = plan('Make a 30 seconds scene: fall, get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls.', seconds=2),
+            dict(id='beat-2', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=26),
+        ]
+        self.assertEqual(fit_story_duration(source), validate_story_plan(source))
+
+    def test_explicit_timing_in_recovery_beat_is_not_rewritten(self):
+        source = plan('Fall, get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls.', seconds=2),
+            dict(id='beat-2', prompt='A person gets up in two seconds.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=4),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual(result['beats'][1]['seconds'], 2)
+        self.assertEqual(len(result['beats']), 3)
+
+    def test_auto_recovery_does_not_silently_exceed_beat_or_scene_limits(self):
+        source = plan('Get up and walk.')
+        source['beats'] = [dict(id=f'beat-{i + 1}',
+                                prompt='A person gets up.' if i == 0 else 'A person walks.',
+                                seconds=7) for i in range(16)]
+        with self.assertRaisesRegex(ValueError, '1–16'):
+            fit_story_duration(source)
+        source['beats'] = source['beats'][:5]
+        for beat in source['beats']:
+            beat['seconds'] = 24
+        with self.assertRaisesRegex(ValueError, '120 seconds'):
+            fit_story_duration(source)
+
+    def test_auto_preserves_heterogeneous_estimates_and_aligns_to_frames(self):
+        source = plan()
+        source['beats'][0]['seconds'] = 1.03
+        source['beats'][1]['seconds'] = 2.05
+        source['beats'][2]['seconds'] = 4.11
+        fitted = fit_story_duration(source)
+        self.assertEqual([beat['seconds'] for beat in fitted['beats']], [1.04, 2.04, 4.12])
+        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in fitted['beats']), 180)
+        self.assertEqual(len(fitted['beats']), len(source['beats']))
+        self.assertEqual(fit_story_duration(fitted), fitted)
+
+    def test_fixed_duration_only_repairs_one_frame_rounding_drift(self):
+        source = plan('The actor walks and waves.')
+        source['beats'] = [
+            {'id': 'beat-1', 'prompt': 'A person walks forward.', 'seconds': 1.96},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 2.00},
+        ]
+        fitted = fit_story_duration(source, 4)
+        self.assertEqual([beat['seconds'] for beat in fitted['beats']], [1.96, 2.04])
+        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in fitted['beats']), 100)
+        self.assertEqual(len(fitted['beats']), 2)
+        self.assertEqual(fit_story_duration(fitted, 4), fitted)
+
+    def test_fixed_duration_rejects_stretching_or_fake_action_splits(self):
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            fit_story_duration(plan(), 60)
+        source = plan('The actor walks slowly.')
+        source['beats'] = [dict(id='beat-1', prompt='A person walks forward.', seconds=4)]
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            fit_story_duration(source, 60)
+
+    def test_duration_rejects_invalid_or_impossible_request(self):
+        for seconds in (False, float('nan'), 0, 121):
+            with self.subTest(seconds=seconds), self.assertRaises(ValueError):
+                fit_story_duration(plan(), seconds)
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            fit_story_duration(plan(), .16)
+
+    def test_preserves_ordered_intent_and_normalizes_seconds(self):
+        source = plan()
+        output = validate_story_plan(source, expected_prompt=STORY)
+        self.assertEqual(output['prompt'], STORY)
+        self.assertEqual([b['id'] for b in output['beats']], ['beat-1', 'beat-2', 'beat-3'])
+        self.assertIn('stairs', output['beats'][0]['prompt'])
+        self.assertIn('punch', output['beats'][1]['prompt'])
+        self.assertIn('reconciliation', output['beats'][2]['prompt'])
+        self.assertEqual([b['seconds'] for b in output['beats']], [5.0, 3.0, 4.0])
+        self.assertIn(MULTI_ACTOR_WARNING, output['warnings'])
+        self.assertEqual(source['warnings'], [])  # Caller/model result is untouched.
+
+    def test_does_not_claim_complex_stunt_physics(self):
+        prompt = 'The actor rounds the corner, then backflips off the building.'
+        source = plan(prompt)
+        source['beats'] = [
+            {'id': 'beat-1', 'prompt': 'The actor runs around the corner.', 'seconds': 3},
+            {'id': 'beat-2', 'prompt': 'The actor launches into a backflip away from the building edge.', 'seconds': 4},
+        ]
+        output = validate_story_plan(source, expected_prompt=prompt)
+        self.assertIn(STUNT_WARNING, output['warnings'])
+        self.assertEqual(output['beats'][1]['prompt'], source['beats'][1]['prompt'])
+
+    def test_rejects_collapsed_sequence_and_changed_source(self):
+        source = plan()
+        source['beats'] = source['beats'][:1]
+        with self.assertRaisesRegex(ValueError, 'sequential actions'):
+            validate_story_plan(source)
+        source = plan()
+        source['prompt'] = 'A different request'
+        with self.assertRaisesRegex(ValueError, 'changed the original'):
+            validate_story_plan(source, expected_prompt=STORY)
+
+    def test_rejects_noncanonical_shape_and_bounds(self):
+        mutations = [
+            (lambda d: d.update(extra=True), 'requires version'),
+            (lambda d: d.update(version=True), 'version'),
+            (lambda d: d['beats'][0].update(id='beat-2'), 'beat-1'),
+            (lambda d: d['beats'][0].update(seconds=True), 'finite'),
+            (lambda d: d['beats'][0].update(seconds=float('nan')), 'finite'),
+            (lambda d: d['beats'][0].update(seconds=.15), '0.16'),
+            (lambda d: d['beats'][0].update(seconds=30.01), '0.16'),
+            (lambda d: d['beats'][0].update(prompt='x'*501), '1–500'),
+            (lambda d: d['beats'][0].update(extra='code'), 'requires id'),
+            (lambda d: d.update(warnings=['']), '1–300'),
+        ]
+        for mutate, error in mutations:
+            with self.subTest(error=error):
+                source = copy.deepcopy(plan())
+                mutate(source)
+                with self.assertRaisesRegex(ValueError, error):
+                    validate_story_plan(source)
+
+    def test_rejects_total_over_budget_and_too_many_beats(self):
+        source = plan('A long sequence')
+        source['beats'] = [
+            {'id': f'beat-{i}', 'prompt': f'Actor moves {i}.', 'seconds': 30}
+            for i in range(1, 6)
+        ]
+        with self.assertRaisesRegex(ValueError, '120 seconds'):
+            validate_story_plan(source)
+        source['beats'] = [
+            {'id': f'beat-{i}', 'prompt': f'Actor moves {i}.', 'seconds': 1}
+            for i in range(1, 18)
+        ]
+        with self.assertRaisesRegex(ValueError, '1–16'):
+            validate_story_plan(source)
+
+
+class StoryPlannerTests(unittest.TestCase):
+    def test_full_scene_retains_every_action_even_without_then_markers(self):
+        request = ('Make the character sprint quickly forward for 20 meters then stop and fall. '
+                   'Get up again and start dancing and at the end doing a backflip.')
+        source = plan(request)
+        source['beats'] = [
+            dict(id=f'beat-{i}', prompt=motion, seconds=seconds)
+            for i, (motion, seconds) in enumerate([
+                ('A person sprints forward for 20 meters.', 6),
+                ('A person stops.', 1.5), ('A person falls forward.', 2.5),
+                ('A person gets up from the floor.', 2),
+                ('A person dances.', 6), ('A person does a backflip.', 3),
+            ], 1)]
+        gateway = Mock()
+        for omitted in range(len(source['beats'])):
+            broken = copy.deepcopy(source)
+            broken['beats'].pop(omitted)
+            for index, beat in enumerate(broken['beats'], 1):
+                beat['id'] = f'beat-{index}'
+            gateway.request_json.side_effect = [broken, source]
+            output = StoryPlanner(gateway).plan(request)
+            self.assertEqual(len(output['beats']), 7)
+            self.assertEqual(output['beats'][3]['seconds'], 6)
+            self.assertEqual(output['beats'][-1]['prompt'], 'A person does a backflip.')
+            self.assertIn('failed validation', gateway.request_json.call_args.args[0])
+
+    def test_double_recovery_and_stopping_named_motion_need_no_repair(self):
+        request = ('Run forward, stop, fall down, get back up, dance, fall to the floor again, '
+                   'get up fully again, wave, jump, land, turn around, and walk away.')
+        source = plan(request)
+        motions = ['runs forward', 'stops running', 'falls to the floor',
+                   'gets back up from the floor', 'stands upright', 'dances',
+                   'falls to the floor again', 'gets up fully from the floor',
+                   'stands upright', 'waves one hand', 'jumps upward', 'lands on both feet',
+                   'turns around', 'walks away']
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=2)
+                           for i, motion in enumerate(motions, 1)]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        result = StoryPlanner(gateway).plan(request)
+        self.assertEqual(gateway.request_json.call_count, 1)
+        self.assertEqual(len(result['beats']), 14)
+        self.assertEqual([result['beats'][i]['seconds'] for i in (3, 7)], [6, 6])
+        self.assertTrue(all('pushes up from lying' in result['beats'][i]['prompt'] for i in (3, 7)))
+
+    def test_combined_stop_and_fall_is_repaired_to_distinct_beats(self):
+        source = plan('Stop and fall.')
+        source['beats'] = [dict(id='beat-1', prompt='A person stops and falls.', seconds=3)]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        with self.assertRaisesRegex(ValueError, 'separate beats'):
+            StoryPlanner(gateway).plan(source['prompt'])
+
+    def test_long_comma_sequence_keeps_every_move_and_explicit_duration(self):
+        moves = [('walks forward', 8), ('turns left', 2), ('jogs forward', 8),
+                 ('stops', 2), ('waves', 4), ('sidesteps left', 6),
+                 ('sidesteps right', 6), ('squats', 4), ('stands upright', 2),
+                 ('shadowboxes', 8), ('dances', 10), ('bows', 3),
+                 ('salutes', 3), ('walks backward', 6)]
+        request = 'Create one continuous performance: ' + ', '.join(
+            f'{motion} for {seconds} seconds' for motion, seconds in moves) + '.'
+        source = plan(request)
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=seconds)
+                           for i, (motion, seconds) in enumerate(moves, 1)]
+        for index in range(len(moves)):
+            with self.subTest(missing=index):
+                broken = copy.deepcopy(source)
+                broken['beats'].pop(index)
+                for i, beat in enumerate(broken['beats'], 1):
+                    beat['id'] = f'beat-{i}'
+                gateway = Mock()
+                gateway.request_json.side_effect = [broken, source]
+                result = StoryPlanner(gateway).plan(request)
+                self.assertEqual(len(result['beats']), 14)
+                self.assertEqual(sum(b['seconds'] for b in result['beats']), 72)
+                self.assertEqual(gateway.request_json.call_count, 2)
+        self.assertFalse(explicit_scene_timing(request))
+        broken = copy.deepcopy(source)
+        broken['beats'][0]['seconds'] = 4
+        gateway = Mock()
+        gateway.request_json.side_effect = [broken, source]
+        result = StoryPlanner(gateway).plan(request)
+        self.assertEqual(result['beats'][0]['seconds'], 8)
+        self.assertIn('must last 8 seconds', gateway.request_json.call_args.args[0])
+        self.assertIn('Previous plan', gateway.request_json.call_args.args[0])
+
+    def test_motion_aliases_and_extra_transition_are_accepted(self):
+        request = 'Jog, stop, sidestep left, squat, turn right, shadowbox, bow.'
+        source = plan(request)
+        motions = ['runs forward', 'stands still', 'steps sideways to the left', 'crouches',
+                   'stands upright', 'pivots right', 'punches the air', 'bows']
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=2)
+                           for i, motion in enumerate(motions, 1)]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        self.assertEqual(len(StoryPlanner(gateway).plan(request)['beats']), 8)
+        self.assertEqual(gateway.request_json.call_count, 1)
+
+    def test_stop_alias_requires_stillness_instead_of_generic_standing(self):
+        source = plan('Run, then stop.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person runs forward.', seconds=2),
+            dict(id='beat-2', prompt='A person stands still.', seconds=2),
+        ]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        self.assertEqual(StoryPlanner(gateway).plan(source['prompt'])['beats'], source['beats'])
+        for motion in ('stands upright', 'stands', 'stands straight'):
+            with self.subTest(motion=motion):
+                broken = copy.deepcopy(source)
+                broken['beats'][1]['prompt'] = f'A person {motion}.'
+                gateway = Mock()
+                gateway.request_json.return_value = broken
+                with self.assertRaisesRegex(ValueError, 'preserve the requested stop'):
+                    StoryPlanner(gateway).plan(source['prompt'])
+                gateway.reset_mock()
+                gateway.request_json.side_effect = [broken, source]
+                repaired = StoryPlanner(gateway).plan(source['prompt'])
+                self.assertEqual(repaired['beats'][1]['prompt'], 'A person stands still.')
+                self.assertEqual(gateway.request_json.call_count, 2)
+
+    def test_prose_scene_duration_is_enforced_and_repaired(self):
+        source = plan('Make a one-minute scene: walk, wave, dance.')
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=seconds)
+                           for i, (motion, seconds) in enumerate(
+                               [('walks', 20), ('waves', 10), ('dances', 30)], 1)]
+        broken = copy.deepcopy(source)
+        broken['beats'][0]['seconds'] = 5
+        gateway = Mock()
+        gateway.request_json.side_effect = [broken, source]
+        result = StoryPlanner(gateway).plan(source['prompt'])
+        self.assertEqual(sum(b['seconds'] for b in result['beats']), 60)
+        self.assertIn('exactly 60.00 seconds', gateway.request_json.call_args.args[0])
+        gateway.reset_mock()
+        with self.assertRaisesRegex(ValueError, 'conflicts'):
+            StoryPlanner(gateway).plan(source['prompt'], seconds=45)
+        gateway.request_json.assert_not_called()
+
+    def test_decimal_and_repeated_action_timings_are_matched_in_order(self):
+        source = plan('Walk for 2.5 seconds, wave for two seconds, walk for three seconds.')
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=seconds)
+                           for i, (motion, seconds) in enumerate(
+                               [('walks', 2.5), ('waves', 2), ('walks', 3)], 1)]
+        self.assertEqual(fit_story_duration(source)['beats'][0]['seconds'], 2.48)
+        source['beats'][2]['seconds'] = 2
+        with self.assertRaisesRegex(ValueError, 'must last 3 seconds'):
+            fit_story_duration(source)
+        self.assertEqual(recovery_timing_flags('Fall, get up in 2.5 seconds, dance.'), (True,))
+
+    def test_timing_provenance_preserves_repetitions_and_inserted_transitions(self):
+        source = plan('Run for eight seconds, fall, get up, dance for ten seconds, fall.')
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=seconds)
+                           for i, (motion, seconds) in enumerate(
+                               [('runs', 8), ('falls', 2), ('gets up', 6),
+                                ('stands upright', 1), ('dances', 10), ('falls', 2)], 1)]
+        self.assertEqual(story_beat_timing_flags(source), (True, False, False, False, True, False))
+        source['prompt'] = 'Make a 29-second scene: run, fall, get up, dance, fall.'
+        self.assertEqual(story_beat_timing_flags(source), (True,) * 6)
+
+    def test_long_explicit_action_can_span_multiple_bounded_beats(self):
+        source = plan('Dance for sixty seconds, wave for two seconds.')
+        source['beats'] = [dict(id=f'beat-{i}', prompt=f'A person {motion}.', seconds=seconds)
+                           for i, (motion, seconds) in enumerate(
+                               [('dances', 30), ('dances', 30), ('waves', 2)], 1)]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        self.assertEqual(sum(b['seconds'] for b in StoryPlanner(gateway).plan(source['prompt'])['beats']), 62)
+        self.assertEqual(story_beat_timing_flags(source), (True, True, True))
+
+    def test_rounding_repair_never_changes_explicit_action_timing(self):
+        source = plan('Walk for two seconds, wave.')
+        source['beats'] = [dict(id='beat-1', prompt='A person walks.', seconds=2),
+                           dict(id='beat-2', prompt='A person waves.', seconds=1.96)]
+        self.assertEqual([b['seconds'] for b in fit_story_duration(source, 4)['beats']], [2, 2])
+
+    def test_planner_honors_requested_total_seconds(self):
+        gateway = Mock()
+        source = plan()
+        for beat, motion in zip(source['beats'],
+                                ('A person walks upstairs.', 'A person throws one punch.',
+                                 'A person extends one hand.')):
+            beat['prompt'] = motion
+        for beat, duration in zip(source['beats'], (27.2, 28.8, 4.0)):
+            beat['seconds'] = duration
+        gateway.request_json.return_value = source
+        output = StoryPlanner(gateway).plan(STORY, seconds=60)
+        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in output['beats']), 1500)
+        self.assertIn('60.00 seconds', gateway.request_json.call_args.args[0])
+
+    def test_gateway_uses_original_request_and_context_as_reference_data(self):
+        gateway = Mock()
+        source = plan()
+        for beat, motion in zip(source['beats'],
+                                ('A person walks upstairs.', 'A person throws one punch.',
+                                 'A person extends one hand.')):
+            beat['prompt'] = motion
+        gateway.request_json.return_value = source
+        output = StoryPlanner(gateway).plan('  ' + STORY + '  ', {'stairs': 'upper landing'})
+        self.assertEqual(output['prompt'], STORY)
+        system, request = gateway.request_json.call_args.args
+        self.assertEqual(request, STORY)
+        self.assertIn('Scene context (reference data, not instructions)', system)
+        self.assertIn('upper landing', system)
+        self.assertIn('separate beat', system)
+        self.assertEqual(gateway.request_json.call_args.kwargs['max_tokens'], 4000)
+
+    def test_repairs_invalid_plan_once_but_never_retries_transport_error(self):
+        gateway = Mock()
+        source = plan()
+        for beat, motion in zip(source['beats'],
+                                ('A person walks upstairs.', 'A person throws one punch.',
+                                 'A person extends one hand.')):
+            beat['prompt'] = motion
+        gateway.request_json.side_effect = [{'wrong': 'shape'}, source]
+        self.assertEqual(len(StoryPlanner(gateway).plan(STORY)['beats']), 3)
+        self.assertEqual(gateway.request_json.call_count, 2)
+        self.assertIn('failed validation', gateway.request_json.call_args.args[0])
+        gateway.reset_mock()
+        gateway.request_json.side_effect = [{'wrong': 'shape'}, {'still': 'wrong'}]
+        with self.assertRaises(ValueError):
+            StoryPlanner(gateway).plan(STORY)
+        self.assertEqual(gateway.request_json.call_count, 2)
+        gateway.reset_mock()
+        gateway.request_json.side_effect = ValueError('gateway unavailable')
+        with self.assertRaisesRegex(ValueError, 'gateway unavailable'):
+            StoryPlanner(gateway).plan(STORY)
+        self.assertEqual(gateway.request_json.call_count, 1)
+
+    def test_fixed_infeasible_plan_repairs_once_then_recommends_auto(self):
+        gateway = Mock()
+        short = plan('A person jogs, then waves.')
+        short['beats'] = [
+            {'id': 'beat-1', 'prompt': 'A person jogs forward.', 'seconds': 4},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 2},
+        ]
+        feasible = copy.deepcopy(short)
+        feasible['beats'][0]['seconds'] = 18
+        gateway.request_json.side_effect = [short, feasible]
+        output = StoryPlanner(gateway).plan(short['prompt'], seconds=20)
+        self.assertEqual([beat['seconds'] for beat in output['beats']], [18, 2])
+        self.assertEqual(gateway.request_json.call_count, 2)
+        gateway.reset_mock()
+        gateway.request_json.side_effect = [short, short]
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            StoryPlanner(gateway).plan(short['prompt'], seconds=20)
+        self.assertEqual(gateway.request_json.call_count, 2)
+
+    def test_auto_retries_non_backend_friendly_prompt(self):
+        gateway = Mock()
+        source = plan('Walk, then wave.')
+        source['beats'] = [
+            {'id': 'beat-1', 'prompt': 'An actor moves poetically, with swirling grace.', 'seconds': 3},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 1},
+        ]
+        repaired = copy.deepcopy(source)
+        repaired['beats'][0]['prompt'] = 'A person walks forward.'
+        gateway.request_json.side_effect = [source, repaired]
+        output = StoryPlanner(gateway).plan(source['prompt'])
+        self.assertEqual(output['beats'][0]['prompt'], 'A person walks forward.')
+        self.assertEqual(gateway.request_json.call_count, 2)
+
+    def test_context_and_prompt_are_bounded(self):
+        gateway = Mock()
+        planner = StoryPlanner(gateway)
+        with self.assertRaisesRegex(ValueError, '1–2000'):
+            planner.plan('')
+        with self.assertRaisesRegex(ValueError, 'context'):
+            planner.plan('Walk.', {'large': 'x'*4000})
+        gateway.request_json.assert_not_called()
+        with self.assertRaisesRegex(ValueError, 'JSON values'):
+            story_system_prompt({'bad': object()})
+
+    def test_configured_gateway_selects_story_model(self):
+        gateway = Mock(model='older-model')
+        with patch('story_planning.GatewayGenerator.from_env', return_value=gateway) as factory, \
+             patch('story_planning.gateway_config', return_value={'NEON_AI_GATEWAY_BASE_URL': 'https://example.test',
+                                                                  'STAGEZERO_STORY_MODEL': 'gpt-5-6-sol'}):
+            created = StoryPlanner()
+        factory.assert_called_once_with(stage='layout')
+        self.assertIs(created.gateway, gateway)
+        self.assertEqual(created.gateway.model, 'gpt-5-6-sol')
+
+
+if __name__ == '__main__':
+    unittest.main()

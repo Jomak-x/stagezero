@@ -1,3 +1,37 @@
+/** Completed native pair: float32 little-endian arrays except uint16 bones. */
+export interface NativePairClipMessage {
+  type: "NativePairClipMessage";
+  revision: number;
+  fps: number;
+  frames: number;
+  actors: Array<{
+    rest: Uint8Array<ArrayBuffer>;
+    linear: Uint8Array<ArrayBuffer>;
+    targets: Uint8Array<ArrayBuffer>;
+    parts: Array<{
+      name: string;
+      bind_world: Uint8Array<ArrayBuffer>;
+      bones: Uint8Array<ArrayBuffer>;
+      weights: Uint8Array<ArrayBuffer>;
+    }>;
+  }>;
+}
+export interface NativePairTransportMessage {
+  type: "NativePairTransportMessage";
+  revision: number;
+  sequence: number;
+  frame: number;
+  playing: boolean;
+  enabled: boolean;
+  capturing?: boolean;
+}
+export interface NativePairStatusMessage {
+  type: "NativePairStatusMessage";
+  revision: number;
+  status: "loaded" | "error";
+  error?: string;
+}
+
 // AUTOMATICALLY GENERATED message interfaces, from Python dataclass definitions.
 // This file should not be manually modified.
 /** Variant of CameraMessage used for visualizing camera frustums.
@@ -213,7 +247,7 @@ export interface IcosphereMessage {
 export interface SkinnedMeshMessage {
   type: "SkinnedMeshMessage";
   name: string;
-  props: {'vertices': Uint8Array<ArrayBuffer>, 'faces': Uint8Array<ArrayBuffer>, 'color': [number, number, number], 'wireframe': boolean, 'opacity': (number | null), 'flat_shading': boolean, 'side': 'front' | 'back' | 'double', 'material': 'standard' | 'toon3' | 'toon5', 'cast_shadow': boolean, 'receive_shadow': (boolean | number), 'bone_wxyzs': Uint8Array<ArrayBuffer>, 'bone_positions': Uint8Array<ArrayBuffer>, 'skin_indices': Uint8Array<ArrayBuffer>, 'skin_weights': Uint8Array<ArrayBuffer>};
+  props: {'vertices': Uint8Array<ArrayBuffer>, 'faces': Uint8Array<ArrayBuffer>, 'color': [number, number, number], 'wireframe': boolean, 'opacity': (number | null), 'flat_shading': boolean, 'side': 'front' | 'back' | 'double', 'material': 'standard' | 'toon3' | 'toon5', 'cast_shadow': boolean, 'receive_shadow': (boolean | number), 'bone_wxyzs': Uint8Array<ArrayBuffer>, 'bone_positions': Uint8Array<ArrayBuffer>, 'skin_indices': Uint8Array<ArrayBuffer>, 'skin_weights': Uint8Array<ArrayBuffer>, 'uv'?: Uint8Array<ArrayBuffer>, 'normals'?: Uint8Array<ArrayBuffer>, 'texture_png'?: Uint8Array<ArrayBuffer>, 'normal_texture_png'?: Uint8Array<ArrayBuffer> | null, 'metallic_roughness_texture_png'?: Uint8Array<ArrayBuffer> | null, 'metallic_factor'?: number, 'roughness_factor'?: number, 'base_color_factor'?: [number, number, number, number]};
 }
 /** Message from server->client carrying batched meshes information.
  *
@@ -1167,9 +1201,83 @@ export interface TimelinePromptMergeMessage {
 
 import type { CameraStudioStateMessage, CameraStudioCommandMessage } from "./cameraProtocol";
 
-export type Message = 
+/** StageZero voice commands are a hold-to-record or typed request queue. */
+export interface VoiceRecordingMessage {
+  type: "VoiceRecordingMessage";
+  request_id: string;
+  mime_type: string;
+  audio: Uint8Array<ArrayBuffer>;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceCommandMessage {
+  type: "VoiceCommandMessage";
+  request_id: string;
+  command: "submit" | "cancel";
+  text: string;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceStatusMessage {
+  type: "VoiceStatusMessage";
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+}
+export interface VoiceQueueRequest {
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+  target: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceQueueMessage {
+  type: "VoiceQueueMessage";
+  requests: VoiceQueueRequest[];
+}
+
+import type { DialogueAssetsMessage, DialoguePlaybackMessage } from "./VoicePlayback";
+import type { DialogueVoice, DialogueCharacter, DialogueLine } from "./ControlPanel/DialogueState";
+export interface DialogueCommandMessage {
+  type: "DialogueCommandMessage";
+  request_id: string;
+  command: "submit" | "retry" | "cancel" | "remove" | "catalog";
+  take_id?: string;
+  start_frame?: number;
+  character_id?: string;
+  text?: string;
+  voice_id?: string;
+  line_id?: string;
+}
+export interface DialogueVoicesMessage {
+  type: "DialogueVoicesMessage"; voices: DialogueVoice[]; available: boolean; detail: string;
+}
+export interface DialogueStatusMessage {
+  type: "DialogueStatusMessage"; request_id: string; line_id: string;
+  status: string; detail: string; retryable: boolean;
+}
+export interface DialogueStateMessage {
+  type: "DialogueStateMessage"; take_id: string; take_name: string; frame: number;
+  characters: DialogueCharacter[]; lines: DialogueLine[]; available: boolean; detail: string;
+}
+
+export type Message =
+  | DialogueCommandMessage
+  | DialogueVoicesMessage
+  | DialogueStatusMessage
+  | DialogueStateMessage
+  | DialogueAssetsMessage
+  | DialoguePlaybackMessage
+  | NativePairClipMessage
+  | NativePairTransportMessage
+  | NativePairStatusMessage
   | CameraStudioStateMessage
   | CameraStudioCommandMessage
+  | VoiceRecordingMessage
+  | VoiceCommandMessage
+  | VoiceStatusMessage
+  | VoiceQueueMessage
   | CameraFrustumMessage
   | GlbMessage
   | ActorGlbLoadMessage

@@ -1,0 +1,272 @@
+{
+  "mode": "offline",
+  "status": "passed",
+  "started_at": "2026-09-27T05:24:09.598+00:00",
+  "source_project": "/Users/jakob/Desktop/Shellhacks/.runtime/voice-live/scene-and-short-voice-20260927-010215-e1af97.stagezero.npz",
+  "checks": {
+    "failure_preserved_take": true,
+    "retry_bundled_recorded_audio": true,
+    "remove_restored_cue_count": true,
+    "cancel_preserved_take": true
+  },
+  "provider_calls": 0,
+  "motion_generation_calls": 0,
+  "retry_snapshot": {
+    "project": "/Users/jakob/Desktop/Shellhacks/.runtime/character-voice/offline-retry-20260927-012409-da8baf.stagezero.npz",
+    "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+    "frames": 125,
+    "dialogue": [
+      {
+        "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+        "character_id": "main",
+        "text": "A line that initially fails.",
+        "voice_id": "OfflineMale123",
+        "audio_id": "3d80f35e-b34a-4e53-972f-04203e5ad1e2",
+        "start_frame": 12,
+        "end_frame": 52
+      }
+    ],
+    "audio_assets": {
+      "3d80f35e-b34a-4e53-972f-04203e5ad1e2": 53960
+    }
+  },
+  "offline_speech_invocations": 3,
+  "completed_at": "2026-09-27T05:24:09.963+00:00",
+  "wire_events": [
+    {
+      "available": true,
+      "detail": "",
+      "voices": [
+        {
+          "id": "OfflineMale123",
+          "name": "Offline Male",
+          "gender": "male"
+        },
+        {
+          "id": "OfflineFemale123",
+          "name": "Offline Female",
+          "gender": "female"
+        }
+      ],
+      "type": "DialogueVoicesMessage",
+      "at": "2026-09-27T05:24:09.553+00:00",
+      "elapsed_seconds": 0.102
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "asset_count": 0,
+      "cue_count": 0,
+      "type": "DialogueAssetsMessage",
+      "at": "2026-09-27T05:24:09.553+00:00",
+      "elapsed_seconds": 0.102
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "take_name": "Walk, Stop, and Wave",
+      "frame": 0,
+      "characters": [
+        {
+          "id": "main",
+          "name": "Character"
+        }
+      ],
+      "lines": [],
+      "available": true,
+      "detail": "",
+      "type": "DialogueStateMessage",
+      "at": "2026-09-27T05:24:09.553+00:00",
+      "elapsed_seconds": 0.102
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "frame": 0,
+      "fps": 25.0,
+      "playing": false,
+      "speed": 1.0,
+      "revision": 2,
+      "type": "DialoguePlaybackMessage",
+      "at": "2026-09-27T05:24:09.553+00:00",
+      "elapsed_seconds": 0.102
+    },
+    {
+      "request_id": "offline-failure",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "queued",
+      "detail": "Waiting to generate voice",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.617+00:00",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "request_id": "offline-failure",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "generating",
+      "detail": "Generating character voice…",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.617+00:00",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "request_id": "offline-failure",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "failed",
+      "detail": "Offline controlled speech failure",
+      "retryable": true,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.617+00:00",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "request_id": "offline-retry",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "queued",
+      "detail": "Waiting to retry voice",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.653+00:00",
+      "elapsed_seconds": 0.201
+    },
+    {
+      "request_id": "offline-retry",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "generating",
+      "detail": "Generating character voice…",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.653+00:00",
+      "elapsed_seconds": 0.201
+    },
+    {
+      "request_id": "offline-retry",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "completed",
+      "detail": "Character line ready",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.653+00:00",
+      "elapsed_seconds": 0.201
+    },
+    {
+      "available": true,
+      "detail": "",
+      "voices": [
+        {
+          "id": "OfflineMale123",
+          "name": "Offline Male",
+          "gender": "male"
+        },
+        {
+          "id": "OfflineFemale123",
+          "name": "Offline Female",
+          "gender": "female"
+        }
+      ],
+      "type": "DialogueVoicesMessage",
+      "at": "2026-09-27T05:24:09.728+00:00",
+      "elapsed_seconds": 0.276
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "asset_count": 1,
+      "cue_count": 1,
+      "type": "DialogueAssetsMessage",
+      "at": "2026-09-27T05:24:09.728+00:00",
+      "elapsed_seconds": 0.276
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "take_name": "Walk, Stop, and Wave",
+      "frame": 0,
+      "characters": [
+        {
+          "id": "main",
+          "name": "Character"
+        }
+      ],
+      "lines": [
+        {
+          "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+          "request_id": "",
+          "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+          "start_frame": 12,
+          "end_frame": 52,
+          "character_id": "main",
+          "text": "A line that initially fails.",
+          "voice_id": "OfflineMale123",
+          "audio_id": "3d80f35e-b34a-4e53-972f-04203e5ad1e2",
+          "status": "completed",
+          "detail": "",
+          "retryable": false
+        }
+      ],
+      "available": true,
+      "detail": "",
+      "type": "DialogueStateMessage",
+      "at": "2026-09-27T05:24:09.728+00:00",
+      "elapsed_seconds": 0.276
+    },
+    {
+      "take_id": "4041b303-3e0d-4d3c-ad86-2d69110af025",
+      "frame": 0,
+      "fps": 25.0,
+      "playing": false,
+      "speed": 1.0,
+      "revision": 2,
+      "type": "DialoguePlaybackMessage",
+      "at": "2026-09-27T05:24:09.728+00:00",
+      "elapsed_seconds": 0.276
+    },
+    {
+      "request_id": "offline-remove",
+      "line_id": "1e4d1816-cf5b-4b0c-8df8-b25527059351",
+      "status": "removed",
+      "detail": "Character line removed",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.745+00:00",
+      "elapsed_seconds": 0.294
+    },
+    {
+      "request_id": "offline-cancel-submit",
+      "line_id": "326b1f92-7271-4815-ae7c-ae4365f781c4",
+      "status": "queued",
+      "detail": "Waiting to generate voice",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.805+00:00",
+      "elapsed_seconds": 0.353
+    },
+    {
+      "request_id": "offline-cancel-submit",
+      "line_id": "326b1f92-7271-4815-ae7c-ae4365f781c4",
+      "status": "generating",
+      "detail": "Generating character voice…",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.805+00:00",
+      "elapsed_seconds": 0.353
+    },
+    {
+      "request_id": "offline-cancel-submit",
+      "line_id": "326b1f92-7271-4815-ae7c-ae4365f781c4",
+      "status": "cancelled",
+      "detail": "Voice generation cancelled",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.864+00:00",
+      "elapsed_seconds": 0.412
+    },
+    {
+      "request_id": "offline-cancel-command",
+      "line_id": "326b1f92-7271-4815-ae7c-ae4365f781c4",
+      "status": "cancelled",
+      "detail": "Voice generation cancelled",
+      "retryable": false,
+      "type": "DialogueStatusMessage",
+      "at": "2026-09-27T05:24:09.864+00:00",
+      "elapsed_seconds": 0.412
+    }
+  ]
+}

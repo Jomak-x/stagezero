@@ -1,0 +1,85 @@
+{
+  "case": {
+    "case": "market-round-robin",
+    "background": "market",
+    "seed": 61,
+    "plan": "plans/market-round-robin.json"
+  },
+  "planner": "explicit frozen authored test plan; not a fresh AI planner run",
+  "plan_sha256": "249429af398dbe2d942f587d5c8279a5bb8933a0515475b0b2e13e052548065e",
+  "scene_sha256": "35d841555e0c8fb822af77a5da288b24d963ac5d901afc71763be952023d6e8d",
+  "code_commit": "8e70b1c7322c14503780fee2047f4272251f044b",
+  "code_file_sha256": {
+    "experiments/trial_prompt_scene.py": "acb0a17b999d6f5b2fdf0273c0ed5e57bd045d8032c78ac42813d2a5a5345fda",
+    "experiments/review_interaction_v2.py": "114eec0d6fb7d788ef0e9fc878bcca19c73733a7ee669cf7e0dd1182027f8bb9",
+    "prompt_scene_builder.py": "e8881932d64a0809a0082bd8a1199907ece74ecdb31eeeea9f37aed68cefa49e",
+    "prompt_scene_plan.py": "01b44a4cd38827e36ac1328f5171575007d5ec7f4956956b71a104e37ac71313",
+    "cast_motion_refinement.py": "08a8704989a7ec039a0866b5b8f167226051a0757cbda180ff00460ca836a5a1",
+    "cast_observer_motion.py": "f9fcf75e893a79007b2c976894a6cdd09b5a2d0f0eb470d8c9f775dd68cf1320",
+    "paired_meetup.py": "dc0ddc119f44c6a5277e8c5e754b7f5a81093f9e25cd9e9c98d402ab00786743",
+    "native_pair_transition.py": "d4e46a3cb325dc780e5e32b8e4daa25089e2a5c660d6522421419f4c3a4c960e",
+    "interaction_scene_collision.py": "e3e2eb269fbaf70cee96060f3d3b3923ba252b9899b8de86c6050966f08a426c",
+    "cast_performance.py": "bdb2d8e205aa05a82b01ff5d425f5a7ac55e8d8a4f02d6e6170c0e0de483db31",
+    "native_wait_pose.py": "438e13ce0e093c415965c0fcf524c0d2c3b17b468ad84311246508c28118cc20",
+    "cast_observer_turn.py": "5e611efa6b8c2a528c9f47d124ec7608a59dd538de4757b33a0e217556fcba83",
+    "cast_observer_continuation.py": "335214bcd0b854c3f3ed4ca25755c3ce17167140f58bbcdf61a9b4d3ad6bcbff"
+  },
+  "runner_wall_seconds": 6.199285999988206,
+  "exit_code": 1,
+  "archive_sha256": null,
+  "source_archives": [
+    {
+      "manifest": "review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/manifest.json",
+      "sha256": "0be42dc665f89bd4759a34acaaa92dbc53de0d3982f43dfea40c5194bcedcc61",
+      "status": "rejected",
+      "sources": [
+        {
+          "name": "pair-01.npz",
+          "kind": "intergen",
+          "recorded_sha256": "445f531b56aafef2b54049523a50dc8bec637f13ee18d8c6905403277e73f8ae",
+          "actual_sha256": "445f531b56aafef2b54049523a50dc8bec637f13ee18d8c6905403277e73f8ae",
+          "hash_matches": true
+        },
+        {
+          "name": "pair-00.npz",
+          "kind": "intergen",
+          "recorded_sha256": "1e54c69f18b6cf9234fda68986c56c7b8395e05b92a4fe61533d578b3ed946ec",
+          "actual_sha256": "1e54c69f18b6cf9234fda68986c56c7b8395e05b92a4fe61533d578b3ed946ec",
+          "hash_matches": true
+        },
+        {
+          "name": "core-000.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "2e53e7e0f0e039f81e27526da85a08c990edef507b0d5b11260a1a3f1ddfb64f",
+          "actual_sha256": "2e53e7e0f0e039f81e27526da85a08c990edef507b0d5b11260a1a3f1ddfb64f",
+          "hash_matches": true
+        },
+        {
+          "name": "core-001.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "84e74a1cca470f3ad6c55bc844f32e107a4fddb63480baf371ba6dfb06629884",
+          "actual_sha256": "84e74a1cca470f3ad6c55bc844f32e107a4fddb63480baf371ba6dfb06629884",
+          "hash_matches": true
+        },
+        {
+          "name": "pair-02.npz",
+          "kind": "intergen",
+          "recorded_sha256": "752aeff25438547b974ec2aa742e178bb9ab69ae4a8b271f44f0a793261ac0e3",
+          "actual_sha256": "752aeff25438547b974ec2aa742e178bb9ab69ae4a8b271f44f0a793261ac0e3",
+          "hash_matches": true
+        }
+      ],
+      "all_archived_files": {
+        "core-000.npz": "2e53e7e0f0e039f81e27526da85a08c990edef507b0d5b11260a1a3f1ddfb64f",
+        "core-001.npz": "84e74a1cca470f3ad6c55bc844f32e107a4fddb63480baf371ba6dfb06629884",
+        "pair-00.json": "986dd44beae861c7283528ece0e0ec871f631fa6334d61309160d1862a4b3949",
+        "pair-00.npz": "1e54c69f18b6cf9234fda68986c56c7b8395e05b92a4fe61533d578b3ed946ec",
+        "pair-01.json": "2ae43f5cda1d0423f445eb30f3c009d9ea69a6b0c1e0926087185267d8476c4c",
+        "pair-01.npz": "445f531b56aafef2b54049523a50dc8bec637f13ee18d8c6905403277e73f8ae",
+        "pair-02.json": "74eda194db8060b36684aec8ad11c46ee33d6ea017544cdd83e1ed66c00a7f26",
+        "pair-02.npz": "752aeff25438547b974ec2aa742e178bb9ab69ae4a8b271f44f0a793261ac0e3"
+      }
+    }
+  ],
+  "raw_failures_preserved": true
+}

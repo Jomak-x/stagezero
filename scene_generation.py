@@ -152,7 +152,8 @@ def main():
         if args.source == 'recipe':
             scene = generate_recipe(validate_prompt(args.prompt), args.seed)
         else:
-            scene = (SceneGenerator() if args.source == 'gateway' else LocalSceneGenerator()).generate(args.prompt)
+            from adaptive_scene_generation import AdaptiveSceneGenerator
+            scene = (AdaptiveSceneGenerator(progress=print) if args.source == 'gateway' else LocalSceneGenerator()).generate(args.prompt)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(scene, indent=2)+'\n')
         print(f"Saved {scene['name']}: {len(scene['objects'])} props, {len(scene['effects'])} effects to {args.output}")

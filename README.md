@@ -1,4 +1,16 @@
+Scene-aware Core direction is now available inside the existing studio Motion panel: [setup, two actors, navigation, and limits](docs/SCENE-DIRECTION.md).
+
 # StageZero — Single-actor directing
+
+Use **Full scene** to generate a complete performance from one prompt in a dedicated popup, then refine its individual movements. See [full-scene generation](docs/FULL-SCENES.md).
+
+Activate **Voice tools** to queue spoken or typed commands for full scenes, short actions, and edits to named takes. See [voice commands and transcription setup](docs/VOICE-COMMANDS.md).
+
+Create a person from a prompt in **Character → Create from description**. See [character generation](docs/CHARACTERS.md) for the private backend setup and current motion limits.
+The **Scene** tab supports one-prompt backgrounds with custom geometry and a
+separate **Add one object** flow that preserves the current set. Reusable city,
+harbor and temple starter sets are included. See [scene generation](docs/OBJECTS.md)
+and [cinematic sets](docs/CINEMATIC-SETS.md).
 
 The Studio now supports [GLB character import and humanoid rig mapping](docs/GLB-CHARACTERS.md).
 Use `director_viewer.py --glb /path/to/character.glb` for GLB characters with the

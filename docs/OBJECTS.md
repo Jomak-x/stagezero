@@ -8,14 +8,16 @@ on the studio layout or browser client.
 ## What works
 
 - **16 prop kinds:** door, lamp, ball, chair, table, sofa, crate, barrel, pillar,
-  wall, arch, plant, tree, rock, console and platform. Up to 40 props per scene.
+  wall, arch, plant, tree, rock, console and platform, plus original custom geometry.
+  Up to 64 props, 16 custom assets, 12,000 shapes and 250,000 generated triangles per scene.
 - **Six effects:** rain streaks, drifting snow, fireflies, sparks, smoke-like
   particles and a rotating portal. Up to eight emitters, with bounded particle
   counts. Same seed and playhead always produce the same effect state.
 - **Five light palettes:** neutral, warm, moonlight, neon and sunset.
-- **Five complete starter sets:** Neon research lab, Enchanted grove, Cozy living
-  room, Industrial yard and Winter plaza.
-- **Editing:** move, duplicate and remove props; add/clear effects, adjust effect
+- **Thirteen starter sets:** includes a multi-block rooftop city, harbor chase,
+  jungle temple, residential street, market, workshop, apartment, and the original
+  five sets. See [cinematic sets](CINEMATIC-SETS.md).
+- **Editing:** move, resize, rotate, duplicate and remove props; add/clear effects, adjust effect
   density when adding, switch lighting, frame the whole scene, download/import
   scene JSON. Scene files work without generating a motion take first.
 - **Project persistence:** props, effects and lighting save with all takes.
@@ -37,12 +39,23 @@ a deliberate layout; counted prop lists use a grid. These recipes match keywords
 counts and a small color vocabulary; they do not understand arbitrary language,
 negation or spatial instructions. Variation seed changes particle patterns.
 
-**AI gateway · Neon** sends your description and the supported catalog to a text
-model. The model chooses the composition, sizes, palette, effects and lighting.
-It creates a structured scene, not an arbitrary textured mesh. All output is
-validated. A schema failure gets at most one correction attempt (a second model
-call); network/HTTP failures are not automatically retried. Failure preserves the
-current scene and never silently switches to recipes.
+**AI gateway · Neon** accepts one scene prompt. **Generate background + scene ·
+replace** designs reusable custom geometry, validates it, then composes the set.
+This can involve multiple model calls internally. **Advanced · reusable props**
+lets you prepare an asset pack separately or reuse saved assets. Models output
+structured primitive geometry, not executable code or arbitrary textured meshes.
+
+**Add one object → Generate object · add to scene** accepts a separate object
+prompt. AI creates exactly one original static prop and appends it, preserving
+existing props, lighting, effects, camera and targets. Its size and placement can
+then be edited. Offline object mode adds one functional door, lamp, ball or chair.
+Custom generated geometry does not automatically gain physical interaction.
+
+AI output is bounded and validated; a schema/geometry failure gets at most one
+repair attempt. Failures preserve the current scene. A project changed while
+AI is running rejects the stale result. Scene ground automatically hides the
+studio floor, grid and platform to prevent depth flicker; clearing that ground
+restores the user's grid/platform choices.
 
 **Local AI · Ollama** supports a locally running Ollama instance at
 `127.0.0.1:11434`, using `qwen3:4b` by default. Set `STAGEZERO_LOCAL_MODEL` in the
@@ -73,8 +86,27 @@ AWS keys in that file are ignored by scene generation.
 ```sh
 NEON_AI_GATEWAY_BASE_URL='https://YOUR_BRANCH_GATEWAY_HOST'
 NEON_AI_GATEWAY_TOKEN='YOUR_GATEWAY_TOKEN'
-STAGEZERO_OBJECT_MODEL='gpt-5-mini'
 ```
+
+With Neon, the model is selected by workflow when no role override is set:
+
+| Workflow | Default model | Optional override |
+| --- | --- | --- |
+| General objects and scenes | `gpt-5-6-sol` | `STAGEZERO_OBJECT_MODEL` |
+| Custom prop geometry and assets | `gpt-6-astra` | `STAGEZERO_SCENE_ASSET_MODEL` |
+| Scene layout | `gpt-5-6-sol` | `STAGEZERO_SCENE_LAYOUT_MODEL` |
+| Grounded scene action planning | `gpt-6-astra` | `STAGEZERO_SCENE_AI_MODEL` |
+| Character design | `gpt-6-astra` | `STAGEZERO_CHARACTER_DESIGN_MODEL` |
+| Character reference image | `gpt-6-astra` | `STAGEZERO_CHARACTER_IMAGE_MODEL` |
+
+Set only the overrides you need in the same private file or process environment.
+For Neon, `STAGEZERO_OBJECT_MODEL` applies to general objects and scenes; it does
+not change the asset, layout, or action-planning roles. Use the corresponding
+role override to change those models.
+An alternate OpenAI-compatible gateway selected with `STAGEZERO_OBJECT_API_BASE`
+or `STAGEZERO_SCENE_AI_API_BASE` requires an explicit model; it does not inherit
+Neon defaults. Scene planning can reuse `STAGEZERO_OBJECT_MODEL` with an alternate
+provider when `STAGEZERO_SCENE_AI_MODEL` is unset.
 
 The gateway token needs `ai_gateway:invoke`. The code appends `/v1` to Neon's bare
 host, then calls `/chat/completions`. Alternative OpenAI-compatible gateways can
@@ -109,18 +141,19 @@ The scene generator itself does not constrain the actor's motion.
 
 Effects and geometry are stylized mockups. Smoke uses opaque/dim particles rather
 than volumetric simulation. Lighting adds colored point lights to the studio's
-existing lights; this is not a postprocessing bloom or material system. Props
-have no rotation field yet. Scene scale/placement can be edited through JSON or
-prop-position controls. Large set dressing may obscure the actor from some
+existing lights; this is not a postprocessing bloom or material system. Props support yaw rotation. Scene size, placement and rotation can be edited
+through JSON or prop controls. Large set dressing may obscure the actor from some
 angles; use the camera controls or **Frame whole scene**.
 
 ## Integration contract
 
-- `scene_composition.validate_scene(doc)` validates version 2 documents with
-  exactly `version`, `name`, `objects`, `effects`, `lighting`.
+- `scene_composition.validate_scene(doc)` validates legacy v2 scenes and v3
+  scenes with embedded `assets` and optional `camera`/`targets`. JSON import is
+  bounded to 1 MB. Targets are prop-relative attachment hints, not motion physics.
 - `make_preset(name, seed)` / `generate_recipe(prompt, seed)` produce offline scenes.
-- `SceneGenerator.generate(prompt)` and `LocalSceneGenerator.generate(prompt)`
-  return the same scene shape.
+- `AdaptiveSceneGenerator.generate(prompt)` produces custom-geometry scenes;
+  `SinglePropGenerator.generate(prompt)` produces one appendable asset/object.
+  `LocalSceneGenerator` retains the catalog-based Ollama path.
 - `ObjectDirectorSession.generate_scene`, `set_scene`, `scene_document`,
   `edit_object`, `duplicate_object`, `remove_object`, `load_scene_document` handle
   controller integration without a UI dependency.
@@ -131,7 +164,8 @@ angles; use the camera controls or **Frame whole scene**.
 - `add_object_controls(gui, session)` attaches the scene authoring panel.
 
 Coordinates are meters, +Y up, with center-based positions. Prop sizes are
-0.05–12 m; effect sizes are 0.1–8 m; positions are bounded to ±20 m. G1 hand
+0.05–60 m (single AI props are limited to 6 m); effect sizes are 0.1–8 m;
+object positions are bounded to ±100 m. G1 hand
 endpoints are joints 25 and 33. Generated code, external asset URLs and unknown
 behavior fields are rejected.
 

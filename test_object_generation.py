@@ -4,6 +4,7 @@ import json
 import tempfile
 import threading
 import unittest
+from unittest import mock
 
 import numpy as np
 import requests
@@ -52,6 +53,44 @@ class GatewayGenerationTests(unittest.TestCase):
     def gateway(self, response=None, error=None):
         transport = FakeTransport(response, error)
         return GatewayGenerator('https://gateway.example/v1/', 'test-model', 'test-secret', transport), transport
+
+    def test_neon_models_follow_generation_role(self):
+        config = {'NEON_AI_GATEWAY_BASE_URL': 'https://branch.example',
+                  'NEON_AI_GATEWAY_TOKEN': 'test-secret'}
+        with mock.patch('object_generation.gateway_config', return_value=config):
+            models = {stage: GatewayGenerator.from_env(stage=stage).model
+                      for stage in (None, 'assets', 'layout')}
+        self.assertEqual(models, {None: 'gpt-5-6-sol', 'assets': 'gpt-6-astra',
+                                  'layout': 'gpt-5-6-sol'})
+
+    def test_explicit_models_and_provider_override_neon_defaults(self):
+        config = {'NEON_AI_GATEWAY_BASE_URL': 'https://branch.example',
+                  'NEON_AI_GATEWAY_TOKEN': 'test-secret',
+                  'STAGEZERO_OBJECT_MODEL': 'general-choice',
+                  'STAGEZERO_SCENE_ASSET_MODEL': 'asset-choice',
+                  'STAGEZERO_SCENE_LAYOUT_MODEL': 'layout-choice'}
+        with mock.patch('object_generation.gateway_config', return_value=config):
+            self.assertEqual(GatewayGenerator.from_env().model, 'general-choice')
+            self.assertEqual(GatewayGenerator.from_env(stage='assets').model, 'asset-choice')
+            self.assertEqual(GatewayGenerator.from_env(stage='layout').model, 'layout-choice')
+        config.update({'STAGEZERO_OBJECT_API_BASE': 'https://other.example/v1',
+                       'STAGEZERO_OBJECT_API_KEY': 'other-secret'})
+        config.pop('STAGEZERO_SCENE_ASSET_MODEL')
+        config.pop('STAGEZERO_SCENE_LAYOUT_MODEL')
+        with mock.patch('object_generation.gateway_config', return_value=config):
+            gateway = GatewayGenerator.from_env(stage='assets')
+        self.assertEqual(gateway.url, 'https://other.example/v1/chat/completions')
+        self.assertEqual(gateway.model, 'general-choice')
+
+    def test_missing_model_or_token_fails_closed_for_other_gateways(self):
+        cases = ({'STAGEZERO_OBJECT_API_BASE': 'https://other.example/v1',
+                  'STAGEZERO_OBJECT_API_KEY': 'other-secret'},
+                 {'NEON_AI_GATEWAY_BASE_URL': 'https://branch.example'})
+        for config in cases:
+            with self.subTest(config=tuple(config)), mock.patch(
+                    'object_generation.gateway_config', return_value=config):
+                with self.assertRaises(ValueError):
+                    GatewayGenerator.from_env(stage='assets')
 
     def test_valid_json_scene_uses_bounded_gateway_request(self):
         objects = [make_object('lamp', 0), make_object('ball', 1)]
