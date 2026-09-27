@@ -155,7 +155,7 @@ class StoryWorkflow:
             with self.lock:
                 if job['status'] == 'cancelled' or self.closed:
                     return
-                job['queue_id'] = self.queue.submit(plan, scene=scene)
+                job['queue_id'] = self.queue.submit(plan, scene=scene, automatic=seconds is None)
                 job['plan'] = plan
                 job['status'] = 'queued'
         except Exception as exc:
@@ -229,6 +229,9 @@ class StoryWorkflow:
                 session.project_revision += 1
                 session.project_status = 'Full scene ready · Save project stores all actions'
                 session.status = 'Full scene ready · press Play to review or select an action to edit'
+                # Recovery can use more or fewer frames than the planning estimate.
+                for beat, segment in zip(job['plan']['beats'], take.segments):
+                    beat['seconds'] = (segment['end'] - segment['start']) / 25
                 job['loaded'] = True
                 job['take_id'] = take.id
                 self.queue.release(job['queue_id'])

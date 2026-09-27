@@ -166,7 +166,7 @@ def run(args, planner=None, backend_factory=Backend, queue_factory=StoryJobQueue
     queue = queue_factory(backends, max_pending=MAX_BATCH, max_history=MAX_BATCH)
     identifiers = []
     try:
-        identifiers = [queue.submit(plan) for plan in plans]
+        identifiers = [queue.submit(plan, automatic=args.seconds is None) for plan in plans]
         deadline = time.monotonic() + args.timeout
         remaining = set(identifiers)
         while remaining:
