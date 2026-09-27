@@ -1,5 +1,7 @@
 # Background navigation demo (opt-in Native Core)
 
+**Continuation checkpoint:** see [current status and next steps](handoff/BACKGROUND-INTERACTION-CONTINUE.md). The full temple route is unfinished.
+
 This adds ordered spatial commands to the existing **Motion → Advanced scene
 motion → Scene direction · Core → Move to a scene object** panel. It does not
 replace the main G1 generator, AI cast, paired interactions, scene authoring,
@@ -23,8 +25,7 @@ grammar makes no LLM call and is not wired into the main AI-cast prompt parser.
 
 ARDY Core still generates every character frame at its native 20 fps. A large
 initial direction change receives a two-second native stationary turn before
-walking. Each route retains a terminal hold. No pose warping, foot IK, G1
-retargeting experiments, replacement controller, or terrain runtime is added.
+walking. The explicit spatial profile uses 1.2 m/s XZ targets without dense travel heading and a short eased final settle. Ordinary/default navigation scheduling is unchanged. Native generated arrays are not pose-warped. Optional terrain fitting and native terrain experiments now exist separately, are not activated by ordinary generation, and do not yet solve stair traversal.
 The existing Navigate to object button retains its target schedule; the new spatial-command workflow also inserts a native turn before object travel when needed.
 
 The controller checks collision proxies and continuous authored floor support

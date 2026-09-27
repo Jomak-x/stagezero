@@ -226,7 +226,7 @@ def request_body(request, *, seed=33):
             raise ValueError('History actor order must match the request actor IDs')
         body['history'] = ({'native_features': clip.native_features.tolist()} if clip.native_features is not None
                            else {'positions': clip.positions.tolist(), 'rotations': clip.rotations.tolist()})
-    for name in ('root_targets', 'target'):
+    for name in ('root_targets', 'target', 'coordinate_frames_y'):
         if name in request.metadata:
             body[name] = request.metadata[name]
     # Placements are cold-start instructions. Reapplying them to native

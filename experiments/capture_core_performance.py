@@ -160,7 +160,12 @@ def capture(args: argparse.Namespace) -> dict:
             server.scene.add_box("/floor", color=(20, 28, 38), dimensions=(200, .1, 200),
                                  position=(0, -.07, 0), cast_shadow=False,
                                  visible=not has_authored_ground(scene["objects"]))
+            terrain = None
+            if getattr(args, "terrain_support", False):
+                from scene_interaction_geometry import SceneInteractionGeometry
+                terrain = SceneInteractionGeometry.from_scene(scene)
             renderer = StudioCoreRenderer(server, name_prefix="/core-cast",
+                                          terrain_geometry=terrain,
                                           paired_retarget=bool(getattr(args, "paired_retarget", False)))
             renderer.set_clip(clip)
             renderer.tick(0)
@@ -261,6 +266,8 @@ def capture(args: argparse.Namespace) -> dict:
             scene_bytes = json.dumps(scene, sort_keys=True, separators=(",", ":"),
                                      allow_nan=False).encode()
             manifest = {
+                "terrain_support_fitting": bool(getattr(args, "terrain_support", False)),
+                "fitting_provenance": renderer.fitting_provenance,
                 "scene_name": scene["name"], "scene_sha256": hashlib.sha256(scene_bytes).hexdigest(),
                 "scene_objects": len(objects), "scene_assets": len(scene.get("assets", [])),
                 "actor_ids": list(clip.actor_ids),
@@ -303,7 +310,7 @@ def capture(args: argparse.Namespace) -> dict:
                     "archive": str(archive), "archive_sha256": hashlib.sha256(content).hexdigest(),
                     "archive_total_frames": clip.frames, "native_fps": 20,
                     "native_features_sha256": sha256_array(clip.native_features),
-                    "capture_note": "One WebGL render per listed saved native frame in order; no interpolation or inferred contact. Props remain at their archived static positions.",
+                    "capture_note": "One WebGL render per listed saved native frame in order; no interpolation or inferred contact. Opt-in props use the archived native root trajectory for reactions; fitting is disclosed separately.",
                 })
             manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
             print(f"CAPTURE COMPLETE: {video}", flush=True)
@@ -320,6 +327,7 @@ def main() -> None:
     inputs.add_argument("--canonical", type=Path,
                         help="Experimental .intergen.canonical.npz from trial_paired_scene.py")
     parser.add_argument("--scene", type=Path, help="Explicit scene JSON required only with --canonical")
+    parser.add_argument("--terrain-support", action="store_true", help="Explicit terrain-relative sole fitting; native arrays remain unchanged")
     parser.add_argument("--paired-retarget", action="store_true", help="Preserve paired world wrists and a common floor translation")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--port", type=int, default=24892)

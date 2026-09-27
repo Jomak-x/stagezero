@@ -62,7 +62,9 @@ class TargetClient:
             frames = [-1] + [item["frame"] for item in goals]
             points = [start] + [[item["position_xz"][0] + self.drift, item["position_xz"][1]] for item in goals]
             roots = np.column_stack([np.interp(np.arange(40), frames, np.asarray(points)[:, i]) for i in (0, 1)])
-            yaw = goals[-1]["heading"] + self.yaw_drift
+            direction = np.asarray(goals[-1]["position_xz"]) - np.asarray(start)
+            path_heading = math.atan2(direction[0], direction[1]) if np.linalg.norm(direction) > 1e-6 else 0.
+            yaw = goals[-1].get("heading", path_heading) + self.yaw_drift
         self.root = roots[-1].copy()
         return [native(roots, yaw)]
 
@@ -101,8 +103,8 @@ class SpatialParserTests(unittest.TestCase):
             np.testing.assert_allclose(route["waypoints"][-1]["position_xz"], expected, atol=1e-5)
         stages, _ = plan_command({"verb": "move", "direction": "back", "distance_m": 2}, adapted, ("actor_1",), "actor_1", native([[0, 0]]), None)
         self.assertIn("turns", stages[0].prompt)
-        self.assertEqual(stages[1].prompt, "A person walks forward naturally.")
-        self.assertEqual(stages[-1].prompt, "A person stands upright and relaxed.")
+        self.assertEqual(stages[1].prompt, "A person walks forward naturally, then slows to a relaxed stop.")
+        self.assertEqual(stages[-1].metadata["navigation"]["phase"], "walk")
         self.assertAlmostEqual(abs(stages[0].metadata["root_targets"]["actor_1"][-1]["heading"]), math.pi, places=5)
 
     def test_point_route_avoids_solids_and_rejects_floor_exit_without_synthetic_target(self):

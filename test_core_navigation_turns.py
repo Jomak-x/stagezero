@@ -104,6 +104,35 @@ class RelativeTurnTests(unittest.TestCase):
             self.assertEqual(baseline.prompt, suffix.prompt)
             self.assertEqual(baseline.metadata["root_targets"], suffix.metadata["root_targets"])
 
+    def test_explicit_spatial_gait_turns_then_walks_without_heading_or_extra_hold(self):
+        starts = {"walker": {"position_xz": [0., 0.], "yaw": 0.},
+                  "witness": {"position_xz": [4., 4.], "yaw": math.pi}}
+        kw = dict(actor_id="walker", verb="move", target_xz=[-2., 0.],
+                  initial_placements=starts, speed_mps=1.2, turn_before_travel=True)
+        stages, route = plan_navigation(scene(), ("walker", "witness"), gait_profile="spatial", **kw)
+        default, _ = plan_navigation(scene(), ("walker", "witness"), **kw)
+        self.assertEqual(route["schedule"]["initial_turn_frames"], 40)
+        self.assertEqual(route["schedule"]["terminal_hold_frames"], 0)
+        self.assertEqual(route["schedule"]["terminal_settle_frames"], 8)
+        self.assertEqual(len(default), len(stages) + 1)
+        self.assertEqual(stages[0].metadata["root_targets"], default[0].metadata["root_targets"])
+        self.assertIn("turns left", stages[0].prompt)
+        self.assertEqual(stages[-1].metadata["navigation"]["phase"], "walk")
+        self.assertIn("relaxed stop", stages[-1].prompt)
+        self.assertTrue(all("heading" not in goal for stage in stages[1:]
+                            for goal in stage.metadata["root_targets"]["walker"]))
+        self.assertEqual([s.metadata["root_targets"]["witness"] for s in stages],
+                         [s.metadata["root_targets"]["witness"] for s in default[:-1]])
+        self.assertEqual(stages[-1].metadata["root_targets"]["walker"][-1]["position_xz"], [-2., 0.])
+
+    def test_default_profile_is_identical_to_omitted_profile(self):
+        kw = dict(actor_id="walker", verb="move", target_xz=[0., 2.],
+                  initial_placements={"walker": {"position_xz": [0., 0.], "yaw": 0.}})
+        implicit, implicit_route = plan_navigation(scene(), ("walker",), **kw)
+        explicit, explicit_route = plan_navigation(scene(), ("walker",), gait_profile="default", **kw)
+        self.assertEqual(implicit, explicit)
+        self.assertEqual(implicit_route, explicit_route)
+
 
 if __name__ == "__main__":
     unittest.main()
