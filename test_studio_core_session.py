@@ -12,6 +12,7 @@ from realtime_clip import CanonicalClip
 from realtime_director import RealtimeDirector, StageSpec
 from scene_objects import make_object
 from studio_core_session import CoreStudioSession, EMPTY_SCENE
+from pathlib import Path
 
 
 def clip(ids=("actor_1",), value=1., *, collide=False, source="ardy_core", native=True):
@@ -36,6 +37,10 @@ class FakeClient:
         self.ignore_cancel = False
         self.active = 0
         self.max_active = 0
+        self.ready = True
+
+    def health(self):
+        return {"ready": self.ready, "model": "ARDY-Core-RP-20FPS-Horizon40"}
 
     def wait(self, body, *, cancelled):
         validate_job(body)  # Use the real HTTP request contract, including native history.
@@ -93,6 +98,27 @@ class CoreStudioTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "not configured"):
                 offline.direct({"actor_1": "Walk"})
             self.assertIsNone(offline._thread)
+
+    def test_city_encounter_validates_before_replacing_existing_motion(self):
+        self.start()
+        self.direct()
+        wait_for(lambda: self.session.snapshot()["total_frames"] == 40)
+        before = self.session.timeline_clip().positions.copy()
+        with self.assertRaisesRegex(ValueError, "route_variant"):
+            self.session.run_city_encounter(EMPTY_SCENE, route_variant="unsafe")
+        np.testing.assert_array_equal(before, self.session.timeline_clip().positions)
+
+        city = json.loads((Path(__file__).parent / "examples/scenes/city-boulevard.json").read_text())
+        self.client.ready = False
+        with self.assertRaisesRegex(RuntimeError, "not ready"):
+            self.session.run_city_encounter(city)
+        np.testing.assert_array_equal(before, self.session.timeline_clip().positions)
+        self.client.ready = True
+        report = self.session.run_city_encounter(city, route_variant="west", timing_variant="brisk", seed=42)
+        self.assertEqual(report["contact_mode"], "staged_no_contact")
+        self.assertEqual(self.session.snapshot()["actor_ids"], ("actor_1", "actor_2"))
+        self.assertIn("Staged, no-contact", self.session.snapshot()["status"])
+        self.assertEqual(self.session._director.project_metadata["studio_core"]["city_encounter"], report)
 
     def test_bounded_lookahead_and_request_schema_with_native_prefix(self):
         self.start(2)

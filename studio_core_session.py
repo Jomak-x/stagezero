@@ -157,6 +157,49 @@ class CoreStudioSession:
 
     reset = start
 
+    def run_city_encounter(self, scene_document, *, placements=None,
+                           route_variant="direct", timing_variant="measured", seed=33):
+        """Start a fresh, measured two-actor staged scene using native Core stages.
+
+        Planning and queue validation finish before replacing the current take.
+        The returned report describes the plan; only generated poses can establish
+        whether the requested actions actually happened.
+        """
+        from core_city_encounter import build_city_encounter
+
+        scene = _copy(scene_document)
+        validate_scene(scene)
+        place, stages, report = build_city_encounter(
+            scene, placements, route_variant=route_variant,
+            timing_variant=timing_variant, seed=seed)
+        ids = ("actor_1", "actor_2")
+        metadata = self._metadata(scene, place)
+        metadata["studio_core"]["city_encounter"] = _copy(report)
+        director = RealtimeDirector(ids, clock=self._clock,
+                                    project_metadata=metadata)
+        director.queue_sequence(stages)
+        with self._lock:
+            self._ensure_open()
+            client, epoch = self._client, self._epoch
+            if client is None:
+                raise RuntimeError("Native Core service is not configured; load a native archive for playback")
+        health = client.health()
+        if (not isinstance(health, dict) or health.get("ready") is not True
+                or health.get("model") != "ARDY-Core-RP-20FPS-Horizon40"):
+            raise RuntimeError("Native Core service is not ready; previous motion retained")
+        with self._lock:
+            self._ensure_open()
+            if self._client is not client or self._epoch != epoch:
+                raise RuntimeError("Native Core configuration changed; previous motion retained")
+            self._invalidate()
+            self._director, self._scene, self._placements = director, scene, place
+            self._scene_changed_since_motion = False
+            self._route = _copy(report)
+            self._active = True
+            self._initialized = True
+            self._run_generation()
+            return _copy(report)
+
     def activate(self):
         with self._lock:
             self._ensure_open()
@@ -350,6 +393,8 @@ class CoreStudioSession:
             if self._scene_changed_since_motion:
                 result["status"] = ("Scene changed; pending motion cancelled. Stored motion was created against an earlier layout. "
                                     + result["status"])
+            if self._director.project_metadata.get("studio_core", {}).get("city_encounter"):
+                result["status"] = "Staged, no-contact fight. " + result["status"]
             return result
 
     def tick(self, now=None):

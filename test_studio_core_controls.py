@@ -123,6 +123,14 @@ class Core:
     def navigate(self, actor_id, target_id, verb):
         self.calls.append(("navigate", actor_id, target_id, verb))
 
+    def run_city_encounter(self, scene_document, *, placements, route_variant, timing_variant, seed):
+        self.calls.append(("city_encounter", scene_document["name"], route_variant,
+                           timing_variant, seed, placements))
+        self.active = True
+        self.initialized = True
+        self.actor_ids = ("actor_1", "actor_2")
+        self.epoch += 1
+
     def play(self):
         self.calls.append(("play",))
 
@@ -219,6 +227,25 @@ class CoreStudioControlsTests(unittest.TestCase):
         self.controls.verb.value = "go_through"
         self.controls.navigate.click()
         self.assertEqual(self.core.calls[-1], ("navigate", "actor_2", "gate-1", "go_through"))
+
+    def test_city_preset_uses_own_scene_and_labels_contact_honestly(self):
+        self.assertFalse(self.controls.city_generate.disabled)
+        self.controls.city_route.value = "west"
+        self.controls.city_timing.value = "brisk"
+        self.controls.city_seed.value = "42"
+        self.controls.city_generate.click()
+        self.assertEqual(self.core.calls[-1],
+                         ("city_encounter", "Downtown street", "west", "brisk", 42, None))
+        self.assertIn("staged/no-contact", self.controls.status.content)
+
+    def test_city_preset_offers_a_second_scene_and_starting_orientation(self):
+        self.controls.city_layout.value = "Generated city"
+        self.controls.city_starts.value = "turn into route"
+        self.controls.city_generate.click()
+        call = self.core.calls[-1]
+        self.assertEqual(call[:2], ("city_encounter", "Generated city set"))
+        self.assertEqual(call[-1]["actor_1"]["yaw"], 0.)
+        self.assertEqual(call[-1]["actor_2"]["yaw"], -3.141592653589793)
 
     def test_catalog_excludes_floor_and_rejects_unverified_passage(self):
         self.controls.enabled.edit(True, client=object())

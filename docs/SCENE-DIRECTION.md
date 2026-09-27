@@ -96,6 +96,41 @@ controls.
 
 ## Useful directions to explore
 
+### City encounter · staged/no-contact fight
+
+The Core panel includes **Generate city encounter**. Choose Downtown boulevard,
+Generated city, or the current Studio scene; then choose a route, starting
+arrangement, timing and seed. This creates a fresh, separate two-actor Core
+timeline, first saving any existing Core motion to a local backup. The preset
+asks both actors to walk, stop, turn toward one another, meet, raise a guard,
+perform a feint and dodge, react to a near miss, retreat and depart. Its
+native Root2D targets share one event clock and avoid the authored scene's
+solid proxies. The preset rejects layouts without a supported safe route.
+
+The label **staged/no-contact fight** is literal: neither ARDY nor this preset
+controls a strike landing, impact force or a physical partner reaction. Each
+stage stores its model, prompt, seed, route/heading conditions and an
+`planned_unobserved` candidate record. Planned geometry is not a generated
+outcome. Inspect the complete saved clip and measure route endpoints, mutual
+facing, pair and prop clearance, floor penetration/sliding and seams before
+marking a candidate successful. `core_city_encounter.measure_city_encounter`
+provides geometry proxies; visual and instruction-following review remains
+separate. Save/open uses **Core projects**, not the ordinary G1 project button.
+
+The 11–13 two-second stages take 22–26 seconds of native Core motion to
+generate. The `measured` timing uses a slower planned approach/departure than
+`brisk`; each stage still uses Core's 40-frame horizon. For reproducibility,
+the preset defaults to seed 33. The standalone `core_action_library.py` records
+walk, stop, turn, meet, guard, lunge, dodge, near-miss reaction, retreat and
+departure candidates. Its outcome writer requires measured geometry plus
+explicit visual and instruction verdicts before recording a pass.
+
+The normal RunPod Studio previously checked at `/workspace/stagezero` was on
+commit `4a2e08a`, before PR #18, and did not contain this Core panel. The
+isolated PR #18 checkout is not automatically deployed to that service. The
+current example needs a configured Core worker on its own endpoint; ordinary
+G1 port 8765 cannot generate Core motion.
+
 These are candidate prompts, not a tested success matrix. Start with short
 beats, inspect the motion, then extend the sequence.
 

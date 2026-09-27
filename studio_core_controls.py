@@ -7,12 +7,23 @@ owned by StudioUI.  This panel only operates on CoreStudioSession.
 from __future__ import annotations
 
 from html import escape
+import json
+import math
 from pathlib import Path
 import time
 
 from studio_interaction_scene import adapt_studio_scene, recommend_placements
 
 MAX_STUDIO_ARCHIVE_BYTES = 64_000_000
+CITY_EXAMPLES = {
+    "Downtown boulevard": Path(__file__).parent / "examples/scenes/city-boulevard.json",
+    "Generated city": Path(__file__).parent / "review/demo/fresh-city.json",
+}
+CITY_LAYOUTS = ("Downtown boulevard", "Generated city", "Current Studio scene")
+CITY_ROUTES = ("direct", "west", "east")
+CITY_TIMINGS = ("measured", "brisk")
+CITY_SEEDS = ("33", "42", "103")
+CITY_STARTS = ("opposite ends", "swapped ends", "turn into route")
 
 
 EXAMPLES = {
@@ -58,6 +69,14 @@ class CoreStudioControls:
             self.actor_two = gui.add_text("Actor 2 direction", initial_value=EXAMPLES["Dance"][1], multiline=True)
             self.duration = gui.add_dropdown("Length", tuple(DURATIONS), initial_value="6 seconds")
             self.generate = gui.add_button("Generate / redirect")
+            with gui.add_folder("City encounter · staged/no-contact fight", expand_by_default=False):
+                self.city_layout = gui.add_dropdown("City layout", CITY_LAYOUTS)
+                self.city_starts = gui.add_dropdown("City starts", CITY_STARTS)
+                self.city_route = gui.add_dropdown("City route", CITY_ROUTES)
+                self.city_timing = gui.add_dropdown("City timing", CITY_TIMINGS)
+                self.city_seed = gui.add_dropdown("City seed", CITY_SEEDS)
+                self.city_generate = gui.add_button("Generate city encounter")
+                gui.add_markdown("Two native Core actors share a route and event clock. The fight is staged without controlled contact; review the generated motion before use.")
             self.play = gui.add_button("Play", color="gray")
             self.pause = gui.add_button("Pause", color="gray")
             self.restart = gui.add_button("Restart", color="gray")
@@ -244,6 +263,39 @@ class CoreStudioControls:
                 self.core.direct(prompts, DURATIONS[self.duration.value])
             self._run(action)
 
+        @self.city_generate.on_click
+        def city_generate_clicked(_):
+            def action():
+                scene = (self._scene_document() if self.city_layout.value == "Current Studio scene"
+                         else json.loads(CITY_EXAMPLES[self.city_layout.value].read_text()))
+                placements = None
+                if self.city_starts.value != "opposite ends":
+                    from core_city_encounter import build_city_encounter
+                    placements = build_city_encounter(
+                        scene, route_variant=self.city_route.value,
+                        timing_variant=self.city_timing.value,
+                        seed=int(self.city_seed.value))[0]
+                    placements = {actor: dict(item) for actor, item in placements.items()}
+                    if self.city_starts.value == "swapped ends":
+                        placements = {"actor_1": placements["actor_2"],
+                                      "actor_2": placements["actor_1"]}
+                    else:
+                        for item in placements.values():
+                            item["yaw"] = ((item["yaw"] + 2 * math.pi) % (2 * math.pi)) - math.pi
+                self._backup()
+                was_active = bool(self._snapshot().get("active"))
+                self.on_active(True)
+                try:
+                    self.core.run_city_encounter(
+                        scene, placements=placements, route_variant=self.city_route.value,
+                        timing_variant=self.city_timing.value,
+                        seed=int(self.city_seed.value))
+                except Exception:
+                    self.on_active(was_active)
+                    raise
+                self._notice = "City encounter queued: staged/no-contact fight. Planned motion is not a verified result."
+            self._run(action)
+
         @self.play.on_click
         def play_clicked(_):
             self._run(self.core.play)
@@ -369,6 +421,8 @@ class CoreStudioControls:
             self._set(self.frame, "value", min(current, max(frames - 1, 1)))
             self._set(self.start, "disabled", not active)
             self._set(self.generate, "disabled", not active or not available or not ids)
+            self._set(self.city_generate, "disabled", not available or not all(
+                path.is_file() for path in CITY_EXAMPLES.values()))
             self._set(self.navigate, "disabled", not active or not available or not targets or not verbs or not ids)
             self._set(self.play, "disabled", not active or frames == 0)
             self._set(self.pause, "disabled", not active or frames == 0)
