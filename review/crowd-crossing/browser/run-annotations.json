@@ -1,0 +1,47 @@
+{
+  "native-cpu-baseline-1790483773107.json": {
+    "use": "preliminary CPU audit",
+    "limitation": "No rendering; observed timing variance; concurrent machine workload not controlled."
+  },
+  "crowd-64-street-1-1790483843085.json": {
+    "use": "preliminary GPU feasibility only",
+    "limitation": "Provisional cached motion, earlier navigation/background; excluded from final benchmark table."
+  },
+  "crowd-64-street-1-1790484508081.json": {
+    "use": "superseded full visual capture",
+    "limitation": "Concurrent interaction video rendering; exclude from clean performance table. Renderer automatically wrapped at120s; later fixed to hold final pose. Raw report/video retained."
+  },
+  "crowd-64-overhead-1-1790484711045.json": {
+    "use": "complete overhead visual evidence",
+    "limitation": "Concurrent unrelated browser rendering and scene audit CPU; excluded from controlled performance table. Full120s, finalposeheld, exact input hashes recorded."
+  },
+  "crowd-64-street-1-1790484862260.json": {
+    "use": "complete final street visual evidence",
+    "limitation": "First part overlaps unrelated capture; excluded from controlled performance table. Full120s, finalposeheld, exactinputhashes recorded."
+  },
+  "crowd-16-orbit-1-1790485004511.json": {
+    "use": "controlled 120-second scale benchmark",
+    "conditions": "No competing capture, generation, encoding or test job; moving camera; recording disabled; 1.5-second warmup; foreground."
+  },
+  "crowd-32-orbit-1-1790485166490.json": {
+    "use": "controlled 120-second scale benchmark",
+    "conditions": "No competing capture, generation, encoding or test job; moving camera; recording disabled; 1.5-second warmup; foreground."
+  },
+  "crowd-100-orbit-1-1790485569071.json": {
+    "use": "controlled 120-second scale benchmark",
+    "conditions": "No competing capture, generation, encoding or test job; moving camera; recording disabled; 1.5-second warmup; foreground."
+  },
+  "crowd-64-orbit-1-1790485315571.json": {
+    "use": "controlled 120-second scale benchmark",
+    "conditions": "No competing capture, generation, encoding or test job; moving camera; recording disabled; 1.5-second warmup; foreground."
+  },
+  "native-cpu-baseline-1790485643971.json": {
+    "use": "final CPU audit repeat",
+    "conditions": "No competing rendering/capture/test/encoding task; five warmup plus 30 samples per population.",
+    "limitation": "CPU-only unchanged native function calls, not native scene FPS; nonmonotonic scaling suggests JIT/allocation/GC effects; not a calibrated linear scaling model."
+  },
+  "native-cpu-baseline-1790485795787.json": {
+    "use": "excluded accidental automatic rerun",
+    "limitation": "Vite cache configuration reload repeated the native URL while MP4 encoding was active; excluded from final CPU audit."
+  }
+}

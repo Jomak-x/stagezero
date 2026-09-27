@@ -1,0 +1,248 @@
+{
+  "schema": "stagezero.crowd-gait-metrics.v1",
+  "actors": 64,
+  "duration_s": 120.0,
+  "sample_fps": 60.0,
+  "sampled_frames": 7201,
+  "renderer_contract": "CrowdRenderer.update: gait selection (casual maps relaxed), XZ-scale-adjusted distance phase, golden offset, linear wrapped walk, nearest idle, velocity smoothstep, actor XYZ scale",
+  "source_loops": [
+    {
+      "id": "walk-relaxed",
+      "frames": 73,
+      "loop_endpoint_discontinuity_rms_m": 0.010858255438506603,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.011789584998041391,
+        "median": 0.011148239951580763,
+        "p95": 0.015983457444235682,
+        "max": 0.01642504334449768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.24689835547046227,
+        "median": 0.18688078224658966,
+        "p95": 0.6105589002370834,
+        "max": 0.9834091663360596
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1584,
+        "mean": 0.014507353586528975,
+        "median": 0.006592961261048913,
+        "p95": 0.04171322267502546,
+        "max": 0.09942567348480225
+      }
+    },
+    {
+      "id": "walk-brisk",
+      "frames": 49,
+      "loop_endpoint_discontinuity_rms_m": 0.014318078756332397,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.014599478570744395,
+        "median": 0.015229490119963884,
+        "p95": 0.020782661344856023,
+        "max": 0.021116426214575768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.31408259306441655,
+        "median": 0.22003816813230515,
+        "p95": 0.9858781963586805,
+        "max": 1.0311684608459473
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1056,
+        "mean": 0.021990485632572512,
+        "median": 0.014684042427688837,
+        "p95": 0.05962672829627991,
+        "max": 0.10345882177352905
+      }
+    },
+    {
+      "id": "idle",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.00553074711933732,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.005105656455270946,
+        "median": 0.004991476656869054,
+        "p95": 0.006349978735670447,
+        "max": 0.006492822431027889
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.1497837117957798,
+        "median": 0.16787390410900116,
+        "p95": 0.23758517801761628,
+        "max": 0.2848610281944275
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.00028844730454187425,
+        "median": 0.0002504111616872251,
+        "p95": 0.0006264716212172061,
+        "max": 0.0014013457112014294
+      }
+    },
+    {
+      "id": "start",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.07885854691267014,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.14086508378386497,
+        "median": 0.1383274719119072,
+        "p95": 0.15959990993142129,
+        "max": 0.16200408339500427
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 1.9282036867331376,
+        "median": 1.8759517073631287,
+        "p95": 4.356341361999512,
+        "max": 4.8601226806640625
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.009412062901178915,
+        "median": 0.005316361086443067,
+        "p95": 0.03270968981087208,
+        "max": 0.09751970320940018
+      }
+    },
+    {
+      "id": "stop",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.13410033285617828,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.26133469492197037,
+        "median": 0.2610357627272606,
+        "p95": 0.32980633080005645,
+        "max": 0.3309306502342224
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 3.0121451670473274,
+        "median": 1.4370371103286743,
+        "p95": 9.51585712432861,
+        "max": 9.927919387817383
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.0062798358810589126,
+        "median": 0.0033107874915003777,
+        "p95": 0.018849618267267942,
+        "max": 0.07572150975465775
+      }
+    }
+  ],
+  "metrics": {
+    "low_foot_proxy": {
+      "height_ceiling_m": 0.06,
+      "vertical_speed_ceiling_mps": 0.25,
+      "candidate_fraction": 0.6758669704861111,
+      "uses_horizontal_speed_to_select": false
+    },
+    "proxy_world_xz_speed_mps": {
+      "samples": 1245758,
+      "mean": 0.1819638845604066,
+      "median": 0.012204426544712073,
+      "p95": 1.0214766885063373,
+      "max": 10.446626323462096
+    },
+    "proxy_bout_endpoint_drift_m": {
+      "samples": 19590,
+      "mean": 0.1493296180483297,
+      "median": 0.08415974900264908,
+      "p95": 0.5526051154809097,
+      "max": 1.1216329216728476
+    },
+    "proxy_bout_path_length_m": {
+      "samples": 19590,
+      "mean": 0.19285601914429387,
+      "median": 0.11751247360646186,
+      "p95": 0.6226133825418727,
+      "max": 22.677710821324208
+    },
+    "proxy_bout_duration_s": {
+      "samples": 19590,
+      "mean": 1.0598587714820487,
+      "median": 0.20000000000000284,
+      "p95": 1.4500000000000028,
+      "max": 42.36666666666666
+    },
+    "transition_proxy_world_xz_speed_mps": {
+      "samples": 53016,
+      "mean": 0.5904791466726539,
+      "median": 0.36553861681434785,
+      "p95": 1.9660546493497089,
+      "max": 10.446626323462096
+    },
+    "transition_all_feet_world_xz_speed_mps": {
+      "samples": 79624,
+      "mean": 0.7267894785755723,
+      "median": 0.4681704460761553,
+      "p95": 2.330433437998855,
+      "max": 16.912796465995267
+    },
+    "stopped_proxy_world_xz_speed_mps": {
+      "samples": 890464,
+      "mean": 0.012595036487721326,
+      "median": 0.0028046638900765843,
+      "p95": 0.03318437937312912,
+      "max": 1.3070545644856684
+    },
+    "all_endpoint_frame_step_m": {
+      "samples": 1843200,
+      "mean": 0.010256447971764868,
+      "median": 0.0007193583762035586,
+      "p95": 0.05503917280626418,
+      "max": 0.2883295574658391
+    },
+    "minimum_endpoint_y_m": -0.002803194656492734,
+    "endpoint_samples_below_y_minus_1cm": 0,
+    "feet": {
+      "left_ankle": {
+        "samples": 250594,
+        "mean": 0.028119940402398347,
+        "median": 0.006551015828509511,
+        "p95": 0.14497304170205516,
+        "max": 5.226037347108092
+      },
+      "right_ankle": {
+        "samples": 243815,
+        "mean": 0.035728845565344974,
+        "median": 0.006024263713068498,
+        "p95": 0.11010348438514672,
+        "max": 6.771984997418256
+      },
+      "left_toe": {
+        "samples": 374287,
+        "mean": 0.25973041802324626,
+        "median": 0.017694868588651824,
+        "p95": 1.9347115425671244,
+        "max": 7.015297988472812
+      },
+      "right_toe": {
+        "samples": 377062,
+        "mean": 0.3015719672224277,
+        "median": 0.019986850278166702,
+        "p95": 2.3263252078866112,
+        "max": 10.446626323462096
+      }
+    }
+  },
+  "limitations": [
+    "Low and vertically stable joint endpoints are contact candidates, not measured physical contacts.",
+    "Native22 endpoint targets are measured, not deformed sole vertices; skin-floor contact can differ.",
+    "Procedural idle/walk blends and source loop seams remain included in the measured motion.",
+    "Frame sampling may miss peaks between samples; no metric threshold implies visual acceptance."
+  ],
+  "inputs": {
+    "review/crowd-crossing/assets/manifest.json": "248d5494ee11973053b17beb7c7d90a54be4203a5ee786ab44883f6466ae9650",
+    "review/crowd-crossing/assets/poses.bin": "db509175f01c69dd4e2db688206ec5a5991a06f38b894b7024a3c7ef18296b20",
+    "review/crowd-crossing/trajectories-64.json": "a92a124c2df4e5c9d73720d50b3b3c094003537d356a3ff30a6fd89e6573fcc9",
+    "/Users/jakob/.codex/worktrees/crowd-crossing/Shellhacks/studio_client/src/crowd/CrowdRenderer.ts": "c7a8f7a4d48db7b60865c1c073535b6aa52ca8edbbfaadb026700cdce680543b"
+  }
+}

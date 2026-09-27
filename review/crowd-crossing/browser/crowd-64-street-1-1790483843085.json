@@ -1,0 +1,84 @@
+{
+  "schema": "stagezero.crowd.browser-profile.v1",
+  "createdAt": "2026-09-27T04:37:23.085Z",
+  "device": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "platform": "MacIntel",
+    "hardwareConcurrency": 12,
+    "deviceMemoryGiB": 32,
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M6, Unspecified Version)",
+    "resolution": [
+      1200,
+      808
+    ],
+    "cssResolution": [
+      1200,
+      808
+    ],
+    "pixelRatio": 1
+  },
+  "actors": 64,
+  "quality": "GPU affine, shared mesh, no shadows, DPR capped1.5",
+  "durationWallSeconds": 30.00580000001192,
+  "frames": 1801,
+  "sustainedFps": 60.0217291323439,
+  "frameMs": {
+    "median": 16.69999999999709,
+    "p95": 18.200000000000728,
+    "p99": 18.599999999998545,
+    "max": 18.700000000000728,
+    "samples": 1801
+  },
+  "updateCpuMs": {
+    "median": 0,
+    "p95": 0.19999998807907104,
+    "p99": 4.200000047683716,
+    "max": 16.399999976158142,
+    "samples": 1801
+  },
+  "renderSubmissionCpuMs": {
+    "median": 0.30000001192092896,
+    "p95": 1.100000023841858,
+    "p99": 3.300000011920929,
+    "max": 12.800000011920929,
+    "samples": 1801
+  },
+  "gpuMs": {
+    "median": 2.575874,
+    "p95": 4.119458,
+    "p99": 5.414666,
+    "max": 6.413541,
+    "samples": 1800
+  },
+  "gpuTimingAvailable": true,
+  "hiddenFrameCount": 0,
+  "validForegroundRun": true,
+  "loadMs": 210.9000000357628,
+  "payloadBytes": 20832665,
+  "heapBytes": {
+    "median": 240278434,
+    "p95": 241098102,
+    "p99": 241286050,
+    "max": 241399494,
+    "samples": 1801
+  },
+  "rendererMemory": {
+    "geometries": 39,
+    "textures": 1
+  },
+  "drawCalls": 39,
+  "triangles": 3152852,
+  "actorTriangles": 3143168,
+  "camera": "street",
+  "trajectorySource": "/review/crowd-crossing/trajectories-64.json",
+  "motionSource": "/review/crowd-crossing/assets/manifest.json",
+  "backgroundSource": "http://127.0.0.1:24970/review/crowd-crossing/assets/crossing_scene.json",
+  "liveCapture": false,
+  "sceneEndTime": 30.004900000035278,
+  "notes": [
+    "rAF includes real wall-clock browser scheduling; capture is MediaRecorder realtime, not deterministic frame export",
+    "Render CPU measures command submission; GPU timer may be unavailable",
+    "JS heap excludes GPU allocation and may require browser precise-memory flags",
+    "Procedural speed-driven idle blend; approximate affine normals; no skin geometry LOD"
+  ]
+}

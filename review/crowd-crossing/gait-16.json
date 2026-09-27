@@ -1,0 +1,278 @@
+{
+  "schema": "stagezero.crowd-gait-metrics.v1",
+  "actors": 16,
+  "duration_s": 120.0,
+  "sample_fps": 60.0,
+  "sampled_frames": 7201,
+  "renderer_contract": "CrowdRenderer.update + locomotionWeights: gait selection (casual maps relaxed), XZ-scale-adjusted distance phase, golden offset, linear wrapped walk, nearest idle, tick smoothstep rate-limited 1.8/s and interpolated, actor XYZ scale",
+  "source_loops": [
+    {
+      "id": "walk-relaxed",
+      "frames": 73,
+      "loop_endpoint_discontinuity_rms_m": 0.010858255438506603,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.011789584998041391,
+        "median": 0.011148239951580763,
+        "p95": 0.015983457444235682,
+        "max": 0.01642504334449768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.24689835547046227,
+        "median": 0.18688078224658966,
+        "p95": 0.6105589002370834,
+        "max": 0.9834091663360596
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1584,
+        "mean": 0.014507353586528975,
+        "median": 0.006592961261048913,
+        "p95": 0.04171322267502546,
+        "max": 0.09942567348480225
+      }
+    },
+    {
+      "id": "walk-brisk",
+      "frames": 49,
+      "loop_endpoint_discontinuity_rms_m": 0.014318078756332397,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.014599478570744395,
+        "median": 0.015229490119963884,
+        "p95": 0.020782661344856023,
+        "max": 0.021116426214575768
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.31408259306441655,
+        "median": 0.22003816813230515,
+        "p95": 0.9858781963586805,
+        "max": 1.0311684608459473
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1056,
+        "mean": 0.021990485632572512,
+        "median": 0.014684042427688837,
+        "p95": 0.05962672829627991,
+        "max": 0.10345882177352905
+      }
+    },
+    {
+      "id": "idle",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.00553074711933732,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.005105656455270946,
+        "median": 0.004991476656869054,
+        "p95": 0.006349978735670447,
+        "max": 0.006492822431027889
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 0.1497837117957798,
+        "median": 0.16787390410900116,
+        "p95": 0.23758517801761628,
+        "max": 0.2848610281944275
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.00028844730454187425,
+        "median": 0.0002504111616872251,
+        "p95": 0.0006264716212172061,
+        "max": 0.0014013457112014294
+      }
+    },
+    {
+      "id": "start",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.07885854691267014,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.14086508378386497,
+        "median": 0.1383274719119072,
+        "p95": 0.15959990993142129,
+        "max": 0.16200408339500427
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 1.9282036867331376,
+        "median": 1.8759517073631287,
+        "p95": 4.356341361999512,
+        "max": 4.8601226806640625
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.009412062901178915,
+        "median": 0.005316361086443067,
+        "p95": 0.03270968981087208,
+        "max": 0.09751970320940018
+      }
+    },
+    {
+      "id": "stop",
+      "frames": 59,
+      "loop_endpoint_discontinuity_rms_m": 0.13410033285617828,
+      "foot_loop_endpoint_discontinuity_m": {
+        "samples": 4,
+        "mean": 0.26133469492197037,
+        "median": 0.2610357627272606,
+        "p95": 0.32980633080005645,
+        "max": 0.3309306502342224
+      },
+      "loop_edge_speed_at_nominal_fps_mps": {
+        "samples": 22,
+        "mean": 3.0121451670473274,
+        "median": 1.4370371103286743,
+        "p95": 9.51585712432861,
+        "max": 9.927919387817383
+      },
+      "ordinary_endpoint_step_m": {
+        "samples": 1276,
+        "mean": 0.0062798358810589126,
+        "median": 0.0033107874915003777,
+        "p95": 0.018849618267267942,
+        "max": 0.07572150975465775
+      }
+    }
+  ],
+  "metrics": {
+    "low_foot_proxy": {
+      "height_ceiling_m": 0.06,
+      "vertical_speed_ceiling_mps": 0.25,
+      "candidate_fraction": 0.6609505208333334,
+      "uses_horizontal_speed_to_select": false
+    },
+    "proxy_world_xz_speed_mps": {
+      "samples": 304566,
+      "mean": 0.19347213701304525,
+      "median": 0.015212096846030136,
+      "p95": 0.9734962981331446,
+      "max": 6.059961024153315
+    },
+    "proxy_bout_endpoint_drift_m": {
+      "samples": 5061,
+      "mean": 0.1342582610202079,
+      "median": 0.06668151594946102,
+      "p95": 0.4281611713312047,
+      "max": 1.6429688898074175
+    },
+    "proxy_bout_path_length_m": {
+      "samples": 5061,
+      "mean": 0.19404938049632872,
+      "median": 0.11756949764685076,
+      "p95": 0.5711406970470975,
+      "max": 26.24861616973508
+    },
+    "proxy_bout_duration_s": {
+      "samples": 5061,
+      "mean": 1.0029836000790358,
+      "median": 0.18333333333333002,
+      "p95": 1.4833333333333272,
+      "max": 38.266666666666666
+    },
+    "transition_proxy_world_xz_speed_mps": {
+      "samples": 31022,
+      "mean": 0.47704843571500716,
+      "median": 0.3694051809687112,
+      "p95": 1.1935996915607425,
+      "max": 4.748541078568385
+    },
+    "transition_all_feet_world_xz_speed_mps": {
+      "samples": 41988,
+      "mean": 0.5274630580132665,
+      "median": 0.41917727575191255,
+      "p95": 1.322839145145426,
+      "max": 4.748541078568385
+    },
+    "stopped_proxy_world_xz_speed_mps": {
+      "samples": 195624,
+      "mean": 0.013918323981590864,
+      "median": 0.002667598604605399,
+      "p95": 0.03276590292642139,
+      "max": 1.3627806495684855
+    },
+    "full_walk_proxy_world_xz_speed_mps": {
+      "samples": 77920,
+      "mean": 0.5313562640938073,
+      "median": 0.09870732816700825,
+      "p95": 3.3367990784764596,
+      "max": 6.059961024153315
+    },
+    "worst_proxy_interval": {
+      "time_start_s": 92.93333333333334,
+      "time_end_s": 92.95,
+      "actor_index": 4,
+      "foot": "left_toe",
+      "xz_speed_mps": 6.059961024153315,
+      "blend_start": 1.0,
+      "blend_end": 1.0,
+      "start_xyz_m": [
+        -2.399484483100872,
+        0.017887922630920126,
+        -1.6436737001289534
+      ],
+      "end_xyz_m": [
+        -2.366558270094884,
+        0.013931194754588486,
+        -1.7391552862009354
+      ]
+    },
+    "all_endpoint_frame_step_m": {
+      "samples": 460800,
+      "mean": 0.010379481392106213,
+      "median": 0.0012073314366113316,
+      "p95": 0.054416134015452075,
+      "max": 0.1010768246297059
+    },
+    "minimum_endpoint_y_m": -0.0027979348263190767,
+    "endpoint_samples_below_y_minus_1cm": 0,
+    "feet": {
+      "left_ankle": {
+        "samples": 60748,
+        "mean": 0.039783268486090935,
+        "median": 0.008337081325775155,
+        "p95": 0.2310082092936671,
+        "max": 0.9749473017542053
+      },
+      "right_ankle": {
+        "samples": 58755,
+        "mean": 0.057534354186951076,
+        "median": 0.009213474276360503,
+        "p95": 0.44015549401763887,
+        "max": 1.4184502757937218
+      },
+      "left_toe": {
+        "samples": 91727,
+        "mean": 0.24410576185002036,
+        "median": 0.025186860495575666,
+        "p95": 1.2973038480587424,
+        "max": 6.059961024153315
+      },
+      "right_toe": {
+        "samples": 93336,
+        "mean": 0.3293130270212025,
+        "median": 0.02432246514443216,
+        "p95": 2.481495288934124,
+        "max": 6.044665821058687
+      }
+    }
+  },
+  "limitations": [
+    "Low and vertically stable joint endpoints are contact candidates, not measured physical contacts.",
+    "Native22 endpoint targets are measured, not deformed sole vertices; skin-floor contact can differ.",
+    "Procedural idle/walk blends and source loop seams remain included in the measured motion.",
+    "Frame sampling may miss peaks between samples; no metric threshold implies visual acceptance."
+  ],
+  "inputs": {
+    "review/crowd-crossing/assets/manifest.json": "2fecf92d292d5667585ad57dfe3a79c0ad2b01c32a4845db8e0253b58a3bd0c3",
+    "review/crowd-crossing/assets/poses.bin": "db509175f01c69dd4e2db688206ec5a5991a06f38b894b7024a3c7ef18296b20",
+    "review/crowd-crossing/trajectories-16.json": "05289f4682dcc9bb64c1bce2ad2eeac9450afabee3dc9712d5540b6d48e91e9f",
+    "studio_client/src/crowd/CrowdRenderer.ts": "d211e04854b0202c629b3b06123b6b45677122e330319dfb665c9850a0db8995"
+  },
+  "provenance_refresh": {
+    "reason": "Final source manifest metadata only; poses SHA and recomputed loop/world gait metrics identical.",
+    "previous_manifest_sha256": "2fecf92d292d5667585ad57dfe3a79c0ad2b01c32a4845db8e0253b58a3bd0c3"
+  }
+}
