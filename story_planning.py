@@ -65,10 +65,20 @@ def story_system_prompt(context=None, seconds=None):
         'Speech while moving belongs on that motion beat. Speech after an action belongs '
         'on a separate later beat with a standing or speaking motion prompt. '
         'Do not invent dialogue. Omit dialogue from beats with no spoken line. '
-        'Each beat prompt is at most 500 characters and suitable for a motion backend. '
-        'Give each beat a unique sequential id beat-1, beat-2, etc. Each beat lasts '
-        '0.16 to 30 seconds; total duration is at most 120 seconds. Prefer several '
-        'short beats over one long beat. Do not assert that physics, contact, safe '
+        'Every beat prompt MUST be one short, plain sentence beginning "A person ". '
+        'Use familiar motion-training language such as "A person walks forward.", '
+        '"A person turns left.", "A person runs forward with strong arm pumps.", '
+        '"A person waves one hand.", or "A person stands still." '
+        'Keep one movement per beat and no more than 18 words. Avoid poetic modifiers, '
+        'emotional descriptions, detailed gait claims, and compound choreography. '
+        'Give each beat a unique sequential id beat-1, beat-2, etc. Estimate each '
+        'movement at its natural duration, considering action complexity, travel '
+        'distance, repetitions, transitions, and any timing stated by the user. '
+        'Quick gestures need less time than traveling across a scene. Do not divide '
+        'a scene total evenly across beats or add idle motion to fill time. '
+        'Each beat lasts 0.16 to 30 seconds; the sum is the scene duration and is '
+        'at most 120 seconds. Preserve the requested number of repetitions. '
+        'Do not assert that physics, contact, safe '
         'landing, navigation, or another character will work. For fights, hugs, '
         'making up, or other multi-character actions, plan ONLY the primary actor\'s '
         'visible motions and warn that the other actor is not independently animated. '
@@ -78,19 +88,18 @@ def story_system_prompt(context=None, seconds=None):
     )
     if seconds is not None:
         frames = validate_story_seconds(seconds)
-        beat_cap = max(6, math.ceil(frames / MAX_BEATS) / FPS)
-        minimum = math.ceil(frames / round(beat_cap * FPS))
         instruction += (
-            f' Plan for a total scene duration of {frames / FPS:.2f} seconds with at least '
-            f'{minimum} beats. Each beat should last about 3 to {beat_cap:g} seconds. '
-            'Every beat prompt MUST be one short, plain sentence beginning "A person ". '
-            'Use familiar motion-training language: "A person walks forward.", '
-            '"A person turns left.", "A person runs forward with strong arm pumps.", '
-            '"A person waves one hand.", or "A person stands still." '
-            'Keep one movement per beat and no more than 18 words. Avoid poetic modifiers, '
-            'emotional descriptions, detailed gait claims, and compound choreography. '
-            'When one action needs more time, repeat its simple motion in adjacent beats.'
+            f' The user requests exactly {frames / FPS:.2f} seconds total. Budget '
+            'plausible, varied beat durations that add to this total at 25 fps. '
+            'Keep explicit action timings and repetition counts in the request. '
+            'Only describe repetitions or extended travel when the request supports '
+            'them; do not invent filler or duplicate a finite gesture to occupy time. '
+            'If the requested total cannot fit the requested actions naturally within '
+            'the beat and scene limits, report the conflict through your best plan; '
+            'the validator will recommend Auto.'
         )
+    else:
+        instruction += ' Auto timing: let the natural beat estimates determine the total scene length.'
     if context is None:
         return instruction
     if not isinstance(context, (str, dict)):
@@ -134,7 +143,7 @@ def validate_story_plan(document, expected_prompt=None):
     if len(beats) < minimum_beats:
         raise ValueError(f'Story request has at least {minimum_beats} sequential actions; keep them in separate beats')
     checked_beats = []
-    total = 0.0
+    total_frames = 0
     for number, beat in enumerate(beats, 1):
         if not isinstance(beat, dict) or not {'id', 'prompt', 'seconds'} <= set(beat) or set(beat) - {'id', 'prompt', 'seconds', 'dialogue'}:
             raise ValueError(f'Beat {number} requires id, prompt, seconds, and optional dialogue only')
@@ -154,12 +163,15 @@ def validate_story_plan(document, expected_prompt=None):
             raise ValueError(f'Beat {number} seconds must be finite')
         if not .16 <= seconds <= MAX_BEAT_SECONDS:
             raise ValueError(f'Beat {number} seconds must be 0.16–30')
-        total += seconds
-        checked = {'id': beat['id'], 'prompt': motion.strip(), 'seconds': float(seconds)}
+        frames = round(seconds * FPS)
+        if not 4 <= frames <= round(MAX_BEAT_SECONDS * FPS):
+            raise ValueError(f'Beat {number} seconds must align within 0.16–30')
+        total_frames += frames
+        checked = {'id': beat['id'], 'prompt': motion.strip(), 'seconds': frames / FPS}
         if dialogue is not None:
             checked['dialogue'] = dialogue.strip()
         checked_beats.append(checked)
-    if total > MAX_STORY_SECONDS + 1e-8:
+    if total_frames > round(MAX_STORY_SECONDS * FPS):
         raise ValueError('Story duration exceeds 120 seconds')
     warnings = document['warnings']
     if not isinstance(warnings, list) or len(warnings) > 8:
@@ -192,42 +204,28 @@ def validate_story_seconds(seconds):
     return frames
 
 
-def fit_story_duration(plan, seconds):
-    """Allocate exact 25 fps frames across ordered beats, splitting long beats.
-
-    A model's duration guesses determine relative pacing. The requested scene
-    length determines the actual take duration, including a 60-second request.
-    """
-    frames = validate_story_seconds(seconds)
-    source = validate_story_plan(plan)
-    beats = source['beats']
-    if (sum(round(beat['seconds'] * FPS) for beat in beats) == frames
-            and all(abs(beat['seconds'] - round(beat['seconds'] * FPS) / FPS) < 1e-9
-                    for beat in beats)):
+def fit_story_duration(plan, seconds=None, expected_prompt=None):
+    """Align estimates to frames; only repair tiny fixed-target rounding drift."""
+    frames = validate_story_seconds(seconds) if seconds is not None else None
+    source = validate_story_plan(plan, expected_prompt=expected_prompt)
+    if frames is None:
         return source
-    if frames < 4 * len(beats):
-        raise ValueError('Requested scene duration is too short for all planned actions')
-    weights = [beat['seconds'] for beat in beats]
-    available = frames - 4 * len(beats)
-    exact = [available * weight / sum(weights) for weight in weights]
-    allocated = [4 + int(value) for value in exact]
-    missing = frames - sum(allocated)
-    order = sorted(range(len(beats)), key=lambda i: exact[i] - int(exact[i]), reverse=True)
-    for index in order[:missing]:
-        allocated[index] += 1
-    fitted = []
-    beat_cap = max(6 * FPS, math.ceil(frames / MAX_BEATS))
-    for beat, count in zip(beats, allocated):
-        pieces = math.ceil(count / beat_cap)
-        base, extra = divmod(count, pieces)
-        for piece in range(pieces):
-            split = dict(beat, id=f'beat-{len(fitted) + 1}', seconds=(base + (piece < extra)) / FPS)
-            if piece:
-                split.pop('dialogue', None)
-            fitted.append(split)
-    if len(fitted) > MAX_BEATS:
-        raise ValueError('Requested scene duration needs more than 16 actions')
-    source['beats'] = fitted
+    beats = source['beats']
+    actual = sum(round(beat['seconds'] * FPS) for beat in beats)
+    difference = frames - actual
+    if difference == 0:
+        return source
+    # Half a frame per beat is the largest plausible aggregate rounding drift.
+    # Move each affected beat by only one frame; larger gaps need a new plan.
+    if abs(difference) > max(1, len(beats) // 2):
+        raise ValueError('Requested scene duration does not fit natural action timing; use Auto or revise the request')
+    direction = 1 if difference > 0 else -1
+    candidates = sorted(range(len(beats)), key=lambda i: beats[i]['seconds'], reverse=True)
+    candidates = [i for i in candidates if 4 <= round(beats[i]['seconds'] * FPS) + direction <= 750]
+    if len(candidates) < abs(difference):
+        raise ValueError('Requested scene duration cannot fit the planned actions; use Auto or revise the request')
+    for index in candidates[:abs(difference)]:
+        beats[index]['seconds'] = (round(beats[index]['seconds'] * FPS) + direction) / FPS
     return validate_story_plan(source, expected_prompt=source['prompt'])
 
 
@@ -262,11 +260,9 @@ class StoryPlanner:
     @staticmethod
     def _checked(document, prompt, seconds):
         plan = validate_story_plan(document, expected_prompt=prompt)
-        if seconds is not None:
-            for number, beat in enumerate(plan['beats'], 1):
-                motion = beat['prompt']
-                if (not motion.startswith('A person ') or len(motion) > 120
-                        or len(motion.split()) > 18 or ',' in motion or ';' in motion):
-                    raise ValueError(f'Beat {number} must be one short, plain movement sentence starting "A person "')
-            return fit_story_duration(plan, seconds)
-        return plan
+        for number, beat in enumerate(plan['beats'], 1):
+            motion = beat['prompt']
+            if (not motion.startswith('A person ') or len(motion) > 120
+                    or len(motion.split()) > 18 or ',' in motion or ';' in motion):
+                raise ValueError(f'Beat {number} must be one short, plain movement sentence starting "A person "')
+        return fit_story_duration(plan, seconds, expected_prompt=prompt)

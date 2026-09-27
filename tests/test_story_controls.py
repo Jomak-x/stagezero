@@ -89,7 +89,7 @@ class Workflow:
         self.jobs = {}
         self.closed = False
 
-    def submit(self, prompt, seconds=60):
+    def submit(self, prompt, seconds=None):
         identifier = f'job-{len(self.jobs) + 1}'
         self.jobs[identifier] = {'status': 'running', 'loaded': False, 'take_id': None,
                                  'plan': None, 'progress': {'completed_beats': 0,
@@ -207,7 +207,8 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(view.modal.title, 'Full scene')
         self.assertEqual(view.prompt.value, '')
         self.assertIn('Walk forward', view.prompt.hint)
-        self.assertEqual(view.length.value, '30 seconds')
+        self.assertEqual(view.length.value, 'Auto')
+        self.assertEqual(view.length.options[0], 'Auto')
         self.assertFalse(view.seconds.visible)
         self.assertFalse(view.jobs.visible)
         self.assertFalse(view.cancel.visible)
@@ -218,6 +219,7 @@ class StoryControlsTests(unittest.TestCase):
         self.assertFalse(view.undo.visible)
         self.assertFalse(view.cancel_edit.visible)
         self.assertEqual(view.status.content, '')
+        self.assertEqual(view.estimate.content, '')
         view.generate.click(self.client)
         self.assertFalse(self.controls.ids)
         self.assertIn('Describe what happens', view.status.content)
@@ -242,7 +244,8 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(len(self.client_gui.modals), 1)
         self.assertEqual(self.client_gui.modals[0].size, 'md')
         self.assertEqual(len(self.gui.modals), 0)
-        self.create_scene(view)
+        identifier = self.create_scene(view)
+        self.assertIsNone(self.controls.workflow.jobs[identifier]['seconds'])
         self.assertEqual(len(self.controls.ids), 1)
         view.close.click(self.client)
         self.assertTrue(view.modal.closed)
@@ -251,7 +254,35 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(len(self.controls.workflow.jobs), 1)
         reopened = self.controls.open(self.client)
         self.assertEqual(reopened.jobs.options[0], next(iter(self.controls.ids)))
+        self.assertEqual(reopened.length.value, 'Auto')
         self.assertIn('Creating scene', reopened.status.content)
+
+    def test_auto_plan_estimate_and_refine_durations(self):
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['plan'] = {
+            'beats': [
+                {'prompt': 'Walk toward the door', 'seconds': 3.4},
+                {'prompt': 'Pause and wave', 'seconds': 2.16},
+                {'prompt': 'Turn and walk away', 'seconds': 4.04},
+            ],
+            'warnings': [],
+        }
+        self.controls.update()
+        self.assertIn('Estimated 9.6s · 3 movements', view.estimate.content)
+        self.assertIn('Pause and wave · 2.16s', view.plan.content)
+        self.session.scene_take = SimpleNamespace(
+            id='scene-take', name='Saved performance', segments=[
+                {'prompt': 'Walk toward the door', 'start': 0, 'end': 85},
+                {'prompt': 'Pause and wave', 'start': 85, 'end': 139},
+                {'prompt': 'Turn and walk away', 'start': 139, 'end': 240},
+            ])
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        view.load.click(self.client)
+        self.assertIn('Current scene: 9.6s · 3 movements', view.estimate.content)
+        self.assertIn('3.40s long · Walk toward the door', view.actions.options[0])
+        self.assertIn('2.16s long · Pause and wave', view.actions.options[1])
+        self.assertIn('4.04s long · Turn and walk away', view.actions.options[2])
 
     def test_core_active_scene_can_submit_but_load_hands_off(self):
         self.session.character_motion_enabled = False
@@ -288,15 +319,20 @@ class StoryControlsTests(unittest.TestCase):
 
     def test_duration_validation_and_selected_movement_edit(self):
         view = self.controls.open(self.client)
+        view.length.edit('15 seconds', self.client)
+        self.assertFalse(view.seconds.visible)
+        identifier = self.create_scene(view)
+        self.assertEqual(self.controls.workflow.jobs[identifier]['seconds'], 15)
         view.length.edit('Custom', self.client)
+        self.assertTrue(view.seconds.visible)
         view.seconds.value = '121'
         view.prompt.value = 'Walk forward, then wave.'
         view.generate.click(self.client)
-        self.assertFalse(self.controls.ids)
+        self.assertEqual(len(self.controls.ids), 1)
         self.assertIn('120', view.error)
         view.seconds.value = '60'
         view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = list(self.controls.ids.values())[-1]
         self.assertEqual(self.controls.workflow.jobs[identifier]['seconds'], 60)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
@@ -325,6 +361,7 @@ class StoryControlsTests(unittest.TestCase):
         view = self.controls.open(self.client)
         self.assertEqual(self.controls.ids, {})
         self.assertIn('Saved performance', view.source.content)
+        self.assertIn('Current scene: 8s · 2 movements', view.estimate.content)
         self.assertEqual(len(view.action_map), 2)
         self.assertFalse(view.edit.disabled)
         view.action_prompt.value = 'Walk toward the door'
@@ -363,10 +400,12 @@ class StoryControlsTests(unittest.TestCase):
         self.session.status = 'Regenerated 2 actions · Undo is available'
         self.session.takes['scene-take'] = SimpleNamespace(
             id='scene-take', name='Saved performance',
-            segments=[{'prompt': 'Walk sideways', 'start': 0, 'end': 100},
-                      {'prompt': 'Wave', 'start': 100, 'end': 200}])
+            segments=[{'prompt': 'Walk sideways', 'start': 0, 'end': 125},
+                      {'prompt': 'Wave', 'start': 125, 'end': 220}])
         self.controls.update()
         self.assertIn('Movement updated', view.status.content)
+        self.assertIn('Current scene: 8.8s · 2 movements', view.estimate.content)
+        self.assertIn('5.00s long · Walk sideways', view.actions.options[0])
         self.controls.update()
         self.assertIn('Movement updated', view.status.content)
         self.assertEqual(view.selected_index, 0)

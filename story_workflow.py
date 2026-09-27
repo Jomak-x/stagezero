@@ -113,11 +113,12 @@ class StoryWorkflow:
             if not isinstance(session.backend, SerializedBackend):
                 session.backend = SerializedBackend(session.backend)
 
-    def submit(self, prompt, seconds=60):
+    def submit(self, prompt, seconds=None):
         if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 2000:
             raise ValueError('Describe the full scene in 1–2000 characters')
         # Validate before starting a planning thread or initializing a pod lane.
-        validate_story_seconds(seconds)
+        if seconds is not None:
+            validate_story_seconds(seconds)
         with self.session.lock:
             scene = copy.deepcopy(self.session.scene)
             identity = self.session.scene
@@ -149,8 +150,8 @@ class StoryWorkflow:
         try:
             planner = self.planner or StoryPlanner()
             plan = planner.plan(prompt, context=planning_context(scene), seconds=seconds)
-            # Custom planner implementations must honor the requested duration too.
-            plan = fit_story_duration(plan, seconds)
+            # Apply the same timing and source-request checks to custom planners.
+            plan = fit_story_duration(plan, seconds, expected_prompt=prompt)
             with self.lock:
                 if job['status'] == 'cancelled' or self.closed:
                     return

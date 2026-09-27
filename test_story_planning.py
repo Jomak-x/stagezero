@@ -24,26 +24,42 @@ def plan(prompt=STORY):
 
 
 class StoryPlanValidationTests(unittest.TestCase):
-    def test_explicit_minute_is_exact_and_keeps_action_order(self):
-        fitted = fit_story_duration(plan(), 60)
-        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in fitted['beats']), 1500)
-        self.assertEqual(list(dict.fromkeys(beat['prompt'] for beat in fitted['beats'])),
-                         [beat['prompt'] for beat in plan()['beats']])
-        self.assertTrue(all(.16 <= beat['seconds'] <= 6 for beat in fitted['beats']))
-        self.assertEqual(fit_story_duration(fitted, 60), fitted)
+    def test_auto_preserves_heterogeneous_estimates_and_aligns_to_frames(self):
+        source = plan()
+        source['beats'][0]['seconds'] = 1.03
+        source['beats'][1]['seconds'] = 2.05
+        source['beats'][2]['seconds'] = 4.11
+        fitted = fit_story_duration(source)
+        self.assertEqual([beat['seconds'] for beat in fitted['beats']], [1.04, 2.04, 4.12])
+        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in fitted['beats']), 180)
+        self.assertEqual(len(fitted['beats']), len(source['beats']))
+        self.assertEqual(fit_story_duration(fitted), fitted)
 
-    def test_long_single_action_splits_to_respect_beat_bound(self):
+    def test_fixed_duration_only_repairs_one_frame_rounding_drift(self):
+        source = plan('The actor walks and waves.')
+        source['beats'] = [
+            {'id': 'beat-1', 'prompt': 'A person walks forward.', 'seconds': 1.96},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 2.00},
+        ]
+        fitted = fit_story_duration(source, 4)
+        self.assertEqual([beat['seconds'] for beat in fitted['beats']], [1.96, 2.04])
+        self.assertEqual(sum(round(beat['seconds'] * 25) for beat in fitted['beats']), 100)
+        self.assertEqual(len(fitted['beats']), 2)
+        self.assertEqual(fit_story_duration(fitted, 4), fitted)
+
+    def test_fixed_duration_rejects_stretching_or_fake_action_splits(self):
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            fit_story_duration(plan(), 60)
         source = plan('The actor walks slowly.')
-        source['beats'] = [dict(id='beat-1', prompt='Walk slowly.', seconds=4)]
-        fitted = fit_story_duration(source, 60)
-        self.assertEqual(len(fitted['beats']), 10)
-        self.assertEqual([beat['seconds'] for beat in fitted['beats']], [6] * 10)
+        source['beats'] = [dict(id='beat-1', prompt='A person walks forward.', seconds=4)]
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            fit_story_duration(source, 60)
 
     def test_duration_rejects_invalid_or_impossible_request(self):
         for seconds in (False, float('nan'), 0, 121):
             with self.subTest(seconds=seconds), self.assertRaises(ValueError):
                 fit_story_duration(plan(), seconds)
-        with self.assertRaisesRegex(ValueError, 'too short'):
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
             fit_story_duration(plan(), .16)
 
     def test_preserves_ordered_intent_and_normalizes_seconds(self):
@@ -123,6 +139,8 @@ class StoryPlannerTests(unittest.TestCase):
                                 ('A person walks upstairs.', 'A person throws one punch.',
                                  'A person extends one hand.')):
             beat['prompt'] = motion
+        for beat, duration in zip(source['beats'], (27.2, 28.8, 4.0)):
+            beat['seconds'] = duration
         gateway.request_json.return_value = source
         output = StoryPlanner(gateway).plan(STORY, seconds=60)
         self.assertEqual(sum(round(beat['seconds'] * 25) for beat in output['beats']), 1500)
@@ -130,7 +148,12 @@ class StoryPlannerTests(unittest.TestCase):
 
     def test_gateway_uses_original_request_and_context_as_reference_data(self):
         gateway = Mock()
-        gateway.request_json.return_value = plan()
+        source = plan()
+        for beat, motion in zip(source['beats'],
+                                ('A person walks upstairs.', 'A person throws one punch.',
+                                 'A person extends one hand.')):
+            beat['prompt'] = motion
+        gateway.request_json.return_value = source
         output = StoryPlanner(gateway).plan('  ' + STORY + '  ', {'stairs': 'upper landing'})
         self.assertEqual(output['prompt'], STORY)
         system, request = gateway.request_json.call_args.args
@@ -142,7 +165,12 @@ class StoryPlannerTests(unittest.TestCase):
 
     def test_repairs_invalid_plan_once_but_never_retries_transport_error(self):
         gateway = Mock()
-        gateway.request_json.side_effect = [{'wrong': 'shape'}, plan()]
+        source = plan()
+        for beat, motion in zip(source['beats'],
+                                ('A person walks upstairs.', 'A person throws one punch.',
+                                 'A person extends one hand.')):
+            beat['prompt'] = motion
+        gateway.request_json.side_effect = [{'wrong': 'shape'}, source]
         self.assertEqual(len(StoryPlanner(gateway).plan(STORY)['beats']), 3)
         self.assertEqual(gateway.request_json.call_count, 2)
         self.assertIn('failed validation', gateway.request_json.call_args.args[0])
@@ -156,6 +184,39 @@ class StoryPlannerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'gateway unavailable'):
             StoryPlanner(gateway).plan(STORY)
         self.assertEqual(gateway.request_json.call_count, 1)
+
+    def test_fixed_infeasible_plan_repairs_once_then_recommends_auto(self):
+        gateway = Mock()
+        short = plan('A person jogs, then waves.')
+        short['beats'] = [
+            {'id': 'beat-1', 'prompt': 'A person jogs forward.', 'seconds': 4},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 2},
+        ]
+        feasible = copy.deepcopy(short)
+        feasible['beats'][0]['seconds'] = 18
+        gateway.request_json.side_effect = [short, feasible]
+        output = StoryPlanner(gateway).plan(short['prompt'], seconds=20)
+        self.assertEqual([beat['seconds'] for beat in output['beats']], [18, 2])
+        self.assertEqual(gateway.request_json.call_count, 2)
+        gateway.reset_mock()
+        gateway.request_json.side_effect = [short, short]
+        with self.assertRaisesRegex(ValueError, 'use Auto'):
+            StoryPlanner(gateway).plan(short['prompt'], seconds=20)
+        self.assertEqual(gateway.request_json.call_count, 2)
+
+    def test_auto_retries_non_backend_friendly_prompt(self):
+        gateway = Mock()
+        source = plan('Walk, then wave.')
+        source['beats'] = [
+            {'id': 'beat-1', 'prompt': 'An actor moves poetically, with swirling grace.', 'seconds': 3},
+            {'id': 'beat-2', 'prompt': 'A person waves one hand.', 'seconds': 1},
+        ]
+        repaired = copy.deepcopy(source)
+        repaired['beats'][0]['prompt'] = 'A person walks forward.'
+        gateway.request_json.side_effect = [source, repaired]
+        output = StoryPlanner(gateway).plan(source['prompt'])
+        self.assertEqual(output['beats'][0]['prompt'], 'A person walks forward.')
+        self.assertEqual(gateway.request_json.call_count, 2)
 
     def test_context_and_prompt_are_bounded(self):
         gateway = Mock()
