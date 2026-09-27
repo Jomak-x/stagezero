@@ -26,23 +26,17 @@ ROUTINE_STATUS_PREFIXES = (
 )
 
 STYLE = """<style>
-:root { --mantine-font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.mantine-Paper-root { background: #111923; }
-.mantine-ScrollArea-viewport { scrollbar-color: #344453 #111923; }
-.mantine-Tabs-list { padding: 0 10px; border-bottom: 1px solid #2a3644; gap: 0; }
-.mantine-Tabs-tab { flex: 1; padding: 9px 5px !important; font-size: 12px; font-weight: 600; color: #8fa3b8; }
-.mantine-Tabs-tab[data-active] { color: #87e8cd; border-color: #87e8cd; background: #182b30; }
-.mantine-Tabs-panel { padding-top: 6px; }
-.mantine-Button-root { min-height: 32px; border-radius: 7px; transition: background 120ms; }
-.mantine-Button-root[data-variant=outline] { border-color: #35495a; color: #d2e3ed; }
-.mantine-Button-root:disabled { opacity: .42; }
-.mantine-Input-input { background: #0c121b; border-color: #304052; border-radius: 6px; color: #e3edf6; }
-.mantine-Input-input:focus { border-color: #83dec7; }
-.mantine-Flex-root:has(> div > .mantine-Textarea-root) { flex-direction: column; align-items: stretch !important; gap: 6px; }
-.mantine-Flex-root:has(> div > .mantine-Textarea-root) > div { width: 100% !important; }
-.mantine-Textarea-input { min-height: 68px; line-height: 1.5; padding: 8px; }
-.mantine-Text-root label { color: #a0b1c1; letter-spacing: 0; font-size: 11px; }
-.mantine-Checkbox-label { color: #b6c7d5; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-ScrollArea-viewport { scrollbar-color: #344453 #111923; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root { min-height: 32px; border-radius: 8px; transition: background 120ms; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root[data-variant=outline] { border-color: #35495a; color: #d2e3ed; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root:disabled { opacity: .42; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Input-input { background: #0c121b; border-color: #304052; border-radius: 8px; color: #e3edf6; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Input-input:focus { border-color: #83dec7; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Flex-root:has(> div > .mantine-Textarea-root) { flex-direction: column; align-items: stretch !important; gap: 6px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Flex-root:has(> div > .mantine-Textarea-root) > div { width: 100% !important; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Textarea-input { min-height: 68px; line-height: 1.5; padding: 8px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Text-root label { color: #a0b1c1; letter-spacing: 0; font-size: 11px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Checkbox-label { color: #b6c7d5; }
 .sz-sub { color: #8fa3b8; font-size: 12px; line-height: 1.6; }
 .sz-section { margin: 5px 12px 7px; color: #f0f6fa; font-size: 13px; font-weight: 600; }
 .sz-section small { display: block; color: #8fa3b8; font-size: 11px; font-weight: 400; line-height: 1.45; margin-top: 2px; }
@@ -104,9 +98,6 @@ class StudioUI:
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
         self.quick_actions = gui.add_button_group('Quick actions', ('New take', 'Guide'))
-        self.project_name = gui.add_text('Project name', initial_value='My performance')
-        self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD, color='gray')
-        self.files = gui.add_html('')
         self.tabs = gui.add_tab_group()
         with self.tabs.add_tab('Motion'):
             if core_controls is not None:
@@ -118,9 +109,6 @@ class StudioUI:
             self.timeline_command = gui.add_text('Timeline action command', initial_value='')
             self.timeline_command.visible = False
             self.motion_intro = gui.add_html('')
-            self.ideas_folder = gui.add_folder('Try a direction', expand_by_default=True)
-            with self.ideas_folder:
-                self.ideas = gui.add_button_group('Example directions', ('Wave', 'Walk', 'Dance'))
             self.action_heading = gui.add_html('')
             self.action_note = gui.add_html('')
             self.action_prompt = gui.add_text('Direction', initial_value='', multiline=True)
@@ -143,6 +131,9 @@ class StudioUI:
             self.duration_seconds = gui.add_text('New motion length (seconds, 0.16–30)', initial_value='4.16')
             self.duration_preview = gui.add_html('')
             self.generate = gui.add_button('Generate', icon=viser.Icon.SPARKLES)
+            self.ideas_folder = gui.add_folder('Need an idea?', expand_by_default=False)
+            with self.ideas_folder:
+                self.ideas = gui.add_button_group('Example directions', ('Wave', 'Walk', 'Dance'))
             self.cancel = gui.add_button('Cancel generation', color='gray', visible=False)
             self.motion_progress = gui.add_html('')
             self.advanced_folder = gui.add_folder('Advanced: change ending as a new version', expand_by_default=False)
@@ -189,7 +180,10 @@ class StudioUI:
             section(gui, 'Camera')
             camera.build_gui(gui)
         with self.tabs.add_tab('Project'):
-            section(gui, 'Open or start a project', 'Use Save project + download above to keep the current project.')
+            self.project_name = gui.add_text('Project name', initial_value='My performance')
+            self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD, color='gray')
+            self.files = gui.add_html('')
+            section(gui, 'Open or start a project', 'Save your work here before starting another project.')
             self.saved = gui.add_dropdown('Saved projects', ('No saved projects',))
             self.open = gui.add_button('Open selected project', color='gray')
             self.upload = gui.add_upload_button('Open project file', mime_type='.npz')
@@ -858,6 +852,15 @@ class StudioUI:
                 if take_id is None: return
                 with s.lock:
                     if s.busy: return
+                    if self._active_motion_session() is not None:
+                        try:
+                            if self.on_story_activate is None:
+                                raise ValueError('Switch to One character before opening a take.')
+                            self.on_story_activate()
+                        except (ValueError, RuntimeError) as exc:
+                            s.project_status = str(exc)
+                            self.update()
+                            return
                     if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                     self._set(self.mode, 'value', 'Live ARDY')
                     self._clear_action_edit()
@@ -871,6 +874,15 @@ class StudioUI:
                 take_id = self.slot_ids[index] if index < len(self.slot_ids) else None
                 with s.lock:
                     if s.busy or take_id not in s.takes: return
+                    if self._active_motion_session() is not None:
+                        try:
+                            if self.on_story_activate is None:
+                                raise ValueError('Switch to One character before opening a take.')
+                            self.on_story_activate()
+                        except (ValueError, RuntimeError) as exc:
+                            s.project_status = str(exc)
+                            self.update()
+                            return
                     if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                     self._set(self.mode, 'value', 'Live ARDY')
                     self._clear_action_edit()
@@ -969,6 +981,17 @@ class StudioUI:
                 with s.lock:
                     if s.busy: return
                 motion = self._active_motion_session()
+                if motion is not None and motion is self.core_session:
+                    data = motion.save()
+                    core_folder = self.folder.parent / 'core-projects'
+                    core_folder.mkdir(parents=True, exist_ok=True)
+                    path = core_folder / f'core-{time.time_ns()}.core.stagezero.npz'
+                    path.write_bytes(data)
+                    s.project_status = f'Saved Core motion: {path.name}'
+                    if e.client is not None:
+                        e.client.send_file_download(path.name, data)
+                    self.update()
+                    return
                 if motion is not None and motion in (self.cast_session, self.paired_session) and motion.snapshot().get('fps') == 30:
                     data = motion.save()
                     is_cast = motion is self.cast_session
@@ -1011,6 +1034,10 @@ class StudioUI:
             try:
                 with s.lock:
                     if s.busy: return
+                    if self._active_motion_session() is not None:
+                        if self.on_story_activate is None:
+                            raise ValueError('Switch to One character before starting a new project.')
+                        self.on_story_activate()
                     s.new_project(self.folder)
                     self._clear_action_edit()
                     self._set(self.mode, 'value', s.mode)
@@ -1120,12 +1147,12 @@ class StudioUI:
             self._set(self.motion_progress, 'visible', not action_progress and bool(progress))
             self._set(self.motion_progress, 'content', progress if not action_progress else '')
             intro = ('Select a motion-ready character to generate motion.' if not s.character_motion_enabled else
-                     'Choose Wave, Walk, or Dance below, or write your own direction. '
-                     'Set a length, then press Generate motion.')
+                     'Describe a movement, then press Generate motion. Need a prompt? Try an idea below.')
             heading = 'Create your first motion' if not s.takes else 'Start another take'
             self._set(self.motion_intro, 'content',
                       f'<div class="sz-intro"><b>{heading}</b>{intro}</div>')
-            self._set(self.motion_intro, 'visible', take is None and not s.busy)
+            self._set(self.motion_intro, 'visible', take is None and not s.busy and
+                      not s.character_motion_enabled)
             if take is None:
                 editor_state = 'New take draft' if live else 'Start a new take'
             elif self.edit_action.value == REPLACE:
@@ -1168,10 +1195,14 @@ class StudioUI:
                 self._set(control, 'disabled', take is None or s.busy)
             self._set(self.trim, 'disabled', not live or take is None or s.busy or s.frame < 3 or s.frame >= last_frame)
             active_motion = self._active_motion_session()
-            native_save = active_motion is not None and active_motion in (self.cast_session, self.paired_session) and active_motion.snapshot().get('fps') == 30
+            native_save = active_motion is not None and (active_motion is self.core_session or
+                (active_motion in (self.cast_session, self.paired_session) and active_motion.snapshot().get('fps') == 30))
             native_state = active_motion.snapshot() if native_save else {}
-            self._set(self.save, 'label', 'Save native performance + download' if native_save else 'Save project + download')
-            self._set(self.save, 'disabled', s.busy or (native_save and (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
+            save_label = ('Save Core motion + download' if active_motion is not None and active_motion is self.core_session else
+                          'Save native performance + download' if native_save else 'Save project + download')
+            self._set(self.save, 'label', save_label)
+            self._set(self.save, 'disabled', s.busy or (native_save and
+                (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
             self._set(self.open, 'disabled', not self.saved_map or s.busy)
             self._set(self.upload, 'disabled', s.busy)
             self._set(self.clear, 'disabled', s.busy)
@@ -1185,6 +1216,7 @@ class StudioUI:
             project_status = s.project_status or 'No project save in this session.'
             self._set(self.files, 'content',
                       f'<div class="sz-project-status" role="status">{escape(project_status)}</div>')
+            self._set(self.files, 'visible', bool(s.project_status))
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')
 

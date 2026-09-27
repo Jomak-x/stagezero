@@ -29,9 +29,9 @@ class SceneAtmosphereLayer:
                 handle.color = color
                 handle.intensity = strength
             if hasattr(self.server.scene, 'set_background_image'):
-                skies = {'neutral': ((100,150,191),(214,226,234)),
-                         'warm': ((62,66,73),(145,137,123)),
-                         'sunset': ((83,105,151),(236,176,130)),
+                skies = {'neutral': ((19,26,36),(43,55,66)),
+                         'warm': ((28,30,36),(66,60,54)),
+                         'sunset': ((32,39,60),(99,70,57)),
                          'moonlight': ((10,17,39),(42,65,84)),
                          'neon': ((13,13,32),(40,30,67))}
                 top, bottom = skies[lighting]
