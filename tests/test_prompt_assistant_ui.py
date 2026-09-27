@@ -130,7 +130,7 @@ class PromptAssistantUITests(unittest.TestCase):
         ui = self.make_ui(refiner)
         self.assertTrue(ui.clarify())
         self.assertEqual(self.applied, [])
-        self.assertTrue(ui.folder.expand_by_default)
+        self.assertFalse(ui.folder.expand_by_default)
         self.assertIn('answer needed', ui.folder.label)
         self.assertIn('&lt;Turn back?&gt;', ui._rows[0][0].content)
         self.assertTrue(ui.continue_button.disabled)

@@ -150,9 +150,12 @@ def main():
     server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False, brand_color=(126, 224, 195))
     server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
-    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
-    server.scene.configure_default_lights(enabled=True, cast_shadow=True)
-    server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
+    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment,
+                                           background=False, environment_intensity=.15)
+    server.scene.configure_default_lights(enabled=False)
+    server.scene.add_light_directional('/studio-key', color=(225, 234, 245), intensity=1.6,
+                                       position=(3, 6, 4), cast_shadow=True)
+    server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.2)
     floor = server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
     grid = server.scene.add_grid('/ground-grid', plane='xz', width=200, height=200, cell_size=.5, section_size=2., cell_color=(44, 57, 70), section_color=(68, 87, 100), position=(0, .008, 0), fade_distance=30., fade_strength=2., shadow_opacity=0.)
     stage = trimesh.creation.cylinder(radius=2., height=.035, sections=96)

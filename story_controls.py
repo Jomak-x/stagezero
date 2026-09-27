@@ -743,6 +743,7 @@ class StoryControls:
         summary = (f'{running} generating · {completed} completed' if self.ids else
                    'Build a sequence up to 120 seconds, then refine each movement.')
         self._set(self.sidebar_status, 'content', f'<div class="sz-note">{escape(summary)}</div>')
+        self._set(self.sidebar_status, 'visible', bool(self.ids))
 
     def close(self):
         if self._closed:

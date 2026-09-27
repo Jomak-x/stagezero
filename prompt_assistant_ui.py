@@ -80,7 +80,7 @@ class PromptAssistantUI:
         self._mutex = Lock()
         self._rows = []
 
-        self.folder = gui.add_folder('Prompt assistant', expand_by_default=True)
+        self.folder = gui.add_folder('Prompt assistant', expand_by_default=False)
         with self.folder:
             self.improve = (gui.add_button('Improve prompt', color='gray')
                             if self.generate is None else None)
