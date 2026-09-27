@@ -12,6 +12,8 @@ import os
 import re
 
 from object_generation import DEFAULT_SCENE_MODEL, GatewayGenerator, gateway_config, validate_prompt
+from story_recovery import (EXPLICIT_TIMING as _EXPLICIT_TIMING, NEGATION as _NEGATION,
+                            RECOVERY_PATTERN, is_recovery_motion, recovery_prompt)
 
 
 MAX_BEATS = 16
@@ -42,6 +44,89 @@ _STUNT = re.compile(
 )
 _SEQUENCE_MARKER = re.compile(r'\b(?:then|afterward|after that|finally)\b', re.I)
 _QUOTED_DIALOGUE = re.compile(r'\b(?:say|says|saying|speak|speaks|speaking|shout|shouts|shouting|whisper|whispers|whispering)\s+[“"\']([^”"\']+)[”"\']', re.I)
+
+# Narrow motion vocabulary: these cues identify important transitions, not a
+# general natural-language parser. Unrecognized actions remain model planned.
+_ACTION_CUES = {
+    'run': r'\b(?:sprint\w*|run(?:s|ning)?)\b',
+    'stop': r'\b(?:stop(?:s|ping)?|halts?|comes? to a stop)\b',
+    'fall': r'\b(?:fall(?:s|ing)?|fell|collaps(?:e|es|ing))\b',
+    'recover': RECOVERY_PATTERN,
+    'dance': r'\b(?:danc(?:e|es|ing))\b',
+    'backflip': r'\bback[ -]?flips?\b',
+}
+_TIMING_CLAUSE = re.compile(r'\b(?:then|afterward|after that|finally|and)\b|[.!?;,]', re.I)
+_SCENE_DURATION_CUE = re.compile(
+    r'\b(?:scene|story|sequence|performance|overall|total|entire|whole|duration|long)\b', re.I)
+
+
+def explicit_scene_timing(prompt):
+    """Recognize a duration assigned to the whole scene rather than an action."""
+    return any(_EXPLICIT_TIMING.search(clause) and _SCENE_DURATION_CUE.search(clause)
+               for clause in _TIMING_CLAUSE.split(prompt))
+
+
+def recovery_timing_flags(prompt):
+    """Match user-stated durations to get-up clauses in their original order."""
+    return tuple(bool(_EXPLICIT_TIMING.search(clause))
+                 for clause in _TIMING_CLAUSE.split(prompt)
+                 if is_recovery_motion(clause))
+
+
+def story_action_cues(text):
+    """Return recognized positive action cues in textual order."""
+    if _NEGATION.search(text):
+        return []
+    matches = [(match.start(), action) for action, pattern in _ACTION_CUES.items()
+               for match in re.finditer(pattern, text, re.I)]
+    return [action for _, action in sorted(matches)]
+
+
+def _standing_motion(text):
+    return (not _NEGATION.search(text) and not is_recovery_motion(text)
+            and bool(re.search(r'\bstand(?:s|ing)?\b', text, re.I)))
+
+
+def _check_action_coverage(plan):
+    """Catch missing/collapsed familiar actions even when 'then' is absent."""
+    requested = story_action_cues(_QUOTED_DIALOGUE.sub('', plan['prompt']))
+    cursor = 0
+    for action in requested:
+        for index in range(cursor, len(plan['beats'])):
+            cues = story_action_cues(plan['beats'][index]['prompt'])
+            if action in cues:
+                if len(set(cues)) > 1:
+                    raise ValueError(f'Keep {action} and the next action in separate beats')
+                cursor = index + 1
+                break
+        else:
+            raise ValueError(f'Story plan must preserve the requested {action} action in order in a separate beat')
+
+
+def _auto_recovery_timing(plan):
+    """Budget rising from the floor and a brief upright transition explicitly.
+
+    Six seconds is a conservative recovery estimate, not a success guarantee.
+    Do not rewrite user-stated timing, including timings in the original text.
+    """
+    if explicit_scene_timing(plan['prompt']):
+        return plan
+    timed_recoveries = iter(recovery_timing_flags(plan['prompt']))
+    beats = []
+    for index, beat in enumerate(plan['beats']):
+        beat = dict(beat)
+        recovery = is_recovery_motion(beat['prompt'])
+        explicitly_timed = ((next(timed_recoveries, False)
+                             or bool(_EXPLICIT_TIMING.search(beat['prompt']))) if recovery else False)
+        if recovery and not explicitly_timed:
+            beat['seconds'] = max(6.0, beat['seconds'])
+            beat['prompt'] = recovery_prompt(beat['prompt'], context=plan['prompt'])
+        beats.append(beat)
+        if (recovery and not explicitly_timed and index + 1 < len(plan['beats'])
+                and not _standing_motion(plan['beats'][index + 1]['prompt'])):
+            beats.append({'prompt': 'A person stands upright.', 'seconds': 1.0})
+    return {**plan, 'beats': [{**beat, 'id': f'beat-{index}'}
+                             for index, beat in enumerate(beats, 1)]}
 
 
 def story_system_prompt(context=None, seconds=None):
@@ -74,6 +159,15 @@ def story_system_prompt(context=None, seconds=None):
         'Give each beat a unique sequential id beat-1, beat-2, etc. Estimate each '
         'movement at its natural duration, considering action complexity, travel '
         'distance, repetitions, transitions, and any timing stated by the user. '
+        'Separate stopping, falling, getting up, standing upright after recovery, '
+        'dancing, and a final flip into distinct beats whenever requested. '
+        'A get-up after a fall needs time to push off the floor, bring the feet '
+        'under the body, and rise; allow at least 6 seconds in Auto unless the '
+        'user explicitly specifies its timing. Follow recovery with about one '
+        'second of upright standing before the next requested action. '
+        'Estimate sprint travel from the requested distance, braking separately; '
+        '20 meters needs several seconds even at a fast pace. A fall, dance, '
+        'and flip have different durations; never assign them equal slices. '
         'Quick gestures need less time than traveling across a scene. Do not divide '
         'a scene total evenly across beats or add idle motion to fill time. '
         'Each beat lasts 0.16 to 30 seconds; the sum is the scene duration and is '
@@ -209,7 +303,7 @@ def fit_story_duration(plan, seconds=None, expected_prompt=None):
     frames = validate_story_seconds(seconds) if seconds is not None else None
     source = validate_story_plan(plan, expected_prompt=expected_prompt)
     if frames is None:
-        return source
+        return validate_story_plan(_auto_recovery_timing(source), expected_prompt=source['prompt'])
     beats = source['beats']
     actual = sum(round(beat['seconds'] * FPS) for beat in beats)
     difference = frames - actual
@@ -265,4 +359,5 @@ class StoryPlanner:
             if (not motion.startswith('A person ') or len(motion) > 120
                     or len(motion.split()) > 18 or ',' in motion or ';' in motion):
                 raise ValueError(f'Beat {number} must be one short, plain movement sentence starting "A person "')
+        _check_action_coverage(plan)
         return fit_story_duration(plan, seconds, expected_prompt=prompt)

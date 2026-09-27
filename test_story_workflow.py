@@ -63,6 +63,16 @@ class StoryWorkflowTests(unittest.TestCase):
         until(lambda: self.workflow.snapshot(identifier)['status'] == 'completed')
         return identifier
 
+    def test_auto_enables_recovery_and_load_keeps_actual_timing(self):
+        original_submit = self.queue.submit
+        self.queue.submit = Mock(wraps=original_submit)
+        identifier = self.completed()
+        self.assertTrue(self.queue.submit.call_args.kwargs['automatic'])
+        # A generated recovery segment may finish later than its estimate.
+        self.workflow.jobs[identifier]['plan']['beats'][0]['seconds'] = 1.0
+        self.assertTrue(self.workflow.load(identifier))
+        self.assertEqual(self.workflow.snapshot(identifier)['plan']['beats'][0]['seconds'], 2.4)
+
     def test_load_adds_editable_take_and_round_trips_archive(self):
         identifier = self.completed()
         self.assertEqual(self.planner.calls[0][0], 'Walk, then wave.')

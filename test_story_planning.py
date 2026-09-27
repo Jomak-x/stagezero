@@ -24,6 +24,69 @@ def plan(prompt=STORY):
 
 
 class StoryPlanValidationTests(unittest.TestCase):
+    def test_auto_gives_recovery_time_and_a_separate_upright_transition(self):
+        source = plan('Fall, get up again and start dancing at the end doing a backflip.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls to the floor.', seconds=2.4),
+            dict(id='beat-2', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=6),
+            dict(id='beat-4', prompt='A person does a backflip.', seconds=3),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual([b['seconds'] for b in result['beats']], [2.4, 6, 1, 6, 3])
+        self.assertEqual(result['beats'][2]['prompt'], 'A person stands upright.')
+        self.assertEqual(fit_story_duration(result), result)
+        self.assertEqual(source['beats'][1]['seconds'], 2)
+        # Both duration-field and prose timing are preserved.
+        self.assertEqual(len(fit_story_duration(source, 13.4)['beats']), 4)
+        source['prompt'] = 'Fall, get up in 2 seconds and dance before a backflip.'
+        self.assertEqual(fit_story_duration(source)['beats'][1]['seconds'], 2)
+
+    def test_unrelated_action_timing_keeps_get_up_automatic(self):
+        source = plan('Run for five seconds, then fall and get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person runs.', seconds=5),
+            dict(id='beat-2', prompt='A person falls.', seconds=2),
+            dict(id='beat-3', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-4', prompt='A person dances.', seconds=4),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual([b['seconds'] for b in result['beats']], [5, 2, 6, 1, 4])
+        self.assertEqual(result['beats'][0]['seconds'], 5)
+
+    def test_whole_scene_timing_keeps_planned_recovery_length(self):
+        source = plan('Make a 30 seconds scene: fall, get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls.', seconds=2),
+            dict(id='beat-2', prompt='A person gets up from the floor.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=26),
+        ]
+        self.assertEqual(fit_story_duration(source), validate_story_plan(source))
+
+    def test_explicit_timing_in_recovery_beat_is_not_rewritten(self):
+        source = plan('Fall, get up and dance.')
+        source['beats'] = [
+            dict(id='beat-1', prompt='A person falls.', seconds=2),
+            dict(id='beat-2', prompt='A person gets up in two seconds.', seconds=2),
+            dict(id='beat-3', prompt='A person dances.', seconds=4),
+        ]
+        result = fit_story_duration(source)
+        self.assertEqual(result['beats'][1]['seconds'], 2)
+        self.assertEqual(len(result['beats']), 3)
+
+    def test_auto_recovery_does_not_silently_exceed_beat_or_scene_limits(self):
+        source = plan('Get up and walk.')
+        source['beats'] = [dict(id=f'beat-{i + 1}',
+                                prompt='A person gets up.' if i == 0 else 'A person walks.',
+                                seconds=7) for i in range(16)]
+        with self.assertRaisesRegex(ValueError, '1–16'):
+            fit_story_duration(source)
+        source['beats'] = source['beats'][:5]
+        for beat in source['beats']:
+            beat['seconds'] = 24
+        with self.assertRaisesRegex(ValueError, '120 seconds'):
+            fit_story_duration(source)
+
     def test_auto_preserves_heterogeneous_estimates_and_aligns_to_frames(self):
         source = plan()
         source['beats'][0]['seconds'] = 1.03
@@ -132,6 +195,39 @@ class StoryPlanValidationTests(unittest.TestCase):
 
 
 class StoryPlannerTests(unittest.TestCase):
+    def test_full_scene_retains_every_action_even_without_then_markers(self):
+        request = ('Make the character sprint quickly forward for 20 meters then stop and fall. '
+                   'Get up again and start dancing and at the end doing a backflip.')
+        source = plan(request)
+        source['beats'] = [
+            dict(id=f'beat-{i}', prompt=motion, seconds=seconds)
+            for i, (motion, seconds) in enumerate([
+                ('A person sprints forward for 20 meters.', 6),
+                ('A person stops.', 1.5), ('A person falls forward.', 2.5),
+                ('A person gets up from the floor.', 2),
+                ('A person dances.', 6), ('A person does a backflip.', 3),
+            ], 1)]
+        gateway = Mock()
+        for omitted in range(len(source['beats'])):
+            broken = copy.deepcopy(source)
+            broken['beats'].pop(omitted)
+            for index, beat in enumerate(broken['beats'], 1):
+                beat['id'] = f'beat-{index}'
+            gateway.request_json.side_effect = [broken, source]
+            output = StoryPlanner(gateway).plan(request)
+            self.assertEqual(len(output['beats']), 7)
+            self.assertEqual(output['beats'][3]['seconds'], 6)
+            self.assertEqual(output['beats'][-1]['prompt'], 'A person does a backflip.')
+            self.assertIn('failed validation', gateway.request_json.call_args.args[0])
+
+    def test_combined_stop_and_fall_is_repaired_to_distinct_beats(self):
+        source = plan('Stop and fall.')
+        source['beats'] = [dict(id='beat-1', prompt='A person stops and falls.', seconds=3)]
+        gateway = Mock()
+        gateway.request_json.return_value = source
+        with self.assertRaisesRegex(ValueError, 'separate beats'):
+            StoryPlanner(gateway).plan(source['prompt'])
+
     def test_planner_honors_requested_total_seconds(self):
         gateway = Mock()
         source = plan()

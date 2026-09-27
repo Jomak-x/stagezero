@@ -8,7 +8,6 @@ from collections import deque
 import copy
 from dataclasses import dataclass
 import math
-import re
 import threading
 import uuid
 
@@ -16,13 +15,11 @@ import numpy as np
 
 from duration_planning import CHUNK_FRAMES, FPS
 from live_motion import validate_result
-from story_planning import validate_story_plan
+from story_planning import explicit_scene_timing, recovery_timing_flags, validate_story_plan
+from story_recovery import (EXPLICIT_TIMING, MAX_RECOVERY_EXTENSIONS, MAX_RECOVERY_BEAT_FRAMES,
+                            is_recovery_motion, recovered_upright as _recovered_upright,
+                            quality_failure_reasons, recovery_completion_frame, recovery_prompt)
 from takes import MAX_FRAMES, Take, validate_take
-
-
-_QUALITY_FAILURE = re.compile(
-    r'^(?:RuntimeError: )?Generated candidates failed motion-quality checks(?: \(([a-z_]+)\))?'
-    r'(?:; no motion committed\. Retry the instruction\.)?$', re.I)
 
 
 class _MotionQualityFailure(RuntimeError):
@@ -31,12 +28,17 @@ class _MotionQualityFailure(RuntimeError):
         super().__init__('Motion quality checks rejected the generated movement')
 
 
+class _RecoveryFailure(RuntimeError):
+    pass
+
+
 @dataclass
 class _Job:
     id: str
     plan: dict
     total_frames: int
     total_chunks: int
+    automatic: bool = False
     status: str = 'queued'
     completed_frames: int = 0
     completed_chunks: int = 0
@@ -76,7 +78,9 @@ class StoryJobQueue:
         for worker in self._workers:
             worker.start()
 
-    def submit(self, plan, scene=None):
+    def submit(self, plan, scene=None, *, automatic=False):
+        if type(automatic) is not bool:
+            raise ValueError('Automatic timing must be a boolean')
         canonical = validate_story_plan(plan)
         frames = [round(beat['seconds'] * FPS) for beat in canonical['beats']]
         total = sum(frames)
@@ -84,7 +88,10 @@ class StoryJobQueue:
             raise ValueError('Story exceeds the 120-second take length')
         chunks = sum(math.ceil(count / CHUNK_FRAMES) for count in frames)
         identifier = str(uuid.uuid4())
-        job = _Job(identifier, canonical, total, chunks)
+        # A whole-scene duration is fixed; durations on other actions do not
+        # prevent an untimed get-up from completing naturally.
+        job = _Job(identifier, canonical, total, chunks,
+                   automatic=automatic and not explicit_scene_timing(canonical['prompt']))
         with self._condition:
             if self._closed:
                 raise RuntimeError('Story queue is closed')
@@ -106,6 +113,7 @@ class StoryJobQueue:
         with self._condition:
             job = self._jobs[identifier]
             return {'id': job.id, 'status': job.status, 'error': job.error,
+                    'actual_seconds': job.total_frames / FPS if job.status == 'completed' else None,
                     'title': job.plan['title'] if job.plan else None,
                     'result_available': job.take is not None and not job.released,
                     'progress': {'completed_beats': job.completed_beats,
@@ -199,6 +207,10 @@ class StoryJobQueue:
                                       else 'motion quality')
                             job.error = (f'Action {number} failed {detail} checks after 3 attempts. '
                                          'Try a simpler movement description and retry.')
+                        elif isinstance(exc, _RecoveryFailure):
+                            job.error = (f'Action {number} did not finish getting upright within its '
+                                         'recovery budget. Later actions were not generated. '
+                                         'Try a simpler get-up motion or allow more recovery time.')
                         else:
                             job.error = f'Generation failed on action {number}; check the backend and retry'
                         job.current_beat = None
@@ -212,6 +224,7 @@ class StoryJobQueue:
         arrays = {key: [] for key in ('positions', 'rotations', 'motion')}
         segments = []
         offset = 0
+        timed_recoveries = iter(recovery_timing_flags(job.plan['prompt']))
         for beat_index, beat in enumerate(job.plan['beats']):
             frames = round(beat['seconds'] * FPS)
             with self._condition:
@@ -220,7 +233,33 @@ class StoryJobQueue:
                 job.current_beat = beat_index
             generation_seconds = 0.0
             remaining = frames
-            while remaining:
+            recovery = is_recovery_motion(beat['prompt'])
+            explicitly_timed = next(timed_recoveries, False) if recovery else False
+            adaptive_recovery = (recovery and job.automatic and not explicitly_timed
+                                 and not EXPLICIT_TIMING.search(beat['prompt']))
+            motion_prompt = recovery_prompt(beat['prompt'], context=job.plan['prompt'])
+            extensions = 0
+            while remaining or recovery:
+                if not remaining:
+                    with self._condition:
+                        if job.status != 'running':
+                            return None
+                    if _recovered_upright(arrays['positions']):
+                        break
+                    # Continue the actual model motion, with its accepted history,
+                    # at most twice. Reserve all later beats in the scene cap.
+                    extra = min(CHUNK_FRAMES, MAX_RECOVERY_BEAT_FRAMES - frames,
+                                min(MAX_FRAMES, 120 * FPS) - job.total_frames)
+                    if not adaptive_recovery or extensions >= MAX_RECOVERY_EXTENSIONS or extra < 4:
+                        raise _RecoveryFailure()
+                    with self._condition:
+                        if job.status != 'running':
+                            return None
+                        frames += extra
+                        remaining = extra
+                        extensions += 1
+                        job.total_frames += extra
+                        job.total_chunks += 1
                 history = self._history(arrays['motion'])
                 for attempt in range(3):
                     with self._condition:
@@ -229,19 +268,32 @@ class StoryJobQueue:
                         request_id = str(uuid.uuid4())
                         job.request_id = request_id
                     try:
-                        result = backend.generate(request_id, beat['prompt'], history)
+                        result = backend.generate(request_id, motion_prompt, history)
                         validate_result(result, request_id)
                         break
                     except RuntimeError as exc:
-                        match = _QUALITY_FAILURE.fullmatch(str(exc))
-                        if match is None:
+                        reasons = quality_failure_reasons(exc)
+                        if reasons is None:
                             raise
                         with self._condition:
                             if job.status != 'running':
                                 return None
                         if attempt == 2:
-                            raise _MotionQualityFailure(match.group(1)) from None
+                            reason = 'intra_clip_jump' if 'intra_clip_jump' in reasons else None
+                            raise _MotionQualityFailure(reason) from None
                 used = min(CHUNK_FRAMES, remaining)
+                if adaptive_recovery:
+                    # Only inspect frames that would actually be committed. A
+                    # stable rise can complete before the conservative estimate.
+                    endpoint = recovery_completion_frame(result['positions'][:used])
+                    if endpoint is not None:
+                        with self._condition:
+                            removed = remaining - endpoint
+                            job.total_frames -= removed
+                            job.total_chunks -= math.ceil(remaining / CHUNK_FRAMES) - 1
+                            frames -= removed
+                            remaining = endpoint
+                            used = endpoint
                 with self._condition:
                     if job.status != 'running':
                         return None
@@ -253,8 +305,10 @@ class StoryJobQueue:
                     job.completed_chunks += 1
                     job.completed_frames += used
             segments.append({'start': offset, 'end': offset + frames,
-                             'prompt': beat['prompt'], 'beat_id': beat['id'],
-                             'generation_seconds': generation_seconds})
+                             'prompt': motion_prompt, 'beat_id': beat['id'],
+                             'generation_seconds': generation_seconds,
+                             'planned_seconds': beat['seconds'],
+                             'recovery_adjustment_frames': frames - round(beat['seconds'] * FPS)})
             offset += frames
             with self._condition:
                 if job.status != 'running':

@@ -467,6 +467,36 @@ class StudioUITests(unittest.TestCase):
         self.session.submit_action_edit.assert_called_once_with(
             'Wave twice', 1, 'replace', seconds=3.0)
 
+    def test_timeline_scene_movement_opens_popup_without_seeking_or_legacy_editor(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'old-editor')
+        self.assertIsNotNone(self.ui.action_edit)
+        take.segments[0]['beat_id'] = 'scene-beat-1'
+        self.session.seek(75)
+        client = object()
+        payload = dict(take_id=take.id, index=0, operation='replace', nonce='scene-popup')
+        with (patch.object(self.ui.story_controls, 'open_for_movement', return_value=True) as open_movement,
+              patch('studio_ui.navigate_tab') as navigate):
+            self.ui.timeline_command.value = json.dumps(payload)
+            self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
+        open_movement.assert_called_once_with(client, take.id, 0)
+        navigate.assert_not_called()
+        self.assertIsNone(self.ui.action_edit)
+        self.assertEqual(self.session.frame, 75)
+        self.assertEqual(self.ui._last_timeline_nonce, 'scene-popup')
+
+    def test_timeline_recognizes_loaded_scene_after_legacy_edit_lost_beat_ids(self):
+        take = self._seed_segmented_take()
+        client = object()
+        payload = dict(take_id=take.id, index=1, operation='replace', nonce='legacy-scene')
+        with (patch.object(self.ui.story_controls, 'owns_take', return_value=True) as owns,
+              patch.object(self.ui.story_controls, 'open_for_movement', return_value=True) as open_movement):
+            self.ui.timeline_command.value = json.dumps(payload)
+            self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
+        owns.assert_called_once_with(take.id)
+        open_movement.assert_called_once_with(client, take.id, 1)
+        self.assertIsNone(self.ui.action_edit)
+
     def test_action_edit_explains_exact_following_regeneration(self):
         take = self._seed_segmented_take()
         self._timeline_edit(take.id, 0, 'replace', 'replace-first')

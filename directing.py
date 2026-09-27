@@ -7,6 +7,10 @@ import numpy as np
 from live_motion import MotionSession, validate_result
 from takes import Take, encode_project, decode_project, validate_take, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
 from duration_planning import CHUNK_FRAMES, plan_duration
+from story_recovery import (EXPLICIT_TIMING, MAX_RECOVERY_BEAT_FRAMES, MAX_RECOVERY_EXTENSIONS,
+                            is_recovery_motion, recovered_upright,
+                            recovery_completion_frame, recovery_prompt,
+                            quality_failure_reasons)
 from camera_model import (copy_camera_cuts, validate_camera,
                           validate_camera_cuts, validate_cameras)
 
@@ -580,9 +584,12 @@ class DirectorSession(MotionSession):
             self.status = 'Restored actions · most recent edit undone'
             return True
 
-    def submit_action_edit(self, prompt, segment_index, operation, seconds=None):
+    def submit_action_edit(self, prompt, segment_index, operation, seconds=None,
+                           *, automatic_timing=False):
         """Regenerate an action and its suffix within the selected take, atomically."""
         with self.lock:
+            if type(automatic_timing) is not bool:
+                raise ValueError('Automatic timing must be a boolean')
             if not self.character_motion_enabled:
                 self.status = 'Select a motion-ready character before generating motion'
                 return False
@@ -624,8 +631,13 @@ class DirectorSession(MotionSession):
                 except ValueError as exc:
                     self.status = str(exc)
                     return False
-            actions = [(prompt, new_frames)] + [(s['prompt'], s['end'] - s['start']) for s in suffix]
-            final_length = stop + sum(frames for _, frames in actions)
+            # A full-scene movement keeps its planner identity after editing.
+            # The popup and timeline use beat_id to recognize that this take
+            # remains a scene even when its first movement is regenerated.
+            beat_id = selected.get('beat_id') if operation == 'replace' else None
+            actions = [(prompt, new_frames, beat_id)] + [
+                (s['prompt'], s['end'] - s['start'], s.get('beat_id')) for s in suffix]
+            final_length = stop + sum(frames for _, frames, _ in actions)
             total = sum(len(t.positions) for t in self.takes.values()) - len(source.positions) + final_length
             if final_length > MAX_FRAMES or total > MAX_TOTAL_FRAMES:
                 self.status = 'Motion budget reached; shorten an action before continuing.'
@@ -640,9 +652,9 @@ class DirectorSession(MotionSession):
             submitted = time.perf_counter()
             self.pending = dict(kind='action_edit', version=self.version, request_id=request_id,
                                 source=source, stop=stop, actions=actions, frame=self.frame,
-                                submitted=submitted)
+                                submitted=submitted, automatic_timing=automatic_timing)
             self.wake.set()
-            chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames in actions)
+            chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _ in actions)
             self.status = f'Regenerating {len(actions)} action' + ('s' if len(actions) != 1 else '') + f' · 0/{chunks} chunks'
             return True
 
@@ -713,7 +725,7 @@ class DirectorSession(MotionSession):
         source, stop = job['source'], job['stop']
         version, request_id = job['version'], job['request_id']
         actions = job['actions']
-        total_chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames in actions)
+        total_chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _ in actions)
         completed_chunks = 0
         generated = {key: [] for key in ('positions', 'rotations', 'motion')}
         segments, events = source.prefix(stop)
@@ -721,39 +733,94 @@ class DirectorSession(MotionSession):
         generation_seconds = 0.0
         final_meta = None
         failure_context = ''
+        automatic_timing = job['automatic_timing']
+        remaining_planned = sum(frames for _, frames, _ in actions)
+        other_take_frames = sum(len(t.positions) for t in self.takes.values() if t is not source)
+        take_limit = min(MAX_FRAMES, 120 * 25 if automatic_timing else MAX_FRAMES,
+                         MAX_TOTAL_FRAMES - other_take_frames)
         try:
-            for action_number, (prompt, frames) in enumerate(actions, start=len(segments) + 1):
-                count = (frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
+            for action_number, (prompt, frames, beat_id) in enumerate(actions, start=len(segments) + 1):
+                remaining_planned -= frames
                 action_start = stop + sum(len(part) for part in generated['motion'])
                 action_seconds = 0.0
-                for index in range(count):
+                action_parts = []
+                target_frames = frames
+                extensions = 0
+                recovery = is_recovery_motion(prompt)
+                adaptive_recovery = recovery and automatic_timing and not EXPLICIT_TIMING.search(prompt)
+                backend_prompt = (recovery_prompt(prompt, context=' '.join(
+                    segment['prompt'] for segment in source.segments))
+                    if adaptive_recovery else prompt)
+                while sum(len(part) for part in action_parts) < target_frames:
                     with self.lock:
                         if version != self.version or request_id != self.current_id:
                             return
                     history_count = min(52, len(motion_so_far)) // 4 * 4
                     history = motion_so_far[-history_count:].copy() if history_count else None
-                    failure_context = f'action {action_number} "{prompt[:60]}", chunk {index + 1}/{count} · '
-                    result = self.backend.generate(request_id, prompt, history)
-                    validate_result(result, request_id)
+                    chunk_number = len(action_parts) + 1
+                    chunk_count = (target_frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
+                    failure_context = (f'action {action_number} "{prompt[:60]}", '
+                                       f'chunk {chunk_number}/{chunk_count} · ')
+                    for attempt in range(3):
+                        try:
+                            result = self.backend.generate(request_id, backend_prompt, history)
+                            validate_result(result, request_id)
+                            break
+                        except RuntimeError as exc:
+                            if quality_failure_reasons(exc) is None:
+                                raise
+                            if attempt == 2:
+                                raise RuntimeError(
+                                    f'Motion quality rejected action {action_number} after 3 attempts') from None
+                            with self.lock:
+                                if version != self.version or request_id != self.current_id:
+                                    return
+                                request_id = str(uuid.uuid4())
+                                self.current_id = request_id
+                                self.status = f'Retrying action {action_number} after motion quality check'
                     final_meta = result['metadata']
                     seconds = float(final_meta['generation_seconds'])
                     action_seconds += seconds
                     generation_seconds += seconds
-                    trim = min(CHUNK_FRAMES, frames - index * CHUNK_FRAMES)
+                    produced = sum(len(part) for part in action_parts)
+                    trim = min(CHUNK_FRAMES, target_frames - produced)
+                    completed = None
+                    if adaptive_recovery:
+                        candidate = np.concatenate(action_parts + [result['positions'][:trim]], axis=0)
+                        completed = recovery_completion_frame(candidate)
+                        if completed is not None:
+                            trim = min(trim, completed - produced)
                     for key in generated:
                         generated[key].append(result[key][:trim])
+                    action_parts.append(result['positions'][:trim])
                     motion_so_far = np.concatenate((motion_so_far, result['motion'][:trim]), axis=0)[-52:]
                     completed_chunks += 1
                     with self.lock:
                         if version != self.version or request_id != self.current_id:
                             return
-                        if completed_chunks < total_chunks:
+                        if completed_chunks < total_chunks or (adaptive_recovery and completed is None):
                             request_id = str(uuid.uuid4())
                             self.current_id = request_id
                             self.status = f'Regenerating actions · {completed_chunks}/{total_chunks} chunks received; holding pose'
                     failure_context = ''
-                segments.append(dict(start=action_start, end=action_start + frames, prompt=prompt,
-                                     request_id=final_meta['request_id'], generation_seconds=action_seconds))
+                    if completed is not None:
+                        break
+                    if sum(len(part) for part in action_parts) == target_frames and adaptive_recovery:
+                        extra = min(CHUNK_FRAMES, MAX_RECOVERY_BEAT_FRAMES - target_frames,
+                                    take_limit - action_start - target_frames - remaining_planned)
+                        if extensions >= MAX_RECOVERY_EXTENSIONS or extra < 4:
+                            raise RuntimeError('Get-up movement did not finish upright within its recovery limit')
+                        target_frames += extra
+                        extensions += 1
+                        total_chunks += 1
+                actual_frames = sum(len(part) for part in action_parts)
+                if recovery and not adaptive_recovery and not recovered_upright(action_parts):
+                    raise RuntimeError('Get-up movement did not finish upright at the requested length')
+                segment = dict(start=action_start, end=action_start + actual_frames, prompt=prompt,
+                               request_id=final_meta['request_id'], generation_seconds=action_seconds)
+                if beat_id is not None:
+                    segment['beat_id'] = beat_id
+                segments.append(segment)
             arrays = [np.concatenate([getattr(source, key)[:stop]] + generated[key], axis=0)
                       for key in ('positions', 'rotations', 'motion')]
             inherited_prefix_changed = source.branch_frame is not None and stop <= source.branch_frame

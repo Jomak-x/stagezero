@@ -652,6 +652,23 @@ class StudioUI:
                     return
                 if s.busy:
                     return
+                # Full-scene movements use the scene popup's Refine editor.
+                # Check under the session lock, then open the client-local
+                # popup outside it to avoid reversing the workflow lock order.
+                story_movement = (operation == 'replace' and
+                                  'beat_id' in take.segments[index])
+            owns_story = (operation == 'replace' and
+                          (story_movement or self.story_controls.owns_take(take_id)))
+            if owns_story and self.story_controls.open_for_movement(e.client, take_id, index):
+                self._last_timeline_nonce = nonce
+                self._clear_action_edit()
+                self.update()
+                return
+            with s.lock:
+                take = s.takes.get(s.active_take)
+                if (take is None or take.id != take_id or not 0 <= index < len(take.segments)
+                        or s.busy or not s.character_motion_enabled):
+                    return
                 self._last_timeline_nonce = nonce
                 self._begin_action_edit(take, index, operation)
                 selected = take.segments[index]

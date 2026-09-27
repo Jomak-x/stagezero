@@ -6,7 +6,10 @@ import unittest
 
 import numpy as np
 
-from story_jobs import StoryJobQueue
+from story_jobs import StoryJobQueue, _recovered_upright
+from motion_quality import JOINT_INDEX, ROOT, SHOULDERS
+from story_recovery import (FLOOR_RECOVERY_PROMPT, quality_failure_reasons,
+                            recovery_completion_frame, recovery_prompt)
 from story_planning import fit_story_duration
 
 
@@ -53,13 +56,191 @@ class FakeBackend:
 
 
 class StoryQueueTests(unittest.TestCase):
-    def test_quality_rejection_retries_fresh_ids_but_transport_error_does_not(self):
+    @staticmethod
+    def recovery_plan(seconds=2):
+        return {'version': 1, 'title': 'Get up and dance', 'prompt': 'Get up and dance.',
+                'beats': [dict(id='beat-1', prompt='A person gets up from the floor.', seconds=seconds),
+                          dict(id='beat-2', prompt='A person dances.', seconds=1)], 'warnings': []}
+
+    @staticmethod
+    def standing_positions():
+        p = np.zeros((104, 34, 3), dtype=np.float32)
+        p[:, ROOT, 1] = .9
+        p[:, SHOULDERS, 1] = 1.3
+        for side in ('left', 'right'):
+            p[:, JOINT_INDEX[f'{side}_hip_yaw_skel'], 1] = .9
+            p[:, JOINT_INDEX[f'{side}_knee_skel'], 1] = .45
+        return p
+
+    def test_upright_proxy_rejects_prone_and_crouched_endings_and_scales(self):
+        upright = self.standing_positions()
+        self.assertTrue(_recovered_upright([upright]))
+        self.assertTrue(_recovered_upright([upright * 2 + [5, 3, -2]]))
+        prone = upright.copy()
+        prone[:, :, [1, 2]] = prone[:, :, [2, 1]]
+        self.assertFalse(_recovered_upright([prone]))
+        crouched = upright.copy()
+        crouched[:, ROOT, 1] = .4
+        crouched[:, SHOULDERS, 1] = .8
+        self.assertFalse(_recovered_upright([crouched]))
+        # One upright endpoint is insufficient; the ending must be sustained.
+        prone[-1] = upright[-1]
+        self.assertFalse(_recovered_upright([prone]))
+        self.assertFalse(_recovered_upright([np.zeros_like(upright)]))
+
+    def recovery_backend(self, upright_on_call):
+        positions = self.standing_positions()
+
+        class RecoveringBackend(FakeBackend):
+            def generate(self, request_id, prompt, history):
+                result = super().generate(request_id, prompt, history)
+                if len(self.calls) >= upright_on_call:
+                    result['positions'] = positions.copy()
+                return result
+
+        return RecoveringBackend()
+
+    def test_auto_continues_recovery_with_history_before_dancing(self):
+        backend = self.recovery_backend(upright_on_call=2)
+        queue = StoryJobQueue([backend])
+        try:
+            identifier = queue.submit(self.recovery_plan(), automatic=True)
+            until(lambda: queue.snapshot(identifier)['status'] == 'completed')
+            self.assertEqual([call[1] for call in backend.calls],
+                             [FLOOR_RECOVERY_PROMPT] * 2 + ['A person dances.'])
+            np.testing.assert_array_equal(backend.calls[1][2], np.ones((48, 414)))
+            take = queue.result(identifier)
+            self.assertEqual(len(take.motion), 125)
+            self.assertEqual(take.segments[0]['end'], 100)
+            self.assertEqual(take.segments[0]['recovery_adjustment_frames'], 50)
+            self.assertEqual(take.segments[1]['start'], 100)
+            snapshot = queue.snapshot(identifier)
+            self.assertEqual(snapshot['progress']['total_frames'], 125)
+            self.assertEqual(snapshot['progress']['total_chunks'], 3)
+            self.assertEqual(snapshot['progress']['fraction'], 1)
+        finally:
+            queue.close()
+
+    def test_recovery_never_advances_prone_or_exposes_a_partial_take(self):
+        for automatic, calls in ((False, 1), (True, 3)):
+            backend = self.recovery_backend(upright_on_call=100)
+            queue = StoryJobQueue([backend])
+            try:
+                identifier = queue.submit(self.recovery_plan(), automatic=automatic)
+                until(lambda: queue.snapshot(identifier)['status'] == 'failed')
+                self.assertEqual(len(backend.calls), calls)
+                self.assertTrue(all(call[1] == FLOOR_RECOVERY_PROMPT for call in backend.calls))
+                self.assertIn('did not finish getting upright', queue.snapshot(identifier)['error'])
+                self.assertFalse(queue.snapshot(identifier)['result_available'])
+            finally:
+                queue.close()
+
+    def test_recovery_respects_prose_timing_and_scene_budget(self):
+        for prose in (True, False):
+            backend = self.recovery_backend(upright_on_call=100)
+            queue = StoryJobQueue([backend])
+            source = self.recovery_plan()
+            if prose:
+                source['prompt'] = 'Get up in two seconds and dance.'
+            else:
+                source['beats'][1]['seconds'] = 30
+                for i, seconds in enumerate((30, 30, 28), 3):
+                    source['beats'].append(dict(id=f'beat-{i}', prompt='A person dances.', seconds=seconds))
+            try:
+                identifier = queue.submit(source, automatic=True)
+                until(lambda: queue.snapshot(identifier)['status'] == 'failed')
+                self.assertEqual(len(backend.calls), 1)
+                self.assertLessEqual(queue.snapshot(identifier)['progress']['total_frames'], 3000)
+            finally:
+                queue.close()
+
+    def test_unrelated_run_timing_does_not_disable_auto_recovery(self):
+        backend = self.recovery_backend(upright_on_call=3)
+        queue = StoryJobQueue([backend])
+        source = self.recovery_plan()
+        source['prompt'] = 'Run for five seconds, then get up and dance.'
+        source['beats'].insert(0, dict(id='beat-1', prompt='A person runs.', seconds=1))
+        source['beats'][1]['id'] = 'beat-2'
+        source['beats'][2]['id'] = 'beat-3'
+        try:
+            identifier = queue.submit(source, automatic=True)
+            until(lambda: queue.snapshot(identifier)['status'] == 'completed')
+            take = queue.result(identifier)
+            self.assertEqual([segment['end'] - segment['start'] for segment in take.segments],
+                             [25, 100, 25])
+            self.assertEqual(len(backend.calls), 4)
+            self.assertEqual(queue.snapshot(identifier)['actual_seconds'], 6)
+        finally:
+            queue.close()
+
+    def test_cancel_during_recovery_extension_stops_later_actions(self):
+        class BlockingRecovery(FakeBackend):
+            def generate(self, request_id, prompt, history):
+                if len(self.calls) == 1:
+                    self.started.clear()
+                    self.release.clear()
+                return super().generate(request_id, prompt, history)
+
+        backend = BlockingRecovery()
+        queue = StoryJobQueue([backend])
+        try:
+            identifier = queue.submit(self.recovery_plan(), automatic=True)
+            until(lambda: len(backend.calls) == 2)
+            self.assertTrue(queue.cancel(identifier))
+            backend.release.set()
+            until(lambda: queue._jobs[identifier].backend is None)
+            self.assertEqual(len(backend.calls), 2)
+            self.assertEqual(queue.snapshot(identifier)['status'], 'cancelled')
+            self.assertFalse(queue.snapshot(identifier)['result_available'])
+        finally:
+            backend.release.set()
+            queue.close()
+
+    def test_auto_finishes_recovery_once_upright_instead_of_repeating_get_up(self):
+        for automatic, frames, calls in ((True, 50, 2), (False, 150, 3)):
+            backend = self.recovery_backend(upright_on_call=1)
+            queue = StoryJobQueue([backend])
+            try:
+                identifier = queue.submit(self.recovery_plan(seconds=6), automatic=automatic)
+                until(lambda: queue.snapshot(identifier)['status'] == 'completed')
+                take = queue.result(identifier)
+                self.assertEqual(take.segments[0]['end'], frames)
+                self.assertEqual(len(backend.calls), calls)
+                self.assertEqual(queue.snapshot(identifier)['progress']['total_chunks'], calls)
+                self.assertEqual(queue.snapshot(identifier)['actual_seconds'], (frames + 25) / 25)
+                self.assertEqual(queue.snapshot(identifier)['progress']['fraction'], 1)
+            finally:
+                queue.close()
+
+    def test_recovery_helpers_preserve_seated_or_negative_intent(self):
+        seated = 'A person stands up from a chair.'
+        self.assertEqual(recovery_prompt(seated, context='Fall then stand up from a chair.'), seated)
+        negative = 'A person does not get up from the floor.'
+        self.assertEqual(recovery_prompt(negative), negative)
+        self.assertEqual(recovery_completion_frame(self.standing_positions()), 50)
+        positions = self.standing_positions()
+        positions[:60] = 0
+        self.assertEqual(recovery_completion_frame(positions), 70)
+
+    def test_auto_recovery_cannot_exceed_30_seconds(self):
+        backend = self.recovery_backend(upright_on_call=100)
+        queue = StoryJobQueue([backend])
+        try:
+            identifier = queue.submit(self.recovery_plan(seconds=29), automatic=True)
+            until(lambda: queue.snapshot(identifier)['status'] == 'failed')
+            self.assertEqual(queue.snapshot(identifier)['progress']['completed_frames'], 750)
+            self.assertEqual(queue.snapshot(identifier)['progress']['total_frames'], 775)
+            self.assertEqual(len(backend.calls), 8)
+        finally:
+            queue.close()
+
+    def test_quality_rejection_retries_fresh_ids_with_multiple_reasons(self):
         class QualityBackend(FakeBackend):
             def generate(self, request_id, prompt, history):
                 if len(self.calls) < 2:
                     self.calls.append((request_id, prompt, history))
                     raise RuntimeError('RuntimeError: Generated candidates failed motion-quality checks '
-                                       '(intra_clip_jump); no motion committed. Retry the instruction.')
+                                       '(horizon_seam, intra_clip_jump); no motion committed. Retry the instruction.')
                 return super().generate(request_id, prompt, history)
 
         quality = QualityBackend()
@@ -71,6 +252,16 @@ class StoryQueueTests(unittest.TestCase):
             self.assertEqual([call[1] for call in quality.calls[:3]], ['Walk forward.'] * 3)
         finally:
             queue.close()
+
+    def test_quality_retry_recognizer_rejects_unknown_or_unstructured_errors(self):
+        prefix = 'Generated candidates failed motion-quality checks'
+        self.assertEqual(quality_failure_reasons(prefix), ())
+        self.assertEqual(quality_failure_reasons(prefix + ' (horizon_seam, intra_clip_jump)'),
+                         ('horizon_seam', 'intra_clip_jump'))
+        for suffix in (' (unknown)', ' (intra_clip_jump, auth)', ' (intra_clip_jump,)'):
+            self.assertIsNone(quality_failure_reasons(prefix + suffix))
+        self.assertIsNone(quality_failure_reasons('Backend HTTP 401'))
+        self.assertIsNone(quality_failure_reasons('Extra text: ' + prefix))
 
         class AuthBackend(FakeBackend):
             def generate(self, request_id, prompt, history):

@@ -6,7 +6,8 @@ import numpy as np
 
 from directing import DirectorSession
 from takes import decode_project, encode_project
-from test_live_motion import ControlledBackend, wait_until
+from test_live_motion import ControlledBackend, result, wait_until
+from motion_quality import JOINT_INDEX
 
 
 class StudioEditingTests(unittest.TestCase):
@@ -135,6 +136,106 @@ class StudioEditingTests(unittest.TestCase):
         self.assertEqual(self.session.frame, 104)
         self.assertTrue(self.session.next_action())
         self.assertEqual(self.session.frame, 104)
+
+    def test_scene_beat_ids_survive_editing_first_movement_and_suffix(self):
+        take = self.generate()
+        take.segments = [
+            dict(start=0, end=52, prompt='Fall to the floor', beat_id='fall'),
+            dict(start=52, end=104, prompt='Wave', beat_id='wave'),
+        ]
+        self.assertTrue(self.session.submit_action_edit(
+            'Fall carefully', 0, 'replace', seconds=2.08))
+        wait_until(lambda: not self.session.busy)
+        self.session.pause()
+        edited = self.session.takes[take.id]
+        self.assertIsNot(edited, take)
+        self.assertEqual([segment.get('beat_id') for segment in edited.segments],
+                         ['fall', 'wave'])
+        self.assertEqual([segment['prompt'] for segment in edited.segments],
+                         ['Fall carefully', 'Wave'])
+
+    def test_auto_get_up_edit_extends_until_upright_and_keeps_undo(self):
+        take = self.generate()
+        take.segments = [dict(start=0, end=52,
+                              prompt='Get up from lying on the floor', beat_id='rise'),
+                         dict(start=52, end=104, prompt='Dance', beat_id='dance')]
+        calls = []
+
+        def rising_result(request_id, prompt, history):
+            calls.append((prompt, history))
+            output = result(request_id)
+            output['positions'][:] = 0
+            # The first short chunk stays prone. The continued chunk rises
+            # after 70 frames, leaving ten stable upright frames by frame 80.
+            if len(calls) == 2:
+                standing = output['positions'][70:]
+                standing[:, JOINT_INDEX['pelvis_skel'], 1] = 1.0
+                for side in ('left', 'right'):
+                    standing[:, JOINT_INDEX[f'{side}_hip_yaw_skel'], 1] = .8
+                    standing[:, JOINT_INDEX[f'{side}_knee_skel'], 1] = .4
+                    standing[:, JOINT_INDEX[f'{side}_shoulder_pitch_skel'], 1] = 1.5
+            return output
+
+        self.backend.generate = rising_result
+        self.assertTrue(self.session.submit_action_edit(
+            'Get up from lying on the floor', 0, 'replace',
+            automatic_timing=True))
+        wait_until(lambda: not self.session.busy)
+        self.session.pause()
+        edited = self.session.takes[take.id]
+        self.assertIsNot(edited, take)
+        self.assertEqual(edited.segments[0]['end'], 132)
+        self.assertEqual(edited.segments[1]['start'], 132)
+        self.assertEqual(edited.segments[0]['beat_id'], 'rise')
+        self.assertEqual(edited.segments[1]['beat_id'], 'dance')
+        self.assertEqual(calls[0][0], 'A person pushes up from lying on the floor and stands upright.')
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(self.session.can_undo_action_edit)
+        self.assertTrue(self.session.undo_action_edit())
+        self.assertIs(self.session.takes[take.id], take)
+
+    def test_fixed_get_up_edit_keeps_original_when_terminal_pose_is_prone(self):
+        take = self.generate()
+        take.segments[0]['beat_id'] = 'rise'
+        revision = self.session.action_edit_revision
+        self.assertTrue(self.session.submit_action_edit(
+            'Get up from lying on the floor', 0, 'replace',
+            seconds=2.0, automatic_timing=False))
+        wait_until(lambda: not self.session.busy)
+        self.assertIs(self.session.takes[take.id], take)
+        self.assertEqual(self.session.action_edit_revision, revision)
+        self.assertIn('did not finish upright', self.session.status)
+
+    def test_action_edit_retries_quality_rejection_only(self):
+        take = self.generate()
+        attempts = []
+
+        def quality_then_success(request_id, prompt, history):
+            attempts.append(request_id)
+            if len(attempts) < 3:
+                raise RuntimeError('Generated candidates failed motion-quality checks '
+                                   '(horizon_seam, intra_clip_jump); no motion committed. Retry the instruction.')
+            return result(request_id)
+
+        self.backend.generate = quality_then_success
+        self.assertTrue(self.session.submit_action_edit('Wave again', 0, 'replace'))
+        wait_until(lambda: not self.session.busy)
+        self.assertEqual(len(attempts), 3)
+        self.assertEqual(len(set(attempts)), 3)
+        self.assertEqual(self.session.takes[take.id].segments[0]['prompt'], 'Wave again')
+
+        updated = self.session.takes[take.id]
+        attempts.clear()
+
+        def unavailable(request_id, prompt, history):
+            attempts.append(request_id)
+            raise RuntimeError('Backend unavailable')
+
+        self.backend.generate = unavailable
+        self.assertTrue(self.session.submit_action_edit('Wave once more', 0, 'replace'))
+        wait_until(lambda: not self.session.busy)
+        self.assertEqual(len(attempts), 1)
+        self.assertIs(self.session.takes[take.id], updated)
 
 
 if __name__ == '__main__':
