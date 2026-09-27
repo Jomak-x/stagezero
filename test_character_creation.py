@@ -168,6 +168,17 @@ class CharacterCreationTests(unittest.TestCase):
         self.assertEqual(self.cast.added, [(b'glb', 'Explorer')])
         self.assertEqual(self.cast.selected, [])
 
+    def test_gemini_setup_error_is_actionable(self):
+        message = 'Set GEMINI_API_KEY in the environment or .runtime/characters.env'
+        generator = Generator(error=ValueError(message))
+        self.creation.prompt.value = 'Explorer'
+        self.start(generator)
+        generator.release.set()
+        wait_until(lambda: not self.creation.busy)
+        self.assertIn('GEMINI_API_KEY', self.creation.status.content)
+        self.assertIn('.runtime/characters.env', self.creation.status.content)
+        self.assertEqual(self.cast.added, [])
+
     def test_failure_preserves_current_cast_and_reuses_matching_reference(self):
         reference = png()
         first = Generator(error=ValueError('secret=credential'), reference=reference)
