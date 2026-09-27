@@ -468,6 +468,53 @@ class PromptAssistantUITests(unittest.TestCase):
         self.assertIn('Model request timed out', ui.status.content)
         self.assertEqual(self.prompt.value, 'Turn back')
 
+    def test_failed_generation_rewrite_can_submit_original_direction(self):
+        submissions = []
+
+        def generate(text, context, scene, original, guard):
+            with guard() as allowed:
+                if allowed:
+                    submissions.append((text, context, scene, original))
+            return allowed
+
+        failure = PromptAssistantResult('', 'Could not refine.', (), False,
+                                        'gateway', 'Assistant changed a stated constraint')
+        ui = PromptAssistantUI(self.gui, self.prompt, self.context, self.apply,
+                               lambda _prompt, _answers: failure,
+                               auto_apply=True, generate=generate)
+        ui.refresh(True, False)
+        self.assertTrue(ui.start_generation())
+        self.wait_for(ui)
+        self.assertTrue(ui.generate_original_button.visible)
+        self.assertIn('action needed', ui.folder.label)
+        ui.generate_original_button.click()
+        self.assertEqual(submissions, [('Turn back', tuple(self.target), None, 'Turn back')])
+        self.assertEqual(self.prompt.value, 'Turn back')
+        self.assertFalse(ui.generate_original_button.visible)
+
+    def test_original_direction_fallback_rejects_changed_context(self):
+        submissions = []
+
+        def generate(text, _context, _scene, _original, guard):
+            with guard() as allowed:
+                if allowed:
+                    submissions.append(text)
+            return True
+
+        failure = PromptAssistantResult('', 'Could not refine.', (), False,
+                                        'gateway', 'Model request timed out')
+        ui = PromptAssistantUI(self.gui, self.prompt, self.context, self.apply,
+                               lambda _prompt, _answers: failure,
+                               auto_apply=True, generate=generate)
+        ui.refresh(True, False)
+        ui.start_generation()
+        self.wait_for(ui)
+        self.target[1] += 1
+        ui.refresh(True, False)
+        self.assertFalse(ui.generate_original_button.visible)
+        ui.generate_original_button.click()
+        self.assertEqual(submissions, [])
+
     def test_actual_refiner_asks_then_preserves_resolved_target(self):
         self.prompt.edit('Walk over there')
         ui = self.make_ui(partial(refine_prompt, offline=True))
