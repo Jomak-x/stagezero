@@ -25,11 +25,12 @@ class StudioTimeline:
     dispatches playhead clicks through ``on_frame_change`` on its own worker.
     """
 
-    def __init__(self, server, session, command_uuid=None, *, core_session=None, paired_session=None):
+    def __init__(self, server, session, command_uuid=None, *, core_session=None, paired_session=None, cast_session=None):
         self.timeline = server.timeline
         self.session = session
         self.core_session = core_session
         self.paired_session = paired_session
+        self.cast_session = cast_session
         self._core_mode = False
         self.command_uuid = command_uuid
         self._layout = None
@@ -40,7 +41,7 @@ class StudioTimeline:
         self.update()
 
     def _active_motion_session(self):
-        for name, candidate in (('paired-research', self.paired_session), ('core', self.core_session)):
+        for name, candidate in (('cast-performance', self.cast_session), ('paired-research', self.paired_session), ('core', self.core_session)):
             if candidate is not None and candidate.snapshot()['active']:
                 return name, candidate
         return None, None

@@ -11,6 +11,8 @@ not a G1 take, and switching modes does not convert either skeleton. Core mode
 renders its own two supplied human character assets; selecting or generating a
 G1/GLB character does not change the native Core cast.
 
+For prompt-driven one-to-three-person scenes in the existing studio, use **Motion → Direct → AI cast · 1–3 people**; see [Main studio cast integration](MAIN-CAST.md).
+
 For paired acting with separate starts and a shared meeting, use **Motion → Direct → Two characters**; see [Paired direction](PAIRED-DIRECTION.md). The existing native Core panel below is now inside **Advanced scene motion**. Core and paired native projects remain separate.
 
 ## Use the current UI

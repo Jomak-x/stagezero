@@ -19,11 +19,17 @@ if ssh "${SSH_ARGS[@]}" "$STAGEZERO_SSH_HOST" 'bash /workspace/stagezero/start-b
 else
   echo 'Pod unavailable; opening the viewer with recorded fallback available.'
 fi
+NATIVE_ARGS=()
+if [[ -n "${STAGEZERO_NATIVE_PAIR_CONFIG:-}" ]]; then
+  NATIVE_ARGS=(--native-pair-config "$STAGEZERO_NATIVE_PAIR_CONFIG")
+elif [[ -f .runtime/prompt-native-provider.json ]]; then
+  NATIVE_ARGS=(--native-pair-config .runtime/prompt-native-provider.json)
+fi
 echo 'Viewer: http://127.0.0.1:2336'
 echo "Remote access: point your private Tailscale Serve proxy at localhost:2336 after review."
 echo 'The Pod may still be loading. Recorded preview remains available.'
 if .venv/bin/python -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:2336",timeout=2)' 2>/dev/null; then
   echo 'Viewer is already running; open the address above.'
 else
-  exec .venv/bin/python director_viewer.py
+  exec .venv/bin/python director_viewer.py "${NATIVE_ARGS[@]}"
 fi

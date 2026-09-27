@@ -28,7 +28,10 @@ from studio_core_renderer import StudioCoreRenderer
 from native_pair_session import NativePairSession
 from native_pair_renderer import NativePairRenderer
 from native_pair_controls import NativePairControls
-from native_pair_playback import NativePairPlaybackController
+from native_pair_playback import NativePairPlaybackController  # register local playback protocol
+from cast_performance_session import CastPerformanceSession
+from cast_performance_renderer import CastPerformanceRenderer
+from studio_cast_runtime import NativePlaybackRouter, decode_native_project, set_cast_camera_view
 
 
 MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
@@ -177,92 +180,99 @@ def main():
     from native_pair_provider import NativePairProvider
     pair_provider = NativePairProvider.from_config(args.native_pair_config) if args.native_pair_config else None
     paired = NativePairSession(pair_provider)
+    cast = CastPerformanceSession()
+    from prompt_scene_plan import ScenePromptPlanner
+    cast_planner = ScenePromptPlanner()
     core.update_scene(session.scene_document())
     paired.update_scene(session.scene_document())
     core_renderer = StudioCoreRenderer(server, name_prefix="/core-cast")
     paired_renderer = NativePairRenderer(server)
+    cast_renderer = CastPerformanceRenderer(server)
     native_render_lock = threading.RLock()
     core_ui = None
     pair_ui = None
+    cast_ui = None
+    prompt_cast_folder = None
     direction_ui = None
     direction_mode = None
     pair_folder = cast_folder = None
     scene_sync_error = None
     core_requested = False
     paired_requested = False
+    cast_requested = False
+    native_exporting = False
     last_core_clip = None
-    last_paired_clip = None
+    last_cast_clip = None
     last_main_scene = session.scene_document()
     last_main_scene_revision = session.project_revision
     core_document = core.scene_document
     core_document_epoch = None
     paired_document = paired.scene_document
     paired_document_revision = None
-    native_playback = NativePairPlaybackController(server,
-        get_state=lambda: dict(paired.snapshot(), enabled=paired_requested))
-    paired_renderer.local_playback = native_playback
+    cast_document = session.scene_document()
+    cast_document_revision = None
+    native_router = NativePlaybackRouter(server,
+        {'paired': (paired, paired_renderer), 'cast': (cast, cast_renderer)}, lock=native_render_lock)
+    native_playback = native_router.controller
+
+    def require_native_idle():
+        if native_exporting or paired.snapshot()['capturing'] or cast.snapshot()['capturing']:
+            raise ValueError('Wait for playback export to finish.')
+        if (session.busy or paired.snapshot()['busy'] or cast.snapshot()['busy'] or
+                native_core_has_pending_work(core.snapshot())):
+            raise ValueError('Finish or cancel current generation before changing modes or opening a project.')
+
+    def activate_mode(mode):
+        nonlocal core_requested, paired_requested, cast_requested
+        with session.lock, native_render_lock:
+            current = 'cast' if cast_requested else 'paired' if paired_requested else 'core' if core_requested else None
+            if current == mode:
+                return
+            require_native_idle()
+            if paired_requested:
+                paired.deactivate()
+            if cast_requested:
+                cast.deactivate()
+            if core_requested:
+                core.deactivate()
+            if mode == 'paired':
+                paired.activate()
+            elif mode == 'cast':
+                cast.activate()
+            core_requested, paired_requested, cast_requested = mode == 'core', mode == 'paired', mode == 'cast'
+            native_router.select(mode if mode in ('paired', 'cast') else None)
+            if mode is not None:
+                session.pause()
+                session.set_character_motion_enabled(False)
+                session.status = 'Scene direction is active; your other motion takes remain stored.'
+            else:
+                entry = characters.active_entry
+                session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
+            actor_group.visible = mode is None
+            core_renderer.set_visible(core_requested)
+            paired_renderer.set_visible(paired_requested)
+            cast_renderer.set_visible(cast_requested)
+            camera.rebase(actor_root())
 
     def activate_core(active):
-        nonlocal core_requested, paired_requested
-        with session.lock:
-            if active and session.busy:
-                raise ValueError('Finish or cancel the current take generation before switching modes.')
-            if active and paired_requested:
-                if paired.snapshot()['busy']:
-                    raise ValueError('Finish or cancel paired research generation before switching modes.')
-                paired.deactivate()
-                paired_requested = False
-            core_requested = bool(active)
-            if active:
-                session.pause()
-                session.set_character_motion_enabled(False)
-                session.status = 'Scene direction is active; your G1 takes remain stored.'
-            else:
-                entry = characters.active_entry
-                session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
-        actor_group.visible = not (core_requested or paired_requested)
-        core_renderer.set_visible(active)
-        paired_renderer.set_visible(paired_requested)
-        camera.rebase(actor_root())
+        if active or core_requested:
+            activate_mode('core' if active else None)
 
     def activate_paired(active):
-        nonlocal core_requested, paired_requested
-        with session.lock:
-            if active and session.busy:
-                raise ValueError('Finish or cancel the current take generation before switching modes.')
-            if active and core_requested:
-                core_state = core.snapshot()
-                if native_core_has_pending_work(core_state):
-                    raise ValueError('Finish or cancel Native Core generation before switching modes.')
-            if active:
-                was_paired_active = bool(paired.snapshot()['active'])
-                paired.activate()
-                try:
-                    if core_requested:
-                        core.deactivate()
-                        core_requested = False
-                except Exception:
-                    if not was_paired_active:
-                        paired.deactivate()
-                    raise
-                paired_requested = True
-                session.pause()
-                session.set_character_motion_enabled(False)
-                session.status = 'Joint InterGen research is active; G1 and Native Core motion remain stored.'
-            else:
-                if paired.snapshot()['busy']:
-                    raise ValueError('Cancel paired research generation before returning to G1.')
-                paired.deactivate()
-                paired_requested = False
-                entry = characters.active_entry
-                session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
-        actor_group.visible = not (core_requested or paired_requested)
-        core_renderer.set_visible(core_requested)
-        paired_renderer.set_visible(paired_requested)
-        camera.rebase(actor_root())
+        if active or paired_requested:
+            activate_mode('paired' if active else None)
+
+    def activate_cast(active):
+        if active or cast_requested:
+            activate_mode('cast' if active else None)
+
+    def activate_story():
+        with session.lock, native_render_lock:
+            require_native_idle()
+            activate_mode(None)
 
     def render_native_capture_frame(frame, state):
-        native_playback.update(paired.snapshot(), enabled=paired_requested)
+        native_playback.update(native_router.get_state(), enabled=paired_requested or cast_requested)
         # Called under native_render_lock after the exact actor pose is set.
         # Do not acquire the main session lock here: live updates acquire that
         # lock before native_render_lock. The paired scene is immutable during
@@ -277,27 +287,77 @@ def main():
             'lighting': doc.get('lighting', 'neutral'),
             'seconds': frame / float(state['fps'])})
 
-    def export_native_pair(client):
-        nonlocal previous_objects
+    def export_native_performance(client, *, composed=False):
+        nonlocal previous_objects, native_exporting
         from native_pair_capture import capture_pair
-        with native_render_lock:
+        motion, renderer = (cast, cast_renderer) if composed else (paired, paired_renderer)
+        with session.lock, native_render_lock:
+            require_native_idle()
+            if not motion.snapshot()['active'] or not motion.snapshot()['total_frames']:
+                raise ValueError('Open or generate a complete performance before exporting.')
             direction_marks.hide()
+            native_router.refresh()
+            native_exporting = True
         try:
-            return capture_pair(paired, paired_renderer, client,
-                                ROOT / '.runtime/native-pair-videos' / str(time.time_ns()), flush=server.flush,
-                                render_lock=native_render_lock, render_frame=render_native_capture_frame)
+            return capture_pair(motion, renderer, client,
+                ROOT / '.runtime' / ('cast-videos' if composed else 'native-pair-videos') / str(time.time_ns()),
+                flush=server.flush, render_lock=native_render_lock,
+                render_frame=render_cast_capture_frame if composed else render_native_capture_frame,
+                archive_name='scene.cast.stagezero.npz' if composed else 'scene.native-pair.stagezero.npz')
         finally:
-            # The restored transport can equal its pre-export frame, but the
-            # effect layer still needs to leave the final captured frame.
             with native_render_lock:
+                native_exporting = False
                 previous_objects = None
+
+    def export_native_pair(client):
+        return export_native_performance(client)
+
+    def render_cast_capture_frame(frame, state):
+        # The cast scene is immutable under its capture lease. Never acquire
+        # the main session lock while holding the capture render lock.
+        camera.update(cast_renderer.actor_root())
+        doc = cast.scene_document
+        objects = doc.get('objects', [])
+        object_layer.update(objects, {'objects': [{'id': obj['id'], 'position': obj['position'],
+            'color': obj['color'], 'active': False} for obj in objects],
+            'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
+            'lighting': doc.get('lighting', 'neutral'), 'seconds': frame / state['fps']})
+
+    def frame_prompt_cast(client):
+        if client is None:
+            return
+        from prompt_scene_camera import prompt_scene_camera_view
+        with session.lock, native_render_lock, cast._lock:
+            if native_exporting or cast.snapshot()['capturing']:
+                raise ValueError('Wait for playback export to finish.')
+            clip, state = cast.timeline_clip(), cast.snapshot()
+            if clip is None:
+                return
+            native_router.refresh()
+            position, center, fov = prompt_scene_camera_view(clip, cast.scene_document,
+                frame=state['frame'], aspect=getattr(client.camera, 'aspect', 16/9))
+            camera._manual(client)
+            set_cast_camera_view(client, position, center, fov)
+
+    def generate_prompt_cast(prompt, seed, client):
+        from prompt_scene_builder import PromptSceneBuilder
+        with session.lock, native_render_lock:
+            require_native_idle()
+            if pair_provider is None or core_client is None:
+                raise ValueError('Configure the existing native and Core providers before generating an AI cast.')
+            builder = PromptSceneBuilder(prompt, cast_planner, pair_provider, core_client,
+                                         ROOT / '.runtime/prompt-scenes/generations', seed=seed)
+            activate_cast(True)
+            cast.build_performance(builder, session.scene_document(), request={'prompt': prompt, 'seed': seed})
+            direction_marks.hide()
+        return cast
 
     def frame_native_cast(client):
         if client is None:
             return
         with session.lock, native_render_lock:
             state = paired.snapshot()
-            if state.get('capturing'):
+            if native_exporting or state.get('capturing'):
                 raise RuntimeError('Playback export is running; wait before framing the cast')
             camera._manual(client)
             paired_renderer.sync_cast(state)
@@ -339,8 +399,7 @@ def main():
         from paired_direction import PairedSceneBuilder, validate_request
         request = validate_request(request)
         with session.lock, native_render_lock:
-            if session.busy or paired.snapshot()['busy'] or paired.snapshot()['capturing']:
-                raise ValueError('Finish or cancel the current generation or export first.')
+            require_native_idle()
             preview_paired_direction(request, client)
             activate_paired(True)
             paired.select_pair(*request['actor_ids'])
@@ -350,29 +409,38 @@ def main():
         return paired
 
     def open_native_project(data):
-        from native_pair_clip import decode_project
-        decoded = decode_project(data)
+        kind, decoded = decode_native_project(data)
         with session.lock, native_render_lock:
-            if session.busy or paired.snapshot()['busy'] or paired.snapshot()['capturing'] or native_core_has_pending_work(core.snapshot()):
-                raise ValueError('Finish or cancel current generation before opening a project.')
-            if paired.snapshot()['total_frames']:
-                backup = ROOT / '.runtime/native-pair-projects' / ('before-open-' + str(time.time_ns()) + '.native-pair.stagezero.npz')
+            require_native_idle()
+            motion = cast if kind == 'cast' else paired
+            scene = decoded[2] if kind == 'cast' else decoded[3]
+            # Validate the Scene tab representation before changing either take.
+            session._document(scene)
+            if motion.snapshot()['total_frames']:
+                suffix = 'cast' if kind == 'cast' else 'native-pair'
+                backup = ROOT / '.runtime' / (suffix + '-projects') / ('before-open-' + str(time.time_ns()) + '.' + suffix + '.stagezero.npz')
                 backup.parent.mkdir(parents=True, exist_ok=True)
-                backup.write_bytes(paired.save())
-            paired.load(data)
-            session.load_scene_document(decoded[3])
-            activate_paired(True)
+                backup.write_bytes(motion.save())
+            motion.load(data)
+            session.load_scene_document(scene)
+            activate_mode(kind)
+            native_router.refresh()
             direction_marks.hide()
-            if direction_ui is not None:
+            if kind == 'paired' and direction_ui is not None:
                 request = decoded[0].metadata.get('direction_request')
                 if request:
                     direction_ui.restore_request(request)
+        # Controls callbacks acquire their lock before invoking this action.
+        # Notify outside the main/render transaction to keep one lock order.
+        if kind == 'cast' and cast_ui is not None:
+            cast_ui.mark_loaded()
 
     def open_g1_project(data):
         with session.lock, native_render_lock:
-            if paired.snapshot()['busy'] or paired.snapshot()['capturing'] or native_core_has_pending_work(core.snapshot()):
-                raise ValueError('Finish or cancel current generation before opening a project.')
+            require_native_idle()
             session.load_project(data)
+            if cast_requested:
+                activate_cast(False)
             if paired_requested:
                 activate_paired(False)
             if core_requested:
@@ -381,9 +449,16 @@ def main():
             direction_marks.hide()
 
     def build_core_controls(gui):
-        nonlocal core_ui, pair_ui, direction_ui, direction_mode, pair_folder, cast_folder
+        nonlocal core_ui, pair_ui, cast_ui, direction_ui, direction_mode, pair_folder, cast_folder, prompt_cast_folder
         from paired_direction_controls import PairedDirectionControls
-        direction_mode = gui.add_dropdown('Direct', ('One character', 'Two characters'), initial_value='One character')
+        from studio_cast_controls import StudioCastControls
+        direction_mode = gui.add_dropdown('Direct', ('One character', 'Two characters', 'AI cast · 1–3 people'), initial_value='One character')
+        with gui.add_folder('AI cast · 1–3 people', expand_by_default=True) as prompt_cast_folder:
+            cast_ui = StudioCastControls(gui, cast, on_generate=generate_prompt_cast,
+                on_frame=frame_prompt_cast, on_export=lambda client: export_native_performance(client, composed=True),
+                on_open=open_native_project, provider_available=pair_provider is not None and core_client is not None,
+                output_root=ROOT / '.runtime/cast-projects')
+        prompt_cast_folder.visible = False
         with gui.add_folder('Two-person scene', expand_by_default=True) as pair_folder:
             direction_ui = PairedDirectionControls(gui, paired, on_generate=generate_paired_direction,
                 on_preview=preview_paired_direction, on_frame_cast=frame_native_cast,
@@ -399,16 +474,19 @@ def main():
                                         project_folder=ROOT / '.runtime/core-projects')
         @direction_mode.on_update
         def change_direction_mode(event):
-            wanted = direction_mode.value == 'Two characters'
-            if wanted == paired_requested:
+            wanted = {'One character': None, 'Two characters': 'paired', 'AI cast · 1–3 people': 'cast'}[direction_mode.value]
+            # Core remains the advanced one-character mode.
+            if wanted is None and core_requested:
                 return
             try:
-                activate_paired(wanted)
+                activate_mode(wanted)
                 direction_marks.hide()
             except (ValueError, RuntimeError) as exc:
                 session.project_status = str(exc)
-                direction_mode.value = 'Two characters' if paired_requested else 'One character'
+                direction_mode.value = 'AI cast · 1–3 people' if cast_requested else 'Two characters' if paired_requested else 'One character'
     def actor_root():
+        if cast_requested:
+            return cast_renderer.actor_root()
         if paired_requested:
             return paired_renderer.actor_root()
         if core_requested and core.snapshot()['total_frames']:
@@ -422,6 +500,8 @@ def main():
         client.camera.far = 250.
         camera.reset(client)
         characters.on_client_connect(client)
+        if cast_requested and not native_exporting and not cast.snapshot()['capturing']:
+            frame_prompt_cast(client)
 
     gate_posts = [server.scene.add_box(f'/gate/post{i}', dimensions=(.055,1.65,.08), color=(83,113,131)) for i in range(2)]
     gate_panel = server.scene.add_box('/gate/panel', dimensions=(1.6,1.25,.04), color=(65,147,138), opacity=.28)
@@ -434,7 +514,7 @@ def main():
     def update_studio_surfaces():
         nonlocal surface_state
         visibility = studio_surface_visibility(
-            (paired_document if paired_requested else core_document if core_requested
+            (cast_document if cast_requested else paired_document if paired_requested else core_document if core_requested
              else session.scene).get('objects', []),
             show_grid=bool(gate_ui['grid'].value),
             show_platform=bool(gate_ui['stage'].value),
@@ -487,11 +567,11 @@ def main():
         edit_gate(gizmo.position)
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
-                  characters.build_gui, core_session=core, paired_session=paired,
+                  characters.build_gui, core_session=core, paired_session=paired, cast_session=cast,
                   core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project,
-                  on_story_activate=lambda: (activate_paired(False), activate_core(False)))
+                  on_story_activate=activate_story)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
-                              core_session=core, paired_session=paired)
+                              core_session=core, paired_session=paired, cast_session=cast)
 
     if args.native_project:
         open_native_project(args.native_project.read_bytes())
@@ -500,9 +580,11 @@ def main():
     def transport_key(event):
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
             return
-        if core_requested or paired_requested:
-            motion = paired if paired_requested else core
+        if core_requested or paired_requested or cast_requested:
+            motion = cast if cast_requested else paired if paired_requested else core
             state = motion.snapshot()
+            if native_exporting or state.get('capturing') or state.get('busy'):
+                return
             if state['total_frames']:
                 if event.key == ' ':
                     motion.pause() if state['playing'] else motion.play()
@@ -546,14 +628,14 @@ def main():
         while True:
             key = session.tick()
             characters.tick(key)
-            if core_requested or paired_requested:
+            if core_requested or paired_requested or cast_requested:
                 session.set_character_motion_enabled(False)
                 session.pause()
             pose_changed = key != previous or characters.revision != previous_character
             # Main-session lock always precedes the render lock; capture never
             # acquires the main-session lock while holding the render lock.
             with session.lock, native_render_lock:
-                if not paired.snapshot().get('capturing'):
+                if not native_exporting and not paired.snapshot().get('capturing') and not cast.snapshot()['capturing']:
                     if session.project_revision != last_main_scene_revision:
                         current_main_scene = session.scene_document()
                         if current_main_scene != last_main_scene:
@@ -564,11 +646,29 @@ def main():
                             except ValueError as exc:
                                 scene_sync_error = str(exc)
                                 session.project_status = 'Background changed; retained paired take uses its saved scene. Generate a new scene to apply these changes. ' + str(exc)
+                            if (cast_requested and cast.snapshot()['total_frames'] and
+                                    current_main_scene != session._document(cast.scene_document)):
+                                session.project_status = 'Scene changed. The retained AI cast take uses its saved scene; generate a new performance to apply the Scene tab changes.'
                             last_main_scene = current_main_scene
                         last_main_scene_revision = session.project_revision
                     core_state = core.tick()
                     paired_state = paired.tick()
-                    paired_renderer.sync_cast(paired_state)
+                    # Hold the publication lock through render and document
+                    # selection so a completed build cannot mix old/new scenes.
+                    with cast._lock:
+                        cast_state = cast.tick()
+                        native_router.refresh()
+                        cast_state = cast.snapshot()
+                        if cast_state['revision'] != cast_document_revision:
+                            cast_document = cast.scene_document if cast_state['total_frames'] else session.scene_document()
+                            cast_document_revision = cast_state['revision']
+                        cast_clip = cast.timeline_clip()
+                        if cast_requested and cast_clip is not None and cast_clip is not last_cast_clip:
+                            last_cast_clip = cast_clip
+                            for client in server.get_clients().values():
+                                frame_prompt_cast(client)
+                    if cast_requested and not cast_state['total_frames']:
+                        cast_document = session.scene_document()
                     if core_state['epoch'] != core_document_epoch:
                         core_document = core.scene_document
                         core_document_epoch = core_state['epoch']
@@ -583,17 +683,13 @@ def main():
                             last_core_clip = core_key
                         core_renderer.tick(core_state['frame'])
                     core_renderer.set_visible(core_requested and bool(core_state['total_frames']))
-                    if paired_requested and paired_state['total_frames']:
-                        if paired_key != last_paired_clip:
-                            paired_renderer.set_clip(paired.timeline_clip())
-                            last_paired_clip = paired_key
-                        paired_renderer.tick(paired_state['frame'])
                     paired_renderer.set_visible(paired_requested)
-                    native_playback.update(paired_state, enabled=paired_requested)
-                    actor_group.visible = not (core_requested or paired_requested)
+                    cast_renderer.set_visible(cast_requested and bool(cast_state['total_frames']))
+                    actor_group.visible = not (core_requested or paired_requested or cast_requested)
                     rendered_root = actor_root()
                     if ((core_requested and core_state['total_frames']) or
-                            (paired_requested and paired_state['total_frames'])):
+                            (paired_requested and paired_state['total_frames']) or
+                            (cast_requested and cast_state['total_frames'])):
                         camera.update(rendered_root)
                     character_changed = characters.revision != previous_character
                     pose_changed = key != previous or character_changed
@@ -613,7 +709,7 @@ def main():
                             previous = key
                             previous_character = characters.revision
                     previous_fallback_needed = fallback_needed
-                    if not (core_requested or paired_requested):
+                    if not (core_requested or paired_requested or cast_requested):
                         camera_studio.update()
                     if session.needs_ack and server.get_clients() and (render_thread is None or not render_thread.is_alive()):
                         request_id,submitted = session.needs_ack
@@ -621,14 +717,15 @@ def main():
                         server.flush()
                         render_thread = threading.Thread(target=acknowledge,args=(next(iter(server.get_clients().values())),request_id,submitted),daemon=True)
                         render_thread.start()
-                    object_key = (key, session.project_revision, core_requested, paired_requested,
+                    object_key = (key, session.project_revision, core_requested, paired_requested, cast_requested,
+                                  cast_state['revision'], cast_state['frame'] if cast_requested else 0,
                                   core_key, paired_key,
                                   core_state['frame'] if core_requested else
                                   paired_state['frame'] if paired_requested else 0)
                     if object_key != previous_objects:
-                        if core_requested or paired_requested:
-                            doc = paired_document if paired_requested else core_document
-                            display_frame = paired_state['frame'] if paired_requested else core_state['frame']
+                        if core_requested or paired_requested or cast_requested:
+                            doc = cast_document if cast_requested else paired_document if paired_requested else core_document
+                            display_frame = cast_state['frame'] if cast_requested else paired_state['frame'] if paired_requested else core_state['frame']
                             objects = doc.get('objects', [])
                             # Native and paired archives retain a scene snapshot for
                             # playback. InterGen did not condition its generation on
@@ -638,24 +735,24 @@ def main():
                             object_layer.update(objects, {'objects': states,
                                 'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
                                 'lighting': doc.get('lighting', 'neutral'),
-                                'seconds': display_frame / float(paired_state['fps'] if paired_requested else core_state['fps'])})
+                                'seconds': display_frame / float(cast_state['fps'] if cast_requested else paired_state['fps'] if paired_requested else core_state['fps'])})
                         else:
                             object_layer.update(session.scene.get('objects', []), session.object_states())
                         update_studio_surfaces()
                         previous_objects = object_key
                     gate = session.scene['gate']
                     gate_open = session.gate_open()
-                    scene_key = (core_requested, paired_requested, tuple(gate['position']),gate['radius'],gate['enabled'],gate_open,gate_ui['edit'].value)
+                    scene_key = (core_requested, paired_requested, cast_requested, tuple(gate['position']),gate['radius'],gate['enabled'],gate_open,gate_ui['edit'].value)
                     if scene_key != last_scene:
                         for i,post in enumerate(gate_posts):
                             post.position = (gate['position'][0]+(-.84 if i==0 else .84),.825,gate['position'][2])
-                            post.visible = gate['enabled'] and not (core_requested or paired_requested)
+                            post.visible = gate['enabled'] and not (core_requested or paired_requested or cast_requested)
                         gate_panel.position = (gate['position'][0],2.4 if gate_open else .725,gate['position'][2])
-                        gate_panel.visible = gate['enabled'] and not (core_requested or paired_requested)
+                        gate_panel.visible = gate['enabled'] and not (core_requested or paired_requested or cast_requested)
                         gate_zone.position = (gate['position'][0],.004,gate['position'][2])
                         gate_zone.vertices = np.asarray(zone_mesh.vertices*np.array([gate['radius'],1.,gate['radius']]),dtype=np.float32)
-                        gate_zone.visible = gate['enabled'] and not (core_requested or paired_requested)
-                        gizmo.visible = gate['enabled'] and gate_ui['edit'].value and not (core_requested or paired_requested)
+                        gate_zone.visible = gate['enabled'] and not (core_requested or paired_requested or cast_requested)
+                        gizmo.visible = gate['enabled'] and gate_ui['edit'].value and not (core_requested or paired_requested or cast_requested)
                         gizmo.position = (gate['position'][0],0.,gate['position'][2])
                         gate_ui['enabled'].value = gate['enabled']
                         gate_ui['x'].value,gate_ui['z'].value = gate['position'][0],gate['position'][2]
@@ -669,9 +766,11 @@ def main():
                         ui.update()
                         core_ui.tick()
                         pair_ui.tick()
+                        cast_ui.tick()
+                        prompt_cast_folder.visible = cast_requested
                         direction_ui.tick()
                         pair_folder.visible = cast_folder.visible = paired_requested
-                        expected_mode = 'Two characters' if paired_requested else 'One character'
+                        expected_mode = 'AI cast · 1–3 people' if cast_requested else 'Two characters' if paired_requested else 'One character'
                         if direction_mode.value != expected_mode:
                             direction_mode.value = expected_mode
                     timeline.update()
@@ -683,8 +782,10 @@ def main():
         session.reset()
         core.close()
         paired.close()
+        cast.close()
         core_renderer.remove()
         paired_renderer.remove()
+        cast_renderer.remove()
         characters.close()
         server.stop()
 

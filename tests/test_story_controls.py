@@ -349,6 +349,27 @@ class StoryControlsTests(unittest.TestCase):
                 self.assertEqual(self.handoffs, [])
                 paired[flag] = False
 
+    def test_cast_busy_or_export_blocks_load_before_g1_take_changes(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.cast_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag, error in (('busy', 'Finish or cancel cast generation'),
+                            ('capturing', 'Wait for cast playback export')):
+            with self.subTest(flag=flag):
+                paired[flag] = True
+                self.controls.update()
+                view.load.click(self.client)
+                self.assertIn(error, view.error)
+                self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+                self.assertEqual(self.session.takes, {})
+                self.assertIsNone(self.session.active_take)
+                self.assertEqual(self.session.project_revision, 0)
+                self.assertEqual(self.handoffs, [])
+                paired[flag] = False
+
     def test_inactive_pair_with_pending_work_still_blocks_automatic_load(self):
         self.core.active = False
         paired = {'active': False, 'busy': True, 'capturing': False}

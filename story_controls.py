@@ -13,11 +13,12 @@ _LENGTHS = {'15 seconds': 15, '30 seconds': 30, '60 seconds': 60,
 
 
 class StoryControls:
-    def __init__(self, gui, session, *, core_session=None, paired_session=None, on_story_activate=None):
+    def __init__(self, gui, session, *, core_session=None, paired_session=None, cast_session=None, on_story_activate=None):
         self.gui = gui
         self.session = session
         self.core_session = core_session
         self.paired_session = paired_session
+        self.cast_session = cast_session
         self.on_story_activate = on_story_activate
         self.workflow = StoryWorkflow(session)
         self.ids = {}
@@ -350,14 +351,15 @@ class StoryControls:
 
     def _native_active(self):
         return any(native is not None and native.snapshot().get('active', False)
-                   for native in (self.core_session, self.paired_session))
+                   for native in (self.core_session, self.paired_session, self.cast_session))
 
     def _paired_activation_error(self):
-        state = self.paired_session.snapshot() if self.paired_session is not None else {}
-        if state.get('capturing'):
-            return 'Wait for paired playback export to finish before loading this scene.'
-        if state.get('busy'):
-            return 'Finish or cancel paired generation before loading this scene.'
+        for label, native in (('paired', self.paired_session), ('cast', self.cast_session)):
+            state = native.snapshot() if native is not None else {}
+            if state.get('capturing'):
+                return f'Wait for {label} playback export to finish before loading this scene.'
+            if state.get('busy'):
+                return f'Finish or cancel {label} generation before loading this scene.'
         return None
 
     def _activate_g1(self):

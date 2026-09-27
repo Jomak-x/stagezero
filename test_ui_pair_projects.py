@@ -23,7 +23,7 @@ class MainPairProjectTests(unittest.TestCase):
         ui.open_data(data.getvalue())
         callback.assert_called_once_with(data.getvalue())
         ui.session.load_project.assert_not_called()
-        self.assertIn('paired scene', ui.session.project_status)
+        self.assertIn('saved cast and background', ui.session.project_status)
 
     def test_invalid_native_open_retains_main_state(self):
         data = io.BytesIO(); np.savez_compressed(data, joints=np.zeros(1))

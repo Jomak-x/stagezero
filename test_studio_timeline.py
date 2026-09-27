@@ -159,6 +159,28 @@ class StudioTimelineTest(unittest.TestCase):
         self.timeline.on_scrub(40)
         self.assertEqual(self.session.frame, 0)
 
+    def test_three_actor_cast_scrubs_on_30fps_timeline_and_returns_to_g1(self):
+        from cast_performance_session import CastPerformanceSession
+        from cast_performance import encode_project, cast_from_performance
+        from test_cast_performance import performance
+        cast = CastPerformanceSession()
+        clip = performance(3, frames=60)
+        cast.load(encode_project(clip, cast_from_performance(clip)))
+        timeline = FakeTimeline()
+        main = FakeSession()
+        adapter = StudioTimeline(SimpleNamespace(timeline=timeline), main, cast_session=cast)
+        self.assertIn(('set_fps', (30.,), {}), timeline.calls)
+        self.assertEqual(timeline.end_frame, 59)
+        timeline.on_scrub(500)
+        self.assertEqual(cast.snapshot()['frame'], 59)
+        self.assertEqual(main.frame, 0)
+        cast.deactivate()
+        adapter.update()
+        self.assertIn(('set_fps', (25.,), {}), timeline.calls)
+        timeline.on_scrub(10)
+        self.assertEqual(main.frame, 10)
+
+
 
 if __name__ == "__main__":
     unittest.main()
