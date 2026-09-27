@@ -53,6 +53,46 @@ def _three_contact(prompt, actor_count=None):
     return group and bool(re.search(r'\b(hug\w*|embrac\w*|wrestl\w*|huddle|pile|hold hands|holding hands)\b', prompt, re.I))
 
 
+def _needs_group_sequence_review(prompt, count):
+    """Select explicit group requests with an ordered action or ending.
+
+    This only selects plans for semantic review; it does not try to extract
+    actions from free text or declare their coverage with keywords.
+    """
+    if count < 2 or not re.search(r'\b(then|after|before|finally|later|next|followed by|at the end|in the end)\b', prompt, re.I):
+        return False
+    group = r'\b(all(?: of them)?|everyone|everybody|both|each(?: person| of them))\b'
+    return bool(re.search(group, prompt, re.I) or (count == 3 and re.search(r'\btogether\b', prompt, re.I)))
+
+
+def _requests_initial_meeting(prompt):
+    return bool(re.search(r'\b(meet\w*|gather\w*|converge\w*)\b', prompt, re.I))
+
+
+def _review_group_sequence(gateway, prompt, plan):
+    """Reject a collapsed or incomplete group timeline before caching it."""
+    review_system = (
+        'Return JSON only with exactly {"preserves_request":boolean,"reason":string}. '
+        'Independently compare the original request with the proposed scene plan. '
+        'Return false if any major requested action is absent, out of order, assigned '
+        'to fewer than all requested performers, or if the requested ending is absent. '
+        'A single compound beat containing two sequential actions does not preserve '
+        'their order: separate action stages are required. Initial meeting or approach '
+        'may be represented by actors.start and meeting staging; later travel requires '
+        'an action beat. Evaluate only the supplied request and plan, not physical motion '
+        'quality. If uncertain whether every requested action is assigned, return false. '
+        'Keep reason under 200 printable characters.'
+    )
+    payload = json.dumps({'original_request': prompt, 'proposed_plan': plan}, ensure_ascii=False)
+    verdict = gateway.request_json(review_system, payload, max_tokens=500, timeout_seconds=45)
+    if (not isinstance(verdict, dict) or set(verdict) != {'preserves_request', 'reason'}
+            or type(verdict['preserves_request']) is not bool):
+        raise ValueError('Group sequence review returned an invalid verdict')
+    reason = _text(verdict['reason'], 'Group sequence review reason', 200)
+    if not verdict['preserves_request']:
+        raise ValueError('Group sequence omitted or reordered requested action: ' + reason)
+
+
 def validate_plan(document, scene=None, expected_prompt=None):
     """Return detached canonical intent; reject unknown fields and unsupported beats.
 
@@ -130,8 +170,6 @@ def validate_plan(document, scene=None, expected_prompt=None):
             if (_three_contact(prompt, count) or _three_contact(beat_prompt, count)
                     or any(_three_contact(action, count) for action in concurrent.values())):
                 raise ValueError('Simultaneous three-person contact is unsupported')
-            if document['meeting'] is not None and len(participants) == 1:
-                raise ValueError('Independent concurrent solos do not support meeting or approach staging')
         lower, upper = (2, 7) if concurrent is not None and len(participants) == 2 else ((1, 7) if len(participants) == 2 else (2, 10))
         if type(seconds) not in (int, float) or not math.isfinite(seconds) or not lower <= seconds <= upper:
             raise ValueError(f'Beat duration must be between {lower} and {upper} seconds')
@@ -144,8 +182,16 @@ def validate_plan(document, scene=None, expected_prompt=None):
             used.update(concurrent)
             result_beat['concurrent_solos'] = concurrent
         beats.append(result_beat)
-    if has_concurrency and len(beats) != 1:
-        raise ValueError('Concurrent actions currently require one whole-performance beat')
+    if has_concurrency and all(len(beat['actor_ids']) == 1 for beat in beats):
+        fixed = [a['start'] for a in actors if a['start'] is not None]
+        if any(math.hypot(a['x']-b['x'], a['z']-b['z']) < 2.
+               for i,a in enumerate(fixed) for b in fixed[i+1:]):
+            raise ValueError('Independent group starting positions must be at least 2 metres apart')
+    if has_concurrency and len(beats) > 1:
+        if not all(len(beat['actor_ids']) == 1 and
+                   set(beat.get('concurrent_solos', {})) == set(ids) - set(beat['actor_ids'])
+                   for beat in beats):
+            raise ValueError('Multiple concurrent beats require all performers in solo actions at every stage')
     if used != set(ids):
         raise ValueError('Every actor must participate in at least one solo or paired beat')
     if total > 30:
@@ -197,6 +243,8 @@ class ScenePromptPlanner:
             'otherwise infer a sensible facing from each actor\'s first action or path. '
             'A direction may be supplied even when start is null. '
             'Meeting is null (automatic), {target_id} from the actual scene inventory, or desired {x,z}. '
+            'For an explicit initial meet or gather in an ordered all-solo group sequence, '
+            'supply a meeting anchor so each performer can approach the gathering. '
             'Coordinates are optional intent only, within ±24 m; a local geometry solver must validate them. '
             'Use actual landmark positions and sizes to infer clear starts, never inside solid objects. '
             'Never invent objects, landmarks, actor roles, or actions absent from the request. '
@@ -212,14 +260,25 @@ class ScenePromptPlanner:
             '{actor_id: observable solo motion prompt}; sequential IDs beat-1 etc. '
             'Actor_ids has one or two known IDs only. Motion prompts are succinct observable motion, '
             'at most 350 characters; separate changes of action. Every actor must participate. '
-            'Use concurrent_solos ONLY when the user explicitly requests independent simultaneous '
-            'actions for all performers in a single whole-performance beat. The primary solo or '
+            'Use concurrent_solos ONLY when the user explicitly requests simultaneous '
+            'actions for all performers. The primary solo or '
             'actor_1/actor_2 pair and each mapped solo happen over the same action interval. '
             'For three people waving, use actor_1 as primary solo and map actor_2 and actor_3. '
+            'Independent group starts must be at least 2 metres apart; prefer 2.6 metres or more. '
+            'Use full concrete movement sentences, e.g. A person raises both arms and waves. '
             'For actor_1 and actor_2 shaking hands while actor_3 waves, use that pair as primary '
             'and map actor_3. These tracks are independent: no synchronized choreography or '
-            'simultaneous three-body contact. Concurrent solo plans cannot combine ordered beats; '
-            'independent solo concurrency cannot request an approach/meeting. Pair-plus-third '
+            'simultaneous three-body contact. When all performers act together in an ordered '
+            'sequence, use 2–4 separate all-solo concurrent beats: one primary solo and '
+            'concurrent_solos for every other actor in EACH beat. For a group that meets, '
+            'dances together, then all backflip at the end, put the meeting in staging, '
+            'dancing in one all-cast beat, and backflips in a later final all-cast beat. '
+            'Never collapse dance and backflip, or any distinct sequential actions, into '
+            'one compound beat. Every requested performer must receive every group action '
+            'in its own stage. Initial meeting staging is allowed for all-solo concurrent '
+            'sequences, including meeting followed by one shared action. '
+            'A pair-plus-third concurrent beat remains a single whole-performance '
+            'beat and cannot mix with other beats. Pair-plus-third '
             'concurrency has a paired action interval of 2–7 seconds; all solo intervals 2–10. '
             'Within an ongoing paired interaction, keep a context-dependent fall or recovery as a '
             'two-actor beat when the nearby partner is involved in the requested sequence. Include both '
@@ -285,6 +344,10 @@ class ScenePromptPlanner:
                 plan = validate_plan(raw, scene, expected_prompt=prompt)
                 if self.expected_actor_count is not None and plan["actor_count"] != self.expected_actor_count:
                     raise ValueError(f"Requested {self.expected_actor_count} performers; the plan must preserve every performer")
+                if _needs_group_sequence_review(prompt, plan['actor_count']):
+                    if _requests_initial_meeting(prompt) and plan['meeting'] is None:
+                        raise ValueError('Explicit group meeting needs a meeting anchor for generated approach')
+                    _review_group_sequence(gateway, prompt, plan)
             except ValueError as error:
                 if attempt:
                     raise

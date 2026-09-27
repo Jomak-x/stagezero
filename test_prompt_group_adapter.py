@@ -1,5 +1,6 @@
 """CPU-only contracts for the bounded concurrent prompt route."""
 import json
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -27,7 +28,18 @@ def plan(*, pair=False, count=3, seconds=4):
                        for i in range(1, count + 1)],
             'meeting': None, 'beats': [{'id': 'beat-1', 'actor_ids': primary,
                 'prompt': 'The pair shakes hands.' if pair else 'Actor 1 waves.',
-                'seconds': seconds, 'concurrent_solos': others}], 'warnings': []}
+            'seconds': seconds, 'concurrent_solos': others}], 'warnings': []}
+
+
+def sequence_plan(*, meeting=True):
+    raw = plan()
+    raw['beats'].append({'id': 'beat-2', 'actor_ids': ['actor_1'],
+                         'prompt': 'Actor 1 backflips.', 'seconds': 4,
+                         'concurrent_solos': {'actor_2': 'Actor 2 backflips.',
+                                              'actor_3': 'Actor 3 backflips.'}})
+    if meeting:
+        raw['meeting'] = {'x': 0, 'z': 0}
+    return validate_plan(raw, SCENE)
 
 
 def clip(count=3, *, action_start=60, action_frames=120):
@@ -79,7 +91,6 @@ class SchemaTests(unittest.TestCase):
         long = plan(pair=True, seconds=7.1); cases.append(long)
         contact = plan(); contact['prompt'] = 'All three hug together.'; cases.append(contact)
         primary_contact = plan(); primary_contact['beats'][0]['prompt'] = 'All three hug together.'; cases.append(primary_contact)
-        meeting = plan(); meeting['meeting'] = {'x': 0, 'z': 0}; cases.append(meeting)
         ordered = plan(); ordered['beats'].append({'id': 'beat-2', 'actor_ids': ['actor_1'],
                                                    'prompt': 'Wave.', 'seconds': 2}); cases.append(ordered)
         wrong_pair = plan(pair=True); wrong_pair['beats'][0]['actor_ids'] = ['actor_2', 'actor_3']
@@ -109,6 +120,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_independent_route_passes_all_prompts_and_names_to_group_generator(self):
         raw = validate_plan(plan())
+        raw['actors'][0]['start_yaw_degrees'] = 90.
         observed = {}
         generated_clip = CastPerformance(['actor_1', 'actor_2', 'actor_3'],
                                          np.zeros((120, 3, 22, 3), dtype=np.float64),
@@ -120,10 +132,84 @@ class AdapterTests(unittest.TestCase):
             result, _ = build_independent_solos(None, SCENE, raw, seed=7, output_root=self.root)
         self.assertEqual([actor['prompt'] for actor in observed['actors']],
                          ['Actor 1 waves.', 'Actor 2 waves.', 'Actor 3 waves.'])
+        self.assertEqual(observed['actors'][0]['yaw_degrees'], 90.)
         self.assertEqual(observed['seconds'], 4)
         self.assertEqual(result.metadata['concurrency_status'], 'accepted_by_geometry_gates')
         self.assertEqual(result.metadata['warnings'], ['Core source warning'])
         self.assertEqual(result.metadata['plan']['beats'][0]['concurrent_solos']['actor_3'], 'Actor 3 waves.')
+
+    def test_sequence_mode_off_rejects_before_placement_or_core(self):
+        cases = (sequence_plan(), sequence_plan(meeting=False),
+                 validate_plan(dict(plan(), meeting={'x': 0, 'z': 0}), SCENE))
+        for raw in cases:
+            for mode in ('', 'invalid'):
+                with self.subTest(beats=len(raw['beats']), meeting=raw['meeting'], mode=mode), \
+                     patch.dict(os.environ, {'STAGEZERO_GROUP_SEQUENCE_MODE': mode}), \
+                     patch('group_scene_placement.group_sequence_placement') as placement, \
+                     patch('group_scene_sequence.build_group_sequence') as sequence, \
+                     patch('independent_group_motion.generate_independent_tracks') as legacy_core:
+                    with self.assertRaisesRegex(ValueError, 'experimental Studio'):
+                        build_independent_solos(None, SCENE, raw, seed=7, output_root=self.root)
+                    placement.assert_not_called()
+                    sequence.assert_not_called()
+                    legacy_core.assert_not_called()
+
+    def test_fresh_and_continuous_modes_forward_yaw_and_stage_policy(self):
+        raw = sequence_plan()
+        raw['actors'][0]['start_yaw_degrees'] = 90.
+        source = CastPerformance(['actor_1', 'actor_2', 'actor_3'],
+                                 np.zeros((120, 3, 22, 3), dtype=np.float64),
+                                 metadata={'fps': 30, 'frames': 120, 'warnings': ['Source warning']})
+        for mode, fresh in ((' FRESH ', True), ('continuous', False)):
+            observed = {}
+            def generate(_client, _scene, _plan, starts, targets, **kwargs):
+                observed.update(starts=starts, targets=targets, **kwargs)
+                return {'performance': source, 'manifest': self.root/'sequence.json'}
+            with self.subTest(mode=mode), \
+                 patch.dict(os.environ, {'STAGEZERO_GROUP_SEQUENCE_MODE': mode}), \
+                 patch('group_scene_sequence.build_group_sequence', side_effect=generate) as sequence, \
+                 patch('independent_group_motion.generate_independent_tracks') as legacy_core:
+                result, _ = build_independent_solos(None, SCENE, raw, seed=7, output_root=self.root)
+                sequence.assert_called_once()
+                legacy_core.assert_not_called()
+            self.assertEqual(observed['fresh_action_stages'], fresh)
+            self.assertEqual(observed['starts']['actor_1']['yaw_degrees'], 90.)
+            self.assertEqual(result.metadata['placement']['starts']['actor_1']['yaw_degrees'], 90.)
+            self.assertEqual(result.metadata['concurrency_kind'], 'independent_group_sequence')
+            self.assertIn('Source warning', result.metadata['warnings'])
+
+    def test_single_beat_without_meeting_stays_on_legacy_route(self):
+        raw = validate_plan(plan())
+        source = CastPerformance(['actor_1', 'actor_2', 'actor_3'],
+                                 np.zeros((120, 3, 22, 3), dtype=np.float64),
+                                 metadata={'fps': 30, 'frames': 120, 'warnings': []})
+        for mode in ('', 'fresh'):
+            with self.subTest(mode=mode), \
+                 patch.dict(os.environ, {'STAGEZERO_GROUP_SEQUENCE_MODE': mode}), \
+                 patch('independent_group_motion.generate_independent_tracks',
+                       return_value={'performance': source}) as legacy_core, \
+                 patch('group_scene_placement.group_sequence_placement') as placement, \
+                 patch('group_scene_sequence.build_group_sequence') as sequence:
+                result, _ = build_independent_solos(None, SCENE, raw, seed=7, output_root=self.root)
+                legacy_core.assert_called_once()
+                placement.assert_not_called()
+                sequence.assert_not_called()
+                self.assertEqual(result.metadata['concurrency_kind'], 'independent_solos')
+
+    def test_one_beat_with_meeting_uses_opted_in_sequence_route(self):
+        raw = validate_plan(dict(plan(), meeting={'x': 0, 'z': 0}), SCENE)
+        source = CastPerformance(['actor_1', 'actor_2', 'actor_3'],
+                                 np.zeros((120, 3, 22, 3), dtype=np.float64),
+                                 metadata={'fps': 30, 'frames': 120, 'warnings': []})
+        with patch.dict(os.environ, {'STAGEZERO_GROUP_SEQUENCE_MODE': 'continuous'}), \
+             patch('group_scene_sequence.build_group_sequence',
+                   return_value={'performance': source}) as sequence, \
+             patch('independent_group_motion.generate_independent_tracks') as legacy_core:
+            result, _ = build_independent_solos(None, SCENE, raw, seed=7, output_root=self.root)
+        sequence.assert_called_once()
+        self.assertFalse(sequence.call_args.kwargs['fresh_action_stages'])
+        legacy_core.assert_not_called()
+        self.assertEqual(result.metadata['concurrency_kind'], 'independent_group_sequence')
 
     def test_builder_dispatches_concurrent_solos_without_legacy_staging(self):
         raw = validate_plan(plan())

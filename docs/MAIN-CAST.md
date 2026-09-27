@@ -82,3 +82,8 @@ plan with all displayed starts and headings pinned. Use that plan with
 `experiments/trial_prompt_scene.py --plan character-start-plan.json` and the
 usual motion-provider arguments to generate a complete performance. The editor
 itself previews placement and does not generate new body motion.
+
+
+## Optional ordered group sequences
+
+PR34 starting positions and facing are preserved for independent group actions. The bounded multi-action extension is experimental and disabled unless `STAGEZERO_GROUP_SEQUENCE_MODE=fresh` or `continuous` is set when launching Studio. It uses the existing Core model and keeps paired generation separate. The requested meet/dance/three-backflip sequence was **not** consistently achieved; do not enable it in the reviewed demo by default. See `review/group-sequence/README.md` for complete UI comparison videos, retained failures, measurements and reproduction commands.

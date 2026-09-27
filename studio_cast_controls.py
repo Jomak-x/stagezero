@@ -171,6 +171,8 @@ class StudioCastControls:
             return ('Generating the approach…' if attempt == 1 else
                     f'Trying a wider approach · attempt {attempt} of '
                     f'{progress.get("maximum_attempts", 3)}…')
+        if phase == 'concurrent_core':
+            return 'Generating movements for every character and action…'
         if phase == 'pair_generation':
             return 'Generating the shared interaction…'
         if phase == 'beat':

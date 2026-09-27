@@ -136,7 +136,7 @@ def add_object_controls(gui, session):
             yaw.disabled = False
 
     def report(doc):
-        status.content = f"Scene ready · {len(doc['objects'])} props · {len(doc['effects'])} effects. Press Play to animate."
+        status.content = f"Scene ready · {len(doc['objects'])} props · {len(doc['effects'])} effects. Generate a new performance to use this background. Existing performances retain their saved scene."
         refresh_props()
 
     def attempt(action):

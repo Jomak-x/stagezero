@@ -1,8 +1,9 @@
-"""Narrow production routing for one whole-beat independent cast action."""
+"""Production routing for independent cast actions and bounded group sequences."""
 from __future__ import annotations
 
 from copy import deepcopy
 import math
+import os
 
 from realtime_navigation import validate_ground_path
 from scene_composition import validate_scene
@@ -20,6 +21,8 @@ def independent_starts(plan, scene, *, cancelled=lambda: False):
     from interaction_scene import scene_objects
     from interaction_planner import _inside, _obstacles
 
+    if cancelled():
+        raise RuntimeError('Concurrent scene staging cancelled')
     scene = validate_scene(scene)
     obstacles = _obstacles(scene_objects(scene), None, 1.65, .4)
 
@@ -55,7 +58,9 @@ def independent_starts(plan, scene, *, cancelled=lambda: False):
                 break
         else:
             raise ValueError('No clear 2-metre-separated concurrent starts fit the actual scene')
-    return {aid: {'x': float(point[0]), 'z': float(point[1]), 'yaw_degrees': 0.}
+    headings = {a['id']: a.get('start_yaw_degrees') for a in plan['actors']}
+    return {aid: {'x': float(point[0]), 'z': float(point[1]),
+                  'yaw_degrees': float(headings.get(aid) or 0.)}
             for aid, point in selected.items()}
 
 
@@ -63,6 +68,28 @@ def build_independent_solos(client, scene, plan, *, seed, output_root, cancelled
     from independent_group_motion import generate_independent_tracks
 
     beat = plan['beats'][0]
+    if len(plan['beats']) > 1 or plan.get('meeting') is not None:
+        mode = os.environ.get('STAGEZERO_GROUP_SEQUENCE_MODE', '').strip().lower()
+        if mode not in ('fresh', 'continuous'):
+            raise ValueError('This request needs a multi-action group sequence, which is still experimental. '
+                             'This Studio keeps the current performance. Try one simultaneous group action; '
+                             'multi-action previews are available on the experimental Studio.')
+        from group_scene_placement import group_sequence_placement
+        from group_scene_sequence import build_group_sequence
+        placement = group_sequence_placement(plan, scene, cancelled=cancelled)
+        generated = build_group_sequence(client, scene, plan, placement['starts'], placement['targets'],
+                                         seed=seed, output_root=output_root, cancelled=cancelled,
+                                         fresh_action_stages=mode == 'fresh')
+        clip = generated['performance']
+        metadata = deepcopy(clip.metadata)
+        metadata.setdefault('warnings', []).append('Experimental group sequence: action fidelity and transitions require visual review.')
+        metadata.update(prompt=plan['prompt'], title=plan['title'], plan=deepcopy(plan),
+                        placement=placement, concurrency_kind='independent_group_sequence',
+                        concurrency_status='accepted_by_geometry_gates',
+                        warnings=_merged_warnings(metadata, plan))
+        metadata['plan']['warnings'] = list(metadata['warnings'])
+        from cast_performance import CastPerformance
+        return CastPerformance(clip.actor_ids, clip.joints, metadata=metadata), generated
     if len(plan['beats']) != 1 or len(beat['actor_ids']) != 1 or not beat.get('concurrent_solos'):
         raise ValueError('Independent concurrency requires one whole-performance solo beat')
     starts = independent_starts(plan, scene, cancelled=cancelled)
