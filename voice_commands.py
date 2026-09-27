@@ -19,6 +19,12 @@ def _normal(text):
     return ' '.join(text.casefold().split())
 
 
+_SPOKEN_NUMBERS = dict(zip(
+    'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen'.split(),
+    range(1, 17)))
+_ACTION_NUMBER = r'(\d+|' + '|'.join(_SPOKEN_NUMBERS) + ')'
+
+
 def route_voice_command(text, target, takes):
     if not isinstance(text, str) or not text.strip():
         raise ValueError('Enter a direction to generate')
@@ -27,8 +33,8 @@ def route_voice_command(text, target, takes):
         prompt = text
         route = VoiceRoute(target, prompt)
     elif target == 'auto':
-        scene = re.fullmatch(r'generate\s+(?:a\s+)?(?:full\s+)?scene\s*[:,-]?\s+(.+)', text, re.I | re.S)
-        short = re.fullmatch(r'generate\s+(?:a\s+)?short\s*(?:action)?\s*[:,-]?\s+(.+)', text, re.I | re.S)
+        scene = re.fullmatch(r'generate\s+(?:a\s+)?(?:full\s+)?scene\s*[.:;,—-]?\s+(.+)', text, re.I | re.S)
+        short = re.fullmatch(r'generate\s+(?:a\s+)?short\s*(?:action)?\s*[.:;,—-]?\s+(.+)', text, re.I | re.S)
         if scene:
             route = VoiceRoute('full_scene', scene.group(1).strip())
         elif short:
@@ -77,10 +83,11 @@ def _resolve_edit(name, prompt, takes):
             raise ValueError('Scene name is missing or ambiguous; use an exact saved take name')
         return VoiceRoute('full_scene', prompt, matches[0].id, 'scene')
 
-    action = re.fullmatch(r'action\s+(\d+)\s+(?:in|of)\s+(.+)', name, re.I)
-    reverse = re.fullmatch(r'(.+?)\s+action\s+(\d+)', name, re.I)
+    action = re.fullmatch(r'action\s+' + _ACTION_NUMBER + r'\s+(?:in|of)\s+(.+)', name, re.I)
+    reverse = re.fullmatch(r'(.+?)\s+action\s+' + _ACTION_NUMBER, name, re.I)
     if action or reverse:
-        number = int((action or reverse).group(1 if action else 2))
+        spoken = (action or reverse).group(1 if action else 2).casefold()
+        number = _SPOKEN_NUMBERS[spoken] if spoken in _SPOKEN_NUMBERS else int(spoken)
         take_name = (action or reverse).group(2 if action else 1).strip().strip('"\'“”')
         matches = [take for take in takes.values() if _normal(take.name) == _normal(take_name)]
         if len(matches) != 1:

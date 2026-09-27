@@ -28,9 +28,13 @@ class VoiceStatusMessage(Message):
     transcript: str
     retryable: bool
 
+    def redundancy_key(self) -> str:
+        # A new queued request must not replace the previous request's
+        # completion before Viser flushes its outgoing message buffer.
+        return f'{type(self).__name__}:{self.request_id}'
+
 
 @dataclass
 class VoiceQueueMessage(Message):
     requests: list[dict[str, Any]]
-
 

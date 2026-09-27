@@ -1,11 +1,13 @@
 """Socket integration tests without provider credentials or a GPU."""
 import threading
+import asyncio
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 import msgspec
 import numpy as np
 from viser._messages import Message
+from viser.infra._async_message_buffer import AsyncMessageBuffer
 from directing import DirectorSession
 from story_jobs import StoryJobQueue
 from story_workflow import StoryWorkflow
@@ -13,7 +15,7 @@ from test_story_jobs import FakeBackend as BaseBackend, plan, until
 from voice_directing import VoiceDirecting
 from voice_commands import route_voice_command
 from voice_protocol import (VoiceCommandMessage, VoiceRecordingMessage,
-                            VoiceQueueMessage)
+                            VoiceQueueMessage, VoiceStatusMessage)
 
 
 class FakeBackend(BaseBackend):
@@ -93,6 +95,19 @@ class VoiceTests(unittest.TestCase):
             self.assertEqual(decoded, message)
         encoded = VoiceRecordingMessage('t', 'audio/webm', b'abc').as_serializable_dict()
         self.assertEqual(encoded['audio'], b'abc')
+
+    def test_next_request_does_not_drop_previous_completion_from_socket_buffer(self):
+        loop = asyncio.new_event_loop()
+        try:
+            buffer = AsyncMessageBuffer(loop, persistent_messages=False)
+            buffer.push(VoiceStatusMessage('scene', 'running', '', '', False))
+            completed = VoiceStatusMessage('scene', 'completed', '', 'Walk', False)
+            next_request = VoiceStatusMessage('short', 'transcribing', '', '', False)
+            buffer.push(completed)
+            buffer.push(next_request)
+            self.assertEqual(list(buffer.message_from_id.values()), [completed, next_request])
+        finally:
+            loop.close()
 
     def test_full_scene_completes_and_is_registered(self):
         self.bridge.on_story_submitted = Mock()
@@ -252,6 +267,8 @@ class VoiceTests(unittest.TestCase):
     def test_auto_route_requires_clear_command_and_exact_named_target(self):
         self.assertEqual(route_voice_command('generate a full scene: cross the room', 'auto', {}).target, 'full_scene')
         self.assertEqual(route_voice_command('generate a short: wave', 'auto', {}).prompt, 'wave')
+        self.assertEqual(route_voice_command('Generate a scene. Walk then wave.', 'auto', {}).prompt, 'Walk then wave.')
+        self.assertEqual(route_voice_command('Generate a short. Bow.', 'auto', {}).target, 'single_action')
         with self.assertRaisesRegex(ValueError, 'Start with'):
             route_voice_command('wave', 'auto', {})
         with self.assertRaisesRegex(ValueError, 'No saved'):
@@ -259,6 +276,8 @@ class VoiceTests(unittest.TestCase):
         named = SimpleNamespace(id='take-1', name='Take 1', segments=[
             dict(start=0, end=10, prompt='Walk'), dict(start=10, end=20, prompt='Wave')])
         takes = {named.id: named}
+        spoken = route_voice_command('Edit action two in "Take 1" to bow.', 'auto', takes)
+        self.assertEqual((spoken.take_id, spoken.at_frame, spoken.prompt), ('take-1', 10, 'bow.'))
         route = route_voice_command('edit action 2 in "Take 1" to jump', 'auto', takes)
         self.assertEqual((route.take_id, route.edit_mode, route.at_frame, route.prompt),
                          ('take-1', 'action', 10, 'jump'))
