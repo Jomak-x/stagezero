@@ -332,25 +332,26 @@ class MeetupTests(unittest.TestCase):
         self.assertEqual(selection['generated_frames'], 40*len(archive))
         self.assertEqual(selection['retained_frames'], round(result['plan']['approach_seconds']*20))
         self.assertLess(selection['retained_frames'], selection['generated_frames'])
-        self.assertEqual(result['plan']['blend_frames'], 12)
+        self.assertEqual(result['plan']['blend_frames'], 21)
         self.assertEqual(result['plan']['total_frames'], len(result['joints']))
         np.testing.assert_array_equal(result['clip'].joints[-self.pair.frames:], self.pair.joints)
         for request in client.requests:
             validate_job(request)
 
-    def test_continuous_short_bridge_failure_uses_existing_gate_and_longer_bridge(self):
+    def test_continuous_preferred_bridge_failure_uses_existing_gate_and_fallback(self):
         from paired_meetup import authored_direction_bridge
         attempts = []
         def gate(*args, **kwargs):
             attempts.append(kwargs['frames'])
             bridge, report = authored_direction_bridge(*args, **kwargs)
-            if kwargs['frames'] == 12:
+            if kwargs['frames'] == 21:
                 report.update(mechanical_gate_passed=False, rejection_reasons=['velocity'])
             return bridge, report
         with patch('paired_meetup.authored_direction_bridge', side_effect=gate):
             result = self.build(self.client(), entry_policy='continuous')
-        self.assertEqual(attempts, [12, 15])
-        self.assertEqual(result['plan']['blend_frames'], 15)
+        self.assertEqual(attempts, [21, 18])
+        self.assertEqual(result['plan']['blend_frames'], 18)
+        self.assertTrue(result['metadata']['transition_provenance']['boundaries']['entry']['mechanical_gate_passed'])
         self.assertFalse(result['metadata']['animation_accepted'])
 
     def test_unknown_entry_policy_rejected_before_core(self):

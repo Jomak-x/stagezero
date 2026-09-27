@@ -1,0 +1,134 @@
+{
+  "case": "market-three-s48",
+  "seed": 48,
+  "plan": "review/interaction-quality/plans/market-three.json",
+  "plan_sha256": "70f790b48d0f37a2d5fe012218fa1b33cdd53f2a4e7bf7cf72511cf477ea3c67",
+  "scene": "review/prompt-scenes/backgrounds/market.json",
+  "scene_sha256": "35d841555e0c8fb822af77a5da288b24d963ac5d901afc71763be952023d6e8d",
+  "code_commit": "8e70b1c7322c14503780fee2047f4272251f044b",
+  "git_dirty_at_launch": true,
+  "code_file_sha256_at_launch": {
+    "experiments/trial_prompt_scene.py": "acb0a17b999d6f5b2fdf0273c0ed5e57bd045d8032c78ac42813d2a5a5345fda",
+    "experiments/review_interaction_v2.py": "114eec0d6fb7d788ef0e9fc878bcca19c73733a7ee669cf7e0dd1182027f8bb9",
+    "prompt_scene_builder.py": "e62daa1044a3c7f0e5e4f4684f75dd0423f47da60f3c75574dd3809dccf094a2",
+    "prompt_scene_plan.py": "01b44a4cd38827e36ac1328f5171575007d5ec7f4956956b71a104e37ac71313",
+    "cast_motion_refinement.py": "08a8704989a7ec039a0866b5b8f167226051a0757cbda180ff00460ca836a5a1",
+    "cast_observer_motion.py": "f9fcf75e893a79007b2c976894a6cdd09b5a2d0f0eb470d8c9f775dd68cf1320",
+    "paired_meetup.py": "dc0ddc119f44c6a5277e8c5e754b7f5a81093f9e25cd9e9c98d402ab00786743",
+    "native_pair_transition.py": "d4e46a3cb325dc780e5e32b8e4daa25089e2a5c660d6522421419f4c3a4c960e",
+    "interaction_scene_collision.py": "e3e2eb269fbaf70cee96060f3d3b3923ba252b9899b8de86c6050966f08a426c",
+    "cast_performance.py": "bdb2d8e205aa05a82b01ff5d425f5a7ac55e8d8a4f02d6e6170c0e0de483db31",
+    "native_wait_pose.py": "438e13ce0e093c415965c0fcf524c0d2c3b17b468ad84311246508c28118cc20",
+    "cast_observer_turn.py": "5e611efa6b8c2a528c9f47d124ec7608a59dd538de4757b33a0e217556fcba83",
+    "cast_observer_continuation.py": "335214bcd0b854c3f3ed4ca25755c3ce17167140f58bbcdf61a9b4d3ad6bcbff"
+  },
+  "held_out": false,
+  "comparison_type": "fresh_Core_and_InterGen_same_saved_plan_seed",
+  "planning": "reviewed saved PR26 plan; no external AI planning",
+  "provider_config_path": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/.runtime/prompt-native-provider.json",
+  "provider_secret_contents_recorded": false,
+  "runner_wall_seconds": 12.434377749974374,
+  "exit_code": 0,
+  "source_archives": [
+    {
+      "manifest": "review/interaction-v2/fresh/market-three-s48/attempt-003/sources/scene-2d3ef38801c1456cbe73acc97ff58dac/manifest.json",
+      "sha256": "a8df6234c9cf81e7e6a312f939b9e9785d15442c36a7e742d1e237ea630398b6",
+      "status": "complete",
+      "sources": [
+        {
+          "name": "pair-01.npz",
+          "kind": "intergen",
+          "recorded_sha256": "efda625ca1fa630a4e225eb4d6476215c370fdf217f0e82df04a017904ca40f8",
+          "actual_sha256": "efda625ca1fa630a4e225eb4d6476215c370fdf217f0e82df04a017904ca40f8",
+          "hash_matches": true
+        },
+        {
+          "name": "pair-00.npz",
+          "kind": "intergen",
+          "recorded_sha256": "e7d217d69278eba80b7feed5f177414ab7182c8a75d653d6e4e26e666912dbc0",
+          "actual_sha256": "e7d217d69278eba80b7feed5f177414ab7182c8a75d653d6e4e26e666912dbc0",
+          "hash_matches": true
+        },
+        {
+          "name": "core-000.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "7f0d57d2048b955f50fecbfd77a933933cd9e9285e47dda8a1c17f6d52e32692",
+          "actual_sha256": "7f0d57d2048b955f50fecbfd77a933933cd9e9285e47dda8a1c17f6d52e32692",
+          "hash_matches": true
+        },
+        {
+          "name": "core-001.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "32e9437d85d46ba136abbba63baa09ac9bb1f0841db90d7ff5089f534c9b147c",
+          "actual_sha256": "32e9437d85d46ba136abbba63baa09ac9bb1f0841db90d7ff5089f534c9b147c",
+          "hash_matches": true
+        },
+        {
+          "name": "core-002.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "4a9bc8d2b5255b4b9707180bd1af11a7949a6741444d8a99de1a618c2554d26b",
+          "actual_sha256": "4a9bc8d2b5255b4b9707180bd1af11a7949a6741444d8a99de1a618c2554d26b",
+          "hash_matches": true
+        },
+        {
+          "name": "core-003.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "329e7385d88eb3479fd26e16371b928cefa2f2d10569329c1935e70dbe87496e",
+          "actual_sha256": "329e7385d88eb3479fd26e16371b928cefa2f2d10569329c1935e70dbe87496e",
+          "hash_matches": true
+        },
+        {
+          "name": "core-004.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "3639ff2a4b9165cd3394e48f8216f1fbb815172bfc7187d63640f00ba42e1d4d",
+          "actual_sha256": "3639ff2a4b9165cd3394e48f8216f1fbb815172bfc7187d63640f00ba42e1d4d",
+          "hash_matches": true
+        },
+        {
+          "name": "core-005.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "b85339c8f37967ac31afcdab36fec448153a42a266047a73d7db0ed34735c849",
+          "actual_sha256": "b85339c8f37967ac31afcdab36fec448153a42a266047a73d7db0ed34735c849",
+          "hash_matches": true
+        }
+      ],
+      "all_archived_files": {
+        "core-000.npz": "7f0d57d2048b955f50fecbfd77a933933cd9e9285e47dda8a1c17f6d52e32692",
+        "core-001.npz": "32e9437d85d46ba136abbba63baa09ac9bb1f0841db90d7ff5089f534c9b147c",
+        "core-002.npz": "4a9bc8d2b5255b4b9707180bd1af11a7949a6741444d8a99de1a618c2554d26b",
+        "core-003.npz": "329e7385d88eb3479fd26e16371b928cefa2f2d10569329c1935e70dbe87496e",
+        "core-004.npz": "3639ff2a4b9165cd3394e48f8216f1fbb815172bfc7187d63640f00ba42e1d4d",
+        "core-005.npz": "b85339c8f37967ac31afcdab36fec448153a42a266047a73d7db0ed34735c849",
+        "observer-actor_1-231-candidate.npz": "16a3462b2dd57ea6d1f36a187a93c5cec29e96f3a9fad10d5c520376244cb875",
+        "observer-actor_1-231-report.json": "49c6ee5fd04c1b8c00915396f58605d8f76437f689976c774d7377dd05256a97",
+        "pair-00.json": "ec6ba6a347f3608c8f5117cb880caf5575cbfb27269911f6f59b3f9f792f09fa",
+        "pair-00.npz": "e7d217d69278eba80b7feed5f177414ab7182c8a75d653d6e4e26e666912dbc0",
+        "pair-01.json": "20ce16216e85790c326b7f9710cdaabcc9776f9b5e4e55e51a1adc56c140c6f7",
+        "pair-01.npz": "efda625ca1fa630a4e225eb4d6476215c370fdf217f0e82df04a017904ca40f8",
+        "refined-cast-candidate.npz": "e7e456ce9f8cacb1f3afa7d43f4bfe3782adb192f50450f8aa9f778eec4b2f4c",
+        "unrefined-cast.npz": "29adda4cbf1d913e7888d5b20a11428c096f9f366e838f732eef2c03adff930b"
+      }
+    }
+  ],
+  "archive_sha256": "0b627b049586226ee796bb4459e170c4494f07ca3b95789f243d0cc9be16c6ee",
+  "command": [
+    "<python>",
+    "experiments/trial_prompt_scene.py",
+    "--prompt",
+    "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+    "--scene",
+    "review/prompt-scenes/backgrounds/market.json",
+    "--plan",
+    "review/interaction-quality/plans/market-three.json",
+    "--config",
+    "<private-config>",
+    "--token",
+    "<private-token>",
+    "--core-url",
+    "http://127.0.0.1:8769",
+    "--seed",
+    "48",
+    "--output",
+    "review/interaction-v2/fresh/market-three-s48/attempt-003"
+  ]
+}

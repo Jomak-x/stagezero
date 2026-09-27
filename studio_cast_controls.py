@@ -41,7 +41,7 @@ class StudioCastControls:
             self.open = gui.add_upload_button('Open performance', mime_type='.npz')
             self.export = gui.add_button('Export video', color='gray')
             self.frame = gui.add_button('Frame everyone', color='gray')
-        gui.add_markdown('Research preview · paired movement is generated jointly; a third person uses authored observer motion during that beat. Review foot planting and contact before use. Noncommercial research terms apply.')
+        gui.add_markdown('Research preview · paired movement is generated jointly; a third person uses independent generated and authored observer motion. Review foot planting and contact before use. Noncommercial research terms apply.')
 
         @self.generate.on_click
         def generate(event):

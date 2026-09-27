@@ -1,0 +1,226 @@
+{
+  "actor_id": "actor_1",
+  "start_frame": 231,
+  "end_frame_exclusive": 483,
+  "target_xz": [
+    0.6575180143160965,
+    -1.272011353203205
+  ],
+  "initial_heading_error_degrees": 164.26625712889003,
+  "status": "rejected_preserved_existing_observer",
+  "active_pair_frames_modified": false,
+  "source": "independent ARDY Core observer turn; authored boundary bridge",
+  "visual_acceptance": "unverified",
+  "motion": {
+    "actor_id": "actor_1",
+    "duration_frames": 252,
+    "fps": 30,
+    "source_fps": 20,
+    "limits": {
+      "maximum_root_excursion_m": 0.3,
+      "maximum_root_height_gap_m": 0.3,
+      "maximum_heading_error_degrees": 30.0,
+      "maximum_tail_foot_speed_m_s": 0.25,
+      "maximum_tail_root_speed_m_s": 0.1,
+      "maximum_tail_joint_speed_m_s": 0.35,
+      "maximum_tail_foot_xz_travel_m": 0.06,
+      "maximum_support_height_gap_m": 0.1,
+      "maximum_wrist_above_root_m": 0.35,
+      "maximum_joint_speed_m_s": 5.0,
+      "maximum_entry_wrist_rise_m": 0.1
+    },
+    "windows": [
+      {
+        "index": 0,
+        "request_id": "observer-turn-d1ebaa2029794c21b16466283217b7f2",
+        "role": "unplayed_neutral_warmup",
+        "used_in_performance": false,
+        "maximum_root_excursion_m": 0.005210091474270512,
+        "maximum_root_height_gap_m": 0.007071410718591409,
+        "initial_heading_error_degrees": 0.0,
+        "final_heading_error_degrees": 1.1096286213115985,
+        "heading_improvement_degrees": -1.1096286213115985,
+        "maximum_tail_foot_speed_m_s": 0.007327299658002775,
+        "maximum_tail_root_speed_m_s": 0.010602217825331696,
+        "maximum_tail_joint_speed_m_s": 0.019277895715836553,
+        "maximum_tail_foot_xz_travel_m": 0.0019993016630082613,
+        "maximum_support_height_gap_m": 0.0038699880242347717,
+        "maximum_wrist_above_root_m": -0.03836277695272783,
+        "source_tail_frames": 10,
+        "source_tail_fps": 20,
+        "settled_tail_passed": true,
+        "rejection_reasons": []
+      },
+      {
+        "index": 1,
+        "request_id": "observer-turn-f50d8eb94d154b65bd8014d11998b2c2",
+        "role": "played_continuation_turn",
+        "used_in_performance": true,
+        "maximum_root_excursion_m": 0.02424557339956457,
+        "maximum_root_height_gap_m": 0.020557552995187245,
+        "initial_heading_error_degrees": 164.26625712889003,
+        "final_heading_error_degrees": 0.2171026482998681,
+        "heading_improvement_degrees": 164.04915448059018,
+        "maximum_tail_foot_speed_m_s": 0.08920351221266071,
+        "maximum_tail_root_speed_m_s": 0.1471047504249351,
+        "maximum_tail_joint_speed_m_s": 0.45315519682519534,
+        "maximum_tail_foot_xz_travel_m": 0.014398987571220828,
+        "maximum_support_height_gap_m": 0.004146195948123932,
+        "maximum_wrist_above_root_m": -0.021461403437004423,
+        "source_tail_frames": 10,
+        "source_tail_fps": 20,
+        "settled_tail_passed": false,
+        "rejection_reasons": [
+          "maximum_tail_root_speed_m_s exceeds limit",
+          "maximum_tail_joint_speed_m_s exceeds limit"
+        ],
+        "maximum_entry_wrist_rise_m": -0.00994262163671178,
+        "maximum_played_wrist_above_root_m": -0.0026324797788628285
+      }
+    ],
+    "spans": [
+      {
+        "start_frame": 0,
+        "end_frame_exclusive": 60,
+        "source": "ardy_core",
+        "model_generated": true,
+        "display_processing": "native anatomy direction fit; linear 20 to 30fps interpolation",
+        "source_frames": 40
+      }
+    ],
+    "source_pair_frames_modified": false,
+    "fresh_initialization": true,
+    "native_history_policy": "Only actual prior Core native330 features; no InterGen conversion",
+    "raw_output_archiving": "caller client.wait proxy",
+    "foot_lock": false,
+    "scene_validation": "required by caller",
+    "visual_acceptance": "unverified",
+    "mechanical_gate_passed": false,
+    "animation_accepted": false,
+    "anatomy": {
+      "source": "ARDY Core",
+      "method": "Core world bone directions with native actor median segment lengths",
+      "reference_frames": 2,
+      "median_lengths_m": [
+        [
+          0.11181410817933404,
+          0.11384060229955527,
+          0.10208496945317339,
+          0.3374903538375466,
+          0.33202845146523896,
+          0.11757138931043187,
+          0.36229682405189756,
+          0.3474393615965097,
+          0.05681434637898461,
+          0.11691590391030407,
+          0.11550345059659956,
+          0.2036526914709056,
+          0.1405632358652861,
+          0.14099986923693608,
+          0.07228089404544324,
+          0.09140593903053057,
+          0.08648060709275557,
+          0.21460641032906935,
+          0.22300706544798832,
+          0.21305637081745638,
+          0.21109790339862305
+        ],
+        [
+          0.11181410817933404,
+          0.11384060229955527,
+          0.10208496945317339,
+          0.3374903538375466,
+          0.33202845146523896,
+          0.11757138931043187,
+          0.36229682405189756,
+          0.3474393615965097,
+          0.05681434637898461,
+          0.11691590391030407,
+          0.11550345059659956,
+          0.2036526914709056,
+          0.1405632358652861,
+          0.14099986923693608,
+          0.07228089404544324,
+          0.09140593903053057,
+          0.08648060709275557,
+          0.21460641032906935,
+          0.22300706544798832,
+          0.21305637081745638,
+          0.21109790339862305
+        ]
+      ],
+      "core_endpoint_displacement_m": {
+        "mean": 0.19759536750848794,
+        "max": 0.4018242133682607,
+        "per_actor_max": [
+          0.4018242133682607,
+          0.4018242133682607
+        ]
+      },
+      "root_xz_modified": false,
+      "native_pair_modified": false,
+      "root_y_correction_range_m": [
+        -0.20416836521972212,
+        -0.1767770591790273
+      ],
+      "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+      "foot_lock": false,
+      "limitations": [
+        "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+        "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+        "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+        "Native source lengths vary while Core display lengths use actor-specific medians."
+      ]
+    },
+    "warmup": {
+      "maximum_root_excursion_m": 0.005210091474270512,
+      "maximum_root_height_gap_m": 0.007071410718591409,
+      "initial_heading_error_degrees": 0.0,
+      "final_heading_error_degrees": 1.1096286213115985,
+      "heading_improvement_degrees": -1.1096286213115985,
+      "maximum_tail_foot_speed_m_s": 0.007327299658002775,
+      "maximum_tail_root_speed_m_s": 0.010602217825331696,
+      "maximum_tail_joint_speed_m_s": 0.019277895715836553,
+      "maximum_tail_foot_xz_travel_m": 0.0019993016630082613,
+      "maximum_support_height_gap_m": 0.0038699880242347717,
+      "maximum_wrist_above_root_m": -0.03836277695272783,
+      "source_tail_frames": 10,
+      "source_tail_fps": 20,
+      "settled_tail_passed": true,
+      "rejection_reasons": []
+    },
+    "warmup_played": false,
+    "generated_motion": {
+      "maximum_root_excursion_m": 0.02424557339956457,
+      "maximum_root_height_gap_m": 0.020557552995187245,
+      "initial_heading_error_degrees": 164.26625712889003,
+      "final_heading_error_degrees": 0.2171026482998681,
+      "heading_improvement_degrees": 164.04915448059018,
+      "maximum_tail_foot_speed_m_s": 0.08920351221266071,
+      "maximum_tail_root_speed_m_s": 0.1471047504249351,
+      "maximum_tail_joint_speed_m_s": 0.45315519682519534,
+      "maximum_tail_foot_xz_travel_m": 0.014398987571220828,
+      "maximum_support_height_gap_m": 0.004146195948123932,
+      "maximum_wrist_above_root_m": -0.021461403437004423,
+      "source_tail_frames": 10,
+      "source_tail_fps": 20,
+      "settled_tail_passed": false,
+      "rejection_reasons": [
+        "maximum_tail_root_speed_m_s exceeds limit",
+        "maximum_tail_joint_speed_m_s exceeds limit"
+      ],
+      "maximum_entry_wrist_rise_m": -0.00994262163671178,
+      "maximum_played_wrist_above_root_m": -0.0026324797788628285
+    },
+    "rejection_reasons": [
+      "maximum_tail_root_speed_m_s exceeds limit; maximum_tail_joint_speed_m_s exceeds limit"
+    ]
+  },
+  "candidate_archive": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/market-three-s49/attempt-002/sources/scene-7be29f378f07462a9216f9f3f472a596/observer-actor_1-231-candidate.npz",
+  "candidate_layout": "observer-only generated candidate; may be partial",
+  "reason": "maximum_tail_root_speed_m_s exceeds limit; maximum_tail_joint_speed_m_s exceeds limit",
+  "source_archives": [
+    "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/market-three-s49/attempt-002/sources/scene-7be29f378f07462a9216f9f3f472a596/core-004.npz",
+    "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/market-three-s49/attempt-002/sources/scene-7be29f378f07462a9216f9f3f472a596/core-005.npz"
+  ]
+}

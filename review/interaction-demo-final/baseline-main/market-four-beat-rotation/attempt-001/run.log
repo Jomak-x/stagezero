@@ -1,0 +1,24 @@
+{"phase": "planning"}
+Traceback (most recent call last):
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/experiments/trial_prompt_scene.py", line 106, in <module>
+    main()
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/experiments/trial_prompt_scene.py", line 97, in main
+    result = builder(scene, on_progress=lambda value: print(json.dumps(value), flush=True))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 895, in __call__
+    raise exc
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 736, in __call__
+    progress('beat', beat_index=beat_index, total_beats=len(beats), actor_ids=active, prompt=beat['prompt'])
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 568, in progress
+    check_cancel()
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 486, in check_cancel
+    raise error
+  File "/Users/jakob/.local/share/uv/python/cpython-3.11.16-macos-aarch64-none/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 523, in generate_pair
+    pair = self.provider.generate(source_prompt, (self.seed+index) % 2**32,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/experiments/trial_prompt_scene.py", line 55, in generate
+    raise ValueError('Native replay has no archived source for this beat/seed')
+ValueError: Native replay has no archived source for this beat/seed

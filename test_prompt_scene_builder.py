@@ -281,7 +281,7 @@ class BuilderTests(unittest.TestCase):
         np.testing.assert_allclose(result.joints[-30:, 2]-result.joints[-30:, 2, :1], incoming.joints[:, 1]-incoming.joints[:, 1, :1])
 
     def test_distant_later_pair_runs_real_core_travel_not_long_authored_bridge(self):
-        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1.8, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
         provider = SimpleNamespace(generate=lambda *a, **kw: pair, last_raw_archive=None)
         beats = [{'id': 'beat-1', 'actor_ids': ['actor_1'], 'prompt': 'Stand.', 'seconds': 2},
                  {'id': 'beat-2', 'actor_ids': ['actor_1', 'actor_2'], 'prompt': 'Face each other.', 'seconds': 1}]
@@ -445,7 +445,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_actual_idle_collision_is_archived_and_retried_with_fresh_core_history(self):
         first = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[3, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
-        later = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        later = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1.8, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
         sources = iter((first, later))
         provider = SimpleNamespace(generate=lambda *args, **kwargs: next(sources), last_raw_archive=None)
         original = self.client.wait

@@ -80,6 +80,16 @@ def _validate(joints, actor_ids, activities, fps, seed):
                 or len(set(active)) != len(active)):
             raise ValueError('Observer activity must contiguously cover frames with known active IDs')
         mask[start:end, [ids.index(a) for a in active]] = True
+        controls = activity.get('observer_control_spans', [])
+        if not isinstance(controls, list):
+            raise ValueError('Observer controller spans must be a list')
+        for span in controls:
+            if (not isinstance(span, dict) or span.get('actor_id') not in ids
+                    or type(span.get('start_frame')) is not int
+                    or type(span.get('end_frame_exclusive')) is not int
+                    or not start <= span['start_frame'] < span['end_frame_exclusive'] <= end):
+                raise ValueError('Observer controller span is outside its activity interval')
+            mask[span['start_frame']:span['end_frame_exclusive'], ids.index(span['actor_id'])] = True
         cursor = end
     if cursor != len(p):
         raise ValueError('Observer activity must cover the entire timeline')

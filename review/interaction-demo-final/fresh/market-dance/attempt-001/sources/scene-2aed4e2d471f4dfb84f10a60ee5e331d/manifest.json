@@ -1,0 +1,328 @@
+{
+  "version": 1,
+  "prompt": "Two people approach and dance together with small coordinated steps and a gentle partner turn.",
+  "seed": 64,
+  "status": "rejected",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-dance/attempt-001/sources/scene-2aed4e2d471f4dfb84f10a60ee5e331d/pair-00.npz",
+      "seconds": 1.4750471669831313,
+      "beat_index": 0,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "Two people dance together with small coordinated steps and a gentle partner turn.",
+      "planned_prompt": "Two people dance together with small coordinated steps and a gentle partner turn.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "ae913fb5ab01a0cd6fcb7a7c591623a20a10a3ae36150c13b14dfea496a26204",
+      "used_in_performance": true
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-dance/attempt-001/sources/scene-2aed4e2d471f4dfb84f10a60ee5e331d/core-000.npz",
+      "seconds": 0.8992169999983162,
+      "sha256": "e078007431c8f926dd55b9ddf98a108df69d68e5043b048d7a942b840c5445f7"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-dance/attempt-001/sources/scene-2aed4e2d471f4dfb84f10a60ee5e331d/core-001.npz",
+      "seconds": 0.9117075410322286,
+      "sha256": "70ff32183e8c3702506696a434fefb3729517cd37b1d319e480a5650dde02e0f"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 6.660120561718941e-07
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.01017441600561142
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 1.4750471669831313
+    },
+    {
+      "stage": "native_initial_staging",
+      "seconds": 0.4450364999938756
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-adcc50f4767141de86b0ba3d7e665c66",
+      "seconds": 0.8992169999983162
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-b48deae354b94994924a173c672abdf6",
+      "seconds": 0.9117075410322286
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Partner dance",
+    "prompt": "Two people approach and dance together with small coordinated steps and a gentle partner turn.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Two people dance together with small coordinated steps and a gentle partner turn.",
+        "seconds": 7.0
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.45334958934150227,
+        "z": -0.6854851648839951,
+        "yaw_degrees": 28.397775059069353
+      },
+      "actor_2": {
+        "x": 0.09383379064278484,
+        "z": -0.8179739440100755,
+        "yaw_degrees": -1.5010519123182045
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false,
+    "initial_source_staging": {
+      "candidate": "backward-0.8-idle-0",
+      "explicit_starts_preserved": [],
+      "candidate_count": 7,
+      "planning_only": true,
+      "observer_orientation": {},
+      "selection": "shortest approach duration, then total route distance; source-oriented starts win ties"
+    }
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 1,
+    "core_horizons": "sequential native330 history"
+  },
+  "initial_staging_candidates": [
+    {
+      "candidate": "outward-0.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.8489186306175962,
+          "z": 0.21256841234057688,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 0.8489186306175962,
+          "z": -0.21256841234057688,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 1.9363446043418249
+    },
+    {
+      "candidate": "outward-1.2-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -1.2369391711432298,
+          "z": 0.3097283841921321,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 1.2369391711432298,
+          "z": -0.3097283841921321,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 2.6044804049941463
+    },
+    {
+      "candidate": "outward-1.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -1.8189699819316807,
+          "z": 0.45546834196946495,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 1.8189699819316807,
+          "z": -0.45546834196946495,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.25,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 3.7323127869665327
+    },
+    {
+      "candidate": "backward-0.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.45334958934150227,
+          "z": -0.6854851648839951,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 0.09383379064278484,
+          "z": -0.8179739440100755,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.5629946073679108,
+      "total_route_distance_m": 1.6956513215916582,
+      "selected": true
+    },
+    {
+      "candidate": "backward-1.2-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.643585609229089,
+          "z": -1.0373519816447259,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 0.10431191118101299,
+          "z": -1.21783668169638,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 2.362186173880189
+    },
+    {
+      "candidate": "backward-1.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.9289396390604694,
+          "z": -1.565152206785822,
+          "yaw_degrees": 28.397775059069353
+        },
+        "actor_2": {
+          "x": 0.12002909198835524,
+          "z": -1.8176307882258367,
+          "yaw_degrees": -1.5010519123182045
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.1,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 3.5089856738005984
+    },
+    {
+      "candidate": "original",
+      "starts": {
+        "actor_1": {
+          "x": -0.9,
+          "z": -1.5
+        },
+        "actor_2": {
+          "x": 0.9,
+          "z": -1.5
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7600000000000001,
+      "total_route_distance_m": 3.2245525859952995
+    }
+  ],
+  "failure_diagnostics": {
+    "approach_body_clearance": {
+      "checked": true,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "frames": 90,
+      "fps": 30,
+      "stage": "displayed_core_approach",
+      "contact_allowed": false,
+      "proxy": "named joint and limb midpoint spheres; all displayed frames",
+      "minimum_clearance_m": -0.05834814537501462,
+      "required_minimum_clearance_m": 0.0,
+      "minimum_clearance_frame": 0,
+      "minimum_clearance_proxy_indices": [
+        14,
+        15
+      ],
+      "overlap_frames": 3,
+      "overlap_frame_indices": [
+        0,
+        1,
+        2
+      ],
+      "passed": false,
+      "physical_contact_verified": false
+    }
+  },
+  "error": "Core approach has unintended body-proxy overlap; meeting rejected",
+  "wall_seconds": 3.8730619590496644
+}
