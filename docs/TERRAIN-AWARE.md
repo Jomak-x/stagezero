@@ -23,6 +23,8 @@ open workshop door, enter
 
 If a previous command stops partway along a staircase, a named `walk up` or `walk down` command can finish that flight from the current rendered tread. Starts on adjacent decks do not qualify as partial stair starts; a command already at its destination tread still rejects. See [partial-stair continuation evidence](../review/terrain-partial-stairs/README.md).
 
+Short terrain continuations can ease into the new facing direction when doing so improves the heading transition from a settled pose. Contact planning and physical limits remain unchanged; see [matched replay comparisons and fresh normal-app evidence](../review/terrain-heading-quality/README.md).
+
 Scene-tab edits do not silently move an existing terrain take onto different geometry. Save the take, build the new scene, then use **Start terrain actor here** for it. Saved projects retain their own authored scene.
 
 For adaptive AI Scene3 generation, explicitly request walking up/down stairs or crossing a bridge. Such requests now ask for connected solid support, a single stair asset with broad shallow box treads, and upper-body obstacle clearance. They bypass the visual-only architectural layout shortcut. This guidance produces candidate geometry, not a guarantee: the motion planner and contact checks still accept or reject the actual result. Live AI scene generation was not part of the recorded UI runs; those used the two offline starter recipes.

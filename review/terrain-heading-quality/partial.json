@@ -1,0 +1,144 @@
+{
+  "start": 40,
+  "frames": 80,
+  "before": {
+    "startup_yaw_speed": 126.94870178558915,
+    "startup_yaw_acceleration": 1366.4659854122647,
+    "suffix_yaw_speed": 126.94870178558915,
+    "suffix_yaw_acceleration": 1366.4659854122647,
+    "startup_world_root_angular_speed": 127.01993244169502,
+    "join_yaw_speed": 68.32330379782945
+  },
+  "after": {
+    "startup_yaw_speed": 36.35161565439944,
+    "startup_yaw_acceleration": 432.554913698425,
+    "suffix_yaw_speed": 55.2763649895536,
+    "suffix_yaw_acceleration": 525.3383909159425,
+    "startup_world_root_angular_speed": 47.655894414278386,
+    "join_yaw_speed": 1.6603756207979359
+  },
+  "report": {
+    "representation": "GroundedCharacter17 explicit assisted presentation",
+    "accepted": false,
+    "visual_review": "pending",
+    "rig_mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+    "rig_bone_count": 17,
+    "native_arrays_unchanged": true,
+    "retarget_count_per_native_frame": 1,
+    "renderer_contract": "render these rig17 positions/rotations directly; no retarget or second IK",
+    "native_cadence_preserved": false,
+    "native_root_xz_preserved": true,
+    "native_retargeted_upperbody_rotations_preserved": false,
+    "heading_assistance_enabled": true,
+    "boundary_heading_target_fade": true,
+    "heading_assistance_scope": "common world-Y alignment to contact/route heading; native data unchanged",
+    "max_display_heading_rate_deg_s": 55.27635355699596,
+    "max_display_heading_correction_deg": 18.473640064577452,
+    "native_relative_upperbody_rotations_preserved": true,
+    "frames": 41,
+    "fps": 20,
+    "stance_anchors": [
+      {
+        "side": 0,
+        "first": 0,
+        "last_exclusive": 12,
+        "contact_xyz": [
+          -0.13031103881861172,
+          0.20399998655319215,
+          -2.329527503288098
+        ]
+      },
+      {
+        "side": 0,
+        "first": 19,
+        "last_exclusive": 41,
+        "contact_xyz": [
+          -0.08686571398268858,
+          0.20400000000000001,
+          -2.6999751862268164
+        ]
+      },
+      {
+        "side": 1,
+        "first": 0,
+        "last_exclusive": 4,
+        "contact_xyz": [
+          0.1302020447592903,
+          0.20399999904579386,
+          -2.3179979920860836
+        ]
+      },
+      {
+        "side": 1,
+        "first": 11,
+        "last_exclusive": 41,
+        "contact_xyz": [
+          0.17311186569581624,
+          0.20400000000000001,
+          -2.7033895770226497
+        ]
+      }
+    ],
+    "bounded_clearance_profiles": [],
+    "swept_clearance_contact_mode": false,
+    "minimum_stance_samples": 4,
+    "route_tangent_swing_paths": false,
+    "contact_reach_repair_passes": 0,
+    "contact_reach_advances_m": [],
+    "moving_intervals": [
+      [
+        4,
+        29
+      ]
+    ],
+    "initial_boundary_position_error_m": 1.1217435985316769e-07,
+    "max_root_y_change_from_native_retarget_m": 0.02226692108618844,
+    "max_local_leg_rotation_change_deg": 64.41928886137667,
+    "max_local_leg_rotation_frame_step_deg": 23.124158452595434,
+    "max_knee_bend_deg": 84.2790844260826,
+    "knee_flexion_limit_deg": 110.0,
+    "knee_limit_enforced_in_root_optimizer": true,
+    "actual_mesh_sole_vertex_counts": [
+      609,
+      569
+    ],
+    "max_actual_mesh_sole_penetration_m": 0.0,
+    "max_flat_stance_mesh_gap_m": 0.018997123831183488,
+    "max_flat_stance_lowest_vertex_gap_m": 0.00400000003038406,
+    "sole_gap_note": "Sole cloud includes vertices within15mm of bind outsole; lowest-vertex gap measures contact separately.",
+    "max_flat_stance_mesh_vertex_slip_m_s": 2.949261330644877e-07,
+    "unsupported_actual_mesh_sole_vertices": 0,
+    "max_swept_sole_envelope_penetration_m": 0.0,
+    "unsupported_swept_sole_envelope_samples": 0,
+    "swept_sole_proxy": {
+      "interframe_samples": 7,
+      "footprint_grid": [
+        3,
+        5
+      ],
+      "margin_m": 0.003,
+      "note": "finite rigid sole-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision"
+    },
+    "limitations": [
+      "buffered whole action, not streaming",
+      "finite sole-envelope sweep; no dynamics or full body collision certificate"
+    ],
+    "motion_derivatives": {
+      "root": {
+        "max_speed_m_s": 0.5669671057664905,
+        "max_acceleration_m_s2": 1.8618550828266829
+      },
+      "feet": {
+        "max_speed_m_s": 1.476611523326461,
+        "max_acceleration_m_s2": 14.57034829930362
+      }
+    },
+    "numerical_rejections": [],
+    "dynamic_body_validation": {
+      "rig17_dynamic_body_sweep_checked": true,
+      "body_proxy_radius_m": 0.06,
+      "body_proxy_samples": 6450,
+      "proxy_only": true
+    }
+  }
+}
