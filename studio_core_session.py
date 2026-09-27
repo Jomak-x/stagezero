@@ -18,6 +18,7 @@ from realtime_client import RealtimeClient, request_body
 from realtime_clip import CanonicalClip, FPS
 from realtime_director import RealtimeDirector, StageSpec
 from realtime_navigation import plan_navigation
+from core_spatial_commands import SpatialSequence
 from scene_composition import validate_scene
 
 SCHEMA = "Native Core27 / 20 fps (separate from G1)"
@@ -72,6 +73,7 @@ class CoreStudioSession:
         self._wake = threading.Event()
         self._thread = None
         self._route = None
+        self._spatial_sequence = SpatialSequence(self)
 
     @property
     def active(self):
@@ -92,6 +94,17 @@ class CoreStudioSession:
         with self._lock:
             return _copy(self._scene)
 
+    @property
+    def scene_reactions_enabled(self):
+        return self._director.project_metadata.get("studio_core", {}).get("scene_reactions_version") == 1
+
+    def _reaction_options(self, *, enabling=False):
+        metadata = self._director.project_metadata.get("studio_core", {})
+        enabled = self.scene_reactions_enabled
+        return {"enabled": enabled or enabling,
+                "start_frame": metadata.get("scene_reactions_start_frame", 0) if enabled
+                               else self._director.total_frames if enabling else 0}
+
     def _metadata(self, scene, placements):
         return {"studio_core": {"version": 1, "schema": SCHEMA,
                 "original_scene_document": _copy(scene), "scene_document": _copy(scene),
@@ -111,6 +124,7 @@ class CoreStudioSession:
             raise RuntimeError("Native Core service is not configured; load a native archive or example for playback")
 
     def _invalidate(self):
+        self._spatial_sequence.cancel()
         self._epoch += 1
         self._generation_enabled = False
         self._director.pause()
@@ -149,6 +163,7 @@ class CoreStudioSession:
             self._ensure_open()
             self._invalidate()
             self._director, self._scene, self._placements = director, scene, place
+            self._spatial_sequence.restore()
             self._scene_changed_since_motion = False
             self._route = None
             self._active = True
@@ -212,6 +227,8 @@ class CoreStudioSession:
             self._require_active(inference=True)
             if not isinstance(prompts, dict) or set(prompts) != set(self._director.actor_ids):
                 raise ValueError("Prompts must cover every native actor ID")
+            if queued and self._spatial_sequence.pending:
+                raise ValueError("Wait for spatial commands before queueing ordinary motion")
             ids = self._director.actor_ids
             summary = (prompts[ids[0]] if len(ids) == 1 else
                        " / ".join(f"{aid}: {prompts[aid]}" for aid in ids)[:500])
@@ -224,6 +241,7 @@ class CoreStudioSession:
                 result = self._director.interrupt(spec.prompt, frames=spec.frames,
                     actor_prompts=spec.actor_prompts, metadata=spec.metadata)
                 self._epoch += 1
+                self._spatial_sequence.cancel()
             self._director.take_cancellations()
             self._route = None
             self._run_generation()
@@ -246,6 +264,8 @@ class CoreStudioSession:
             stages, report = build_choreography(plan, self._director.actor_ids,
                 initial_placements=self._placements, last_clip=self._director.timeline_clip())
             pending = self._director.snapshot()
+            if queued and self._spatial_sequence.pending:
+                raise ValueError("Wait for spatial commands before queueing choreography")
             spatial = bool(report["plan"].get("recipe")) or any("root_offsets" in beat for beat in report["plan"]["beats"])
             if queued and spatial and (pending["queued_stages"] or pending["inflight_request_id"]):
                 raise ValueError("Spatial choreography must start from known committed roots; wait for pending motion")
@@ -278,7 +298,9 @@ class CoreStudioSession:
         from studio_interaction_scene import adapt_studio_scene
         with self._lock:
             self._require_active(inference=True)
-            adapted = adapt_studio_scene(self._scene)
+            from core_scene_reactions import evaluated_scene
+            adapted = adapt_studio_scene(evaluated_scene(self._scene, self._director.timeline_clip(),
+                                                        **self._reaction_options()))
             stages, route = plan_navigation(adapted["scene"], self._director.actor_ids,
                 actor_id=actor_id, target_id=target_id, verb=verb,
                 last_clip=self._director.timeline_clip(), initial_placements=self._placements,
@@ -291,6 +313,12 @@ class CoreStudioSession:
             self._run_generation()
             return _copy(route)
 
+    def spatial_commands(self, actor_id, text):
+        """Submit bounded spatial commands; each leg starts from committed motion."""
+        with self._lock:
+            self._require_active(inference=True)
+            return _copy(self._spatial_sequence.start(actor_id, text))
+
     def _worker(self):
         while True:
             with self._lock:
@@ -298,6 +326,8 @@ class CoreStudioSession:
                     return
                 director, client, epoch = self._director, self._client, self._epoch
                 scene = self._scene
+                reaction_options = self._reaction_options()
+                committed_history = director.timeline_clip() if reaction_options["enabled"] else None
                 request = (director.claim_request() if self._active and self._generation_enabled
                            and client is not None else None)
             if request is None:
@@ -316,7 +346,8 @@ class CoreStudioSession:
                 if len(clips) != 1 or not isinstance(clips[0], CanonicalClip) or clips[0].native_features is None:
                     raise ValueError("Core service must return one native 40-frame horizon")
                 if not cancelled():
-                    self._check_geometry(clips[0], scene, history=request.history)
+                    self._check_geometry(clips[0], scene, history=request.history,
+                                         reaction_history=committed_history, **reaction_options)
                     self._check_continuity(request.history, clips[0])
                     if request.metadata.get("pose_cue_profile"):
                         separation = np.linalg.norm(clips[0].positions[0, :, :, None, :] - clips[0].positions[1, :, None, :, :], axis=-1)
@@ -330,11 +361,13 @@ class CoreStudioSession:
                                  clip.source, {**clip.metadata, "pose_cue_audit": audit}, clip.native_features)]
                 with self._lock:
                     if not cancelled():
-                        director.complete(request.request_id, clips[0])
+                        if director.complete(request.request_id, clips[0]):
+                            self._spatial_sequence.committed()
             except Exception as exc:
                 with self._lock:
                     if not cancelled():
                         director.fail(request.request_id, exc)
+                        self._spatial_sequence.failed(exc)
 
     @staticmethod
     def _check_continuity(history, clip):
@@ -345,20 +378,19 @@ class CoreStudioSession:
             raise ValueError(f"Native continuation root discontinuity ({root_steps.max():.2f} m); last good motion retained")
 
     @staticmethod
-    def _check_geometry(clip, scene, *, history=None):
+    def _check_geometry(clip, scene, *, history=None, reaction_history=None, enabled=False, start_frame=0):
         from studio_interaction_scene import adapt_studio_scene
-        from interaction_scene_collision import scene_collision
+        from core_scene_reactions import check_reactive_geometry
         from interaction_metrics import pair_separation
         from realtime_navigation import validate_ground_path
         adapted = adapt_studio_scene(scene)
+        check_reactive_geometry(clip, scene, reaction_history if enabled else history,
+                                enabled=enabled, start_frame=start_frame)
         for index, actor_id in enumerate(clip.actor_ids):
             root_path = clip.positions[index, :, 0, :][:, [0, 2]]
             if history is not None:
                 root_path = np.vstack((history.positions[index, -1, 0, [0, 2]], root_path))
             validate_ground_path(adapted["scene"], root_path, actor_radius_m=.28)
-            report = scene_collision(clip.positions[index], "core27", adapted["scene"], adapted["affordances"])
-            if report["total_collision_frames"]:
-                raise ValueError(f"{actor_id} motion overlaps scene solid proxies; last good motion retained")
         if len(clip.actor_ids) == 2:
             report = pair_separation(clip.positions[0], clip.positions[1],
                                     skeleton_a="core27", skeleton_b="core27",
@@ -388,6 +420,7 @@ class CoreStudioSession:
             self._director.retry()
             pending = self._director.snapshot()["queued_stages"] > 0
             if pending:
+                self._spatial_sequence.retry()
                 self._run_generation()
             return pending
 
@@ -397,8 +430,15 @@ class CoreStudioSession:
             result.update(active=self._active, epoch=self._epoch, initialized=self._initialized,
                           scene_changed_since_motion=self._scene_changed_since_motion, available=self.available, schema=SCHEMA,
                           example_available=self.example_available, route=_copy(self._route),
+                          spatial_commands=_copy(self._spatial_sequence.report),
+                          scene_reactions_enabled=self.scene_reactions_enabled,
+                          scene_reactions_start_frame=self._reaction_options()["start_frame"],
                           fps=FPS, segments=self._director.segments,
                           geometry_check="sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)")
+            spatial = self._spatial_sequence.report
+            if spatial:
+                result["status"] = (f"Spatial commands: {spatial['completed_actions']}/{len(spatial['actions'])} verified; "
+                                    f"{spatial['status']}. " + spatial.get("detail", "") + " " + result["status"])
             if not self._active:
                 result["phase"], result["status"] = "inactive", "Native Core inactive; the G1 session is independent."
             elif self._client is None and not result["generated"]:
@@ -458,11 +498,19 @@ class CoreStudioSession:
             scene.get(key, []) != original.get(key, []) for key in ("objects", "assets")))
         if type(changed) is not bool:
             raise ValueError("Invalid saved scene-change provenance")
+        if "scene_reactions_version" in metadata:
+            version = metadata["scene_reactions_version"]
+            start = metadata.get("scene_reactions_start_frame")
+            if type(version) is not int or version != 1 or type(start) is not int or not 0 <= start <= director.total_frames:
+                raise ValueError("Invalid native scene reaction provenance")
+        elif "scene_reactions_start_frame" in metadata:
+            raise ValueError("Native scene reaction start requires a supported version")
         place = _placements(director.actor_ids, metadata["initial_placements"])
         with self._lock:
             self._ensure_open()
             self._invalidate()
             self._director, self._scene, self._placements = director, scene, place
+            self._spatial_sequence.restore()
             self._scene_changed_since_motion = changed
             self._route = None
             self._active = True
@@ -495,6 +543,7 @@ class CoreStudioSession:
             self._ensure_open()
             self._invalidate()
             self._director, self._scene, self._placements, self._active = director, scene, placements, True
+            self._spatial_sequence.restore()
             self._scene_changed_since_motion = False
             self._initialized = True
             self._route = None

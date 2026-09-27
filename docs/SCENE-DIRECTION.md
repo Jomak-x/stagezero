@@ -249,3 +249,7 @@ and intent caching improve measured latency without reusing generated motion.
 See [prompt-scene evidence](../review/prompt-scenes/README.md) for complete videos,
 measurements, reproduction commands, and preserved failures. This does not replace
 main's current UI or promote arbitrary contact/falls/three-body motion as solved.
+
+## Opt-in ordered background commands
+
+[Background navigation demo](BACKGROUND-NAVIGATION-DEMO.md) adds a separate command entry inside Move to a scene object. It supports bounded relative directions, exact object approaches, verified passages and configured automatic proximity doors. Existing Core timelines keep static props unless this workflow is explicitly used. The full raised temple route remains unsupported; see the linked complete videos and limitations.

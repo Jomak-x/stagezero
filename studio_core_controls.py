@@ -133,6 +133,9 @@ class CoreStudioControls:
                 self.target = gui.add_dropdown("Object", ("No scene objects",), initial_value="No scene objects")
                 self.verb = gui.add_dropdown("Action", ("approach", "go_through"), initial_value="approach")
                 self.navigate = gui.add_button("Navigate to object")
+                self.spatial_text = gui.add_text("Spatial commands", initial_value="walk two metres forward then walk one metre left", multiline=True)
+                gui.add_markdown("Use up to four actions: walk 2 metres forward, approach an exact object name or ID, open a configured automatic door, then go through it. Directions turn and walk from the actor's current heading. Stairs and opening doors by hand are unsupported.")
+                self.spatial_run = gui.add_button("Run spatial commands")
             self.retry = gui.add_button("Retry failed generation", color="gray")
             self.cancel = gui.add_button("Cancel pending motion", color="gray")
             with gui.add_folder("Core projects", expand_by_default=False):
@@ -578,6 +581,13 @@ class CoreStudioControls:
                 self.core.navigate(actor_id, target_id, self.verb.value)
             self._run(action)
 
+        @self.spatial_run.on_click
+        def spatial_clicked(_):
+            def action():
+                actor_id = "actor_1" if self.nav_actor.value == "Actor 1" else "actor_2"
+                self.core.spatial_commands(actor_id, self.spatial_text.value)
+            self._run(action)
+
         @self.target.on_update
         def target_changed(event):
             if event.client is not None and not self._syncing:
@@ -778,6 +788,7 @@ class CoreStudioControls:
                       self._together_plan is None or self._together_key != together_state)
             self._set(self.together_preview, "content", self._together_preview_text())
             self._set(self.navigate, "disabled", not active or not available or not targets or not verbs or not ids)
+            self._set(self.spatial_run, "disabled", not active or not available or not ids)
             self._set(self.play, "disabled", not active or frames == 0)
             self._set(self.pause, "disabled", not active or frames == 0)
             self._set(self.restart, "disabled", not active or frames == 0)

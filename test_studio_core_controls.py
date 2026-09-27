@@ -123,6 +123,9 @@ class Core:
     def navigate(self, actor_id, target_id, verb):
         self.calls.append(("navigate", actor_id, target_id, verb))
 
+    def spatial_commands(self, actor_id, text):
+        self.calls.append(("spatial_commands", actor_id, text))
+
     def play(self):
         self.calls.append(("play",))
 
@@ -219,6 +222,16 @@ class CoreStudioControlsTests(unittest.TestCase):
         self.controls.verb.value = "go_through"
         self.controls.navigate.click()
         self.assertEqual(self.core.calls[-1], ("navigate", "actor_2", "gate-1", "go_through"))
+
+    def test_spatial_command_button_uses_selected_actor_and_preserves_prompt(self):
+        self.assertTrue(self.controls.spatial_run.disabled)
+        self.controls.enabled.edit(True, client=object())
+        self.controls.cast.value = "Two actors"
+        self.controls.start.click()
+        self.controls.nav_actor.value = "Actor 2"
+        self.controls.spatial_text.value = "walk two metres forward then approach gate-1"
+        self.controls.spatial_run.click()
+        self.assertEqual(self.core.calls[-1], ("spatial_commands", "actor_2", self.controls.spatial_text.value))
 
     def test_catalog_excludes_floor_and_rejects_unverified_passage(self):
         self.controls.enabled.edit(True, client=object())

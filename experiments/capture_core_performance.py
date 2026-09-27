@@ -217,7 +217,12 @@ def capture(args: argparse.Namespace) -> dict:
             try:
                 for frame in range(captured_frames):
                     renderer.tick(frame)
-                    layer.update(objects, {"objects": static_states,
+                    states = static_states
+                    if not research and state.get("scene_reactions_enabled"):
+                        from core_scene_reactions import object_states
+                        states = object_states(scene, clip, frame, enabled=True,
+                            start_frame=state.get("scene_reactions_start_frame", 0))
+                    layer.update(objects, {"objects": states,
                         "assets": scene.get("assets", []), "effects": scene["effects"],
                         "lighting": scene["lighting"], "seconds": frame / 20.})
                     server.flush()

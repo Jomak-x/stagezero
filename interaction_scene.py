@@ -92,8 +92,9 @@ def scene_objects(scene: Mapping) -> list[SceneObject]:
         x, y, z = [_number(v, f"{label}.position[{i}]", -100, 100) for i, v in enumerate(position)]
         width, height, depth = [_number(v, f"{label}.size[{i}]", .05, 60) for i, v in enumerate(size)]
         yaw = _number(obj.get("yaw", 0), f"{label}.yaw", -360, 360)
-        if kind != "custom" and yaw != 0:
-            # Procedural props in object_scene.py are not rendered with yaw.
+        if kind not in ("custom", "door") and yaw != 0:
+            # Door boxes and passage axes match the renderer yaw. Other
+            # procedural passage shapes still require explicit rotation support.
             raise ValueError(f"{label} cannot rotate a procedural prop")
         if kind == "custom" and (scene["version"] != 3 or obj.get("asset") not in asset_ids):
             raise ValueError(f"{label} custom asset requires scene version 3 and an existing asset id")
@@ -129,7 +130,7 @@ def passage_for(obj: SceneObject, affordances: Mapping | None, *, actor_height_m
         height = obj.y - obj.height / 2
         if height < actor_height_m + .05:
             raise ValueError(f"{obj.id} door is closed or has insufficient overhead clearance")
-        return Passage(obj.id, obj.center_xz, 0., obj.width, height,
+        return Passage(obj.id, obj.center_xz, obj.yaw_degrees, obj.width, height,
                        obj.depth, "raised_procedural_door")
     if obj.kind == "arch":
         floor_y = obj.y - obj.height / 2

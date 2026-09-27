@@ -1,0 +1,1402 @@
+{
+  "case": "temple-courtyard",
+  "seed": 33,
+  "sparse_targets": true,
+  "prompt": "walk 1 metre forward then walk 1 metre left",
+  "source": "ARDY-Core-RP-20FPS-Horizon40",
+  "post_pose_edits": false,
+  "temple_scope": "ground courtyard only; stairs and raised bridge unsupported",
+  "state": {
+    "phase": "playing",
+    "status": "Spatial commands: 2/2 verified; completed. Every command reached its measured destination Playing generated motion.",
+    "frame": 96,
+    "total_frames": 200,
+    "buffer_frames": 104,
+    "playing": true,
+    "generated": true,
+    "inflight_request_id": null,
+    "queued_stages": 0,
+    "contact_open": false,
+    "failure": null,
+    "revision": 5,
+    "mode": "production",
+    "actor_ids": [
+      "actor_1"
+    ],
+    "active": true,
+    "epoch": 2,
+    "initialized": true,
+    "scene_changed_since_motion": false,
+    "available": true,
+    "schema": "Native Core27 / 20 fps (separate from G1)",
+    "example_available": true,
+    "route": {
+      "version": 1,
+      "actor_id": "actor_1",
+      "verb": "move",
+      "target_id": null,
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.00256,
+            0.50143
+          ],
+          "role": "start"
+        },
+        {
+          "time_seconds": 1.5385,
+          "position_xz": [
+            0.99743,
+            0.49977
+          ],
+          "role": "arrival"
+        }
+      ],
+      "geometry": {
+        "target_xz": [
+          0.9974340510169425,
+          0.4997708567375342
+        ]
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "actor_radius_m": 0.28,
+        "obstacle_margin_m": 0.06,
+        "speed_mps": 0.65
+      },
+      "ground_support": {
+        "authored_floor": true,
+        "continuous_support_verified": true,
+        "floor_ids": [
+          "temple-00",
+          "temple-03"
+        ],
+        "actor_footprint_margin_m": 0.28,
+        "floor_height_range_m": [
+          0.0,
+          0.020000000000000018
+        ]
+      },
+      "schedule": {
+        "frames": 120,
+        "fps": 20,
+        "seconds": 6.0,
+        "travel_seconds": 1.5385,
+        "initial_turn_frames": 40,
+        "movement_start_frame": 40,
+        "initial_turn_radians": -1.5707993050832354,
+        "terminal_hold_frames": 40,
+        "horizons": 3,
+        "dense_root_targets_per_actor_per_horizon": 1,
+        "held_actor_id": null,
+        "sampled_route_clearance_m": null
+      }
+    },
+    "spatial_commands": {
+      "version": 1,
+      "text": "walk 1 metre forward then walk 1 metre left",
+      "actor_id": "actor_1",
+      "actions": [
+        {
+          "verb": "move",
+          "direction": "forward",
+          "distance_m": 1.0
+        },
+        {
+          "verb": "move",
+          "direction": "left",
+          "distance_m": 1.0
+        }
+      ],
+      "status": "completed",
+      "action_index": 2,
+      "completed_actions": 2,
+      "legs": [
+        {
+          "action_index": 0,
+          "start_frame": 0,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "move",
+            "target_id": null,
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.0,
+                  1.5
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.5385,
+                "position_xz": [
+                  0.0,
+                  0.5
+                ],
+                "role": "arrival"
+              }
+            ],
+            "geometry": {
+              "target_xz": [
+                1.2246467991473532e-16,
+                0.5
+              ]
+            },
+            "assumptions": {
+              "motion_following_verified": false,
+              "actor_radius_m": 0.28,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "temple-00",
+                "temple-03"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.020000000000000018
+              ]
+            },
+            "schedule": {
+              "frames": 80,
+              "fps": 20,
+              "seconds": 4.0,
+              "travel_seconds": 1.5385,
+              "initial_turn_frames": 0,
+              "movement_start_frame": 0,
+              "initial_turn_radians": 0.0,
+              "terminal_hold_frames": 40,
+              "horizons": 2,
+              "dense_root_targets_per_actor_per_horizon": 1,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -0.0025645662099123,
+              0.5014338493347168
+            ],
+            "target_xz": [
+              0.0,
+              0.5
+            ],
+            "arrival_error_m": 0.0029381837518595976,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true
+          },
+          "end_frame": 80
+        },
+        {
+          "action_index": 1,
+          "start_frame": 80,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "move",
+            "target_id": null,
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  -0.00256,
+                  0.50143
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.5385,
+                "position_xz": [
+                  0.99743,
+                  0.49977
+                ],
+                "role": "arrival"
+              }
+            ],
+            "geometry": {
+              "target_xz": [
+                0.9974340510169425,
+                0.4997708567375342
+              ]
+            },
+            "assumptions": {
+              "motion_following_verified": false,
+              "actor_radius_m": 0.28,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "temple-00",
+                "temple-03"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.020000000000000018
+              ]
+            },
+            "schedule": {
+              "frames": 120,
+              "fps": 20,
+              "seconds": 6.0,
+              "travel_seconds": 1.5385,
+              "initial_turn_frames": 40,
+              "movement_start_frame": 40,
+              "initial_turn_radians": -1.5707993050832354,
+              "terminal_hold_frames": 40,
+              "horizons": 3,
+              "dense_root_targets_per_actor_per_horizon": 1,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              1.0247825384140015,
+              0.5024492144584656
+            ],
+            "target_xz": [
+              0.99743,
+              0.49977
+            ],
+            "arrival_error_m": 0.027483441338447313,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true
+          },
+          "end_frame": 200
+        }
+      ],
+      "submitted_after_committed_frame": 0,
+      "detail": "Every command reached its measured destination"
+    },
+    "scene_reactions_enabled": true,
+    "scene_reactions_start_frame": 0,
+    "fps": 20,
+    "segments": [
+      {
+        "start": 0,
+        "end": 40,
+        "stage_id": "0d7baaa5a6124bdb8e76b3c7cb921059",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally.",
+        "source": "ardy_core",
+        "request_id": "8facad03637049df9bde9ff5b4898ba6",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  0.5
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 0,
+            "planned_only": true,
+            "phase": "walk"
+          },
+          "initial_placements": {
+            "actor_1": {
+              "position_xz": [
+                0.0,
+                1.5
+              ],
+              "yaw": 3.141592653589793
+            }
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "8facad03637049df9bde9ff5b4898ba6",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "approach",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 40,
+        "end": 80,
+        "stage_id": "56e597528c19401db1249e98c4ba31ab",
+        "kind": "approach",
+        "prompt": "A person stands upright and relaxed.",
+        "source": "ardy_core",
+        "request_id": "d0b935ee2ff142e6bd4eeaeed837fe26",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  0.5
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 1,
+            "planned_only": true,
+            "phase": "hold"
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "d0b935ee2ff142e6bd4eeaeed837fe26",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 80,
+        "end": 120,
+        "stage_id": "64bad96d6f9a4f0a9fb0b2080c4cf133",
+        "kind": "approach",
+        "prompt": "A person turns left in place, keeping an upright posture.",
+        "source": "ardy_core",
+        "request_id": "4a7f5a82704b48f1b6aaf1f5fed043fb",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 0,
+                "position_xz": [
+                  -0.00256,
+                  0.50143
+                ],
+                "heading": -3.13993
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  -0.00256,
+                  0.50143
+                ],
+                "heading": 1.572456
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 0,
+            "planned_only": true,
+            "phase": "turn"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "4a7f5a82704b48f1b6aaf1f5fed043fb",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 120,
+        "end": 160,
+        "stage_id": "81d7fefaa05f444d963487e3da269b13",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally.",
+        "source": "ardy_core",
+        "request_id": "dda410ad1d2e4bebaa5ebfc8c8d6cd1e",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.99743,
+                  0.49977
+                ],
+                "heading": 1.572456
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 1,
+            "planned_only": true,
+            "phase": "walk"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "dda410ad1d2e4bebaa5ebfc8c8d6cd1e",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 160,
+        "end": 200,
+        "stage_id": "02dbef2bf2ff48bc9f6b3a6eff38061e",
+        "kind": "approach",
+        "prompt": "A person stands upright and relaxed.",
+        "source": "ardy_core",
+        "request_id": "08f6989beb5f4e9b8dee9a5e1bae526b",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.99743,
+                  0.49977
+                ],
+                "heading": 1.572456
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 2,
+            "planned_only": true,
+            "phase": "hold"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "08f6989beb5f4e9b8dee9a5e1bae526b",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      }
+    ],
+    "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+  },
+  "wall_seconds": 5.740356250025798,
+  "calls": [
+    {
+      "index": 1,
+      "seed": 33,
+      "prompt": "A person walks forward naturally.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              0.5
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.8814888329943642
+    },
+    {
+      "index": 2,
+      "seed": 33,
+      "prompt": "A person stands upright and relaxed.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              0.5
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.8998322089901194
+    },
+    {
+      "index": 3,
+      "seed": 33,
+      "prompt": "A person turns left in place, keeping an upright posture.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 0,
+            "position_xz": [
+              -0.00256,
+              0.50143
+            ],
+            "heading": -3.13993
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              -0.00256,
+              0.50143
+            ],
+            "heading": 1.572456
+          }
+        ]
+      },
+      "seconds": 0.8921627500094473
+    },
+    {
+      "index": 4,
+      "seed": 33,
+      "prompt": "A person walks forward naturally.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 39,
+            "position_xz": [
+              0.99743,
+              0.49977
+            ],
+            "heading": 1.572456
+          }
+        ]
+      },
+      "seconds": 0.7622760829981416
+    },
+    {
+      "index": 5,
+      "seed": 33,
+      "prompt": "A person stands upright and relaxed.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 39,
+            "position_xz": [
+              0.99743,
+              0.49977
+            ],
+            "heading": 1.572456
+          }
+        ]
+      },
+      "seconds": 0.7622997500002384
+    }
+  ],
+  "inference_wait_seconds": 4.198059624992311,
+  "frames": 200,
+  "duration_seconds": 10.0,
+  "max_root_step_m": 0.0648379996418953,
+  "native_positions_exact": true,
+  "native_rotations_exact": true,
+  "native_features_exact": true,
+  "final_objects": [
+    {
+      "id": "temple-00",
+      "position": [
+        0.0,
+        -0.07,
+        2.4
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-01",
+      "position": [
+        0.0,
+        -0.07,
+        -25.6
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-02",
+      "position": [
+        0.0,
+        -2.35,
+        -14.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-03",
+      "position": [
+        0.0,
+        -0.18,
+        0.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-04",
+      "position": [
+        0.0,
+        1.05,
+        -6.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-05",
+      "position": [
+        0.0,
+        1.05,
+        -3.7
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-06",
+      "position": [
+        0.0,
+        1.5,
+        -9.3
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-07",
+      "position": [
+        0.0,
+        3.7706,
+        -14.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-08",
+      "position": [
+        0.0,
+        1.5,
+        -18.7
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-09",
+      "position": [
+        0.0,
+        4.3,
+        -20.5
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-10",
+      "position": [
+        0.0,
+        2.8,
+        -24.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-11",
+      "position": [
+        0.0,
+        6.8,
+        -22.4
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-12",
+      "position": [
+        0.0,
+        11.1,
+        -26.8
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-13",
+      "position": [
+        -8.0,
+        0.72,
+        -5.6
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-14",
+      "position": [
+        -5.2,
+        0.55,
+        -2.3
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-15",
+      "position": [
+        -8.8,
+        5.0,
+        -10.6
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-16",
+      "position": [
+        -9.4,
+        6.2,
+        -25.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-17",
+      "position": [
+        -3.35,
+        3.8,
+        -8.5
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-18",
+      "position": [
+        -4.3,
+        5.8,
+        -22.8
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-19",
+      "position": [
+        -6.8,
+        5.6,
+        -23.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-20",
+      "position": [
+        -3.1,
+        3.5,
+        -23.1
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-21",
+      "position": [
+        8.0,
+        0.72,
+        -5.6
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-22",
+      "position": [
+        5.2,
+        0.55,
+        -2.3
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-23",
+      "position": [
+        8.8,
+        5.0,
+        -10.6
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-24",
+      "position": [
+        9.4,
+        6.2,
+        -25.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-25",
+      "position": [
+        3.35,
+        3.8,
+        -8.5
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-26",
+      "position": [
+        4.3,
+        5.8,
+        -22.8
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-27",
+      "position": [
+        6.8,
+        5.6,
+        -23.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-28",
+      "position": [
+        3.1,
+        3.5,
+        -23.1
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-29",
+      "position": [
+        -13.131975955131283,
+        3.9,
+        4.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-30",
+      "position": [
+        -11.889391547456167,
+        3.9,
+        -2.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-31",
+      "position": [
+        -13.172513864598795,
+        3.9,
+        -8.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-32",
+      "position": [
+        12.559908588236537,
+        3.9,
+        3.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-33",
+      "position": [
+        13.20897752154386,
+        3.9,
+        -3.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-34",
+      "position": [
+        12.36096408784516,
+        3.9,
+        -8.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-35",
+      "position": [
+        -13.069877545249899,
+        3.9,
+        -20.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-36",
+      "position": [
+        13.163435839512136,
+        3.9,
+        -20.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-37",
+      "position": [
+        -12.942799783710543,
+        3.9,
+        -28.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-38",
+      "position": [
+        12.96446002438921,
+        3.9,
+        -28.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-39",
+      "position": [
+        -5.2,
+        0.55,
+        4.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-40",
+      "position": [
+        5.3,
+        0.55,
+        4.3
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-41",
+      "position": [
+        -11.0,
+        0.55,
+        -15.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-42",
+      "position": [
+        11.0,
+        0.55,
+        -15.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-43",
+      "position": [
+        -6.9,
+        0.55,
+        -27.2
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-44",
+      "position": [
+        6.9,
+        0.55,
+        -28.0
+      ],
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-shrine-door",
+      "position": [
+        0.0,
+        7.1,
+        -22.38
+      ],
+      "color": [
+        112,
+        91,
+        65
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "exact_save_load": true
+}

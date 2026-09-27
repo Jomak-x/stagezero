@@ -93,6 +93,7 @@ def build_parser():
     parser.add_argument('--core-token-path', type=Path,
                         help='Core token file (defaults to --token-path); absent token permits replay only')
     parser.add_argument('--native-project', type=Path, help='Open an exact saved native cast performance at startup')
+    parser.add_argument('--core-project', type=Path, help='Open an exact Core scene-direction archive for paused replay')
     parser.add_argument('--native-pair-config', type=Path, help='Private native paired generation provider configuration; omit for reviewed playback')
     return parser
 
@@ -136,6 +137,8 @@ def create_motion_backend(args):
 def main():
     parser = build_parser()
     args = parser.parse_args()
+    if args.core_project and (args.project or args.native_project):
+        parser.error('--core-project cannot be combined with another startup project')
     torch.set_num_threads(2)
     if args.reference_only:
         from ardy.skeleton import G1Skeleton34
@@ -577,6 +580,11 @@ def main():
 
     if args.native_project:
         open_native_project(args.native_project.read_bytes())
+    if args.core_project:
+        core.load_project(args.core_project.read_bytes())
+        core.pause()
+        core.seek(0)
+        activate_core(True)
 
     def activate_voice_motion():
         activate_story()
@@ -747,6 +755,10 @@ def main():
                             # these objects; the UI labels it a backdrop.
                             states = [{'id': o['id'], 'position': o['position'],
                                        'color': o['color'], 'active': False} for o in objects]
+                            if core_requested and core_state.get('scene_reactions_enabled'):
+                                from core_scene_reactions import object_states as core_object_states
+                                states = core_object_states(doc, core.timeline_clip(), int(display_frame),
+                                    enabled=True, start_frame=core_state.get('scene_reactions_start_frame', 0))
                             object_layer.update(objects, {'objects': states,
                                 'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
                                 'lighting': doc.get('lighting', 'neutral'),
