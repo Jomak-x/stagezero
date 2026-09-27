@@ -42,7 +42,8 @@ MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
 def native_core_has_pending_work(snapshot):
     """A playing phase can still have queued or in-flight native work."""
     return (snapshot.get('inflight_request_id') is not None or
-            bool(snapshot.get('queued_stages')))
+            bool(snapshot.get('queued_stages')) or
+            bool(snapshot.get('terrain_pending')))
 
 
 def native_cast_camera_view(clip, placement, cast_roots, *, aspect=16/9):
