@@ -6,6 +6,16 @@ See [measured results and films](RESULTS.md) for the validated review milestone.
 
 ## Open the demos
 
+### From the normal Studio app
+
+After merging PR #41, build the client (`cd studio_client && npm ci && npm run build`) and start/restart Studio using your usual launch command. The server caches assets, so refresh alone is insufficient after replacing a running build. In the main controls panel, choose **Crowd demos**. It opens a separate tab on the same app server, preserving your working Studio tab. No GPU worker or separate demo server is needed. You can also open `/demos.html?scene=city&count=112` on that server directly.
+
+Choose **Crossing**, **City lives**, or **Last train**, then select **112** or **128** people. Drag to orbit, scroll to zoom, use the timeline to inspect any moment, and select a person followed by **Follow actor**. Camera buttons choose fixed views; **Director camera** resumes the movie sequence. **Courtyard performance** jumps to the city dance. **Back to Studio** opens the Studio entry in the current tab; your original Studio tab stays open.
+
+The normal build includes all18 saved populations and the animation atlas under `build/demo-data/`. Only the selected take is fetched at runtime. On ordinary builds, **Save still**, **Record full demo**, and **Profile** produce explicit download links below the controls, with no server write API. The separate local capture server keeps its existing evidence-save workflow.
+
+### Standalone development viewer
+
 From the isolated checkout, run:
 
 ```sh

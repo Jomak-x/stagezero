@@ -79,7 +79,7 @@ export function locomotionWeights(trajectory:Trajectory){
  for(let f=0;f<trajectory.frames.length;f++){const dt=f?trajectory.frames[f].t-trajectory.frames[f-1].t:0;weights.push(trajectory.frames[f].people.map((person,i)=>{const target=THREE.MathUtils.smoothstep(person[3],.025,.42);return f?weights[f-1][i]+THREE.MathUtils.clamp(target-weights[f-1][i],-1.8*dt,1.8*dt):target;}));}
  return weights;
 }
-export function accumulatedDistances(trajectory:Trajectory){return trajectory.frames.map((frame,f)=>frame.people.map((p,i)=>p[5]??(f?0:0))).map((_,f,all)=>{if(f)for(let i=0;i<all[f].length;i++){const a=trajectory.frames[f-1].people[i],b=trajectory.frames[f].people[i];all[f][i]=all[f-1][i]+Math.hypot(b[0]-a[0],b[1]-a[1]);}return all[f];});}
+export function accumulatedDistances(trajectory:Trajectory){return trajectory.frames.map((frame,f)=>frame.people.map((p)=>p[5]??(f?0:0))).map((_,f,all)=>{if(f)for(let i=0;i<all[f].length;i++){const a=trajectory.frames[f-1].people[i],b=trajectory.frames[f].people[i];all[f][i]=all[f-1][i]+Math.hypot(b[0]-a[0],b[1]-a[1]);}return all[f];});}
 export function nativeParts(manifest:CrowdManifest,affine:Float32Array):NativePairPart[]{
  const linear=new Float32Array(manifest.totalFrames*22*9),targets=new Float32Array(manifest.totalFrames*22*3);
  for(let f=0;f<manifest.totalFrames;f++)for(let b=0;b<22;b++)for(let r=0;r<3;r++){const src=(f*22+b)*12+r*4;linear.set(affine.subarray(src,src+3),(f*22+b)*9+r*3);targets[(f*22+b)*3+r]=affine[src+3];}

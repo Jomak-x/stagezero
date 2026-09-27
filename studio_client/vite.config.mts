@@ -1,4 +1,6 @@
 import { defineConfig } from "vite";
+import { resolve } from "node:path";
+import { crowdDemoAssets } from "./crowdDemoAssets.mjs";
 import react from "@vitejs/plugin-react";
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 
@@ -10,6 +12,7 @@ import browserslistToEsbuild from "browserslist-to-esbuild";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    crowdDemoAssets(),
     react(),
     eslint({ failOnError: false, failOnWarning: false }),
     viteTsconfigPaths(),
@@ -25,6 +28,7 @@ export default defineConfig({
   },
   build: {
     outDir: "build",
+    rollupOptions: { input: { studio: resolve("index.html"), demos: resolve("demos.html") } },
     target: browserslistToEsbuild(),
   },
 });

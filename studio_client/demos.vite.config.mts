@@ -1,8 +1,9 @@
 import {defineConfig} from 'vite';
+import {crowdDemoAssets} from './crowdDemoAssets.mjs';
 import {resolve} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
 const root=resolve('..'),output=resolve('../review/crowd-demos/browser');
-export default defineConfig({cacheDir:resolve('../.runtime/demo-vite-cache'),publicDir:false,plugins:[{name:'saved-crowd-demos',configureServer(server){server.middlewares.use(async(req,res,next)=>{
+export default defineConfig({cacheDir:resolve('../.runtime/demo-vite-cache'),publicDir:false,plugins:[crowdDemoAssets(),{name:'saved-crowd-demos',configureServer(server){server.middlewares.use(async(req,res,next)=>{
  if(req.url?.startsWith('/review/crowd-demos/')||req.url?.startsWith('/review/crowd-crossing/assets/')){req.url='/@fs'+root+req.url;return next();}
  if(!req.url?.startsWith('/__demo/'))return next();
  if(req.method!=='POST'||req.headers.origin!=='http://127.0.0.1:24985'){res.statusCode=403;res.end();return;}
