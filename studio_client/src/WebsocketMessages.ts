@@ -1237,7 +1237,38 @@ export interface VoiceQueueMessage {
   requests: VoiceQueueRequest[];
 }
 
-export type Message = 
+import type { DialogueAssetsMessage, DialoguePlaybackMessage } from "./VoicePlayback";
+import type { DialogueVoice, DialogueCharacter, DialogueLine } from "./ControlPanel/DialogueState";
+export interface DialogueCommandMessage {
+  type: "DialogueCommandMessage";
+  request_id: string;
+  command: "submit" | "retry" | "cancel" | "remove" | "catalog";
+  take_id?: string;
+  start_frame?: number;
+  character_id?: string;
+  text?: string;
+  voice_id?: string;
+  line_id?: string;
+}
+export interface DialogueVoicesMessage {
+  type: "DialogueVoicesMessage"; voices: DialogueVoice[]; available: boolean; detail: string;
+}
+export interface DialogueStatusMessage {
+  type: "DialogueStatusMessage"; request_id: string; line_id: string;
+  status: string; detail: string; retryable: boolean;
+}
+export interface DialogueStateMessage {
+  type: "DialogueStateMessage"; take_id: string; take_name: string; frame: number;
+  characters: DialogueCharacter[]; lines: DialogueLine[]; available: boolean; detail: string;
+}
+
+export type Message =
+  | DialogueCommandMessage
+  | DialogueVoicesMessage
+  | DialogueStatusMessage
+  | DialogueStateMessage
+  | DialogueAssetsMessage
+  | DialoguePlaybackMessage
   | NativePairClipMessage
   | NativePairTransportMessage
   | NativePairStatusMessage

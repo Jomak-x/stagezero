@@ -1,12 +1,13 @@
 """Offline tests for the voice direction transcription adapter."""
 
 import os
+import base64
 import unittest
 from unittest.mock import patch
 
 import requests
 
-from speech_service import ElevenLabsSpeech, MAX_RECORDING_BYTES, SpeechError
+from speech_service import ElevenLabsSpeech, MAX_RECORDING_BYTES, SpeechError, _mp3_duration
 
 
 class FakeResponse:
@@ -37,6 +38,16 @@ class FakeSession:
         if self.error is not None:
             raise self.error
         return self.response
+
+
+class CatalogSession:
+    def __init__(self, responses):
+        self.responses = responses
+        self.calls = []
+
+    def get(self, url, **kwargs):
+        self.calls.append((url, kwargs))
+        return self.responses[kwargs['params']['gender']]
 
 
 class SpeechServiceTests(unittest.TestCase):
@@ -111,6 +122,35 @@ class SpeechServiceTests(unittest.TestCase):
                     ElevenLabsSpeech('secret-key', session=FakeSession(response)).transcribe(self.audio, 'audio/mpeg')
                 self.assertIn(expected, str(raised.exception))
                 self.assertNotIn('secret-key', str(raised.exception))
+
+    def test_voice_catalog_uses_authenticated_gender_filters(self):
+        def response(gender, names):
+            return FakeResponse({'voices': [dict(voice_id=identifier, name=name,
+                labels={'gender': gender}) for identifier, name in names]})
+        session = CatalogSession({
+            'male': response('male', [('MaleVoice00000000001', 'Roger'),
+                                      ('MaleVoice00000000002', 'Charlie'),
+                                      ('MaleVoice00000000003', 'George')]),
+            'female': response('female', [('FemaleVoice000000001', 'Bella'),
+                                          ('FemaleVoice000000002', 'Sarah')])})
+        voices = ElevenLabsSpeech('secret-key', session=session).list_voice_options()
+        self.assertEqual([(v['name'], v['gender']) for v in voices],
+                         [('Roger', 'male'), ('Charlie', 'male'),
+                          ('Bella', 'female'), ('Sarah', 'female')])
+        self.assertEqual([call[1]['params']['gender'] for call in session.calls], ['male', 'female'])
+        self.assertTrue(all(call[1]['headers'] == {'xi-api-key': 'secret-key'} for call in session.calls))
+
+    def test_tts_duration_includes_complete_mp3_tail_after_id3(self):
+        frame = bytes.fromhex('fffb9000') + bytes(413)
+        audio = b'ID3\x04\x00\x00\x00\x00\x00\x00' + frame * 2
+        self.assertGreater(_mp3_duration(audio), .05)
+        session = FakeSession(FakeResponse({
+            'audio_base64': base64.b64encode(audio).decode(),
+            'normalized_alignment': {'character_end_times_seconds': [.01]}}))
+        generated = ElevenLabsSpeech('secret-key', session=session).synthesize('Hi', 'MaleVoice00000000001')
+        self.assertGreater(generated['duration_seconds'], .05)
+        self.assertEqual(generated['audio'], audio)
+        self.assertEqual(session.calls[0][1]['json']['model_id'], 'eleven_flash_v2_5')
 
 
 if __name__ == '__main__':

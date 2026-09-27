@@ -26,6 +26,7 @@ from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
 from studio_core_renderer import StudioCoreRenderer
 from voice_directing import VoiceDirecting
+from dialogue_directing import DialogueDirector
 from native_pair_session import NativePairSession
 from native_pair_renderer import NativePairRenderer
 from native_pair_controls import NativePairControls
@@ -585,6 +586,11 @@ def main():
                            on_story_submitted=ui.story_controls.register_voice_job,
                            on_motion_activate=activate_voice_motion)
 
+    dialogue = DialogueDirector(session, server, enabled=lambda: not (core_requested or paired_requested or cast_requested))
+    server.on_client_connect(dialogue.connected)
+    for client in server.get_clients().values():
+        dialogue.connected(client)
+
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
@@ -775,6 +781,7 @@ def main():
                         ui.update()
                         core_ui.tick()
                         voice.update()
+                        dialogue.update()
                         pair_ui.tick()
                         cast_ui.tick()
                         prompt_cast_folder.visible = cast_requested
@@ -789,6 +796,7 @@ def main():
             time.sleep(1/60)
     except KeyboardInterrupt:
         voice.close()
+        dialogue.close()
         ui.story_controls.close()
         session.reset()
         core.close()

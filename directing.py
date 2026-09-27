@@ -405,10 +405,12 @@ class DirectorSession(MotionSession):
 
     def _add_edited_take(self, source, stop, suffix):
         segments, events = source.prefix(stop)
+        dialogue, audio_assets = source.dialogue_prefix(stop)
         copied = [getattr(source, key)[:stop].copy() for key in ('positions', 'rotations', 'motion')]
         new = Take(str(uuid.uuid4()), self._copy_name(source, suffix), *copied,
                    segments=segments, parent=source.id, branch_frame=stop - 1, events=events,
-                   camera_cuts=copy_camera_cuts(source.camera_cuts, stop))
+                   camera_cuts=copy_camera_cuts(source.camera_cuts, stop),
+                   dialogue=dialogue, audio_assets=audio_assets)
         self.takes[new.id] = new
         self._select(new.id, min(self.frame, stop - 1))
         self.project_revision += 1
@@ -738,6 +740,7 @@ class DirectorSession(MotionSession):
         completed_chunks = 0
         generated = {key: [] for key in ('positions', 'rotations', 'motion')}
         segments, events = source.prefix(stop)
+        dialogue, audio_assets = source.dialogue_prefix(stop)
         motion_so_far = source.motion[max(0, stop - 52):stop].copy()
         generation_seconds = 0.0
         final_meta = None
@@ -888,7 +891,8 @@ class DirectorSession(MotionSession):
             edited = Take(source.id, source.name, *arrays, segments=segments,
                           parent=None if inherited_prefix_changed else source.parent,
                           branch_frame=None if inherited_prefix_changed else source.branch_frame, events=events,
-                          camera_cuts=copy_camera_cuts(source.camera_cuts, len(arrays[0])))
+                          camera_cuts=copy_camera_cuts(source.camera_cuts, len(arrays[0])),
+                          dialogue=dialogue, audio_assets=audio_assets)
             self._record_gate_events(edited)
             validate_take(edited)
             with self.lock:
@@ -929,6 +933,7 @@ class DirectorSession(MotionSession):
         t, stop, branch = self.edit_context
         arrays = [result[k] for k in ('positions', 'rotations', 'motion')]
         segments, events = ([], []) if t is None else t.prefix(stop)
+        dialogue, audio_assets = ([], {}) if t is None else t.dialogue_prefix(stop)
         if t is not None:
             arrays = [np.concatenate([getattr(t, k)[:stop], a], axis=0) for k, a in zip(('positions', 'rotations', 'motion'), arrays)]
         meta = result['metadata']
@@ -939,7 +944,8 @@ class DirectorSession(MotionSession):
         new = Take(take_id, name, *arrays, segments=segments,
                    parent=t.id if branch and stop else (t.parent if t and not branch else None),
                    branch_frame=stop - 1 if branch and stop else (t.branch_frame if t and not branch else None), events=events,
-                   camera_cuts=[] if t is None else copy_camera_cuts(t.camera_cuts, len(arrays[0])))
+                   camera_cuts=[] if t is None else copy_camera_cuts(t.camera_cuts, len(arrays[0])),
+                   dialogue=dialogue, audio_assets=audio_assets)
         self.takes[take_id] = new
         self.active_take = take_id
         self.positions, self.rotations, self.motion = arrays

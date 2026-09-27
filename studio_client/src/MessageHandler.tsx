@@ -31,6 +31,9 @@ import { applyCameraState } from "./cameraStore";
 import { setServerCameraTarget } from "./serverCamera";
 import { receiveVoiceQueue, receiveVoiceStatus } from "./VoiceCommands";
 
+import { voicePlayback } from "./VoicePlayback";
+import { receiveDialogueVoices, receiveDialogueState, receiveDialogueStatus } from "./ControlPanel/DialogueState";
+
 /** Returns a handler for all incoming messages. */
 function useMessageHandler() {
   const viewer = useContext(ViewerContext)!;
@@ -143,6 +146,11 @@ function useMessageHandler() {
     }
 
     switch (message.type) {
+      case "DialogueVoicesMessage": receiveDialogueVoices(message); return;
+      case "DialogueStateMessage": receiveDialogueState(message); return;
+      case "DialogueStatusMessage": receiveDialogueStatus(message); return;
+      case "DialogueAssetsMessage": void voicePlayback.receiveAssets(message, () => {}); return;
+      case "DialoguePlaybackMessage": voicePlayback.receivePlayback(message); return;
       case "VoiceStatusMessage": {
         receiveVoiceStatus(message);
         return;
