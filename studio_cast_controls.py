@@ -27,7 +27,7 @@ class StudioCastControls:
         self._last_clip = None
         self._sync_prompt_from_archive = True
 
-        gui.add_markdown('Describe what happens with one, two, or three people. Cast and duration are planned automatically.')
+        gui.add_markdown('Describe what happens with one, two, or three people. Cast and duration are planned automatically. Try “Three people celebrate together in place.”')
         self.prompt = gui.add_text('What happens?', initial_value=DEFAULT_PROMPT, multiline=True)
         self.generate = gui.add_button('Generate', color='green')
         self.cancel = gui.add_button('Cancel', color='gray')
@@ -187,6 +187,8 @@ class StudioCastControls:
             seconds = beat.get('seconds')
             suffix = f' ({seconds:g}s)' if isinstance(seconds, (float, int)) else ''
             lines.append(escape(f'{people}: {prompt}{suffix}'))
+            for actor, action in beat.get('concurrent_solos', {}).items():
+                lines.append(escape(f'At the same time · {actor}: {action}'))
         for warning in plan.get('warnings', []):
             lines.append(escape(str(warning)))
         if metadata.get('wall_seconds') is not None:
@@ -228,6 +230,10 @@ class StudioCastControls:
                        (state.get('progress') if state.get('busy') else None) or
                        (None if available else 'AI cast needs both motion providers configured.') or
                        state.get('status') or 'Ready. Duration is automatic.')
+            clip = self.session.timeline_clip()
+            fallback = (clip.metadata or {}).get('concurrency_fallback') if clip else None
+            if fallback and not busy and not state.get('failure') and not self._notice:
+                message = 'Requested simultaneous action was not achieved; preserved the original performance. ' + str(fallback)
             self._set(self.status, 'content', '<p>' +
                       escape(self._progress_message(message)) + '</p>')
 
