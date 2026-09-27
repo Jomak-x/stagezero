@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { addStreetDressing } from "./StreetDressing";
 
 /** Original, deterministic, metre-scale architecture. All geometry is authored here;
  * the local advertising atlas contains original generated raster artwork. No external models or network requests. */
@@ -37,7 +38,7 @@ function canvasTexture(width: number, height: number, draw: (ctx: CanvasRenderin
 }
 function surface(kind: "asphalt" | "paving" | "concrete" | "wood", repeat = 1) {
   const texture = canvasTexture(512, 512, ctx => {
-    ctx.fillStyle = { asphalt: "#454a4c", paving: "#bab8ae", concrete: "#b8b3a8", wood: "#a77d55" }[kind];
+    ctx.fillStyle = { asphalt: "#454a4c", paving: "#c5b29b", concrete: "#c8bca7", wood: "#a77d55" }[kind];
     ctx.fillRect(0, 0, 512, 512);
     for (let i = 0; i < 24000; i++) {
       const v = Math.floor(100 + random() * 100);
@@ -86,11 +87,12 @@ class Builder {
   glass = material("#7d9d9e", .22, .46);
   glassDark = material("#324c54", .2, .52);
   warm = material("#f8dca3", .55, 0, "#ffc379");
-  leaf = [material("#3c5345"), material("#516448"), material("#687154")];
-  accents = [material("#ccc7b8"), material("#a9adb0"), material("#766d63"), material("#d9d6c9"), material("#8d9c9d")];
+  leaf = [material("#206444"), material("#428146"), material("#83a14c")];
+  accents = [material("#e9c69e"), material("#7faebe"), material("#b87965"), material("#f0dfbc"), material("#7b9c89")];
   windows = [windowMaterial(0), windowMaterial(1), windowMaterial(0), windowMaterial(2), windowMaterial(3)];
   instancedCount = 0;
-  private paintStrips: {x:number;z:number;angle:number;width:number}[] = [];
+  private paintStrips: {x:number;z:number;angle:number;width:number;route:number}[] = [];
+  private paintRoutes: {x:number;z:number;angle:number;width:number;length:number}[] = [];
   mesh(parent: THREE.Object3D, geometry: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, sx = 1, sy = 1, sz = 1, ry = 0) {
     const mesh = new THREE.Mesh(geometry, mat); mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz); mesh.rotation.y = ry;
     mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
@@ -167,8 +169,9 @@ class Builder {
   }
   zebra(ax: number, az: number, bx: number, bz: number, width: number) {
     const dx = bx - ax, dz = bz - az, length = Math.hypot(dx, dz), angle = Math.atan2(dx, dz);
+    const route=this.paintRoutes.length;this.paintRoutes.push({x:(ax+bx)/2,z:(az+bz)/2,angle,width,length});
     for (let t = .65; t < length - .5; t += 1.6) this.paintStrips.push({
-      x: ax + dx*t/length, z: az + dz*t/length, width, angle });
+      x: ax + dx*t/length, z: az + dz*t/length, width, angle, route });
   }
   tactile(ax: number, az: number, bx: number, bz: number, width = .38) {
     const mat = material("#b8a568"); const dx = bx - ax, dz = bz - az, length = Math.hypot(dx, dz);
@@ -224,7 +227,7 @@ class Builder {
     this.cyl(g, this.metal, w * .22, h + 1.7, -d * .25, .045, 3.4);
   }
   shop(g: THREE.Object3D, x: number, front: number, w: number, name: string, index: number, open: boolean) {
-    const colors = ["#294341", "#714b3f", "#a28b68", "#33485b", "#674e59"];
+    const colors = ["#087e83", "#d45039", "#d39b28", "#285ba4", "#a74472"];
     const facade = front + .15;
     this.box(g, this.dark, x - w / 2 + .09, 1.85, facade, .18, 3.7, .28);
     this.box(g, this.dark, x + w / 2 - .09, 1.85, facade, .18, 3.7, .28);
@@ -241,11 +244,11 @@ class Builder {
       // Doorway is entirely open and flush: no collision or opaque front wall.
       const depth = 7;
       this.box(g, this.wood, x, -.06, front - depth / 2, w - .25, .1, depth);
-      this.box(g, material("#d5c8b2"), x, 1.9, front - depth, w, 3.8, .18);
+      this.box(g, material(name.includes("BOOK") ? "#d5c8b2" : "#bc8870"), x, 1.9, front - depth, w, 3.8, .18);
       for (const side of [-1, 1]) this.box(g, this.concrete, x + side * (w / 2 - .13), 1.9, front - depth / 2, .18, 3.8, depth);
       this.box(g, this.white, x, 3.65, front - depth / 2, w, .15, depth);
       this.box(g, this.warm, x, 3.55, front - depth / 2, w - .7, .05, .14);
-      this.text(g, name.includes("BOOK") ? "READ / REST / REPEAT" : "GOOD DAYS BEGIN HERE", x, 2.5, front - depth + .12, w - 1, .65, "#d5c8b2", "#414d45");
+      this.text(g, name.includes("BOOK") ? "READ / REST / REPEAT" : "GOOD DAYS BEGIN HERE", x, 2.5, front - depth + .12, w - 1, .65, name.includes("BOOK") ? "#d5c8b2" : "#176b73", name.includes("BOOK") ? "#414d45" : "#fff1d3");
       if (name.includes("BOOK")) this.bookshop(g, x, front, w);
       else this.cafe(g, x, front, w);
       this.box(g, this.dark, x, 2.68, facade, w - .3, .08, .12);
@@ -262,6 +265,17 @@ class Builder {
     this.box(g, material(colors[index % 5]), x, 2.51, facade + 1.1, w - .18, .22, .04);
   }
   cafe(g: THREE.Object3D, x: number, front: number, w: number) {
+    const teal=material("#16848a"), coral=material("#d67452"), leaf=material("#428249");
+    // Warm retail detail behind the counter, outside the central customer route.
+    for(const side of [-1,1]) {
+      const px=x+side*(w/2-1.1);
+      this.cyl(g,coral,px,1.4,front-5.8,.2,.38);
+      for(let i=0;i<5;i++)this.mesh(g,this.SPHERE,leaf,px+Math.sin(i*2.4)*.17,1.75+i*.08,front-5.8+Math.cos(i*2.4)*.12,.22,.3,.18);
+    }
+    for(let i=0;i<7;i++) {
+      this.cyl(g,i%2?teal:coral,x-1.8+i*.38,1.4,front-5.95,.075,.3);
+    }
+
     this.box(g, this.wood, x, .57, front - 5.7, w - 1.2, 1.14, .9);
     this.box(g, this.white, x, 1.17, front - 5.7, w - 1, .1, 1.05);
     this.box(g, this.metal, x + w / 4, 1.45, front - 5.8, .85, .5, .5);
@@ -271,7 +285,7 @@ class Builder {
       this.cyl(g, this.dark, tx, .36, tz, .045, .72); this.cyl(g, this.wood, tx, .75, tz, .55, .07);
       for (const offset of [-.72, .72]) {
         this.box(g, this.wood, tx, .44, tz + offset, .44, .065, .44);
-        this.box(g, this.wood, tx, .75, tz + offset + Math.sign(offset) * .2, .44, .5, .055);
+        this.box(g, teal, tx, .75, tz + offset + Math.sign(offset) * .2, .44, .5, .055);
         for (const a of [-.16, .16]) for (const b of [-.16, .16]) this.box(g, this.dark, tx + a, .21, tz + offset + b, .028, .42, .028);
       }
       this.cyl(g, this.white, tx + .1, .835, tz, .065, .12);
@@ -349,7 +363,7 @@ class Builder {
       const width=maxX-minX,depth=maxZ-minZ;
       const map=canvasTexture(2048,2048,ctx=>{
         ctx.clearRect(0,0,2048,2048);ctx.scale(2048/width,2048/depth);ctx.translate(-minX,-minZ);ctx.fillStyle='#e9e6d7';
-        for(const p of this.paintStrips){ctx.save();ctx.translate(p.x,p.z);ctx.rotate(-p.angle);ctx.fillRect(-p.width/2,-.39,p.width,.78);ctx.restore();}
+        for(let r=0;r<this.paintRoutes.length;r++){const route=this.paintRoutes[r];ctx.save();ctx.translate(route.x,route.z);ctx.rotate(-route.angle);ctx.clearRect(-route.width/2-.15,-route.length/2,route.width+.3,route.length);ctx.restore();for(const p of this.paintStrips.filter(p=>p.route===r)){ctx.save();ctx.translate(p.x,p.z);ctx.rotate(-p.angle);ctx.fillRect(-p.width/2,-.39,p.width,.78);ctx.restore();}}
       });
       const paint=new THREE.MeshStandardMaterial({map,roughness:.95,transparent:true,alphaTest:.2,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
       const decal=this.plane(paint,(minX+maxX)/2,(minZ+maxZ)/2,width,depth,.009);decal.renderOrder=1;
@@ -452,7 +466,7 @@ function crossing(b: Builder) {
   // Primary landmark: a tall rounded glazed corner, with a sculptural screen crown.
   const corner = b.local(-39, -38);
   const curved = new THREE.CylinderGeometry(12, 12, 27, 28, 1, false, 0, Math.PI / 2);
-  const glass = b.mesh(corner, curved, material("#88a7ad", .32, .26), 0, 20.5, 0); glass.rotation.y = 0;
+  const glass = b.mesh(corner, curved, material("#439db0", .24, .3), 0, 20.5, 0); glass.rotation.y = 0;
   for (let level = 0; level <= 8; level++) {
     const arc = new THREE.TorusGeometry(12.25, .14, 4, 28, Math.PI / 2);
     const ring = new THREE.Mesh(arc, b.metal); ring.rotation.x = Math.PI / 2; ring.position.y = 7 + level * 3.3; corner.add(ring);
@@ -470,9 +484,11 @@ function crossing(b: Builder) {
   const south = b.local(43, 42, Math.PI);
   b.billboard(south, 2, 0, 20, 11.1, 15, 10);
   // Four conventional crossings and the two complete centre-spanning scramble paths.
-  b.zebra(-22, -17.7, 22, -17.7, 5.3); b.zebra(-22, 17.7, 22, 17.7, 5.3);
-  b.zebra(-17.7, -22, -17.7, 22, 5.3); b.zebra(17.7, -22, 17.7, 22, 5.3);
-  b.zebra(-24, -24, 24, 24, 4.8); b.zebra(-24, 24, 24, -24, 4.8);
+  b.zebra(-22, -17.7, 22, -17.7, 7); b.zebra(-22, 17.7, 22, 17.7, 7);
+  b.zebra(-17.7, -22, -17.7, 22, 7); b.zebra(17.7, -22, 17.7, 22, 7);
+  b.zebra(-17, -17, 17, 17, 7);
+  // Break the second diagonal at the shared centre instead of stacking paint patterns.
+  b.zebra(-17, 17, -3, 3, 7); b.zebra(3, -3, 17, -17, 7);
   for (const sign of [-1, 1]) {
     roadLines(b, "z", sign < 0 ? -125 : 31, sign < 0 ? -30 : 125);
     roadLines(b, "x", sign < 0 ? -125 : 31, sign < 0 ? -30 : 125);
@@ -495,12 +511,12 @@ function crossing(b: Builder) {
     { id: "east", position: [115, 0, 25], width: 6, direction: [-1, 0, 0] },
     { id: "west", position: [-115, 0, -25], width: 6, direction: [1, 0, 0] }];
   metadata.interactionAnchors = [{ id: "scramble-centre", label: "Crossing centre", position: [0, 0, 0] }, { id: "corner-plaza", label: "Koma corner", position: [-26, 0, -27] }];
-  metadata.clearWidths = { roadway: 44, cornerSidewalk: 8, zebra: 5.3, diagonalZebra: 4.8 };
+  metadata.clearWidths = { roadway: 44, cornerSidewalk: 8, zebra: 7, diagonalZebra: 7 };
   const cameras: EnvironmentCamera[] = [
-    { id: "hero", label: "Crossing · hero", position: [7, 23, 61], target: [-1, 6, -9], fov: 57 },
+    { id: "hero", label: "Crossing · hero", position: [5, 21, 66], target: [-1, 12, -10], fov: 58 },
     { id: "street", label: "Scramble · eye level", position: [22, 1.72, 25], target: [-19, 9, -27], fov: 66 },
     { id: "centre", label: "In the crossing", position: [0, 1.7, 3], target: [-33, 14, -37], fov: 71 },
-    { id: "overhead", label: "Crossing geometry", position: [1, 110, 14], target: [0, 0, 0], fov: 48 },
+    { id: "overhead", label: "Crossing geometry", position: [1, 76, 14], target: [0, 0, 0], fov: 48 },
     { id: "corner", label: "Corner shops", position: [4, 1.7, -26], target: [-39, 4.3, -29], fov: 62 },
     { id: "avenue", label: "Along the avenue", position: [-71, 2.2, 24], target: [23, 8, -26], fov: 55 },
   ];
@@ -697,10 +713,27 @@ export function buildEnvironment(kind: EnvironmentKind): EnvironmentResult {
   const b = new Builder(); b.group.name = `environment-${kind}`;
   const result = kind === "crossing" ? crossing(b) : kind === "city" ? city(b) : station(b);
   b.finish();
+  addStreetDressing(b.group, kind);
+  if(kind === "crossing") {
+    // Compact the stage horizontally while retaining believable building heights.
+    // Actor dimensions must remain unscaled when integrated into this environment.
+    const scale = .58;
+    b.group.scale.set(scale, 1, scale);
+    for(const c of result.cameras){c.position[0]*=scale;c.position[2]*=scale;c.target[0]*=scale;c.target[2]*=scale;}
+    result.cameras[0].position[1]=14;
+    result.cameras[3].position[1]=46;
+    for(const r of result.metadata.walkableRects){r.min=r.min.map(v=>v*scale) as [number,number];r.max=r.max.map(v=>v*scale) as [number,number];}
+    for(const g of result.metadata.spawnExitGates){g.position[0]*=scale;g.position[2]*=scale;g.width*=scale;}
+    for(const a of result.metadata.interactionAnchors){a.position[0]*=scale;a.position[2]*=scale;}
+    for(const k of Object.keys(result.metadata.clearWidths))result.metadata.clearWidths[k]*=scale;
+    result.metadata.bounds.min[0]*=scale;result.metadata.bounds.min[2]*=scale;result.metadata.bounds.max[0]*=scale;result.metadata.bounds.max[2]*=scale;
+    result.metadata.description="A compact 25.5-metre fictional Tokyo-inspired scramble, composed for a future 64–100-person crowd, with colorful shopfronts and offscreen arrivals.";
+    result.metadata.limitations.push("Crossing architecture is compressed horizontally to create a compact stage; actor dimensions must not inherit its scale. Planned 100-person occupancy is not yet validated with motion.");
+  }
   b.group.userData.provenance = result.metadata.provenance;
   b.group.userData.instancedObjectCount = b.instancedCount;
   return { group: b.group, ...result,
     lighting: kind === "station"
-      ? { background: "#89969f", fogNear: 130, fogFar: 310, sun: [-70, 38, 65], sunColor: "#ffd0a1", sunIntensity: 2.6, ambientIntensity: 1.15, exposure: 1.05 }
-      : { background: "#cbd8dc", fogNear: 115, fogFar: 310, sun: [-65, 100, 55], sunColor: "#fff2dc", sunIntensity: 3.0, ambientIntensity: 1.2, exposure: 1.0 } };
+      ? { background: "#a797a8", fogNear: 130, fogFar: 310, sun: [-70, 38, 65], sunColor: "#ffd0a1", sunIntensity: 2.6, ambientIntensity: 1.15, exposure: 1.05 }
+      : { background: "#bdcddb", fogNear: 95, fogFar: 290, sun: [-65, 65, 55], sunColor: "#ffdcad", sunIntensity: 3.2, ambientIntensity: .85, exposure: 1.05 } };
 }

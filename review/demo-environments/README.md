@@ -2,6 +2,14 @@
 
 Three new 3D environments for the final crowd demonstration: a Tokyo-inspired scramble crossing, a connected city block with shop interiors, and a station plaza at dusk. These are background studies awaiting visual approval and completed movement integration. No people or model motion are generated in this phase.
 
+## September refinement — compact and colorful
+
+The crossing roadway is now 25.52 m across instead of 44 m. Its horizontal activity area is 33.64% of the previous size (66.36% less ground area), with future actors remaining at full human scale. Painted paths are 4.06 m wide. The planned cast is 64–100, not 1,000; provisional peak allocation is 52 crossing, 28 on sidewalks, 16 at corners, and four at storefronts. Density and navigation still need validation with actors.
+
+All scenes now use a warmer, more saturated palette: teal glass, terracotta/cream façades, bright awnings, flower planters, vending machines, courtyard parasols, and overhead festival color. Dressing is static and placed at scenic edges; it is not a substitute for the upcoming actor simulation.
+
+[Watch the combined revised background film](preview/all-backgrounds-revised.mp4): crossing first, city at approximately 0:36, station at approximately 1:12. The 108-second film shows all 18 saved camera views, including the shop interiors. No characters have been generated for this film.
+
 ## Review the result
 
 | Preset | Opening still | Full 36-second camera tour | Saved settings |
@@ -22,6 +30,8 @@ cd studio_client
 ```
 
 Open http://127.0.0.1:24974/environments.html. The three preset buttons switch full 3D worlds. Drag/scroll to explore; shot buttons restore saved positions. Play camera tour moves through saved compositions. Save still and Record tour capture the actual browser canvas into `review/demo-environments/captures` while the local Vite server is running. The local capture endpoint accepts only its exact loopback origin and uses sanitized server-created file names.
+
+After using Record tour for all three presets, regenerate the MP4s, combined film and provenance with `python3 review/demo-environments/package_tours.py` from the repository root (requires ffmpeg/ffprobe).
 
 A production build is available with `vite build --config environments.vite.config.mts`; capture-to-disk endpoints are development-server features, not part of the static bundle. Billboard assets are bundled locally. No model service, credentials or GPU Pod is required to open these presets.
 
