@@ -260,7 +260,7 @@ class VoiceDirecting:
                         story_prompt = context[:max(0, 2000 - len(route.prompt))] + route.prompt
                         request['source_take_id'] = source.id
                     seconds = (min(120, max(.16, len(source.positions) / 25))
-                               if route.edit_mode == 'scene' else 30)
+                               if route.edit_mode == 'scene' else None)
                     request['job'] = self.workflow.submit(story_prompt, seconds=seconds)
                     request['story_state'] = self._state()
                     if self.on_story_submitted is not None:

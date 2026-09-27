@@ -99,7 +99,7 @@ class VoiceTests(unittest.TestCase):
         self.complete()
         self.assertEqual(self.bridge.requests['request']['status'], 'completed')
         self.assertTrue(self.session.playing)
-        self.assertEqual(len(self.session.positions), 750)
+        self.assertEqual(len(self.session.positions), 208)
         self.bridge.on_story_submitted.assert_called_once()
 
     def test_core_activation_precedes_scene_character_check(self):

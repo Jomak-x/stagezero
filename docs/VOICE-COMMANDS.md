@@ -7,6 +7,8 @@ Typed commands use the same routing and queue.
 
 - `Generate a scene: walk to the door, turn, then wave.` plans a full sequence.
 - `Generate a short: wave hello.` generates one motion action.
+- `Edit scene "Walk and wave" to walk slowly.` revises the full sequence,
+  preserving the original take and its total duration.
 - `Edit "Walk and wave" to walk slowly.` creates an alternate take and preserves
   the original.
 - `Edit action 2 in "Walk and wave" to wave with both hands.` replaces that action.
@@ -20,6 +22,8 @@ The queue runs commands in order and waits while another action is generating.
 Cancel an individual request in the queue. Changing the project invalidates
 queued work; cancelled or superseded generations cannot install a late result.
 Full-scene results also appear in the existing Full scene interface.
+New scenes use the planner's automatic duration; short commands use the current
+single-action duration estimator.
 
 ## Configuration
 
