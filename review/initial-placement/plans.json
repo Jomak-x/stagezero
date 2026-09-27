@@ -1,0 +1,444 @@
+{
+  "scene": {
+    "version": 2,
+    "name": "Clear review stage",
+    "objects": [],
+    "effects": [],
+    "lighting": "neutral"
+  },
+  "cases": [
+    {
+      "title": "One character / explicit mark and facing",
+      "plan": {
+        "version": 1,
+        "title": "Alice waves hello",
+        "prompt": "One person named Alice starts at x -2 z 1 facing +X (90 degrees) and waves hello.",
+        "actor_count": 1,
+        "actors": [
+          {
+            "id": "actor_1",
+            "name": "Alice",
+            "start": {
+              "x": -2.0,
+              "z": 1.0
+            },
+            "start_yaw_degrees": 90.0
+          }
+        ],
+        "meeting": null,
+        "beats": [
+          {
+            "id": "beat-1",
+            "actor_ids": [
+              "actor_1"
+            ],
+            "prompt": "Alice waves hello while facing +X.",
+            "seconds": 4
+          }
+        ],
+        "warnings": [],
+        "raw_plan": {
+          "version": 1,
+          "title": "Alice waves hello",
+          "prompt": "One person named Alice starts at x -2 z 1 facing +X (90 degrees) and waves hello.",
+          "actor_count": 1,
+          "actors": [
+            {
+              "id": "actor_1",
+              "name": "Alice",
+              "start": {
+                "x": -2,
+                "z": 1
+              },
+              "start_yaw_degrees": 90
+            }
+          ],
+          "meeting": null,
+          "beats": [
+            {
+              "id": "beat-1",
+              "actor_ids": [
+                "actor_1"
+              ],
+              "prompt": "Alice waves hello while facing +X.",
+              "seconds": 4
+            }
+          ],
+          "warnings": []
+        },
+        "planning_seconds": 5.242388999962714,
+        "planning_attempts": 1,
+        "planner_model": "gpt-6-astra",
+        "planner_cache_hit": false
+      },
+      "placement": {
+        "starts": {
+          "actor_1": {
+            "x": -2.0,
+            "z": 1.0,
+            "yaw_degrees": 90.0
+          }
+        },
+        "meeting": {
+          "x": -2.25,
+          "z": 0.75,
+          "yaw_degrees": 0.0
+        },
+        "target_id": null,
+        "routes": {
+          "actor_1": [
+            [
+              -2.0,
+              1.0
+            ],
+            [
+              -2.25,
+              0.75
+            ]
+          ]
+        },
+        "planned_only": true,
+        "physical_contact_verified": false
+      }
+    },
+    {
+      "title": "Two characters / independent directions",
+      "plan": {
+        "version": 1,
+        "title": "Waves from separate marks",
+        "prompt": "Alice starts at x -2 z 0 facing +X (90 degrees). Bob starts at x 2 z 0 facing -X (-90 degrees). Alice waves, then Bob waves. They remain at their separate marks.",
+        "actor_count": 2,
+        "actors": [
+          {
+            "id": "actor_1",
+            "name": "Alice",
+            "start": {
+              "x": -2.0,
+              "z": 0.0
+            },
+            "start_yaw_degrees": 90.0
+          },
+          {
+            "id": "actor_2",
+            "name": "Bob",
+            "start": {
+              "x": 2.0,
+              "z": 0.0
+            },
+            "start_yaw_degrees": -90.0
+          }
+        ],
+        "meeting": null,
+        "beats": [
+          {
+            "id": "beat-1",
+            "actor_ids": [
+              "actor_1"
+            ],
+            "prompt": "Alice waves while staying at her starting mark, facing +X.",
+            "seconds": 2
+          },
+          {
+            "id": "beat-2",
+            "actor_ids": [
+              "actor_2"
+            ],
+            "prompt": "After Alice's wave, Bob waves while staying at his starting mark, facing -X.",
+            "seconds": 2
+          }
+        ],
+        "warnings": [
+          "No meeting or initial approach is requested; both actors must remain at their separate starting marks throughout."
+        ],
+        "raw_plan": {
+          "version": 1,
+          "title": "Waves from separate marks",
+          "prompt": "Alice starts at x -2 z 0 facing +X (90 degrees). Bob starts at x 2 z 0 facing -X (-90 degrees). Alice waves, then Bob waves. They remain at their separate marks.",
+          "actor_count": 2,
+          "actors": [
+            {
+              "id": "actor_1",
+              "name": "Alice",
+              "start": {
+                "x": -2,
+                "z": 0
+              },
+              "start_yaw_degrees": 90
+            },
+            {
+              "id": "actor_2",
+              "name": "Bob",
+              "start": {
+                "x": 2,
+                "z": 0
+              },
+              "start_yaw_degrees": -90
+            }
+          ],
+          "meeting": null,
+          "beats": [
+            {
+              "id": "beat-1",
+              "actor_ids": [
+                "actor_1"
+              ],
+              "prompt": "Alice waves while staying at her starting mark, facing +X.",
+              "seconds": 2
+            },
+            {
+              "id": "beat-2",
+              "actor_ids": [
+                "actor_2"
+              ],
+              "prompt": "After Alice's wave, Bob waves while staying at his starting mark, facing -X.",
+              "seconds": 2
+            }
+          ],
+          "warnings": [
+            "No meeting or initial approach is requested; both actors must remain at their separate starting marks throughout."
+          ]
+        },
+        "planning_seconds": 8.079676082998049,
+        "planning_attempts": 1,
+        "planner_model": "gpt-6-astra",
+        "planner_cache_hit": false
+      },
+      "placement": {
+        "starts": {
+          "actor_1": {
+            "x": -2.0,
+            "z": 0.0,
+            "yaw_degrees": 90.0
+          },
+          "actor_2": {
+            "x": 2.0,
+            "z": 0.0,
+            "yaw_degrees": -90.0
+          }
+        },
+        "meeting": {
+          "x": 0.0,
+          "z": 0.0,
+          "yaw_degrees": 0.0
+        },
+        "target_id": null,
+        "routes": {
+          "actor_1": [
+            [
+              -2.0,
+              0.0
+            ],
+            [
+              -0.9,
+              0.0
+            ]
+          ],
+          "actor_2": [
+            [
+              2.0,
+              0.0
+            ],
+            [
+              0.9,
+              0.0
+            ]
+          ]
+        },
+        "planned_only": true,
+        "physical_contact_verified": false
+      }
+    },
+    {
+      "title": "Three characters / automatic staging",
+      "plan": {
+        "version": 1,
+        "title": "Three people wave hello in turn",
+        "prompt": "Three people named Alice, Bob and Carol wave hello in turn. Choose sensible clear starting positions and initial facing directions for all three people.",
+        "actor_count": 3,
+        "actors": [
+          {
+            "id": "actor_1",
+            "name": "Alice",
+            "start": {
+              "x": -2.0,
+              "z": 0.0
+            },
+            "start_yaw_degrees": 0.0
+          },
+          {
+            "id": "actor_2",
+            "name": "Bob",
+            "start": {
+              "x": 0.0,
+              "z": 0.0
+            },
+            "start_yaw_degrees": 0.0
+          },
+          {
+            "id": "actor_3",
+            "name": "Carol",
+            "start": {
+              "x": 2.0,
+              "z": 0.0
+            },
+            "start_yaw_degrees": 0.0
+          }
+        ],
+        "meeting": null,
+        "beats": [
+          {
+            "id": "beat-1",
+            "actor_ids": [
+              "actor_1"
+            ],
+            "prompt": "Alice raises one hand, waves hello, and lowers her hand.",
+            "seconds": 2
+          },
+          {
+            "id": "beat-2",
+            "actor_ids": [
+              "actor_2"
+            ],
+            "prompt": "Bob raises one hand, waves hello, and lowers his hand.",
+            "seconds": 2
+          },
+          {
+            "id": "beat-3",
+            "actor_ids": [
+              "actor_3"
+            ],
+            "prompt": "Carol raises one hand, waves hello, and lowers her hand.",
+            "seconds": 2
+          }
+        ],
+        "warnings": [],
+        "raw_plan": {
+          "version": 1,
+          "title": "Three people wave hello in turn",
+          "prompt": "Three people named Alice, Bob and Carol wave hello in turn. Choose sensible clear starting positions and initial facing directions for all three people.",
+          "actor_count": 3,
+          "actors": [
+            {
+              "id": "actor_1",
+              "name": "Alice",
+              "start": {
+                "x": -2,
+                "z": 0
+              },
+              "start_yaw_degrees": 0
+            },
+            {
+              "id": "actor_2",
+              "name": "Bob",
+              "start": {
+                "x": 0,
+                "z": 0
+              },
+              "start_yaw_degrees": 0
+            },
+            {
+              "id": "actor_3",
+              "name": "Carol",
+              "start": {
+                "x": 2,
+                "z": 0
+              },
+              "start_yaw_degrees": 0
+            }
+          ],
+          "meeting": null,
+          "beats": [
+            {
+              "id": "beat-1",
+              "actor_ids": [
+                "actor_1"
+              ],
+              "prompt": "Alice raises one hand, waves hello, and lowers her hand.",
+              "seconds": 2
+            },
+            {
+              "id": "beat-2",
+              "actor_ids": [
+                "actor_2"
+              ],
+              "prompt": "Bob raises one hand, waves hello, and lowers his hand.",
+              "seconds": 2
+            },
+            {
+              "id": "beat-3",
+              "actor_ids": [
+                "actor_3"
+              ],
+              "prompt": "Carol raises one hand, waves hello, and lowers her hand.",
+              "seconds": 2
+            }
+          ],
+          "warnings": []
+        },
+        "planning_seconds": 8.379615959012881,
+        "planning_attempts": 1,
+        "planner_model": "gpt-6-astra",
+        "planner_cache_hit": false
+      },
+      "placement": {
+        "starts": {
+          "actor_1": {
+            "x": -2.0,
+            "z": 0.0,
+            "yaw_degrees": 0.0
+          },
+          "actor_2": {
+            "x": 0.0,
+            "z": 0.0,
+            "yaw_degrees": 0.0
+          },
+          "actor_3": {
+            "x": 2.0,
+            "z": 0.0,
+            "yaw_degrees": 0.0
+          }
+        },
+        "meeting": {
+          "x": 0.0,
+          "z": 0.0,
+          "yaw_degrees": 0.0
+        },
+        "target_id": null,
+        "routes": {
+          "actor_1": [
+            [
+              -2.0,
+              0.0
+            ],
+            [
+              -0.9,
+              0.0
+            ]
+          ],
+          "actor_2": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.9,
+              0.0
+            ]
+          ],
+          "actor_3": [
+            [
+              2.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.8
+            ]
+          ]
+        },
+        "planned_only": true,
+        "physical_contact_verified": false
+      }
+    }
+  ]
+}

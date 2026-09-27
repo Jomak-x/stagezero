@@ -73,7 +73,8 @@ class InitialObserverStagingTests(unittest.TestCase):
 
     def test_explicit_yaw_prevents_automatic_observer_rotation(self):
         self.placement['starts'][IDLE]['yaw_degrees'] = 55.
-        self.plan['actors'][-1]['start'] = dict(self.placement['starts'][IDLE])
+        self.plan['actors'][-1]['start'] = {'x': 6., 'z': 0.}
+        self.plan['actors'][-1]['start_yaw_degrees'] = 55.
         yaw = math.radians(55.)
         c, s = math.cos(yaw), math.sin(yaw)
         rotation = np.array([[c, 0., s], [0., 1., 0.], [-s, 0., c]])

@@ -138,6 +138,19 @@ def _scene_with_idle_roots(scene, poses, active):
     return copied, proxies
 
 
+def place_initial_pose(pose, start):
+    """Rigidly place a native pose at a ground mark with absolute world yaw.
+
+    Source poses may already face any direction. Initial staging happens before
+    playback; it must not treat the desired heading as an additional rotation.
+    """
+    yaw = (math.radians(start['yaw_degrees']) - _heading(pose)
+           if 'yaw_degrees' in start else 0.)
+    rotated = shared_place_pair(np.repeat(pose[None, None], 2, axis=1), yaw=yaw)[0, 0]
+    translation = np.array([start['x']-rotated[0, 0], 0., start['z']-rotated[0, 2]])
+    return rotated+translation, yaw, translation
+
+
 def select_initial_staging(pair, scene, plan, placement, poses, active, *, cancelled=lambda: False,
                            candidate_reports=None):
     """Bounded source-aware automatic starts; explicit user starts never move.
@@ -147,6 +160,14 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
     """
     reports = candidate_reports if candidate_reports is not None else []
     explicit = {actor['id'] for actor in plan['actors'] if actor.get('start') is not None}
+    facing = {actor['id']: actor['start_yaw_degrees'] for actor in plan['actors']
+              if actor.get('start_yaw_degrees') is not None}
+    initial_starts = deepcopy(placement['starts'])
+    for aid, start in initial_starts.items():
+        if aid not in facing:
+            # auto_place faced a provisional slot. Native entry routes below
+            # can differ, so let them infer heading again for legacy/null yaw.
+            start.pop('yaw_degrees', None)
     meeting = placement['meeting']
     rotated = shared_place_pair(pair.joints, yaw=math.radians(meeting.get('yaw_degrees', 0.)))
     center = rotated[0, :, 0].mean(axis=0)
@@ -163,7 +184,7 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
     candidates = []
     for mode in ('outward', 'backward'):
         for distance in (.8, 1.2, 1.8):
-            base = deepcopy(placement['starts'])
+            base = deepcopy(initial_starts)
             for index, aid in enumerate(active):
                 if aid in explicit:
                     continue
@@ -179,7 +200,12 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
                             idle = midpoint+lateral*2.4*idle_side
                             candidate[aid] = {'x': float(idle[0]), 'z': float(idle[1])}
                 candidates.append((f'{mode}-{distance:g}-idle-{idle_side}', candidate))
-    candidates.append(('original', deepcopy(placement['starts'])))
+    candidates.append(('original', deepcopy(initial_starts)))
+    # Facing is independent of position: a yaw-only request still permits the
+    # source-aware solver to find a clear mark without replacing that heading.
+    for _, starts in candidates:
+        for aid, yaw in facing.items():
+            starts[aid]['yaw_degrees'] = yaw
     seen = set()
     best = None
     for label, starts in candidates:
@@ -201,19 +227,26 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
             pose = candidate_poses[aid]
             origin = pose[0].copy()
             direction = np.array([meeting['x']-origin[0], meeting['z']-origin[2]])
-            if 'yaw_degrees' not in starts[aid] and np.linalg.norm(direction) > .1:
-                yaw = math.atan2(direction[0], direction[1])-_heading(pose)
+            target_yaw = (math.radians(starts[aid]['yaw_degrees']) if 'yaw_degrees' in starts[aid]
+                          else math.atan2(direction[0], direction[1]) if np.linalg.norm(direction) > .1 else None)
+            if target_yaw is not None:
+                yaw = target_yaw-_heading(pose)
+                yaw = math.atan2(math.sin(yaw), math.cos(yaw))
+                if abs(yaw) < 1e-12:
+                    continue
                 c, s = math.cos(yaw), math.sin(yaw)
                 rotation = np.array([[c, 0., s], [0., 1., 0.], [-s, 0., c]])
                 candidate_poses[aid] = (pose-origin) @ rotation.T + origin
                 record.setdefault('observer_orientation', {})[aid] = {
                     'yaw_radians': yaw, 'target_xz': [meeting['x'], meeting['z']],
-                    'method': 'initial rigid source-pose staging toward meeting; root preserved'}
+                    'target_yaw_degrees': math.degrees(target_yaw),
+                    'method': 'initial rigid source-pose staging to world heading; root preserved'}
         try:
             planning_scene, proxies = _scene_with_idle_roots(scene, candidate_poses, active)
             route = plan_meetup(pair, planning_scene, actor_ids=active, starts=[starts[aid] for aid in active],
                                 meeting=meeting, entry_policy='continuous', speed_mps=.85,
-                                arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M, idle_route_padding_m=IDLE_ROUTE_PADDING_M)
+                                arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M, idle_route_padding_m=IDLE_ROUTE_PADDING_M,
+                                initial_heading_ramp_seconds=INITIAL_HEADING_RAMP_SECONDS if facing else 0.)
             all_ids = tuple(actor['id'] for actor in plan['actors'])
             world = np.stack([placed[:, active.index(aid)] if aid in active else
                               np.repeat(candidate_poses[aid][None], len(placed), axis=0) for aid in all_ids], axis=1)
@@ -236,6 +269,7 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
         selected = deepcopy(placement)
         selected['starts'] = starts
         selected['initial_source_staging'] = {'candidate': label, 'explicit_starts_preserved': sorted(explicit),
+            'specified_headings_preserved': sorted(facing),
             'candidate_count': len(reports), 'planning_only': True,
             'observer_orientation': record.get('observer_orientation', {}),
             'selection': 'shortest approach duration, then total route distance; source-oriented starts win ties'}
@@ -727,11 +761,8 @@ class PromptSceneBuilder:
                 native = await_pair(source_index)
                 role = incoming_beat['actor_ids'].index(aid)
                 start = placement['starts'][aid]
-                yaw = math.radians(start.get('yaw_degrees', 0.))
                 waiting_pose, waiting_report = select_native_wait_pose(native.joints, role)
-                rotated = shared_place_pair(np.repeat(waiting_pose[None, None], 2, axis=1), yaw=yaw)[0, 0]
-                translation = np.array([start['x']-rotated[0, 0], 0., start['z']-rotated[0, 2]])
-                poses[aid] = rotated+translation
+                poses[aid], yaw, translation = place_initial_pose(waiting_pose, start)
                 manifest.setdefault('idle_initializations', []).append({'actor_ids': [aid], 'source': 'intergen',
                     'source_beat_index': source_index, 'source_actor_index': role,
                     'source_frame': waiting_report['source_frame'], 'waiting_pose_selection': waiting_report,
@@ -798,6 +829,8 @@ class PromptSceneBuilder:
                             entry_policy='continuous', speed_mps=.85, seed=self.seed, cancelled=cancelled,
                             arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M,
                             idle_route_padding_m=IDLE_ROUTE_PADDING_M,
+                            initial_heading_ramp_seconds=(INITIAL_HEADING_RAMP_SECONDS if any(
+                                actor.get('start_yaw_degrees') is not None for actor in plan['actors']) else 0.),
                             source_paths=lambda: [item['path'] for item in manifest['sources'] if item['source'] == 'ardy_core'],
                             on_progress=on_progress)
                         for segment in result['metadata']['segments']:
