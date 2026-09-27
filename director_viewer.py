@@ -93,7 +93,7 @@ def build_parser():
     parser.add_argument('--core-token-path', type=Path,
                         help='Core token file (defaults to --token-path); absent token permits replay only')
     parser.add_argument('--native-project', type=Path, help='Open an exact saved native cast performance at startup')
-    parser.add_argument('--native-pair-config', type=Path, help='Private native paired generation provider configuration; omit for reviewed playback')
+    parser.add_argument('--native-pair-config', type=Path, help='Private native pair configuration; defaults to STAGEZERO_NATIVE_PAIR_CONFIG or .runtime/prompt-native-provider.json')
     return parser
 
 
@@ -182,8 +182,9 @@ def main():
     core_client = (RealtimeClient(args.core_backend_url, token_path.read_text())
                    if token_path.is_file() and token_path.read_text().strip() else None)
     core = CoreStudioSession(core_client)
-    from native_pair_provider import NativePairProvider
-    pair_provider = NativePairProvider.from_config(args.native_pair_config) if args.native_pair_config else None
+    from native_pair_config import resolve_native_pair_provider
+    pair_resolution = resolve_native_pair_provider(args.native_pair_config, repo_root=ROOT)
+    pair_provider = pair_resolution.provider
     paired = NativePairSession(pair_provider)
     cast = CastPerformanceSession()
     from prompt_scene_plan import ScenePromptPlanner
@@ -344,18 +345,36 @@ def main():
             camera._manual(client)
             set_cast_camera_view(client, position, center, fov)
 
-    def generate_prompt_cast(prompt, seed, client):
+    def cast_generation_readiness(source="generate"):
+        if core_client is None:
+            return "Configure the Core motion connection before generating performers."
+        if source == "generate" and pair_provider is None:
+            return pair_resolution.status
+        return None
+
+    def generate_prompt_cast(prompt, seed, client, *, actor_count=None):
         from prompt_scene_builder import PromptSceneBuilder
         with session.lock, native_render_lock:
             require_native_idle()
-            if pair_provider is None or core_client is None:
-                raise ValueError('Configure the existing native and Core providers before generating an AI cast.')
-            builder = PromptSceneBuilder(prompt, cast_planner, pair_provider, core_client,
+            readiness = cast_generation_readiness()
+            if readiness:
+                raise ValueError(readiness)
+            planner = cast_planner if actor_count is None else ScenePromptPlanner(expected_actor_count=actor_count)
+            builder = PromptSceneBuilder(prompt, planner, pair_provider, core_client,
                                          ROOT / '.runtime/prompt-scenes/generations', seed=seed)
             activate_cast(True)
             cast.build_performance(builder, session.scene_document(), request={'prompt': prompt, 'seed': seed})
             direction_marks.hide()
         return cast
+
+    def generate_scene_cast(prompt, seconds, client, *, actor_count):
+        if seconds is not None:
+            raise ValueError("Choose Auto length for a multi-person scene; describe action timing in the prompt.")
+        seed = int(cast_ui.seed.value) if cast_ui is not None else 42
+        generate_prompt_cast(prompt, seed, client, actor_count=actor_count)
+        if cast_ui is not None:
+            cast_ui.prompt.value = prompt
+        return True
 
     def frame_native_cast(client):
         if client is None:
@@ -405,7 +424,11 @@ def main():
         request = validate_request(request)
         with session.lock, native_render_lock:
             require_native_idle()
-            preview_paired_direction(request, client)
+            if request['source'] == 'generate':
+                readiness = cast_generation_readiness()
+                if readiness:
+                    raise ValueError(readiness)
+            request = preview_paired_direction(request, client)['request']
             activate_paired(True)
             paired.select_pair(*request['actor_ids'])
             builder = PairedSceneBuilder(request, pair_provider, core_client, ROOT / '.runtime/paired-scenes')
@@ -462,13 +485,14 @@ def main():
             cast_ui = StudioCastControls(gui, cast, on_generate=generate_prompt_cast,
                 on_frame=frame_prompt_cast, on_export=lambda client: export_native_performance(client, composed=True),
                 on_open=open_native_project, provider_available=pair_provider is not None and core_client is not None,
-                output_root=ROOT / '.runtime/cast-projects')
+                output_root=ROOT / '.runtime/cast-projects', generation_readiness=cast_generation_readiness)
         prompt_cast_folder.visible = False
         with gui.add_folder('Two-person scene', expand_by_default=True) as pair_folder:
             direction_ui = PairedDirectionControls(gui, paired, on_generate=generate_paired_direction,
                 on_preview=preview_paired_direction, on_frame_cast=frame_native_cast,
                 on_active=activate_paired, scene_provider=session.scene_document,
-                on_export=lambda client: pair_ui.start_capture(client), on_edit=direction_marks.hide)
+                on_export=lambda client: pair_ui.start_capture(client), on_edit=direction_marks.hide,
+                generation_readiness=cast_generation_readiness)
         with gui.add_folder('Cast, playback and files', expand_by_default=False) as cast_folder:
             pair_ui = NativePairControls(gui, paired, session, on_active=activate_paired,
                 project_folder=ROOT / '.runtime/native-pair-projects', on_capture=export_native_pair,
@@ -574,7 +598,7 @@ def main():
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
                   characters.build_gui, core_session=core, paired_session=paired, cast_session=cast,
                   core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project,
-                  on_story_activate=activate_story)
+                  on_story_activate=activate_story, on_generate_cast=generate_scene_cast)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core, paired_session=paired, cast_session=cast)
 

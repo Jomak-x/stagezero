@@ -186,6 +186,14 @@ class Core:
 
 class StoryControlsTests(unittest.TestCase):
     def setUp(self):
+        from scene_actor_intent import ActorIntent
+        actor_classifier = patch('scene_actor_intent.classify_actor_intent', return_value=ActorIntent(1))
+        actor_classifier.start()
+        self.addCleanup(actor_classifier.stop)
+        actor_thread = patch('scene_actor_intent.Thread',
+                             side_effect=lambda *, target, **_kwargs: SimpleNamespace(start=target))
+        actor_thread.start()
+        self.addCleanup(actor_thread.stop)
         patcher = patch('story_controls.StoryWorkflow', Workflow)
         patcher.start()
         self.addCleanup(patcher.stop)

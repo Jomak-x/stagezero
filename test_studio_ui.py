@@ -143,6 +143,14 @@ class StudioUITests(unittest.TestCase):
         assistant_factory.start()
         self.addCleanup(assistant_factory.stop)
         self.temp = TemporaryDirectory()
+        from scene_actor_intent import ActorIntent
+        actor_classifier = patch('scene_actor_intent.classify_actor_intent', return_value=ActorIntent(1))
+        actor_classifier.start()
+        self.addCleanup(actor_classifier.stop)
+        actor_thread = patch('scene_actor_intent.Thread',
+                             side_effect=lambda *, target, **_kwargs: SimpleNamespace(start=target))
+        actor_thread.start()
+        self.addCleanup(actor_thread.stop)
         self.backend = ControlledBackend()
         self.session = DirectorSession(
             self.backend,
