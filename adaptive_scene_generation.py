@@ -1,6 +1,7 @@
 """Two-stage scene production: invent reusable geometry, then compose a set."""
 import copy
 import json
+import re
 import numpy as np
 from asset_geometry import _rotation
 from asset_geometry import validate_assets
@@ -59,8 +60,14 @@ def fit_generated_layout(doc):
     return doc
 
 
-def asset_system_prompt():
-    return '''You are a stylized 3D prop designer. Create 6 to 8 reusable original assets tailored to the user's scene. A cohesive set should include several distinct anchor structures and smaller props that establish scale and activity.
+def explicit_traversal_request(prompt):
+    """Only route requests opt into structural traversal guidance."""
+    return bool(re.search(r'\b(walk\w*|climb\w*|ascend\w*|descend\w*|cross\w*|travers\w*)\b', prompt, re.I)
+                and re.search(r'\b(stair\w*|step\w*|bridge\w*|walkway\w*)\b', prompt, re.I))
+
+
+def asset_system_prompt(*, traversal=False):
+    prompt = '''You are a stylized 3D prop designer. Create 6 to 8 reusable original assets tailored to the user's scene. A cohesive set should include several distinct anchor structures and smaller props that establish scale and activity.
 Return JSON only: {"assets":[{"id":"safe-id","name":"Descriptive name","parts":[...]}]}.
 Each part has EXACTLY: shape (box,sphere,cylinder,cone), position [x,y,z], size [width,height,depth], color [R,G,B] integer 0..255.
 Optional rotation [rx,ry,rz] in degrees. Optional repeat {"count":[nx,ny,nz],"step":[dx,dy,dz]} adds a lattice starting at position.
@@ -78,12 +85,15 @@ No scripts, URLs, textures, shaders or external files. No extra keys. Never gene
 Example part grid: {"shape":"box","position":[-0.3,-0.2,0.455],"size":[0.12,0.09,0.015],"color":[95,163,201],"repeat":{"count":[4,5,1],"step":[0.2,0.13,0]}}.
 For a room, create INDIVIDUAL furniture/storage/lights that match the request: a bedroom needs a bed and bedside furniture, a kitchen needs counters and appliances, and a workshop needs benches and tools. Never combine two furniture items into one asset, and never generate the entire room or its walls as one asset. Architecture is supplied by the composer. For an outdoor city or neighborhood, prioritize at least three distinct detailed buildings, a storefront or landmark, and street furniture. A market should include multiple different stalls, canopies, display goods and a focal point such as a fountain. An industrial space should include separate large equipment, workstations and storage.
 '''
+    if traversal:
+        prompt += ('For requested stair traversal, include one stair asset with at least three broad, horizontal box tread parts in a single asset; at world scale use shallow roughly 0.04m risers, at least 0.5m tread runs and 2m width. For requested bridge crossing, include a separate solid box-part bridge/deck asset. These are rendered support solids, not a decorative or invisible ramp.\n')
+    return prompt
 
 
-def layout_system_prompt(assets):
+def layout_system_prompt(assets, *, traversal=False):
     summaries = [{'id': a['id'], 'name': a['name']} for a in assets]
     catalog = [make_object(k, i) for i,k in enumerate(KINDS)]
-    return ('''You are an environment artist composing a coherent 3D scene for a 1.3m humanoid at world origin.
+    prompt = ('''You are an environment artist composing a coherent 3D scene for a 1.3m humanoid at world origin.
 Return JSON only: {"version":3,"name":"Title","assets":[],"objects":[...],"effects":[],"lighting":"neutral","camera":{"position":[8,4,12],"look_at":[0,1,-3]}}.
 The application supplies the asset definitions: keep assets=[] in your response; reference their exact IDs in objects.
 Custom object EXACT fields: {"id":"unique-safe-id","name":"Short readable name","kind":"custom","asset":"provided-asset-id","position":[x,y,z],"size":[width,height,depth],"color":[255,255,255],"interaction":{"action":"none","trigger":"none","radius":0},"yaw":0}.
@@ -97,6 +107,9 @@ Coordinates +/-100m; dimensions .05..60m. Keep near-city buildings 4-12m high an
 Lighting one of neutral,warm,moonlight,neon,sunset. Prefer warm for interiors, neutral or sunset for cities. effects=[] is fine: good architecture matters more than particles.
 The whole scene must stay below 250000 triangles (box=12, sphere=168, cylinder=48, cone=24 per repeated shape), 12000 shape instances and 64 objects. No arbitrary asset IDs, code, URLs, extra fields or objects unsupported by the prepared assets/catalog. Use meaningful composition, scale variation, matched colors.
 PREPARED ASSETS: ''' + json.dumps(summaries) + '\nCATALOG: ' + json.dumps(catalog))
+    if traversal:
+        prompt += ('\nFor requested traversal, place real rendered support continuously from the actor entry through any requested stair treads and/or bridge deck to an exit landing at matching heights. Keep at least 0.6m horizontal upper-body clearance from obstacles along the route. If a door is requested, use a built-in door with open/proximity interaction above a supported landing and leave a supported approach and passage. Do not use an invisible ramp or decorative steps as the walkable route. Generated geometry remains a candidate until the route planner and native motion checks validate it.')
+    return prompt
 
 
 class AdaptiveSceneGenerator:
@@ -171,7 +184,7 @@ class AdaptiveSceneGenerator:
     def prepare_assets(self, prompt):
         prompt = validate_prompt(prompt)
         self.progress(f'Designing original props with {self._model_label(self.gateway)}…')
-        system = asset_system_prompt()
+        system = asset_system_prompt(traversal=explicit_traversal_request(prompt))
         request_system = system
         for attempt in range(2):
             doc = None
@@ -204,12 +217,13 @@ class AdaptiveSceneGenerator:
         if not assets:
             raise ValueError('Prepare or select at least one asset before composing a scene')
         from scene_asset_composition import compose_architectural_scene
-        architectural = compose_architectural_scene(prompt, assets)
+        traversal = explicit_traversal_request(prompt)
+        architectural = None if traversal else compose_architectural_scene(prompt, assets)
         if architectural is not None:
             self.progress('Custom props composed into an architectural set.')
             return architectural
         self.progress(f'Composing the environment with {self._model_label(self.layout_gateway)}…')
-        system = layout_system_prompt(assets)
+        system = layout_system_prompt(assets, traversal=traversal)
         doc = self._request(self.layout_gateway, system, prompt, 10000)
         for attempt in range(2):
             try:

@@ -1,0 +1,220 @@
+{
+  "status": "completed",
+  "seed": 33,
+  "passed": false,
+  "route": {
+    "fps": 20,
+    "generated_frames": 120,
+    "width_m": 2.0,
+    "step_count": 5,
+    "rise_m": 0.04,
+    "tread_run_m": 0.5,
+    "entry_landing_m": 1.0,
+    "exit_landing_m": 0.75,
+    "start_z": 0.85,
+    "end_z": -3.05,
+    "distance_m": 3.9,
+    "cruise_m_s": 1.2,
+    "ease_seconds": 0.35,
+    "pelvis_clearance_m": 0.95
+  },
+  "prefix_frames": 40,
+  "native_pose_policy": "unchanged model output; rigid local-floor coordinate transforms only",
+  "prompts": {
+    "stand": "A person stands still in a relaxed neutral pose.",
+    "walk": "A person walks up a short flight of shallow stairs, lifting each foot onto the next step, with a relaxed upright posture."
+  },
+  "embedding_sources": {
+    "stand": {
+      "path": "/workspace/stagezero-spatial-v2/review/terrain-native-v2-localfloor/stand_embedding.pt",
+      "sha256": "98a878e5d0071b272cb81ded20b4364941b6c2bb3a8f113789a331f91f3efa03"
+    },
+    "walk": {
+      "path": "/workspace/stagezero-spatial-v2/review/terrain-native-v2-localfloor/walk_embedding.pt",
+      "sha256": "b43b2493615549485644eccd39c38c95a6d457528265c89e27bac4022d025ecc"
+    }
+  },
+  "checkpoints": "/workspace/stagezero-spatial-v2/checkpoints",
+  "warning": "Joint and four-point sole proxies are not skinned mesh or dynamics proof.",
+  "joint_names": [
+    "Hips",
+    "Spine",
+    "Spine1",
+    "Spine2",
+    "Spine3",
+    "Neck",
+    "Head",
+    "RightShoulder",
+    "RightArm",
+    "RightForeArm",
+    "RightHand",
+    "RightHandEnd",
+    "RightHandThumb1",
+    "LeftShoulder",
+    "LeftArm",
+    "LeftForeArm",
+    "LeftHand",
+    "LeftHandEnd",
+    "LeftHandThumb1",
+    "RightUpLeg",
+    "RightLeg",
+    "RightFoot",
+    "RightToeBase",
+    "LeftUpLeg",
+    "LeftLeg",
+    "LeftFoot",
+    "LeftToeBase"
+  ],
+  "parents": [
+    null,
+    "Hips",
+    "Spine",
+    "Spine1",
+    "Spine2",
+    "Spine3",
+    "Neck",
+    "Spine3",
+    "RightShoulder",
+    "RightArm",
+    "RightForeArm",
+    "RightHand",
+    "RightHand",
+    "Spine3",
+    "LeftShoulder",
+    "LeftArm",
+    "LeftForeArm",
+    "LeftHand",
+    "LeftHand",
+    "Hips",
+    "RightUpLeg",
+    "RightLeg",
+    "RightFoot",
+    "Hips",
+    "LeftUpLeg",
+    "LeftLeg",
+    "LeftFoot"
+  ],
+  "feature_slices": {
+    "root_pos": [
+      0,
+      3
+    ],
+    "global_root_heading": [
+      3,
+      5
+    ],
+    "local_joints_positions": [
+      5,
+      83
+    ],
+    "global_rot_data": [
+      83,
+      245
+    ],
+    "velocities": [
+      245,
+      326
+    ],
+    "foot_contacts": [
+      326,
+      330
+    ]
+  },
+  "model_denoising_steps": 10,
+  "prefix_mask_feature_indices": [
+    0,
+    1,
+    2
+  ],
+  "duration_seconds": 0.7349234370049089,
+  "local_floor_origins_m": [
+    0.0,
+    0.12,
+    0.2
+  ],
+  "walk_mask_feature_indices": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      1,
+      2
+    ]
+  ],
+  "metrics": {
+    "min_raw_toe_clearance_m": -0.03949812889099122,
+    "raw_toe_below_minus_2cm_fraction": 0.029166666666666667,
+    "unsupported_raw_toe_fraction": 0.0,
+    "min_four_point_sole_clearance_m": -0.03972963116048987,
+    "four_point_sole_below_minus_1cm_fraction": 0.053125,
+    "unsupported_sole_point_fraction": 0.0,
+    "body_joint_collision_samples": 0,
+    "stance_frames": 43,
+    "stance_slip_p95_m_s": 0.2735497623682022,
+    "stance_anchor_max_drift_m": 0.06198388338088989,
+    "upper_body_lean_median_deg": 6.739005088806152,
+    "upper_body_lean_p95_deg": 15.552680635452269,
+    "root_target_mean_error_m": 0.09164351373321651,
+    "root_end_error_m": 0.15612933709877588,
+    "root_end_xyz": [
+      -0.0041155326180160046,
+      1.2913819551467896,
+      -3.116110324859619
+    ]
+  },
+  "gates": {
+    "raw_toes": false,
+    "sole": false,
+    "supported": true,
+    "body": true,
+    "stance": false,
+    "lean": true,
+    "route": true,
+    "stance_anchor": false
+  },
+  "proxy": {
+    "body_joint_names": [
+      "Hips",
+      "Spine",
+      "Spine1",
+      "Spine2",
+      "Neck",
+      "Head",
+      "LeftUpLeg",
+      "RightUpLeg",
+      "LeftLeg",
+      "RightLeg",
+      "LeftArm",
+      "RightArm"
+    ],
+    "native_local_toe_offsets": [
+      [
+        0.0,
+        -0.05847490578889847,
+        0.16065828502178192
+      ],
+      [
+        0.0,
+        -0.05847489833831787,
+        0.16065827012062073
+      ]
+    ]
+  },
+  "archive": "seed33.npz",
+  "prefix_support_metrics": {
+    "min_raw_toe_clearance_m": -0.010301470756530762,
+    "min_four_point_sole_clearance_m": -0.016218864263064743,
+    "unsupported_raw_toe_fraction": 0.0,
+    "unsupported_sole_point_fraction": 0.0
+  },
+  "scene_schema_repaired": true,
+  "geometry_unchanged": true
+}

@@ -68,6 +68,23 @@ def wait_status(manager, request_id, expected, timeout=2):
 
 
 class RealtimeBackendTests(unittest.TestCase):
+    def test_terrain_fields_are_explicit_and_validated(self):
+        ordinary = validate_job(request())["core_request"]
+        self.assertTrue(all("coordinate_frame_y" not in a for a in ordinary["actors"]))
+        body = request(coordinate_frames_y={"a": 2.5}, root_targets={
+            "a": [{"frame": 39, "position_xz": [0, 1], "root_height": 3.45}]})
+        actors = validate_request(validate_job(body)["core_request"])["actors"]
+        self.assertEqual(actors[0]["coordinate_frame_y"], 2.5)
+        self.assertEqual(actors[0]["root_targets"][0]["root_height"], 3.45)
+        self.assertNotIn("coordinate_frame_y", actors[1])
+        for origins in ({"unknown": 1}, {"a": float("nan")}, {"a": 26}):
+            with self.subTest(origins=origins), self.assertRaises(ValueError):
+                validate_job(request(coordinate_frames_y=origins))
+        for height in (float("inf"), -26):
+            with self.subTest(height=height), self.assertRaises(ValueError):
+                validate_job(request(root_targets={"a": [
+                    {"frame": 39, "position_xz": [0, 1], "root_height": height}]}))
+
     def test_contract_limits_and_research_gate(self):
         normalized = validate_job(request(root_targets={"a": [{"frame": 39, "position_xz": [1, 2]}]}))
         self.assertEqual(normalized["core_request"]["actors"][0]["root_targets"][0]["frame"], 39)

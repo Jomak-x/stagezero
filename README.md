@@ -1,5 +1,7 @@
 Scene-aware Core direction is now available inside the existing studio Motion panel: [setup, two actors, navigation, and limits](docs/SCENE-DIRECTION.md).
 
+For authored stairs, bridges, and automatic gates, use the explicit [terrain-aware option in the normal app](docs/TERRAIN-AWARE.md). Ordinary ARDY motion remains separate.
+
 # StageZero — Single-actor directing
 
 Use **Full scene** to generate a complete performance from one prompt in a dedicated popup, then refine its individual movements. See [full-scene generation](docs/FULL-SCENES.md).

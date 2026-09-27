@@ -126,6 +126,46 @@ class NavigationTests(unittest.TestCase):
                             for stage in stages
                             for goal in stage.metadata["root_targets"]["witness"]))
 
+    def test_spatial_gait_preserves_detour_corners_and_short_endpoint_settle(self):
+        crate = make_object("crate", 0)
+        crate.update(position=[0., .4, 1.], size=[.5, .8, .5])
+        starts = {"walker": {"position_xz": [0., 0.], "yaw": 0.},
+                  "witness": {"position_xz": [4., 4.], "yaw": math.pi}}
+        kw = dict(actor_id="walker", verb="move", target_xz=[0., 2.],
+                  initial_placements=starts, speed_mps=1.2)
+        stages, route = plan_navigation(scene(crate), ("walker", "witness"),
+                                        gait_profile="spatial", **kw)
+        default, _ = plan_navigation(scene(crate), ("walker", "witness"), **kw)
+        self.assertGreater(len(route["waypoints"]), 2)
+        self.assertEqual(len(stages) + 1, len(default))
+        self.assertEqual([s.metadata["root_targets"]["witness"] for s in stages],
+                         [s.metadata["root_targets"]["witness"] for s in default[:-1]])
+        goals = [goal for stage in stages for goal in stage.metadata["root_targets"]["walker"]]
+        points = [np.asarray([0., 0.])] + [np.asarray(goal["position_xz"]) for goal in goals]
+        for waypoint in route["waypoints"][1:-1]:
+            self.assertTrue(any(np.allclose(point, waypoint["position_xz"], atol=1e-5)
+                                for point in points))
+        self.assertLess(max(np.linalg.norm(after-before)
+                            for before, after in zip(points, points[1:])), 1.25)
+        self.assertEqual(goals[-1]["position_xz"], [0., 2.])
+        self.assertEqual(stages[-1].metadata["root_targets"]["walker"][-2]["position_xz"], [0., 2.])
+        self.assertTrue(all("heading" not in goal
+                            for stage in stages if stage.metadata["navigation"]["phase"] == "walk"
+                            for goal in stage.metadata["root_targets"]["walker"]))
+        director = RealtimeDirector(("walker", "witness"),
+                                    target_buffer_frames=600, max_buffer_frames=600)
+        director.queue_sequence(stages)
+        for _ in stages:
+            request = director.claim_request()
+            validate_job(request_body(request))
+            positions = np.zeros((2, 40, 27, 3), np.float32)
+            rotations = np.broadcast_to(np.eye(3, dtype=np.float32),
+                                        (2, 40, 27, 3, 3)).copy()
+            director.complete(request.request_id,
+                              CanonicalClip(positions, rotations, 20,
+                                            ("walker", "witness"), "ardy_core",
+                                            native_features=np.zeros((2, 40, 330), np.float32)))
+
     def test_rejects_blocked_and_unknown_targets(self):
         crate = make_object("crate", 1)
         crate["position"] = [0., .4, 2.4]

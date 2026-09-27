@@ -69,7 +69,7 @@ def validate_request(body: dict, *, feature_count: int = FEATURES) -> dict:
     ids = set()
     for item in supplied:
         if not isinstance(item, dict) or not {"id", "prompt", "seed"} <= set(item) or set(item) - {
-            "id", "prompt", "seed", "history", "root_targets", "initial_position_xz", "initial_yaw"
+            "id", "prompt", "seed", "history", "root_targets", "initial_position_xz", "initial_yaw", "coordinate_frame_y"
         }:
             raise ValueError("Each actor requires id, prompt, seed, and optional history/placement/root_targets")
         actor_id = item["id"]
@@ -97,9 +97,9 @@ def validate_request(body: dict, *, feature_count: int = FEATURES) -> dict:
         normalized_targets = []
         target_frames = set()
         for target in targets:
-            if not isinstance(target, dict) or set(target) not in (
-                    {"frame", "position_xz"}, {"frame", "position_xz", "heading"}):
-                raise ValueError("A root target requires frame and position_xz, with optional heading")
+            if (not isinstance(target, dict) or not {"frame", "position_xz"} <= set(target)
+                    or set(target) - {"frame", "position_xz", "heading", "root_height"}):
+                raise ValueError("A root target requires frame and position_xz, with optional heading and root_height")
             frame = _integer(target["frame"], "target frame", low=0, high=frames - 1)
             if frame in target_frames:
                 raise ValueError("Each actor may specify one root target per frame")
@@ -107,7 +107,11 @@ def validate_request(body: dict, *, feature_count: int = FEATURES) -> dict:
             normalized = {"frame": frame, "position_xz": _position(target["position_xz"], "target position_xz")}
             if "heading" in target:
                 normalized["heading"] = _finite(target["heading"], "heading (radians)", bound=math.pi)
+            if "root_height" in target:
+                normalized["root_height"] = _finite(target["root_height"], "root_height", bound=25)
             normalized_targets.append(normalized)
+        if "coordinate_frame_y" in item:
+            frame_y = _finite(item["coordinate_frame_y"], "coordinate_frame_y", bound=25)
         initial_position = None if "initial_position_xz" not in item else _position(
             item["initial_position_xz"], "initial_position_xz")
         initial_yaw = None if "initial_yaw" not in item else _finite(
@@ -116,6 +120,8 @@ def validate_request(body: dict, *, feature_count: int = FEATURES) -> dict:
                        "history": history, "initial_position_xz": initial_position,
                        "initial_yaw": initial_yaw,
                        "root_targets": sorted(normalized_targets, key=lambda x: x["frame"])})
+        if "coordinate_frame_y" in item:
+            actors[-1]["coordinate_frame_y"] = frame_y
     return {"request_id": request_id, "frames": frames, "actors": actors}
 
 
@@ -149,6 +155,13 @@ def build_conditions(model, actors: list[dict], *, generated_offset: int,
                 root_2d=torch.tensor([target["position_xz"]], dtype=torch.float32, device=device),
                 global_root_heading=None if heading is None else torch.tensor([heading], dtype=torch.float32, device=device),
             ))
+            if "root_height" in target:
+                # Explicit terrain navigation only: use the native scalar root
+                # height feature, without pinning torso/leg rotations or feet.
+                from core_terrain_constraints import RootHeightConstraint
+                constraints.append(RootHeightConstraint(
+                    torch.tensor([target["window_frame"]], device=device),
+                    [target["root_height"] - actor.get("coordinate_frame_y", 0.)]))
         if condition_hook is not None:
             extras = condition_hook(model=model, actor=actor, generated_offset=generated_offset,
                                     history_length=history_length, device=device,
@@ -207,6 +220,9 @@ class InteractionRuntime:
 
         raw = torch.from_numpy(actor["history"]).unsqueeze(0).to(self.device)
         rep = self.model.motion_rep
+        if actor.get("coordinate_frame_y", 0.):
+            from core_terrain_constraints import translate_native_y
+            raw = translate_native_y(rep, raw, -actor["coordinate_frame_y"])
         if actor["initial_position_xz"] is None and actor["initial_yaw"] is None:
             return raw[0]
         world = rep.unnormalize(raw)
@@ -229,6 +245,8 @@ class InteractionRuntime:
 
         request = validate_request(body, feature_count=self.model.motion_rep.motion_rep_dim)
         actors = request["actors"]
+        if self.condition_hook is not None and any(a.get("coordinate_frame_y", 0.) for a in actors):
+            raise ValueError("Trusted full-body/hand hooks require an explicit terrain-frame adapter")
         output = [None] * len(actors)
         actor_metrics = [None] * len(actors)
         conditioned_frames: list[list[int]] = [[] for _ in actors]
@@ -294,7 +312,14 @@ class InteractionRuntime:
                     )
                     if result.shape != (len(selected), history_length + HORIZON, FEATURES):
                         raise ValueError("ARDY returned an invalid generation window")
-                    chunks.append(result[:, history_length:history_length + HORIZON])
+                    piece = result[:, history_length:history_length + HORIZON]
+                    if any(a.get("coordinate_frame_y", 0.) for a in selected):
+                        from core_terrain_constraints import translate_native_y
+                        piece = translate_native_y(self.model.motion_rep, piece,
+                            [a.get("coordinate_frame_y", 0.) for a in selected])
+                    chunks.append(piece)
+                    # History remains in the same rigid local frame for this
+                    # request. Only published native features use world Y.
                     current = result[:, -TOKEN_FRAMES:]
                     if self.device == "cuda":
                         torch.cuda.synchronize()

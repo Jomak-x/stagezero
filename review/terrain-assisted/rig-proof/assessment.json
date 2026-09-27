@@ -1,0 +1,178 @@
+{
+  "representation": "GroundedCharacter17 explicit assisted presentation",
+  "accepted": false,
+  "visual_review": "pending",
+  "rig_mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+  "rig_bone_count": 17,
+  "native_arrays_unchanged": true,
+  "retarget_count_per_native_frame": 1,
+  "renderer_contract": "render these rig17 positions/rotations directly; no retarget or second IK",
+  "native_cadence_preserved": false,
+  "native_root_xz_preserved": true,
+  "native_retargeted_upperbody_rotations_preserved": true,
+  "frames": 160,
+  "fps": 20.0,
+  "stance_anchors": [
+    {
+      "side": 0,
+      "first": 0,
+      "last_exclusive": 52,
+      "contact_xyz": [
+        -0.21230006109660543,
+        0.004,
+        0.7178107554331372
+      ]
+    },
+    {
+      "side": 0,
+      "first": 58,
+      "last_exclusive": 67,
+      "contact_xyz": [
+        -0.13621651495973433,
+        0.04400000000000001,
+        -0.31576996412135055
+      ]
+    },
+    {
+      "side": 0,
+      "first": 75,
+      "last_exclusive": 83,
+      "contact_xyz": [
+        -0.1366578212935962,
+        0.12400000000000001,
+        -1.3225884658668607
+      ]
+    },
+    {
+      "side": 0,
+      "first": 91,
+      "last_exclusive": 100,
+      "contact_xyz": [
+        -0.11257352502084034,
+        0.20400000000000004,
+        -2.3170752133870294
+      ]
+    },
+    {
+      "side": 0,
+      "first": 110,
+      "last_exclusive": 160,
+      "contact_xyz": [
+        -0.1262897751226241,
+        0.20400000000000004,
+        -3.085409313586868
+      ]
+    },
+    {
+      "side": 1,
+      "first": 0,
+      "last_exclusive": 44,
+      "contact_xyz": [
+        0.1951876781171835,
+        0.004,
+        0.7088838435616022
+      ]
+    },
+    {
+      "side": 1,
+      "first": 51,
+      "last_exclusive": 59,
+      "contact_xyz": [
+        0.1287307208379282,
+        0.004,
+        0.24794185957528037
+      ]
+    },
+    {
+      "side": 1,
+      "first": 66,
+      "last_exclusive": 76,
+      "contact_xyz": [
+        0.1322405229374038,
+        0.084,
+        -0.814696060687934
+      ]
+    },
+    {
+      "side": 1,
+      "first": 82,
+      "last_exclusive": 92,
+      "contact_xyz": [
+        0.1451776837796069,
+        0.16400000000000003,
+        -1.8176697961923094
+      ]
+    },
+    {
+      "side": 1,
+      "first": 99,
+      "last_exclusive": 111,
+      "contact_xyz": [
+        0.13065451449145205,
+        0.20400000000000001,
+        -2.758042978883179
+      ]
+    },
+    {
+      "side": 1,
+      "first": 118,
+      "last_exclusive": 160,
+      "contact_xyz": [
+        0.13282904743669713,
+        0.20400000000000004,
+        -3.106797062310635
+      ]
+    }
+  ],
+  "moving_intervals": [
+    [
+      40,
+      128
+    ]
+  ],
+  "initial_boundary_position_error_m": null,
+  "max_root_y_change_from_native_retarget_m": 0.23762240402046952,
+  "max_local_leg_rotation_change_deg": 104.50459775205839,
+  "max_local_leg_rotation_frame_step_deg": 34.40629249234251,
+  "max_knee_bend_deg": 102.69749734954122,
+  "actual_mesh_sole_vertex_counts": [
+    609,
+    569
+  ],
+  "max_actual_mesh_sole_penetration_m": 0.0,
+  "max_flat_stance_mesh_gap_m": 0.01899712383808566,
+  "max_flat_stance_lowest_vertex_gap_m": 0.004000000037691118,
+  "sole_gap_note": "Sole cloud includes vertices within15mm of bind outsole; lowest-vertex gap measures contact separately.",
+  "max_flat_stance_mesh_vertex_slip_m_s": 1.1036162209474583e-09,
+  "unsupported_actual_mesh_sole_vertices": 0,
+  "max_swept_sole_envelope_penetration_m": 0.0,
+  "unsupported_swept_sole_envelope_samples": 0,
+  "swept_sole_proxy": {
+    "interframe_samples": 7,
+    "footprint_grid": [
+      3,
+      5
+    ],
+    "margin_m": 0.003,
+    "note": "finite rigid bottom-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision"
+  },
+  "limitations": [
+    "buffered whole action, not streaming",
+    "finite sole-envelope sweep; no dynamics or full body collision certificate"
+  ],
+  "motion_derivatives": {
+    "root": {
+      "max_speed_m_s": 1.6987646576836952,
+      "max_acceleration_m_s2": 7.1385597593867445
+    },
+    "feet": {
+      "max_speed_m_s": 4.151027941035888,
+      "max_acceleration_m_s2": 35.86861489291537
+    }
+  },
+  "numerical_rejections": [],
+  "difference_from_previous_generalized": {
+    "max_position_m": 0.03564501712246376,
+    "rotations_exact": false
+  }
+}

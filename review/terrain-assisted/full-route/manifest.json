@@ -1,0 +1,739 @@
+{
+  "status": "native_generation_complete",
+  "provenance": "native Core terrain generation; presentation not attempted",
+  "commands": "walk up the shallow temple stairs, cross the bridge, open temple gate, and enter",
+  "scene": "/workspace/temple-route-01a0e1c2/temple-scene.json",
+  "scene_sha256": "4eeb317cef58f8c1df6cd86f7c260aac3d26e5ceb70148cd928ab695aa88f9bb",
+  "checkpoints": "/workspace/stagezero-spatial-v2/checkpoints",
+  "embedding_sources": {
+    "stand": {
+      "path": "/workspace/stagezero-spatial-v2/review/terrain-native-v2-localfloor/stand_embedding.pt",
+      "sha256": "98a878e5d0071b272cb81ded20b4364941b6c2bb3a8f113789a331f91f3efa03"
+    },
+    "walk": {
+      "path": "/workspace/stagezero-spatial-v2/review/terrain-native-v2-localfloor/walk_embedding.pt",
+      "sha256": "b43b2493615549485644eccd39c38c95a6d457528265c89e27bac4022d025ecc"
+    }
+  },
+  "cached_embedding_mapping": {
+    "walk": "cached walk_embedding.pt for prompts containing walk/walking, cross/crossing, climb/climbing, ascend, descend, enter, move/moving, approach/approaching, or through",
+    "stand": "cached stand_embedding.pt for prompts containing stand/standing, still, turn/turning, hold, pause, or relaxed (unless a walk-class term also occurs)",
+    "fallback": "none; unmatched prompts fail closed"
+  },
+  "seed": 33,
+  "native_only": true,
+  "native_archive": "native_route.npz",
+  "window_directory": "native_windows",
+  "duration_seconds": 2.520680127898231,
+  "frames": 360,
+  "fps": 20,
+  "actor_ids": [
+    "actor_1"
+  ],
+  "action_spans": [
+    [
+      0,
+      80
+    ],
+    [
+      80,
+      200
+    ],
+    [
+      200,
+      280
+    ],
+    [
+      280,
+      360
+    ]
+  ],
+  "routes": [
+    {
+      "version": 1,
+      "terrain_navigation_version": 1,
+      "actor_id": "actor_1",
+      "verb": "ascend",
+      "target_id": "temple-stairs",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            0.0,
+            0.85
+          ],
+          "support_y": 0.0,
+          "role": "start"
+        },
+        {
+          "time_seconds": 0.6667,
+          "position_xz": [
+            0.0,
+            0.05
+          ],
+          "support_y": 0.0,
+          "role": "route"
+        },
+        {
+          "time_seconds": 0.75,
+          "position_xz": [
+            0.0,
+            -0.05
+          ],
+          "support_y": 0.04,
+          "role": "route"
+        },
+        {
+          "time_seconds": 1.0833,
+          "position_xz": [
+            0.0,
+            -0.45
+          ],
+          "support_y": 0.04,
+          "role": "route"
+        },
+        {
+          "time_seconds": 1.1667,
+          "position_xz": [
+            0.0,
+            -0.55
+          ],
+          "support_y": 0.08,
+          "role": "route"
+        },
+        {
+          "time_seconds": 1.5,
+          "position_xz": [
+            0.0,
+            -0.95
+          ],
+          "support_y": 0.08,
+          "role": "route"
+        },
+        {
+          "time_seconds": 1.5833,
+          "position_xz": [
+            0.0,
+            -1.05
+          ],
+          "support_y": 0.12,
+          "role": "route"
+        },
+        {
+          "time_seconds": 1.9167,
+          "position_xz": [
+            0.0,
+            -1.45
+          ],
+          "support_y": 0.12,
+          "role": "route"
+        },
+        {
+          "time_seconds": 2.0,
+          "position_xz": [
+            0.0,
+            -1.55
+          ],
+          "support_y": 0.16,
+          "role": "route"
+        },
+        {
+          "time_seconds": 2.3333,
+          "position_xz": [
+            0.0,
+            -1.95
+          ],
+          "support_y": 0.16,
+          "role": "route"
+        },
+        {
+          "time_seconds": 2.4167,
+          "position_xz": [
+            0.0,
+            -2.05
+          ],
+          "support_y": 0.2,
+          "role": "route"
+        },
+        {
+          "time_seconds": 2.5833,
+          "position_xz": [
+            0.0,
+            -2.25
+          ],
+          "support_y": 0.2,
+          "role": "arrival"
+        }
+      ],
+      "support_xyz": [
+        [
+          0.0,
+          0.0,
+          0.85
+        ],
+        [
+          0.0,
+          0.0,
+          0.05
+        ],
+        [
+          0.0,
+          0.04,
+          -0.05
+        ],
+        [
+          0.0,
+          0.04,
+          -0.45
+        ],
+        [
+          0.0,
+          0.08,
+          -0.55
+        ],
+        [
+          0.0,
+          0.08,
+          -0.95
+        ],
+        [
+          0.0,
+          0.12,
+          -1.05
+        ],
+        [
+          0.0,
+          0.12,
+          -1.45
+        ],
+        [
+          0.0,
+          0.16,
+          -1.55
+        ],
+        [
+          0.0,
+          0.16,
+          -1.95
+        ],
+        [
+          0.0,
+          0.2,
+          -2.05
+        ],
+        [
+          0.0,
+          0.2,
+          -2.25
+        ]
+      ],
+      "geometry": {
+        "support_object_id": "temple-stairs"
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "raw_native_contact_verified": false,
+        "actor_radius_m": 0.18,
+        "speed_mps": 1.2
+      },
+      "schedule": {
+        "frames": 80,
+        "fps": 20,
+        "seconds": 4.0,
+        "travel_seconds": 2.5833333333333335,
+        "initial_turn_frames": 0,
+        "horizons": 2,
+        "terminal_settle_frames": 8,
+        "door_hold_frames": 0,
+        "gait_profile": "terrain_experimental"
+      }
+    },
+    {
+      "version": 1,
+      "terrain_navigation_version": 1,
+      "actor_id": "actor_1",
+      "verb": "cross",
+      "target_id": "temple-bridge",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.02598,
+            -2.18714
+          ],
+          "support_y": 0.2,
+          "role": "start"
+        },
+        {
+          "time_seconds": 2.3442,
+          "position_xz": [
+            0.0,
+            -5.0
+          ],
+          "support_y": 0.2,
+          "role": "center"
+        },
+        {
+          "time_seconds": 4.6108,
+          "position_xz": [
+            0.0,
+            -7.72
+          ],
+          "support_y": 0.2,
+          "role": "arrival"
+        }
+      ],
+      "support_xyz": [
+        [
+          -0.02598,
+          0.2,
+          -2.18714
+        ],
+        [
+          0.0,
+          0.2,
+          -5.0
+        ],
+        [
+          0.0,
+          0.2,
+          -7.72
+        ]
+      ],
+      "geometry": {
+        "support_object_id": "temple-bridge"
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "raw_native_contact_verified": false,
+        "actor_radius_m": 0.18,
+        "speed_mps": 1.2
+      },
+      "schedule": {
+        "frames": 120,
+        "fps": 20,
+        "seconds": 6.0,
+        "travel_seconds": 4.610820239577855,
+        "initial_turn_frames": 0,
+        "horizons": 3,
+        "terminal_settle_frames": 8,
+        "door_hold_frames": 0,
+        "gait_profile": "terrain_experimental"
+      }
+    },
+    {
+      "version": 1,
+      "terrain_navigation_version": 1,
+      "actor_id": "actor_1",
+      "verb": "open",
+      "target_id": "temple-gate",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.03757,
+            -7.73083
+          ],
+          "support_y": 0.2,
+          "role": "start"
+        },
+        {
+          "time_seconds": 0.8249,
+          "position_xz": [
+            0.0,
+            -8.72
+          ],
+          "support_y": 0.2,
+          "role": "approach"
+        }
+      ],
+      "support_xyz": [
+        [
+          -0.03757,
+          0.2,
+          -7.73083
+        ],
+        [
+          0.0,
+          0.2,
+          -8.72
+        ]
+      ],
+      "geometry": {
+        "passage_depth_m": 0.18,
+        "minimum_lateral_clearance_m": 0.51,
+        "floor_y_m": 0.19999999999999996,
+        "source": "observed_raised_door"
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "raw_native_contact_verified": false,
+        "actor_radius_m": 0.18,
+        "speed_mps": 1.2
+      },
+      "schedule": {
+        "frames": 80,
+        "fps": 20,
+        "seconds": 4.0,
+        "travel_seconds": 0.824899290531309,
+        "initial_turn_frames": 0,
+        "horizons": 2,
+        "terminal_settle_frames": 8,
+        "door_hold_frames": 40,
+        "gait_profile": "terrain_experimental"
+      }
+    },
+    {
+      "version": 1,
+      "terrain_navigation_version": 1,
+      "actor_id": "actor_1",
+      "verb": "go_through",
+      "target_id": "temple-gate",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.00287,
+            -8.72103
+          ],
+          "support_y": 0.2,
+          "role": "start"
+        },
+        {
+          "time_seconds": 0.0025,
+          "position_xz": [
+            0.0,
+            -8.72
+          ],
+          "support_y": 0.2,
+          "role": "entry"
+        },
+        {
+          "time_seconds": 0.4859,
+          "position_xz": [
+            0.0,
+            -9.3
+          ],
+          "support_y": 0.2,
+          "role": "center"
+        },
+        {
+          "time_seconds": 0.9692,
+          "position_xz": [
+            0.0,
+            -9.88
+          ],
+          "support_y": 0.2,
+          "role": "exit"
+        }
+      ],
+      "support_xyz": [
+        [
+          -0.00287,
+          0.2,
+          -8.72103
+        ],
+        [
+          0.0,
+          0.2,
+          -8.72
+        ],
+        [
+          0.0,
+          0.2,
+          -9.3
+        ],
+        [
+          0.0,
+          0.2,
+          -9.88
+        ]
+      ],
+      "geometry": {
+        "passage_depth_m": 0.18,
+        "minimum_lateral_clearance_m": 0.51,
+        "floor_y_m": 0.19999999999999996,
+        "source": "observed_raised_door"
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "raw_native_contact_verified": false,
+        "actor_radius_m": 0.18,
+        "speed_mps": 1.2
+      },
+      "schedule": {
+        "frames": 80,
+        "fps": 20,
+        "seconds": 4.0,
+        "travel_seconds": 0.9692055755481415,
+        "initial_turn_frames": 40,
+        "horizons": 2,
+        "terminal_settle_frames": 8,
+        "door_hold_frames": 0,
+        "gait_profile": "terrain_experimental"
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "terminal_xz": [
+        -0.025980979204177856,
+        -2.187135696411133
+      ],
+      "target_xz": [
+        0.0,
+        -2.25
+      ],
+      "arrival_error_m": 0.06802155501104912,
+      "arrival_tolerance_m": 0.3,
+      "arrival_verified": true,
+      "crossing_verified": null,
+      "terminal_root_y": 1.2281733751296997,
+      "target_root_y": 1.15,
+      "root_height_error_m": 0.0781733751296998,
+      "root_height_verified": true,
+      "completed": true,
+      "native_root_body_checked": true,
+      "native_raw_feet_checked": false,
+      "max_root_support_height_gap_m": 0.11886367276310925
+    },
+    {
+      "terminal_xz": [
+        -0.03756817430257797,
+        -7.730834007263184
+      ],
+      "target_xz": [
+        0.0,
+        -7.72
+      ],
+      "arrival_error_m": 0.03909914876065207,
+      "arrival_tolerance_m": 0.3,
+      "arrival_verified": true,
+      "crossing_verified": null,
+      "terminal_root_y": 1.2505277395248413,
+      "target_root_y": 1.15,
+      "root_height_error_m": 0.1005277395248414,
+      "root_height_verified": true,
+      "completed": true,
+      "native_root_body_checked": true,
+      "native_raw_feet_checked": false,
+      "max_root_support_height_gap_m": 0.11459896564483646
+    },
+    {
+      "terminal_xz": [
+        -0.0028682444244623184,
+        -8.721027374267578
+      ],
+      "target_xz": [
+        0.0,
+        -8.72
+      ],
+      "arrival_error_m": 0.0030466906577694347,
+      "arrival_tolerance_m": 0.3,
+      "arrival_verified": true,
+      "crossing_verified": null,
+      "terminal_root_y": 1.187224268913269,
+      "target_root_y": 1.15,
+      "root_height_error_m": 0.03722426891326913,
+      "root_height_verified": true,
+      "completed": true,
+      "native_root_body_checked": true,
+      "native_raw_feet_checked": false,
+      "max_root_support_height_gap_m": 0.09582338333129886,
+      "automatic_door_open_verified": true
+    },
+    {
+      "terminal_xz": [
+        -0.022831054404377937,
+        -9.90478801727295
+      ],
+      "target_xz": [
+        0.0,
+        -9.88
+      ],
+      "arrival_error_m": 0.03370019058610285,
+      "arrival_tolerance_m": 0.3,
+      "arrival_verified": true,
+      "crossing_verified": true,
+      "terminal_root_y": 1.119950771331787,
+      "target_root_y": 1.15,
+      "root_height_error_m": 0.030049228668212802,
+      "root_height_verified": true,
+      "completed": true,
+      "native_root_body_checked": true,
+      "native_raw_feet_checked": false,
+      "max_root_support_height_gap_m": 0.08644022941589352
+    }
+  ],
+  "reaction_states": [
+    {
+      "id": "temple-forecourt",
+      "position": [
+        0.0,
+        -0.1,
+        2.5
+      ],
+      "color": [
+        143,
+        137,
+        115
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-entry",
+      "position": [
+        0.0,
+        -0.05,
+        0.25
+      ],
+      "color": [
+        151,
+        145,
+        120
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-stairs",
+      "position": [
+        0.0,
+        0.05,
+        -1.25
+      ],
+      "color": [
+        156,
+        143,
+        116
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-bridge",
+      "position": [
+        0.0,
+        0.1,
+        -5.0
+      ],
+      "color": [
+        116,
+        84,
+        54
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-far-landing",
+      "position": [
+        0.0,
+        0.1,
+        -9.5
+      ],
+      "color": [
+        143,
+        137,
+        115
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-gate",
+      "position": [
+        0.0,
+        3.5,
+        -9.3
+      ],
+      "color": [
+        124,
+        85,
+        56
+      ],
+      "active": true,
+      "opening_fraction": 1.0,
+      "trigger_frame": 204
+    },
+    {
+      "id": "temple-chasm",
+      "position": [
+        0.0,
+        -2.25,
+        -5.0
+      ],
+      "color": [
+        55,
+        59,
+        50
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-lintel",
+      "position": [
+        0.0,
+        3.15,
+        -9.3
+      ],
+      "color": [
+        167,
+        156,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-column-left",
+      "position": [
+        -2.25,
+        1.65,
+        -9.3
+      ],
+      "color": [
+        158,
+        149,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "temple-column-right",
+      "position": [
+        2.25,
+        1.65,
+        -9.3
+      ],
+      "color": [
+        158,
+        149,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "observed_prompt_embedding_mapping": {
+    "A person walks forward naturally.": "walk",
+    "A person walks forward naturally, then slows to a relaxed stop.": "walk",
+    "A person stands upright and relaxed.": "stand",
+    "A person turns in place, keeping an upright posture.": "stand"
+  },
+  "committed_prefix_frames": 0,
+  "native_archive_sha256": "a5e732068eccdb619cc79d6fd7a684e1bd77c0c8b13b3299598fdd58a6db757e",
+  "presentation_status": "not_run"
+}

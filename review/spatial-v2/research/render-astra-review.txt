@@ -1,0 +1,215 @@
+## Review conclusion
+
+**The supplied code does not establish a world/local rotation bug that would justify straightening the torso or replacing the gait.** It does establish a terrain-coordinate bug in support detection, and an existing foot-clearance operation that can increase knee bend.
+
+The reported native torso lean—approximately 11° for dense-heading 0.65 m/s versus 3° for xz-only 1.2 m/s—must remain part of the native motion. Do not subtract that lean as a renderer “fix.”
+
+This is a source review and proposed draft, not an applied or verified change. The implementations of `_layout`, `_two_bone`, and the Viser client are not supplied.
+
+## Concrete findings
+
+### 1. The visible retargeting math uses global rotations consistently
+
+In `GroundedCharacter.retarget()`:
+
+```python
+matrices = rotation[self.core_map] @ self.correction
+```
+
+The bind correction maps a fitted rest-space segment into its canonical Core direction. The source global rotation then acts on that direction. That multiplication order is consistent with the stated convention.
+
+The subsequent correction:
+
+```python
+matrices[bone] = (
+    _align_direction(matrices[bone] @ rest_segment, target)
+    @ matrices[bone]
+)
+```
+
+is also correctly **left-multiplied**: it rotates an already-world-space direction onto the observed world-space source segment.
+
+Fixed-length FK:
+
+```python
+fitted[bone] = fitted[parent] + matrices[parent] @ rest_offset
+```
+
+and CPU skinning:
+
+```python
+R @ (vertex - rest_position) + fitted_position
+```
+
+are consistent with those global transforms. The arm/leg IK updates likewise left-multiply a world-space direction adjustment.
+
+**Do not change these to local rotations merely because `_PARENTS` exists.** It is used for fitting, but `_add_actor()` does not pass that hierarchy to Viser. Whether `bone.position` and `bone.wxyz` have the expected semantics must be checked against the unavailable client implementation or a renderer test.
+
+A useful exact invariant is:
+
+```text
+normalize(fitted[2] - fitted[1])
+    == normalize(source[Head] - source[Spine3])
+```
+
+before and after the supplied floor/foot processing. Therefore this torso segment intentionally retains native lean. A chest surface can still look more hunched because the rig compresses the spine into one torso bone, the mesh has its own shape, and vertices blend between bones.
+
+### 2. Root-height correction is conditional on an undocumented neutral-origin assumption
+
+Current code:
+
+```python
+root_height_offset = rest[0, 1] + neutral[:, 1].min()
+```
+
+Let:
+
+- `h` = fitted bind pelvis height;
+- `n` = neutral Core pelvis height;
+- `m` = minimum neutral Core joint height.
+
+Matching the pelvis of the floor-grounded canonical source to the fitted bind pelvis requires:
+
+```text
+offset = h - (n - m) = h - n + m
+```
+
+The existing expression is correct **if `n == 0`**. `_layout()` is not supplied, so a missing `-n` is a conditional finding, not a proven bug.
+
+Also, matching canonical pelvis height does not prove the **retargeted posed mesh sole** lies at zero. Limb proportions, bind-axis corrections, foot orientation, and skin weights affect that.
+
+**Recommendation:** test the origin assumption and neutral sole position before changing this offset. Do not tune the offset to make walking look more upright.
+
+The clip-wide floor translation by itself cannot change knee angles or torso lean. It can, however, change how much subsequent foot IK is requested.
+
+### 3. “Preserve feet” is actually ankle lifting and can increase knee bend
+
+`StudioCoreRenderer._fit_actor()` always requests:
+
+```python
+preserve_feet=True
+```
+
+This is active even when `paired_retarget=False`.
+
+`_preserve_feet()`:
+
+- keeps the pelvis and hip positions fixed;
+- retains fitted ankle x/z;
+- raises penetrating ankle targets;
+- solves fixed-length leg IK;
+- leaves foot orientation unchanged.
+
+For an ankle below its hip, raising that ankle generally reduces hip-to-ankle distance. Fixed-length segments must then bend more at the knee.
+
+Thus this operation can produce **extra bent-leg appearance without lowering the torso**. It cannot directly cause torso lean, and it is not native foot-trajectory preservation or a foot-contact lock.
+
+This is a geometric consequence of the chosen correction, not evidence that the IK rotation multiplication is wrong.
+
+Additional concerns:
+
+- Eligibility is based on native toe height, not confirmed support/contact.
+- An eligible swinging foot can therefore be modified.
+- An unreachable target can accumulate additional requested lift over three iterations without achieving clearance.
+- The renderer discards the payload’s clearance/error diagnostics, making this distortion difficult to attribute.
+
+**First diagnostic:** compare exactly the same clip and fixed floor offsets with clearance enabled and disabled. Record per-leg knee-angle changes, ankle displacement, actual sole clearance, and unreachable-target error. Do not infer the cause from the final mesh alone.
+
+### 4. Confirmed bug: support detection assumes native terrain is at world y=0
+
+Two expressions are not invariant to vertical scene translation:
+
+In `_floor_calibration()`:
+
+```python
+grounded = ... & (toe[:, 1] < .15)
+```
+
+In `_preserve_feet()`:
+
+```python
+u = np.clip((.30 - source[toe_index, 1]) / .15, 0., 1.)
+```
+
+A native character standing on a platform at y=1 can fail both checks despite having the same terrain-relative motion as one standing at y=0.
+
+Passing `floor_y=1` does **not** fix this: it changes the rendered clearance plane, but support eligibility still tests absolute native heights.
+
+`floor_offset` is also unused inside `_preserve_feet()`. However, simply adding it to the native toe is not necessarily correct: a mesh calibration offset and a native terrain height are different quantities.
+
+## Minimal opt-in correction draft
+
+Introduce an explicit **terrain-relative support mode**, disabled by default, and thread it through both the initial calibration and suffix fitting paths.
+
+For a horizontal platform, use two explicit references:
+
+- `source_floor_y`: ground height in the supplied native positions’ coordinate system;
+- existing `floor_y`: clearance plane in the fitted/render coordinate system.
+
+The corrected support calculation is:
+
+```python
+# Opt-in branch only. Legacy branch stays unchanged.
+clearance = toe[:, 1] - source_floor_y
+baseline = np.quantile(clearance, .1)
+grounded = (
+    (clearance <= baseline + .025)
+    & (velocity < .35)
+    & (clearance < .15)
+)
+```
+
+And foot eligibility becomes:
+
+```python
+clearance = source[toe_index, 1] - source_floor_y
+u = np.clip((.30 - clearance) / .15, 0., 1.)
+eligibility = u * u * (3. - 2. * u)
+```
+
+Keep the existing rendered sole target against `floor_y`.
+
+Important distinctions:
+
+- If native coordinates and terrain are both elevated by `H`, use `source_floor_y=H`.
+- If native motion remains ground-relative at zero, do not treat an unrelated render placement height as its native ground.
+- Do not derive either ground reference from the lowest foot every frame.
+
+This is grounded in an actual coordinate bug. It does not authorize torso straightening, altered generation, or synthetic gait.
+
+### Uneven terrain
+
+A scalar plane is insufficient for stairs or slopes. An explicit extension would supply separate source-space and render-space terrain queries.
+
+For rendered clearance, evaluate each selected deformed sole vertex against terrain **at that vertex’s x/z**:
+
+```text
+penetration = max_over_sole_vertices(
+    terrain_height(vertex.x, vertex.z) - vertex.y
+)
+```
+
+Use only positive penetration to request upward clearance. Preserve native swing motion and avoid downward snapping. Re-query after each IK iteration.
+
+Support eligibility should similarly use native toe clearance above the corresponding source terrain, not world y=0.
+
+This provides clearance, **not** slope-aligned feet, contact locking, or guaranteed reachable stepping. Large corrections should be reported as unsupported/reach-limited rather than hidden by pelvis manipulation.
+
+Terrain configuration must also participate in cache validity: `set_clip()` currently recognizes appends using native arrays and actor order only. Keep terrain settings immutable for a renderer instance, or invalidate fitting when they change.
+
+## Proposed tests
+
+| Test | Required result |
+|---|---|
+| **Legacy regression** | With the new option off, fitted outputs and native inputs remain unchanged. No generation call or parameter changes. |
+| **Torso direction** | Fitted torso-to-head direction matches native `Spine3→Head`; compare the reported clips using the same lean definition. |
+| **Global-rotation equivariance** | Apply a common yaw to native positions and global rotations; fitted transforms rotate equivalently with ground processing disabled. |
+| **Viser transport** | Compare rendered vertex positions against `deform_vertices()` for known single-bone and multi-bone poses. Catch local/global interpretation errors before changing transport. |
+| **Neutral origin/height** | Inspect neutral pelvis y, check the offset formula, and measure actual retargeted sole height separately. |
+| **Foot-clearance ablation** | Reuse identical floor offsets with clearance on/off. Hip and torso transforms stay identical; measure ankle lifts and knee-angle deltas. Nonpenetrating frames remain unchanged. |
+| **Vertical translation invariance** | Translate native motion and both terrain references by `H`. In corrected mode, rotations, eligibility, calibration offset, and IK deltas remain equal; fitted positions translate by `H`. |
+| **Elevated platform** | Support samples remain detectable above y=0.3; no flattening to zero. |
+| **Uneven terrain/swing** | Per-foot terrain is respected; swing feet are not pulled down, and unreachable corrections are disclosed. |
+| **Append/seek determinism** | With the same initial calibration window, appending preserves the fitted prefix byte-for-byte. Seeking never recalibrates or refits. |
+
+**Recommended scope:** add terrain-relative support as an opt-in coordinate fix, expose clearance diagnostics, and validate rotation transport. There is no supplied-code basis for an automatic “upright gait” correction.

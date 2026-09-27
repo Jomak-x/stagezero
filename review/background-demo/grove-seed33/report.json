@@ -1,0 +1,691 @@
+{
+  "case": "grove",
+  "seed": 33,
+  "prompt": "walk 1 metre forward then walk 1 metre left",
+  "source": "ARDY-Core-RP-20FPS-Horizon40",
+  "post_pose_edits": false,
+  "temple_scope": "ground courtyard only; stairs and raised bridge unsupported",
+  "state": {
+    "phase": "playing",
+    "status": "Spatial commands: 1/2 verified; planning_failed. Actor or route target overlaps scene geometry Playing generated motion.",
+    "frame": 19,
+    "total_frames": 80,
+    "buffer_frames": 61,
+    "playing": true,
+    "generated": true,
+    "inflight_request_id": null,
+    "queued_stages": 0,
+    "contact_open": false,
+    "failure": null,
+    "revision": 2,
+    "mode": "production",
+    "actor_ids": [
+      "actor_1"
+    ],
+    "active": true,
+    "epoch": 2,
+    "initialized": true,
+    "scene_changed_since_motion": false,
+    "available": true,
+    "schema": "Native Core27 / 20 fps (separate from G1)",
+    "example_available": true,
+    "route": {
+      "version": 1,
+      "actor_id": "actor_1",
+      "verb": "move",
+      "target_id": null,
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            0.0,
+            -0.8
+          ],
+          "role": "start"
+        },
+        {
+          "time_seconds": 1.5385,
+          "position_xz": [
+            0.0,
+            0.2
+          ],
+          "role": "arrival"
+        }
+      ],
+      "geometry": {
+        "target_xz": [
+          0.0,
+          0.19999999999999996
+        ]
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "actor_radius_m": 0.28,
+        "obstacle_margin_m": 0.06,
+        "speed_mps": 0.65
+      },
+      "ground_support": {
+        "authored_floor": false,
+        "continuous_support_verified": false
+      },
+      "schedule": {
+        "frames": 80,
+        "fps": 20,
+        "seconds": 4.0,
+        "travel_seconds": 1.5385,
+        "terminal_hold_frames": 40,
+        "horizons": 2,
+        "dense_root_targets_per_actor_per_horizon": 5,
+        "held_actor_id": null,
+        "sampled_route_clearance_m": null
+      }
+    },
+    "spatial_commands": {
+      "version": 1,
+      "text": "walk 1 metre forward then walk 1 metre left",
+      "actor_id": "actor_1",
+      "actions": [
+        {
+          "verb": "move",
+          "direction": "forward",
+          "distance_m": 1.0
+        },
+        {
+          "verb": "move",
+          "direction": "left",
+          "distance_m": 1.0
+        }
+      ],
+      "status": "planning_failed",
+      "action_index": 1,
+      "completed_actions": 1,
+      "legs": [
+        {
+          "action_index": 0,
+          "start_frame": 0,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "move",
+            "target_id": null,
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.0,
+                  -0.8
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.5385,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "role": "arrival"
+              }
+            ],
+            "geometry": {
+              "target_xz": [
+                0.0,
+                0.19999999999999996
+              ]
+            },
+            "assumptions": {
+              "motion_following_verified": false,
+              "actor_radius_m": 0.28,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65
+            },
+            "ground_support": {
+              "authored_floor": false,
+              "continuous_support_verified": false
+            },
+            "schedule": {
+              "frames": 80,
+              "fps": 20,
+              "seconds": 4.0,
+              "travel_seconds": 1.5385,
+              "terminal_hold_frames": 40,
+              "horizons": 2,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -0.0018610991537570953,
+              0.19924862682819366
+            ],
+            "target_xz": [
+              0.0,
+              0.2
+            ],
+            "arrival_error_m": 0.0020070504984742426,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true
+          },
+          "end_frame": 80
+        }
+      ],
+      "submitted_after_committed_frame": 0,
+      "detail": "Actor or route target overlaps scene geometry"
+    },
+    "scene_reactions_enabled": true,
+    "scene_reactions_start_frame": 0,
+    "fps": 20,
+    "segments": [
+      {
+        "start": 0,
+        "end": 40,
+        "stage_id": "c2b82a7e17fe49bfa3d4d73e28f1c928",
+        "kind": "approach",
+        "prompt": "Turn to face the travel direction and walk forward along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "fdcd3d60b75d4b56955d366006fede4b",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -0.54001
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -0.28001
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -0.02002
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 0,
+            "planned_only": true
+          },
+          "initial_placements": {
+            "actor_1": {
+              "position_xz": [
+                0.0,
+                -0.8
+              ],
+              "yaw": 0.0
+            }
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "fdcd3d60b75d4b56955d366006fede4b",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "approach",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 40,
+        "end": 80,
+        "stage_id": "0066bc02af8040298ddaef8fbcbddc0d",
+        "kind": "approach",
+        "prompt": "Turn to face the travel direction and walk forward along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "2d69d93c866a474692c81655c5a8aefc",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  0.2
+                ],
+                "heading": 0.0
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 1,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "2d69d93c866a474692c81655c5a8aefc",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      }
+    ],
+    "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+  },
+  "wall_seconds": 1.8433647920028307,
+  "calls": [
+    {
+      "index": 1,
+      "seed": 33,
+      "prompt": "Turn to face the travel direction and walk forward along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -0.54001
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -0.28001
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -0.02002
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          }
+        ]
+      },
+      "seconds": 0.8971621250384487
+    },
+    {
+      "index": 2,
+      "seed": 33,
+      "prompt": "Turn to face the travel direction and walk forward along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              0.2
+            ],
+            "heading": 0.0
+          }
+        ]
+      },
+      "seconds": 0.9176770829944871
+    }
+  ],
+  "inference_wait_seconds": 1.8148392080329359,
+  "frames": 80,
+  "duration_seconds": 4.0,
+  "max_root_step_m": 0.04093639552593231,
+  "native_positions_exact": true,
+  "native_rotations_exact": true,
+  "native_features_exact": true,
+  "final_objects": [
+    {
+      "id": "tree-0",
+      "position": [
+        -3.0,
+        1.75,
+        1.0
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-1",
+      "position": [
+        -2.8,
+        1.75,
+        -2.4
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-2",
+      "position": [
+        2.8,
+        1.75,
+        -2.4
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-3",
+      "position": [
+        3.0,
+        1.75,
+        1.0
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-4",
+      "position": [
+        0.0,
+        1.75,
+        -3.8
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-5",
+      "position": [
+        -1.8,
+        0.25,
+        -0.4
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-6",
+      "position": [
+        -1.3,
+        0.4,
+        0.09999999999999998
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-7",
+      "position": [
+        1.9,
+        0.25,
+        0.6
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-8",
+      "position": [
+        2.4,
+        0.4,
+        1.1
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-9",
+      "position": [
+        -1.0,
+        0.25,
+        -2.7
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-10",
+      "position": [
+        -0.5,
+        0.4,
+        -2.2
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-11",
+      "position": [
+        1.5,
+        0.25,
+        -2.9
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-12",
+      "position": [
+        2.0,
+        0.4,
+        -2.4
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "arch-13",
+      "position": [
+        0.0,
+        1.4,
+        -2.8
+      ],
+      "color": [
+        107,
+        113,
+        130
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "exact_save_load": true
+}

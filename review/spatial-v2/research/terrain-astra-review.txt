@@ -1,0 +1,231 @@
+## Recommendation
+
+**Finish the local-Y experiment, then—if native FK still fails—test a bounded, phase-aware contact adapter on Core.** Do not repeat synthetic bilateral endpoint/leg-rotation conditioning. Do not expand the native-conditioning sweep without first establishing that the remaining failure is coordinate sensitivity rather than missing stair-contact behavior.
+
+This is a proposal from the supplied code and reported results; I have not run or verified changes.
+
+Keep the entire path behind an **explicit spatial/terrain-controller opt-in**. Ordinary generation, model weights, statistics, and native cache behavior remain untouched.
+
+## Actual findings
+
+### 1. The root masks are correct, but they do not encode stair support
+
+The supplied encoder confirms:
+
+- Root2D writes and masks **X/Z only**.
+- `root_y_pos` writes and masks **Y only**.
+- Together they constrain root XYZ, not feet, contact phase, limb reach, or swing clearance.
+- The root-height hook selects a **40-frame future interval**, then offsets indices by history length. Verify that this matches the actual runtime generation horizon; the supplied runtime context does not establish that.
+
+Your penetration results already rule out “root follows the stairs” as a useful success criterion.
+
+### 2. Native position constraints are real, but separate from rotation-FK geometry
+
+`_fill_global_position_constraints()` writes joint-position feature channels; it does **not** solve rotations to satisfy those positions.
+
+At each constrained time it requires:
+
+- A root entry in the position constraints.
+- Root X/Z already masked.
+- A root entry whose X/Z agrees with that root target.
+
+The supplied root entry is used for coordinate conversion; it does **not** itself constrain root Y.
+
+The feature convention is:
+
+\[
+\tilde p_j=(p_{jx}-r_x,\ p_{jy},\ p_{jz}-r_z).
+\]
+
+Despite the name `local_joints_positions`, these are **root-XZ-relative, absolute-Y positions**, not heading-local or fully pelvis-relative coordinates.
+
+Thus:
+
+> FK-derived position hints are valid inputs, but their provenance does not guarantee that generated rotations reconstruct the hinted feet.
+
+Measure both **position-feature target error** and **rotation-FK target error**. Good position-channel agreement with bad FK would identify cross-representation inconsistency rather than bad root masking.
+
+Also, `inverse(..., posed_joints_from="positions")` creates a dummy root whose Y remains zero. Use the returned `root_positions` for root-height diagnostics, not that decoded root joint.
+
+### 3. The constant vertical-frame change is consistent with this representation
+
+`shift_vertical_coordinate_frame()` shifts both:
+
+- `root_pos.y`;
+- every non-root position-feature Y.
+
+That matches the encoding above. A **constant** translation leaves rotations and velocities unchanged. Every root-height and global-position constraint must receive the same translation.
+
+This addresses a plausible elevation-distribution problem because native recentering removes **XZ only**. It does not establish that ARDY knows stair stepping.
+
+Do not use a time-varying floor subtraction within a window while leaving velocities unchanged. That would no longer be a rigid coordinate change.
+
+### 4. The old G1 projection is research evidence, not a Core implementation
+
+Useful ingredients:
+
+- Infer support from native motion rather than assuming alternating feet.
+- Preserve the source knee bend plane.
+- Use bounded corrections and reject infeasible cases.
+- Keep corrected poses out of native history unless fully re-encoded.
+
+Important limitations visible in the code:
+
+- G1-specific indices, subtree assumptions, shape checks, and upper-body slices.
+- Whole-clip support inference and anticipatory clearance: **not streaming evidence**.
+- Endpoint height queries, not swept foot/riser collision.
+- Mostly translation-based foot correction with preserved ankle orientation.
+- A root-Y preference equal to `.65` times weighted foot correction, rather than a minimum-change constrained root solution.
+- Temporal smoothing with some rate limits checked afterward, not enforced by the optimizer.
+
+These do not establish the cause of the previous squat, but they are concrete reasons not to port that solver unchanged.
+
+Your present **0.425–0.52 m worst penetration** is also outside the intended scale of a small contact polish. A bounded adapter must reject such an input if correcting it requires large residual pose changes.
+
+## Experiment 1 — Finish the coordinate test, with a decisive diagnostic
+
+Use the current three seeds and nine-tread geometry. Keep speed, heading policy, and conditioning recipe fixed; do not mix the 1.2 m/s XZ-only case with the 0.65 m/s heading case as a heading ablation.
+
+### A. Paired elevation control
+
+For the same motion/terrain relationship, compare:
+
+1. Terrain at the reference elevation.
+2. Terrain translated upward, with the same constant subtracted from the complete model input window and all positional constraints, then restored afterward.
+
+Compare the actual normalized model inputs and masks. Equivalent transformed inputs should be equal within numerical tolerance; with identical randomness, outputs should agree to the runtime’s determinism tolerance.
+
+This separates **coordinate plumbing** from **model sensitivity to absolute elevation**.
+
+For rolling windows, transform the complete history into the new constant origin. Do not splice differently centered feature windows together.
+
+### B. Diagnose the existing position hints
+
+On the generated result, report per hinted joint/time:
+
+\[
+e_{\text{position}}=\|\hat p^{\,\text{position}}-p^*\|,
+\qquad
+e_{\text{FK}}=\|\operatorname{FK}(\hat R,\hat r)-p^*\|.
+\]
+
+Also audit that each position-constraint root XZ matches the separately encoded root XZ.
+
+Interpretation:
+
+- **Both errors large:** conditioning is not being followed sufficiently.
+- **Position error small, FK error large:** the duplicate representations disagree.
+- **Both small at hints, collisions elsewhere:** hint coverage/phase/swing trajectory is inadequate.
+- **Local-Y native FK passes full contact tests:** retain native conditioning; no adapter needed.
+
+A useful encoder-only positive control is to encode constraints from a known native clip and inspect their values/masks against that clip’s representation. That requires no invented stair pose.
+
+**Do not add synthetic leg rotations to make the constraints “coherent.”** A coherent stair target requires a reachable whole leg configuration at the correct native gait phase. Flat/native FK provenance alone does not supply that target.
+
+## Experiment 2 — If native FK still fails, bounded Core contact adaptation
+
+Start offline on the same three seeds. Use Core skeleton topology and calibrated sole/foot geometry, not G1 indices.
+
+Crucially, the native proposal must already provide a plausible **cumulative ascent**. Nine rises total approximately \(0.882\) m. That planned ascent belongs in the terrain-controller root trajectory; it is not an allowable “small IK correction.” If the native proposal remains far below the staircase, reject it or replan its explicit spatial targets.
+
+### Short algorithm
+
+Let \(q_t^0,r_t^0\) be native local rotations and root positions.
+
+**1. Observe gait phase from native motion.**
+
+Infer stance, swing, touchdown, and toe-off using foot velocity and foot height relative to the pelvis, with temporal hysteresis. Native contact channels can be supplementary evidence, not the sole authority.
+
+Retain native timing. Do not force alternation or make both feet flat simultaneously.
+
+**2. Choose persistent support anchors.**
+
+For each inferred stance, select a reachable tread contact patch near the native foot trajectory. Check sole footprint fit and proximity to tread edges.
+
+Maintain the same world-space anchor through that stance. Preserve native heel/toe roll by constraining the active contact region—not all sole points to zero height throughout toe-off.
+
+**3. Solve a small constrained correction problem.**
+
+Variables are:
+
+- Residual root Y, \(\delta h_t\);
+- Core hip/knee/ankle rotations;
+- Toe articulation only if necessary and explicitly bounded.
+
+Freeze root XZ, root orientation, and every non-leg local rotation.
+
+Minimize:
+
+\[
+E=
+\sum_t\left[
+w_h\delta h_t^2+
+\sum_{j\in\text{legs}}w_j
+\left\|\log\!\left((R^0_{tj})^\top R_{tj}\right)\right\|^2
+\right]
++\lambda\sum_t\|\Delta^2 c_t\|^2,
+\]
+
+where \(c_t\) is the **correction**, not the absolute motion. This preserves native gait variation rather than smoothing it away.
+
+Enforce:
+
+- Stance contact within a small support tolerance, with bounded anchor slip.
+- Nonpenetration for calibrated foot geometry.
+- Swing clearance over tread edges and risers, including swept checks between frames.
+- Anatomical joint limits, bounded correction magnitude and rate.
+- Reachability and continuity.
+
+For a two-bone leg with lengths \(a,b\), hip \(H\), and target ankle \(A\):
+
+\[
+|a-b|+\epsilon < d=\|A-H\| < a+b-\epsilon,
+\]
+
+\[
+u=\frac{a^2-b^2+d^2}{2d},\qquad
+K=H+u\hat d+\sqrt{a^2-u^2}\,\hat n.
+\]
+
+Here \(\hat n\) is the native bend-plane direction transported continuously toward the target direction. Reject an ambiguous pole or unreachable target; do not substitute an arbitrary world-axis knee direction.
+
+Preserve native foot orientation unless bounded terrain alignment is required. Compute ankle targets from the intended **sole contact geometry**, not ankle clearance alone.
+
+**4. Reject, never silently relax.**
+
+Declare budgets before evaluating. The old `.12 m` foot-relative-root, `.08 m` residual root, and `.06 m` planar budgets can be provisional rejection limits, **not validated Core naturalness limits**.
+
+If both legs cannot satisfy contact within the budgets, reject the candidate. Do not lower the pelvis into a squat or increase correction limits until it passes.
+
+### Why this differs from the failed synthetic endpoint approach
+
+It preserves ARDY’s phase, swing shape, knee plane, root orientation, and upper articulation. It imposes contact only where the observed gait calls for contact. Root correction is the minimum required by feasible contact/reach, not a heuristic consequence of lifting both feet.
+
+It remains a kinematic visual adapter—not a claim of dynamic balance.
+
+## Handoff and history
+
+For the first adapter experiment, use **two explicitly separate streams**:
+
+- **Native stream:** unchanged ARDY output/features used as model history.
+- **Presentation stream:** terrain-adapted poses used for rendering.
+
+Never attach corrected positions/rotations to stale native velocities, position features, or contacts and feed that mixture back.
+
+For a later rolling adapter, retain contact state across windows: stance identity, tread anchor, phase, previous correction and its rate. Use generated lookahead and commit only a feasible prefix. Once an anchor is committed, subsequent windows cannot move it. Insufficient lookahead is a rejection/latency issue, not evidence of streaming success.
+
+If corrected history is eventually required, rebuild it from corrected local rotations and root positions through `ArdyMotionRep.__call__`, including FK-derived positions, global rotations, heading, and velocities across the seam. Its call to `foot_detect_from_pos_and_vel(...)` needs a separate terrain-contact semantics audit—the detector implementation was not supplied. Do not assume its recomputed contacts are suitable for elevated treads.
+
+## Acceptance gate
+
+Require all of the following, not just root progress:
+
+- FK sole penetration, including worst case.
+- Stance support gap and anchor slip.
+- Swing/riser swept collision checks.
+- Tread-edge footprint validity.
+- Correction magnitude/rate, knee changes, and window seams.
+- Exact preservation of non-leg articulation and root orientation.
+- Visual review of touchdown, toe-off, weight transfer, and absence of sustained crouch.
+
+**Immediate decision:** the local-Y trial is the remaining justified native test. If it still produces the reported scale of penetration, move to the bounded contact experiment—but accept that infeasibility may require spatial replanning, not stronger IK.
