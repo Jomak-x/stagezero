@@ -36,6 +36,8 @@ For Market42/48/49, released heading error changes **115.1→1.27°, 129.4→0.8
 
 [Python log](python-tests.log): **1,360 tests passed** after latest-main integration. [Client log](client-checks.log): **45 tests passed**, TypeScript and production build passed. All active InterGen display beats remain exact against PR26; each raw generated source is archived without editing. Geometry uses sampled spheres and walkable slabs, not full mesh collision, physical balance or shoe contact. Browser review covered all six complete final videos; accepting the attention/transition improvement does not accept the documented contact/foot defects.
 
+[Runnable studio screenshot](studio.png) shows the complete take at its final frame in latest main's voice-enabled UI.
+
 The isolated preview has the existing Core/InterGen providers configured; the replay command below intentionally needs no credentials. It runs on `http://localhost:24971/`, evidence on `http://localhost:24972/interaction-v2/index.html`. The user's live2380 instance remains separate. From this checkout, replay the exact selected archive in main's UI:
 
 ```sh
