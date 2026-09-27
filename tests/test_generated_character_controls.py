@@ -58,7 +58,7 @@ class GeneratedCharacterCatalogTests(unittest.TestCase):
         self.assertIsNone(self.controls.active_id)
         self.assertEqual(self.controls.selection_revision, revision)
         sidecar = json.loads((self.root / asset_id / 'generated.json').read_text())
-        self.assertEqual(sidecar, {'version': 1, 'source': 'gemini-trellis',
+        self.assertEqual(sidecar, {'version': 1, 'source': 'gemini-neon-trellis',
                                    'asset_id': asset_id, 'prompt': 'Original explorer'})
 
         self.assertTrue(self.controls.select_generated(asset_id, 'client-1', revision))

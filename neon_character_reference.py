@@ -101,7 +101,7 @@ class NeonCharacterReference:
     """Bounded, cancellable Neon Responses image-generation adapter."""
 
     def __init__(self, base_url, api_key, *, model="gpt-6-astra", design_model="gpt-6-astra",
-                 transport=None, deadline=240.0, clock=None):
+                 transport=None, deadline=240.0, clock=None, designer=None):
         try:
             url = urlsplit(base_url)
             port = url.port
@@ -123,6 +123,7 @@ class NeonCharacterReference:
         self._api_key = api_key
         self.model = model
         self.design_model = design_model
+        self.designer = designer
         self.transport = transport or requests
         self.deadline = float(deadline)
         self.clock = clock or time.monotonic
@@ -241,6 +242,15 @@ class NeonCharacterReference:
             raise ValueError("Neon character connection failed") from None
 
     def _design(self, description, progress, cancelled, expires):
+        if self.designer is not None:
+            def check_design():
+                self._check(cancelled, expires)
+                return False
+            design = self.designer.generate(description, progress=progress, cancelled=check_design)
+            self._check(cancelled, expires)
+            if not isinstance(design, str) or not 1 <= len(design.strip()) <= 1600:
+                raise ValueError("Invalid character design")
+            return design.strip()
         progress("Designing character with Neon")
         payload = {
             "model": self.design_model,

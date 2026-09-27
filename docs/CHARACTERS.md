@@ -8,16 +8,19 @@ The model has textured geometry and automatic body motion. Hands, fingers, and f
 
 ## Existing private backend
 
-The feature calls the Gemini API directly to create a photographic character reference, then uses the existing private TRELLIS worker to create its textured mesh. Gemini creates the appearance; TRELLIS reconstructs the 3D model. A Gemini key alone does not run the 3D model: the existing GPU worker is also required. No Neon or Meshy credentials are needed for character creation.
+The feature uses **Gemini 3.1 Flash-Lite** to turn your description into a short, detailed appearance brief. That brief drives the existing **Neon image generator**, and the private **TRELLIS GPU worker** reconstructs the textured 3D character. Gemini is used for text only; no Gemini image-generation quota is needed. All three stages must be configured.
 
 - Install the normal `requirements-live.txt` dependencies and build `studio_client`.
-- Put `GEMINI_API_KEY=your-key-here` in `.runtime/characters.env` at the project root (create `.runtime` if needed), or export `GEMINI_API_KEY` before starting the UI. The environment takes precedence. This file is Git-ignored; never put the key in frontend code. Get a key from [Google AI Studio](https://aistudio.google.com/apikey) with image-generation access and available quota. Restart the UI after changing its environment.
+- Put `GEMINI_API_KEY=your-key-here` in `.runtime/characters.env` at the project root (create `.runtime` if needed), or export `GEMINI_API_KEY` before starting the UI. The environment takes precedence. This file is Git-ignored; never put the key in frontend code. Get a key from [Google AI Studio](https://aistudio.google.com/apikey) with text-generation access and available quota. Restart the UI after changing its environment.
+- Keep `NEON_AI_GATEWAY_BASE_URL` and `NEON_AI_GATEWAY_TOKEN` in the environment or private `.runtime/objects.env` file for image generation.
 - Keep the worker bearer token in `.runtime/api-token`; SSH settings are in `.runtime/pod.env` (see `pod.env.example`). Never commit these files.
 - `run-character-backend.command` connects to the already configured Pod and starts its existing isolated character environment. It does not provision GPU resources. That environment must already contain TRELLIS and its CUDA dependencies at `/workspace/stagezero-characters/TRELLIS`, with an isolated `.venv`, model access, and a verified smoke reference at `jobs/smoke/reference.png`.
 - The worker listens privately through an SSH tunnel on `127.0.0.1:8770`. `STAGEZERO_CHARACTER_BACKEND_URL` can select another localhost tunnel. It admits one job at a time and waits for 14 GiB of free GPU memory; its PyTorch allocator is capped at 12 GiB.
 - Start the main UI with `python director_viewer.py`. Characters persist under `.runtime/characters` (or `--characters PATH`).
 
-The default image model is `gemini-3.1-flash-image`. Optionally set `STAGEZERO_GEMINI_CHARACTER_MODEL` in the process environment to another Gemini image model. Legacy Neon character model overrides are not used. The adapter follows the [Gemini image-generation API](https://ai.google.dev/gemini-api/docs/generate-content/image-generation), with bounded PNG validation before GPU submission.
+The default Gemini text model is `gemini-3.1-flash-lite`. Optionally set `STAGEZERO_GEMINI_CHARACTER_DESIGN_MODEL` in the process environment. Neon image generation defaults to `gpt-6-astra`; `STAGEZERO_CHARACTER_IMAGE_MODEL` remains its override. The production path uses Gemini for the brief and does not silently substitute another provider if Gemini fails.
+
+For a challenge submission, the accurate description is: “Gemini expands a user's character idea into an appearance brief, which guides Neon image generation and TRELLIS 3D reconstruction.”
 
 ## Verification
 

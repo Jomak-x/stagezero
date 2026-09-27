@@ -1,6 +1,4 @@
-"""Direct Gemini image generation for the existing private image-to-3D worker."""
-import base64
-import binascii
+"""Gemini writes the appearance brief; Neon renders the character reference image."""
 import json
 import math
 import os
@@ -11,12 +9,10 @@ import time
 
 import requests
 
-from character_reference import validate_reference
-from neon_character_reference import _reference_prompt
+from neon_character_reference import DESIGN_INSTRUCTIONS
 
-DEFAULT_MODEL = "gemini-3.1-flash-image"
-MAX_IMAGE_BYTES = 10 * 1024 * 1024
-MAX_RESPONSE_BYTES = 16 * 1024 * 1024
+DEFAULT_MODEL = "gemini-3.1-flash-lite"
+MAX_RESPONSE_BYTES = 128 * 1024
 
 
 class CharacterGenerationCancelled(ValueError):
@@ -44,12 +40,12 @@ def _configured_key(*, environ, config_path=None, key_name="GEMINI_API_KEY"):
     return key
 
 
-class GeminiCharacterReference:
+class GeminiCharacterDesigner:
     def __init__(self, api_key, *, model=DEFAULT_MODEL, transport=None,
-                 deadline=240.0, clock=None):
+                 deadline=60.0, clock=None):
         self._api_key = _configured_key(environ={"GEMINI_API_KEY": api_key}, key_name="GEMINI_API_KEY")
         if not isinstance(model, str) or not re.fullmatch(r"gemini-[a-zA-Z0-9.-]{1,90}", model):
-            raise ValueError("A Gemini image model is required")
+            raise ValueError("A Gemini text model is required")
         if type(deadline) not in (int, float) or not math.isfinite(deadline) or not 0 < deadline <= 600:
             raise ValueError("Invalid Gemini generation deadline")
         self.model = model
@@ -62,12 +58,13 @@ class GeminiCharacterReference:
     def from_env(cls, *, environ=None, config_path=None, **kwargs):
         environ = os.environ if environ is None else environ
         key = _configured_key(environ=environ, config_path=config_path, key_name="GEMINI_API_KEY")
-        kwargs.setdefault("model", environ.get("STAGEZERO_GEMINI_CHARACTER_MODEL", DEFAULT_MODEL))
+        kwargs.setdefault("model", environ.get("STAGEZERO_GEMINI_CHARACTER_DESIGN_MODEL", DEFAULT_MODEL))
         return cls(key, **kwargs)
 
     def generate(self, description, progress=lambda message: None, cancelled=lambda: False):
-        # Reuse the established A-pose and framing constraints, without a second design call.
-        prompt = _reference_prompt(description, "Preserve the requested appearance and choose coherent details")
+        if not isinstance(description, str) or not 1 <= len(description.strip()) <= 800:
+            raise ValueError("Describe the character in 1–800 characters")
+        prompt = description.strip()
         expires = self.clock() + self.deadline
 
         def check():
@@ -75,7 +72,7 @@ class GeminiCharacterReference:
                 raise CharacterGenerationCancelled("Character reference generation cancelled")
             remaining = expires - self.clock()
             if remaining <= 0:
-                raise TimeoutError("Gemini character reference generation timed out")
+                raise TimeoutError("Gemini character design timed out")
             return remaining
 
         remaining = check()
@@ -83,13 +80,14 @@ class GeminiCharacterReference:
         try:
             with self.transport.post(
                 self.url, headers={"x-goog-api-key": self._api_key},
-                json={"contents": [{"parts": [{"text": prompt}]}],
-                      "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]}},
+                json={"systemInstruction": {"parts": [{"text": DESIGN_INSTRUCTIONS}]},
+                      "contents": [{"parts": [{"text": prompt}]}],
+                      "generationConfig": {"maxOutputTokens": 1024}},
                 timeout=(min(10, remaining), remaining), stream=True, allow_redirects=False,
             ) as response:
                 check()
                 if response.status_code in (401, 403):
-                    raise ValueError("Gemini authentication failed; check GEMINI_API_KEY and image model access")
+                    raise ValueError("Gemini authentication failed; check GEMINI_API_KEY and text model access")
                 if response.status_code == 429:
                     raise ValueError("Gemini quota exceeded; check API billing and quota or try again later")
                 if response.status_code != 200:
@@ -109,25 +107,18 @@ class GeminiCharacterReference:
             raise ValueError("Gemini returned invalid JSON") from None
         candidates = document.get("candidates", []) if isinstance(document, dict) else []
         for candidate in candidates if isinstance(candidates, list) else []:
-            if not isinstance(candidate, dict) or candidate.get("finishReason") not in (None, "STOP"):
+            if not isinstance(candidate, dict) or candidate.get("finishReason") != "STOP":
                 continue
             content = candidate.get("content")
             parts = content.get("parts", []) if isinstance(content, dict) else []
-            for part in parts if isinstance(parts, list) else []:
-                if not isinstance(part, dict) or part.get("thought"):
-                    continue
-                inline = part.get("inlineData")
-                if not isinstance(inline, dict) or inline.get("mimeType") != "image/png":
-                    continue
-                encoded = inline.get("data")
-                if not isinstance(encoded, str) or len(encoded) > (MAX_IMAGE_BYTES + 2) // 3 * 4:
-                    raise ValueError("Gemini returned an invalid character image")
-                try:
-                    png = base64.b64decode(encoded, validate=True)
-                    validate_reference(png)
-                except (ValueError, binascii.Error):
-                    raise ValueError("Gemini returned an invalid character image") from None
+            text = " ".join(part["text"] for part in parts
+                            if isinstance(part, dict) and not part.get("thought")
+                            and isinstance(part.get("text"), str)) if isinstance(parts, list) else ""
+            design = " ".join(text.split())
+            if design:
+                if len(design) > 1600:
+                    raise ValueError("Gemini returned an invalid character design")
                 check()
-                progress("Character reference ready")
-                return png
-        raise ValueError("Gemini returned no character image; try a different description")
+                progress("Character design ready")
+                return design
+        raise ValueError("Gemini returned no character design; try a different description")
