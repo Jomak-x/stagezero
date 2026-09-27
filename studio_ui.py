@@ -524,7 +524,7 @@ class StudioUI:
                  self._generation_request_context == self._generation_context())
         self._set(self.generate, 'label', 'Generating…' if busy else
                   'Improving direction…' if assistant_pending and self.prompt_assistant._request_pending else
-                  'Answer prompt questions' if assistant_pending else
+                  'Review prompt assistant' if assistant_pending else
                   'Take limit reached' if at_limit else
                   'Retry generation' if retry else 'Generate motion')
 
