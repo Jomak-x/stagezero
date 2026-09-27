@@ -1,4 +1,4 @@
-# Continue background/object interaction — PR #30
+# Historical PR #30 handoff — superseded by terrain-aware work
 
 Last updated: 2026-09-27. The latest continuation below supersedes the older native-only checkpoint retained afterward.
 

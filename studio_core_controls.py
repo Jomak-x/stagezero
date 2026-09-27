@@ -42,6 +42,14 @@ EXAMPLES = {
 }
 DURATIONS = {"2 seconds": 2, "6 seconds": 6, "12 seconds": 12}
 ACTOR_COUNTS = {"One actor": 1, "Two actors": 2}
+DEFAULT_SPATIAL_COMMAND = "walk two metres forward then walk one metre left"
+TEMPLE_ROUTE_COMMAND = "walk up temple stairs then cross temple bridge"
+TRAVERSABLE_TEMPLE_HINT = (
+    "This Jungle temple starter set is a cinematic scene; its stairs are not the tested "
+    "terrain route. In Scene → Create a background → Or start from a preset, choose "
+    "Traversable temple and click Build starter set. Then click Start terrain actor here "
+    "and run 'walk up temple stairs then cross temple bridge'."
+)
 TOGETHER_PRESETS = {
     "Feint and dodge": "feint_dodge",
     "Dance and answer": "dance_response",
@@ -145,7 +153,7 @@ class CoreStudioControls:
                 self.target = gui.add_dropdown("Object", ("No scene objects",), initial_value="No scene objects")
                 self.verb = gui.add_dropdown("Action", ("approach", "go_through"), initial_value="approach")
                 self.navigate = gui.add_button("Navigate to object")
-                self.spatial_text = gui.add_text("Spatial commands", initial_value="walk two metres forward then walk one metre left", multiline=True)
+                self.spatial_text = gui.add_text("Spatial commands", initial_value=DEFAULT_SPATIAL_COMMAND, multiline=True)
                 self.spatial_run = gui.add_button("Run spatial commands")
             self.retry = gui.add_button("Retry failed generation", color="gray")
             self.cancel = gui.add_button("Cancel pending motion", color="gray")
@@ -169,6 +177,15 @@ class CoreStudioControls:
 
     def _scene_document(self):
         return self.studio.scene_document()
+
+    @staticmethod
+    def _terrain_scene_hint(scene):
+        """Identify the original cinematic temple without limiting edited scenes."""
+        if (scene.get("name") == "Jungle temple crossing" and
+                {"temple-05", "temple-06"}.issubset(
+                    {obj.get("id") for obj in scene.get("objects", ())})):
+            return TRAVERSABLE_TEMPLE_HINT
+        return ""
 
     def _scene_targets(self, snapshot):
         initialized = bool(snapshot.get("initialized"))
@@ -624,10 +641,16 @@ class CoreStudioControls:
             def action():
                 placements = self._terrain_placements()
                 scene = self._scene_document()
+                hint = self._terrain_scene_hint(scene)
+                if hint:
+                    raise ValueError(hint)
                 was_active = bool(self._snapshot().get("active"))
                 self.on_active(True)
                 try:
                     self.core.start_terrain(scene_document=scene, placements=placements)
+                    if (scene.get("name") == "Shallow temple bridge crossing"
+                            and self.spatial_text.value == DEFAULT_SPATIAL_COMMAND):
+                        self.spatial_text.value = TEMPLE_ROUTE_COMMAND
                 except Exception:
                     self.on_active(was_active)
                     raise
@@ -833,7 +856,8 @@ class CoreStudioControls:
                 terrain_fallback = "Terrain-aware movement is off."
             else:
                 terrain_fallback = "Terrain-aware movement is ready for a spatial command."
-            terrain_status = str(snapshot.get("terrain_status") or terrain_fallback)
+            scene_hint = self._terrain_scene_hint(self._scene_document())
+            terrain_status = scene_hint or str(snapshot.get("terrain_status") or terrain_fallback)
             if terrain_pending:
                 terrain_status = "Terrain route in progress. Cancel keeps the last committed take. " + terrain_status
             self._set(self.terrain_status, "content", self._mdx_text(terrain_status))
