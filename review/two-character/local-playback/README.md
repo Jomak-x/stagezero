@@ -51,4 +51,4 @@ Use Export video in the studio for an exact full-frame WebGL capture. `watch.htm
 
 ## Checks
 
-976 Python tests passed in the full run; the final readiness/reconnect/capture fixes additionally passed all 27 affected tests. 35 client tests, TypeScript checking, production build, and diff checks passed. The existing large client-bundle warning remains.
+1,028 Python tests passed after integrating main 058d9a5. The readiness/reconnect/capture fixes additionally passed all 27 affected tests, and a subprocess regression covers protocol registration before early reconnects. 35 client tests, TypeScript checking, production build, and diff checks passed. The existing large client-bundle warning remains.

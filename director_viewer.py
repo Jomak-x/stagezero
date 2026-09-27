@@ -488,7 +488,8 @@ def main():
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
                   characters.build_gui, core_session=core, paired_session=paired,
-                  core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project)
+                  core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project,
+                  on_story_activate=lambda: (activate_paired(False), activate_core(False)))
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core, paired_session=paired)
 
@@ -678,6 +679,7 @@ def main():
                     last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
+        ui.story_controls.close()
         session.reset()
         core.close()
         paired.close()

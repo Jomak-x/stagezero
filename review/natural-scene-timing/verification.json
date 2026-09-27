@@ -1,0 +1,103 @@
+{
+  "gateway_cases": [
+    {
+      "case": "natural-mixed",
+      "requested_seconds": null,
+      "total_seconds": 8.0,
+      "plan": {
+        "version": 1,
+        "title": "Walk, Turn Left, and Wave Twice",
+        "prompt": "Walk forward for several meters at a relaxed pace, then turn left once, then wave twice.",
+        "beats": [
+          {
+            "id": "beat-1",
+            "prompt": "A person walks forward several meters at a relaxed pace.",
+            "seconds": 5.0
+          },
+          {
+            "id": "beat-2",
+            "prompt": "A person turns left once.",
+            "seconds": 1.0
+          },
+          {
+            "id": "beat-3",
+            "prompt": "A person waves one hand twice.",
+            "seconds": 2.0
+          }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "case": "explicit-beats",
+      "requested_seconds": null,
+      "total_seconds": 10.0,
+      "plan": {
+        "version": 1,
+        "title": "Walk, Turn Left, and Wave",
+        "prompt": "Walk forward for 7 seconds, then turn left for 1 second, then wave for 2 seconds.",
+        "beats": [
+          {
+            "id": "beat-1",
+            "prompt": "A person walks forward.",
+            "seconds": 7.0
+          },
+          {
+            "id": "beat-2",
+            "prompt": "A person turns left.",
+            "seconds": 1.0
+          },
+          {
+            "id": "beat-3",
+            "prompt": "A person waves one hand.",
+            "seconds": 2.0
+          }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "case": "fixed-workout",
+      "requested_seconds": 20,
+      "total_seconds": 20.0,
+      "plan": {
+        "version": 1,
+        "title": "20-Second Jog, Squats, and Wave Workout",
+        "prompt": "Do a 20-second workout: jog in place, then do three squats, then wave once to finish.",
+        "beats": [
+          {
+            "id": "beat-1",
+            "prompt": "A person jogs in place.",
+            "seconds": 12.0
+          },
+          {
+            "id": "beat-2",
+            "prompt": "A person does three squats.",
+            "seconds": 6.4
+          },
+          {
+            "id": "beat-3",
+            "prompt": "A person waves one hand once.",
+            "seconds": 1.6
+          }
+        ],
+        "warnings": []
+      }
+    }
+  ],
+  "live_ui_and_pod": {
+    "total_frames": 200,
+    "fps": 25,
+    "movement_seconds": [
+      5.0,
+      1.0,
+      2.0
+    ],
+    "saved_project_verified": true
+  },
+  "tests": {
+    "run": 140,
+    "skipped": 1
+  },
+  "limitations": "Durations are planning estimates; timing checks do not prove semantic action completion or collision accuracy."
+}

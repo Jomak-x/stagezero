@@ -69,7 +69,7 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, core_controls=None, on_native_open=None, on_g1_open=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, core_controls=None, on_native_open=None, on_g1_open=None, on_story_activate=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.core_session = core_session
@@ -96,6 +96,9 @@ class StudioUI:
         gui = server.gui
         gui.add_html(STYLE)
         self.status = gui.add_html('')
+        from story_controls import StoryControls
+        self.story_controls = StoryControls(gui, session, core_session=core_session, paired_session=paired_session,
+                                            on_story_activate=on_story_activate)
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
         self.quick_actions = gui.add_button_group('Quick actions', ('New take', 'Guide'))
@@ -1008,6 +1011,7 @@ class StudioUI:
 
     def update(self):
         """Synchronize the sidebar after the viewer advances the session clock."""
+        self.story_controls.update()
         s = self.session
         if self._active_motion_session() is None:
             for handle, visible in self._core_visibility:
