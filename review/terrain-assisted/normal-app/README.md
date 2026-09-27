@@ -26,7 +26,7 @@ After loading the final 360-frame temple take, two separate `walk 0.5 metres for
 
 ## Ordinary motion and rejection behavior
 
-A fresh ordinary 240-frame Core take was generated from the normal UI before terrain mode. Its positions, rotations, and all native feature channels remained exactly identical after terrain generation, save/load, a rejected jump, and toggling terrain off. [Baseline archive](ordinary-baseline.core.stagezero.npz) and [exact preservation check](ordinary-preservation.json).
+A fresh ordinary 240-frame Core take was generated from the normal UI before terrain mode. Its positions, rotations, and all native feature channels remained exactly identical after terrain generation, save/load, and toggling terrain off. [Baseline archive](ordinary-baseline.core.stagezero.npz) and [exact preservation check](ordinary-preservation.json).
 
 The real UI rejected `jump onto the temple roof` with **Jumping across terrain is unsupported** and retained all 440 committed native and display frames. [Preservation check](unsupported-command-preservation.json). CPU tests additionally cover missing support, blocked routes, ambiguous targets, cancellation, stale results, project corruption, transformed scenes, and repeated continuation.
 
@@ -60,6 +60,6 @@ Open the printed capture page and click **Capture actual-rig proof**. The output
 
 ## Final validation
 
-[Targeted test log](targeted-tests.log): 174 tests passed across session isolation, terrain motion, geometry, UI controls, archives, runtime/client/backend, scene recipes, and AI generation guidance. Another 15 UI-control tests and viewer compilation passed after the final wording/terrain-floor visibility adjustment. The AI guidance uses fake-gateway tests; live AI background generation was not verified.
+[Targeted test log](targeted-tests.txt): 174 tests passed across session isolation, terrain motion, geometry, UI controls, archives, runtime/client/backend, scene recipes, and AI generation guidance. Another 15 UI-control tests and viewer compilation passed after the final wording/terrain-floor visibility adjustment. The AI guidance uses fake-gateway tests; live AI background generation was not verified.
 
 The final display explicitly assists global facing as well as legs/pelvis, retaining upper-body relative articulation and exact native history. Archive `visual_review=pending` is capture-time metadata; this evidence index records subsequent human-facing visual inspection without rewriting the saved archives. Codex workers handled bounded implementation and verification; Neon GPT-6 Astra reviewed session invariants and the heading approach.
