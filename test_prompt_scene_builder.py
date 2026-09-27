@@ -14,7 +14,8 @@ from experiments.native_pair_rig import NativeRigAsset
 from native_pair_clip import NativePairClip
 from native_pair_transition import CORE_TO_NATIVE, shared_place_pair
 from prompt_scene_builder import PromptSceneBuilder, align_pair, _bridge, check_cast_geometry, pair_source_prompt, _scene_with_idle_roots, select_initial_staging, select_later_meeting, select_native_wait_pose, generate_later_approach
-from paired_meetup import plan_meetup
+from paired_meetup import plan_meetup, _heading
+from prompt_scene_builder import place_initial_pose
 from experiments.trial_prompt_scene import ReplayPairProvider
 from realtime_backend import validate_job
 from test_native_pair_rig import fixture_glb
@@ -85,6 +86,49 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(len(manifest['sources']), 2)
         with np.load(manifest['sources'][0]['path']) as saved:
             self.assertEqual(saved['native_features'].shape, (1, 40, 330))
+
+    def test_solo_forwards_start_and_absolute_heading_in_radians(self):
+        self.staging['starts']['actor_1'] = {'x': -4., 'z': 2., 'yaw_degrees': -90.}
+        self.build()
+        initial = self.client.requests[0]['initial_placements']['actor_1']
+        self.assertEqual(initial['position_xz'], [-4., 2.])
+        self.assertAlmostEqual(initial['yaw'], -np.pi/2)
+
+    def test_native_initial_pose_uses_absolute_heading_not_rotation_delta(self):
+        source = shared_place_pair(np.repeat(self.pose[None, None], 2, axis=1), yaw=.73)[0, 0]
+        original = source.copy()
+        for heading in (0., 90., -90., 180.):
+            with self.subTest(heading=heading):
+                placed, _, _ = place_initial_pose(source, {'x': -2., 'z': 3., 'yaw_degrees': heading})
+                np.testing.assert_allclose(placed[0, [0, 2]], [-2., 3.], atol=1e-12)
+                error = _heading(placed)-np.radians(heading)
+                self.assertAlmostEqual(np.arctan2(np.sin(error), np.cos(error)), 0.)
+                np.testing.assert_allclose(placed[:, 1], source[:, 1], atol=1e-12)
+        np.testing.assert_array_equal(source, original)
+
+    def test_yaw_only_survives_every_source_aware_candidate_and_idle_staging(self):
+        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[3, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        plan = {'actors': [{'id': f'actor_{i+1}', 'start': None, 'start_yaw_degrees': yaw}
+                           for i, yaw in enumerate((90., -90., 180.))]}
+        reports = []
+        routes = []
+        def collect(*args, **kwargs):
+            route = plan_meetup(*args, **kwargs)
+            routes.append(route)
+            return route
+        with patch('prompt_scene_builder.plan_meetup', side_effect=collect):
+            selected, poses, _, _ = select_initial_staging(pair, SCENE, plan, self.staging,
+                {'actor_3': self.pose+[6, 0, 0]}, ['actor_1', 'actor_2'], candidate_reports=reports)
+        self.assertTrue(routes)
+        for route in routes:
+            self.assertEqual(route['initial_heading_ramp_seconds'], 1.)
+            for aid, yaw in (('actor_1', np.pi/2), ('actor_2', -np.pi/2)):
+                self.assertAlmostEqual(route['horizons'][0]['root_targets'][aid][0]['heading'], yaw)
+        for record in reports:
+            for i, yaw in enumerate((90., -90., 180.)):
+                self.assertEqual(record['starts'][f'actor_{i+1}']['yaw_degrees'], yaw)
+        self.assertEqual(selected['initial_source_staging']['specified_headings_preserved'], ['actor_1', 'actor_2', 'actor_3'])
+        self.assertAlmostEqual(abs(_heading(poses['actor_3'])), np.pi)
 
     def test_three_cast_solo_changes_hold_persistent_poses_and_reset_history(self):
         beats = [{'id': f'beat-{i+1}', 'actor_ids': [f'actor_{i+1}'], 'prompt': 'Stand.', 'seconds': 2} for i in range(3)]
@@ -339,6 +383,20 @@ class BuilderTests(unittest.TestCase):
                 select_initial_staging(pair, SCENE, plan, placement, {}, ['actor_1', 'actor_2'], candidate_reports=reports)
         self.assertEqual(len(reports), 1)
         self.assertEqual(reports[0]['starts'], placement['starts'])
+
+    def test_legacy_position_only_pair_reinfers_heading_for_native_route(self):
+        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[3, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        plan = {'actors': [{'id': aid, 'start': dict(self.staging['starts'][aid])}
+                           for aid in ('actor_1', 'actor_2')]}
+        placement = dict(self.staging, starts={aid: dict(self.staging['starts'][aid], yaw_degrees=37.)
+                                              for aid in ('actor_1', 'actor_2')})
+        reports = []
+        selected, _, _, _ = select_initial_staging(pair, SCENE, plan, placement, {},
+            ['actor_1', 'actor_2'], candidate_reports=reports)
+        self.assertEqual(len(reports), 1)
+        for start in selected['starts'].values():
+            self.assertNotIn('yaw_degrees', start)
+        self.assertEqual(placement['starts']['actor_1']['yaw_degrees'], 37.)
 
     def test_automatic_staging_prefers_short_source_roles_over_swapped_generic_marks(self):
         pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[3, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})

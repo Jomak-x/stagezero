@@ -78,10 +78,16 @@ def validate_plan(document, scene=None, expected_prompt=None):
         raise ValueError('Actors must match actor_count')
     actors = []
     for identifier, actor in zip(ids, raw_actors):
-        if not isinstance(actor, dict) or not {'id', 'name'} <= set(actor) or set(actor) - {'id', 'name', 'start'} or actor['id'] != identifier:
+        if not isinstance(actor, dict) or not {'id', 'name'} <= set(actor) or set(actor) - {'id', 'name', 'start', 'start_yaw_degrees'} or actor['id'] != identifier:
             raise ValueError('Actors must use ordered stable IDs actor_1 through actor_N')
-        actors.append({'id': identifier, 'name': _text(actor['name'], 'Actor name', 80),
-                       'start': None if actor.get('start') is None else _anchor(actor['start'], 'Desired start')})
+        clean_actor = {'id': identifier, 'name': _text(actor['name'], 'Actor name', 80),
+                       'start': None if actor.get('start') is None else _anchor(actor['start'], 'Desired start')}
+        if 'start_yaw_degrees' in actor:
+            yaw = actor['start_yaw_degrees']
+            if yaw is not None and (type(yaw) not in (int, float) or not math.isfinite(yaw) or not -180 <= yaw <= 180):
+                raise ValueError('Desired start yaw must be finite and within ±180 degrees')
+            clean_actor['start_yaw_degrees'] = None if yaw is None else float(yaw)
+        actors.append(clean_actor)
     meeting = document['meeting']
     if meeting is not None:
         if isinstance(meeting, dict) and set(meeting) == {'target_id'}:
@@ -172,14 +178,24 @@ class ScenePromptPlanner:
         exact_prompt = prompt
         prompt = validate_prompt(prompt)
         scene = validate_scene(scene)
-        inventory = [{'id': item['id'], 'name': item['name'], 'position': item['position']}
+        inventory = [{'id': item['id'], 'name': item['name'], 'position': item['position'],
+                      **({'size': item['size']} if 'size' in item else {}),
+                      **({'object_id': item['object_id']} if 'object_id' in item else {})}
                      for item in _landmarks(scene).values()]
         system = (
             'Return JSON only with version:1,title,prompt,actor_count,actors,meeting,beats,warnings. '
-            'Preserve prompt exactly. Infer 1–3 actors; actors is an ordered list of {id,name,start}, '
-            'IDs actor_1 through actor_N; start null (automatic) or desired {x,z}. '
+            'Preserve prompt exactly. Infer 1–3 actors; actors is an ordered list of '
+            '{id,name,start,start_yaw_degrees}, IDs actor_1 through actor_N. '
+            'For each actor choose an initial world position and facing independently. '
+            'Start is desired {x,z} when the request specifies or implies a position, '
+            'otherwise null so the geometry solver selects a clear default. '
+            'Start_yaw_degrees is a world yaw in [-180,180]: 0 faces +Z, 90 faces +X, '
+            '-90 faces -X, and 180 faces -Z. Honor explicitly requested directions; '
+            'otherwise infer a sensible facing from each actor\'s first action or path. '
+            'A direction may be supplied even when start is null. '
             'Meeting is null (automatic), {target_id} from the actual scene inventory, or desired {x,z}. '
             'Coordinates are optional intent only, within ±24 m; a local geometry solver must validate them. '
+            'Use actual landmark positions and sizes to infer clear starts, never inside solid objects. '
             'Never invent objects, landmarks, actor roles, or actions absent from the request. '
             'Core automatically generates travel from the initial starts to the first meeting before '
             'the first interaction. Express that initial travel through actors.start and meeting staging; '
@@ -364,7 +380,19 @@ def auto_place(plan, scene, *, cancelled=lambda: False):
                     raise ValueError('No separated start fits this meeting')
         except ValueError:
             continue
-        return {'starts': {a['id']: {'x': starts[a['id']][0], 'z': starts[a['id']][1]} for a in plan['actors']},
+        resolved = {}
+        for actor in plan['actors']:
+            identifier = actor['id']
+            start = starts[identifier]
+            yaw = actor.get('start_yaw_degrees')
+            if yaw is None:
+                direction = next(((point[0]-start[0], point[1]-start[1]) for point in routes[identifier][1:]
+                                  if math.dist(point, start) > 1e-9), None)
+                if direction is None and math.dist(start, meeting) > 1e-9:
+                    direction = (meeting[0]-start[0], meeting[1]-start[1])
+                yaw = math.degrees(math.atan2(*direction)) if direction is not None else 0.
+            resolved[identifier] = {'x': start[0], 'z': start[1], 'yaw_degrees': float(yaw)}
+        return {'starts': resolved,
                 'meeting': {'x': meeting[0], 'z': meeting[1], 'yaw_degrees': 0.},
                 'target_id': target_id, 'routes': routes, 'planned_only': True,
                 'physical_contact_verified': False}

@@ -1,7 +1,7 @@
 """CPU-only semantic gateway and real geometry staging contracts."""
 import math
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from prompt_scene_plan import ScenePromptPlanner, validate_plan, auto_place, THREE_CONTACT_WARNING
 from scene_objects import make_object
@@ -76,6 +76,31 @@ class PlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'actual scene'):
             validate_plan(raw, SCENE)
 
+    def test_start_yaw_is_independent_of_position_and_backward_compatible(self):
+        raw = document(3)
+        raw['actors'][0]['start'] = {'x': -4, 'z': 0}
+        raw['actors'][0]['start_yaw_degrees'] = 90
+        raw['actors'][1]['start_yaw_degrees'] = 0
+        raw['actors'][2]['start_yaw_degrees'] = None
+        clean = validate_plan(raw)
+        self.assertEqual(clean['actors'][0]['start'], {'x': -4., 'z': 0.})
+        self.assertEqual(clean['actors'][0]['start_yaw_degrees'], 90.)
+        self.assertIsNone(clean['actors'][1]['start'])
+        self.assertEqual(clean['actors'][1]['start_yaw_degrees'], 0.)
+        self.assertIsNone(clean['actors'][2]['start_yaw_degrees'])
+        self.assertNotIn('start_yaw_degrees', validate_plan(document(1))['actors'][0])
+
+    def test_start_yaw_rejects_invalid_values_and_nested_fields(self):
+        for yaw in (True, '90', float('nan'), float('inf'), 180.1, -180.1):
+            raw = document(1)
+            raw['actors'][0]['start_yaw_degrees'] = yaw
+            with self.subTest(yaw=yaw), self.assertRaisesRegex(ValueError, 'start yaw'):
+                validate_plan(raw)
+        raw = document(1)
+        raw['actors'][0]['start'] = {'x': 0, 'z': 0, 'yaw_degrees': 90}
+        with self.assertRaisesRegex(ValueError, 'x and z only'):
+            validate_plan(raw)
+
     def test_three_contact_warning_discloses_serial_adaptation(self):
         raw = document(3); raw['prompt'] = 'All three hug together.'
         self.assertIn(THREE_CONTACT_WARNING, validate_plan(raw)['warnings'])
@@ -138,6 +163,21 @@ class GatewayTests(unittest.TestCase):
         raw = document(); gateway = self.gateway(raw)
         result = ScenePromptPlanner(gateway, model='chosen-model').plan(raw['prompt'], SCENE)
         self.assertEqual(result['planner_model'], 'chosen-model')
+
+    def test_gateway_requests_per_actor_world_facing_with_scene_sizes(self):
+        raw = document(2)
+        raw['actors'][0]['start'] = {'x': -3, 'z': 0}
+        raw['actors'][0]['start_yaw_degrees'] = 90
+        raw['actors'][1]['start_yaw_degrees'] = -90
+        crate = make_object('crate', 0)
+        gateway = self.gateway(raw)
+        result = ScenePromptPlanner(gateway).plan(raw['prompt'], dict(SCENE, objects=[crate]))
+        self.assertEqual([actor['start_yaw_degrees'] for actor in result['actors']], [90., -90.])
+        instruction = gateway.request_json.call_args.args[0]
+        self.assertIn('initial world position and facing independently', instruction)
+        self.assertIn('0 faces +Z, 90 faces +X', instruction)
+        self.assertIn('direction may be supplied even when start is null', instruction)
+        self.assertIn('"size":', instruction)
 
 
 class CacheTests(unittest.TestCase):
@@ -272,7 +312,37 @@ class StagingTests(unittest.TestCase):
                 for b in points[i+1:]:
                     self.assertGreaterEqual(math.dist(a, b), 1.5)
             self.assertEqual(set(placed['starts']), set(placed['routes']))
+            self.assertTrue(all(-180 <= start['yaw_degrees'] <= 180 for start in placed['starts'].values()))
             self.assertFalse(placed['physical_contact_verified'])
+
+    def test_explicit_and_yaw_only_directions_survive_staging_for_three_actors(self):
+        raw = document(3)
+        raw['meeting'] = {'x': 0, 'z': 0}
+        raw['actors'][0].update(start={'x': -4, 'z': 0}, start_yaw_degrees=0)
+        raw['actors'][1].update(start={'x': 4, 'z': 0}, start_yaw_degrees=-90)
+        raw['actors'][2]['start_yaw_degrees'] = 180
+        placed = auto_place(raw, SCENE)
+        self.assertEqual(placed['starts']['actor_1'], {'x': -4., 'z': 0., 'yaw_degrees': 0.})
+        self.assertEqual(placed['starts']['actor_2'], {'x': 4., 'z': 0., 'yaw_degrees': -90.})
+        self.assertEqual(placed['starts']['actor_3']['yaw_degrees'], 180.)
+        self.assertEqual(placed['starts']['actor_3']['x'], 0.)
+
+    def test_missing_direction_follows_first_route_then_meeting(self):
+        raw = document(1)
+        raw['actors'][0]['start'] = {'x': -4, 'z': -3}
+        raw['meeting'] = {'x': 0, 'z': 0}
+        def detour(start, end, _obstacles, _radius):
+            return [start, (start[0], end[1]), end]
+        with patch('interaction_planner._path', side_effect=detour):
+            placed = auto_place(raw, SCENE)
+        route = placed['routes']['actor_1']
+        start = placed['starts']['actor_1']
+        first = next(point for point in route[1:] if math.dist(point, [start['x'], start['z']]) > 1e-9)
+        expected = math.degrees(math.atan2(first[0]-start['x'], first[1]-start['z']))
+        self.assertAlmostEqual(start['yaw_degrees'], expected)
+        self.assertEqual(start['yaw_degrees'], 0.)
+        raw['actors'][0]['start'] = {'x': 0, 'z': 0}
+        self.assertEqual(auto_place(raw, SCENE)['starts']['actor_1']['yaw_degrees'], 0.)
 
     def test_obstacle_is_avoided_and_target_resolved_beside_it(self):
         crate = make_object('crate', 0)
@@ -304,7 +374,7 @@ class StagingTests(unittest.TestCase):
         raw = document(); raw['actors'][0]['start'] = {'x': -4, 'z': -3}
         raw['meeting'] = {'x': 0, 'z': 0}
         result = auto_place(raw, SCENE)
-        self.assertEqual(result['starts']['actor_1'], {'x': -4., 'z': -3.})
+        self.assertEqual((result['starts']['actor_1']['x'], result['starts']['actor_1']['z']), (-4., -3.))
         self.assertEqual(result['meeting']['x'], 0)
 
     def test_authored_floor_bounds_all_staging(self):
