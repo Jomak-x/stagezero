@@ -158,4 +158,35 @@ class AdaptiveTests(unittest.TestCase):
         self.assertFalse(any(i['severity']=='error' for i in assess_assets(reviewed)))
         self.assertEqual(reviewed,AdaptiveSceneGenerator._review_assets(reviewed))
 
+    def test_coplanar_detail_at_unit_boundary_gets_depth_clearance(self):
+        from asset_quality import assess_assets
+        asset={'id':'wall-sign','name':'Wall sign','parts':[
+            {'shape':'box','position':[0,0,0],'size':[1,1,1],'color':[90,90,90]},
+            {'shape':'box','position':[0,0,.495],'size':[.3,.2,.01],'color':[230,210,180]}]}
+        self.assertIn('coplanar_surface', [i['code'] for i in assess_assets([asset])])
+        reviewed=AdaptiveSceneGenerator._review_assets([asset])
+        self.assertNotIn('coplanar_surface', [i['code'] for i in assess_assets(reviewed)])
+        backing, detail = reviewed[0]['parts']
+        self.assertGreater(detail['position'][2]+detail['size'][2]/2,
+                           backing['position'][2]+backing['size'][2]/2+.001)
+        self.assertEqual(reviewed,AdaptiveSceneGenerator._review_assets(reviewed))
+        self.assertEqual(asset['parts'][0]['size'], [1,1,1])
+
+    def test_minimum_thickness_repeated_detail_at_either_boundary(self):
+        from asset_quality import assess_assets
+        from asset_geometry import validate_assets
+        for side in (-1, 1):
+            with self.subTest(side=side):
+                asset={'id':'edge-trim','name':'Edge trim','parts':[
+                    {'shape':'box','position':[0,0,0],'size':[1,1,1],'color':[90,90,90]},
+                    {'shape':'box','position':[-.2,0,side*.4995],
+                     'size':[.1,.2,.001],'color':[230,210,180],
+                     'repeat':{'count':[3,1,1],'step':[.2,0,0]}}]}
+                self.assertIn('coplanar_surface', [i['code'] for i in assess_assets([asset])])
+                reviewed=AdaptiveSceneGenerator._review_assets([asset])
+                self.assertEqual(validate_assets(reviewed), reviewed)
+                self.assertNotIn('coplanar_surface', [i['code'] for i in assess_assets(reviewed)])
+                self.assertEqual(reviewed[0]['parts'][1]['size'][2], .001)
+                self.assertEqual(reviewed, AdaptiveSceneGenerator._review_assets(reviewed))
+
 if __name__=='__main__': unittest.main()
