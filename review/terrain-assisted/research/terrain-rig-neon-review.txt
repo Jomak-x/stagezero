@@ -1,0 +1,72 @@
+## Verdict
+
+**Moving the terrain solve after retargeting is the right architecture.** Contact and reach must be solved on the rendered 17-bone rig, not inferred from the native skeleton. Render those solved transforms through the same bind matrices and LBS implementation used for validation. Preserve the native motion/features separately; label their coordinate space and timestamps so downstream code cannot mistake them for corrected contacts.
+
+For speed and robustness, use a rigid sole proxy for planning, fixed-length analytical leg IK, and **actual skinned-geometry validation with rejection or replanning**.
+
+## 1. Extract a usable sole footprint
+
+Use rest-mesh geometry, skin weights, bone transforms, and inverse binds. Weights identify candidate foot regions; they do **not** identify the outsole reliably. Prefer sole vertex/triangle tags, or manually inspect a geometric extraction once per character.
+
+For rest vertex \(x_v\), its foot-local coordinate is
+
+\[
+q_v=(G_f^{rest})^{-1}x_v,
+\]
+
+assuming mesh and bone transforms share a coordinate convention. Retain the sole’s 3D shape and a projected contact polygon; flattening everything loses toe curvature and heel offsets.
+
+**Mixed foot/shin weights are the principal trap.** Under standard LBS,
+
+\[
+x_v(t)=\sum_j w_{vj}G_j(t)B_j^{-1}x_v.
+\]
+
+Consequently, \(G_f(t)^{-1}x_v(t)\) generally changes with ankle articulation. A rest-pose footprint is not necessarily a conservative runtime footprint.
+
+Practical choices:
+
+- Make outsole vertices effectively rigid to the foot, if asset editing is acceptable.
+- Otherwise, build a foot-local envelope of deformed sole vertices over the permitted ankle/knee pose range. Use its projected hull for edge containment and its lowest surface for clearance.
+- Sampling poses produces an empirical envelope, **not a proof**. Add a margin based on measured deformation, enforce joint limits, and still validate runtime LBS. A guaranteed envelope requires bounds over the permitted transform range.
+
+A hull enclosing heel and toe also conservatively rejects unsupported gaps between them. That is preferable for an initial implementation.
+
+## 2. Plan contacts on actual geometry
+
+Represent each tread and connected deck as its actual support surface, with consistent seams and collision geometry matching the renderer. Treat risers, sides, undersides, and the moving door as obstacles—not a heightfield or hidden ramp.
+
+Plan alternating **world-space sole poses**, including orientation. During stance, hold the sole pose fixed; convert it to a foot-bone target using the sole-to-bone offset. For moving supports, use support-local anchors.
+
+Erode usable support regions by the footprint plus an initial **10–20 mm edge margin**. Connected coplanar deck pieces should act as one support region, avoiding false rejection at internal seams.
+
+Use smooth swing paths with zero endpoint velocity. Start with **30–50 mm clearance above relevant obstacle tops**, but test the entire swept shoe against risers: ankle height alone does not establish clearance. Retime for the door using its actual trajectory; reject passages without clearance for the rest of the character.
+
+## 3. Solve pelvis and legs
+
+For thigh/shin lengths \(L_1,L_2\), constrain hip-to-ankle distance:
+
+\[
+|L_1-L_2|+\epsilon \le d \le L_1+L_2-\epsilon.
+\]
+
+Start with an extension reserve \(\epsilon\) of **1–2% of total leg length**. Account for rotated sole offsets when deriving ankle targets.
+
+With fixed horizontal pelvis motion, derive feasible pelvis-height intervals from each active leg’s distance bounds. Joint limits and knee direction further restrict feasibility. Solve a short-horizon objective penalizing deviation from retargeted pelvis height, vertical velocity, and acceleration, subject to those constraints. Do not smooth afterward in a way that violates reach. Empty feasible sets require changing steps, timing, or pelvis horizontal motion—not stretching bones.
+
+Use analytical two-bone IK. Construct knee poles from the retargeted bend direction, transported over time and biased toward a stable character-forward direction. Preserve the previous plane near straight-leg singularities; prevent sign flips. Validate joint limits explicitly.
+
+## 4. Minimum rejection gates
+
+The following are starting tolerances for a metre-scale character, not universal guarantees:
+
+- **Contact:** stance sole gap within roughly **±2 mm**; anchor drift below **3 mm per stance**.
+- **Reach:** no infeasible target; solved segment-length error below **0.1%**; no joint-limit violations.
+- **Support:** footprint inside the usable support union with the chosen margin; reject heel/toe overhang unless intentionally supported.
+- **Penetration:** validate all skinned sole vertices against rendered support, rejecting penetration beyond **2 mm**. Also test sole triangles/edges against obstacle triangles: vertices alone miss intersecting faces and narrow obstacles.
+- **Between frames:** use swept collision or adaptive subdivision. An initial subdivision trigger is **2 mm maximum relevant surface-point displacement**, using rotational/deformation bounds, with a clearance margin covering that displacement. Sparse samples alone cannot certify clearance.
+- **Segment joins:** check pose continuity, contact labels, anchor identity, velocities, and collision across the join. Initial limits: **2 mm position**, **0.5° orientation**, and **0.05 m/s velocity** mismatch. Repair/revalidate joins exceeding them.
+
+## Is a rigid sole sufficient?
+
+Often **yes for planning common stiff shoes**, but “mostly foot-weighted” is not sufficient evidence. Bound deviation by \(\sum_{j\ne f}w_j\|\Delta_j\|\), then measure actual outsole deformation over allowed poses. If it remains below your clearance budget—say **1–2 mm**—the proxy is useful. Keep full LBS validation regardless.

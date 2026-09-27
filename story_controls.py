@@ -4,27 +4,33 @@ from html import escape
 import math
 from types import SimpleNamespace
 
+from studio_navigation import navigate_tab
 from story_workflow import StoryWorkflow
+from scene_actor_intent import ActorPreflight, scene_identity, cast_route_error
 
 
 _RUNNING = frozenset(('planning', 'queued', 'running', 'speech_retrying'))
 _LENGTHS = {'15 seconds': 15, '30 seconds': 30, '60 seconds': 60,
             '120 seconds': 120}
+_CURRENT = 'Current scene'
 
 
 class StoryControls:
-    def __init__(self, gui, session, *, core_session=None, paired_session=None, cast_session=None, on_story_activate=None):
+    def __init__(self, gui, session, *, core_session=None, paired_session=None, cast_session=None, on_story_activate=None, on_generate_cast=None):
         self.gui = gui
         self.session = session
         self.core_session = core_session
         self.paired_session = paired_session
         self.cast_session = cast_session
         self.on_story_activate = on_story_activate
+        self.on_generate_cast = on_generate_cast
+        self._route_status = ""
         self.workflow = StoryWorkflow(session)
         self.ids = {}
         self._views = {}
         self._drafts = {}
         self._automatic_attempts = set()
+        self._voice_ids = set()
         self._movement_edit = None
         self._closed = False
         self.open_button = gui.add_button('Full scene')
@@ -47,6 +53,21 @@ class StoryControls:
         identifier = self.ids.get(view.jobs.value)
         return (identifier, self.workflow.snapshot(identifier)) if identifier else (None, None)
 
+    def register_voice_job(self, identifier):
+        """Expose a voice-submitted scene in the existing scene list."""
+        if self._closed or identifier in self.ids.values():
+            return
+        data = self.workflow.snapshot(identifier)
+        prompt = data.get('prompt', '').strip()
+        label = f'{len(self.ids) + 1:02d} · {prompt[:52] or "Voice scene"}'
+        self.ids[label] = identifier
+        self._voice_ids.add(identifier)
+        for view in tuple(self._views.values()):
+            previous = view.jobs.value
+            self._set(view.jobs, 'options', tuple(self.ids))
+            if previous not in self.ids:
+                self._set(view.jobs, 'value', label)
+
     def _is_current(self, view):
         return not self._closed and self._views.get(view.key) is view
 
@@ -57,18 +78,30 @@ class StoryControls:
             return self.session.takes.get(data.get('take_id'))
 
     def _view_take(self, view, data):
-        if view.current_take_id is not None:
+        if view.jobs.value == _CURRENT and view.current_take_id is not None:
             with self.session.lock:
+                if self.session.active_take != view.current_take_id:
+                    return None
                 return self.session.takes.get(view.current_take_id)
         return self._loaded_take(data)
 
+    def _scene_options(self, current_take_id=None):
+        with self.session.lock:
+            has_current = (self.session.active_take in self.session.takes or
+                           current_take_id is not None)
+        options = ((_CURRENT,) if has_current else ()) + tuple(self.ids)
+        return options or ('No scenes yet',)
+
     def _close_view(self, view):
-        if self._views.get(view.key) is not view:
-            return
-        self._drafts[view.key] = (view.prompt.value, view.length.value,
-                                  view.seconds.value, view.jobs.value)
-        self._views.pop(view.key)
-        view.modal.close()
+        with self.session.lock:
+            if self._views.get(view.key) is not view:
+                return
+            self._route_status = ''
+            view.actor_check.cancel()
+            self._drafts[view.key] = (view.prompt.value, view.length.value,
+                                      view.seconds.value, view.jobs.value)
+            self._views.pop(view.key)
+            view.modal.close()
 
     def open(self, client=None):
         if self._closed:
@@ -81,22 +114,23 @@ class StoryControls:
         # is retained as a fallback for environments without a client handle.
         gui = getattr(client, 'gui', None) or self.gui
         modal = gui.add_modal('Full scene', size='md', show_close_button=False)
+        with self.session.lock:
+            current_take_id = (self.session.active_take
+                               if self.session.active_take in self.session.takes else None)
+        options = self._scene_options(current_take_id)
         prompt_draft, length_draft, seconds_draft, selected_job = self._drafts.get(
-            key, ('', 'Auto', '30', next(iter(self.ids), 'No scenes yet')))
+            key, ('', 'Auto', '30', next(reversed(self.ids), _CURRENT if current_take_id else 'No scenes yet')))
         view = SimpleNamespace(key=key, modal=modal, error='', action_map={},
                                action_token=None, selected_index=None,
-                               current_take_id=None, bound_take=None,
-                               rebound_edit_revision=None)
-        if not self.ids:
-            with self.session.lock:
-                if self.session.active_take in self.session.takes:
-                    view.current_take_id = self.session.active_take
+                               current_take_id=current_take_id, bound_take=None,
+                               rebound_edit_revision=None, client=client, actor_check=ActorPreflight(),
+                               actor_kind=None, actor_approved=None, route_status="")
         self._views[key] = view
         with modal:
             view.status = gui.add_html('')
             view.estimate = gui.add_html('')
-            tabs = gui.add_tab_group()
-            with tabs.add_tab('Create'):
+            view.tabs = gui.add_tab_group()
+            with view.tabs.add_tab('Create'):
                 view.prompt = gui.add_text('What happens?', initial_value=prompt_draft,
                                            multiline=True,
                                            hint='Example: Walk forward, wave, then turn and sit.')
@@ -105,23 +139,25 @@ class StoryControls:
                 view.seconds = gui.add_text('Seconds', initial_value=seconds_draft,
                                              hint='0.16–120')
                 view.generate = gui.add_button('Generate scene')
-                view.jobs = gui.add_dropdown('Scenes', tuple(self.ids) or ('No scenes yet',))
-                if selected_job in self.ids:
+                view.jobs = gui.add_dropdown('Scenes', options)
+                if selected_job in options:
                     self._set(view.jobs, 'value', selected_job)
                 view.cancel = gui.add_button('Cancel generation', color='gray')
-                view.load = gui.add_button('Load scene', color='gray')
-                view.review = gui.add_button('Open scene', color='gray')
+                view.review = gui.add_button('Review scene')
+                view.load = gui.add_button('Edit movements', color='gray')
                 with gui.add_folder('Details', expand_by_default=False) as details:
                     view.details = details
                     view.warnings = gui.add_html('')
                     view.plan = gui.add_html('')
-            with tabs.add_tab('Refine'):
+            with view.tabs.add_tab('Refine'):
                 view.source = gui.add_html('')
                 view.actions = gui.add_dropdown('Movement', ('No movements yet',))
                 view.refresh_action = gui.add_button('Refresh movement', color='gray')
                 view.action_prompt = gui.add_text('Change this movement', initial_value='', multiline=True)
                 with gui.add_folder('Timing', expand_by_default=False) as timing:
                     view.timing = timing
+                    view.action_length = gui.add_dropdown('Length', ('Auto', 'Custom'),
+                                                          initial_value='Auto')
                     view.action_seconds = gui.add_text('Seconds', initial_value='4.16',
                                                         hint='0.16–30')
                 view.edit = gui.add_button('Update movement')
@@ -154,15 +190,17 @@ class StoryControls:
                                else float(view.seconds.value))
                     if not math.isfinite(seconds) or not 0.16 <= seconds <= 120:
                         raise ValueError('Enter a scene length from 0.16 to 120 seconds.')
-                identifier = self.workflow.submit(view.prompt.value, seconds=seconds)
-                label = f'{len(self.ids) + 1:02d} · {view.prompt.value.strip()[:52]}'
-                self.ids[label] = identifier
-                self._set(view.jobs, 'options', tuple(self.ids))
-                self._set(view.jobs, 'value', label)
+                if view.actor_check.pending or any(
+                        (self.workflow.snapshot(job) or {}).get('status') in _RUNNING and
+                        (self.workflow.snapshot(job) or {}).get('prompt') == view.prompt.value and
+                        (self.workflow.snapshot(job) or {}).get('seconds') == seconds
+                        for job in self.ids.values()):
+                    return
+                view.actor_kind = 'create'
+                view.actor_seconds = seconds
+                view.actor_check.start(view.prompt.value, self._actor_context(view))
                 view.error = ''
-                view.current_take_id = None
-                view.action_token = None
-                view.bound_take = None
+                view.route_status = self._route_status = 'Checking requested performers…'
             except (ValueError, RuntimeError) as exc:
                 view.error = str(exc)
             self.update()
@@ -171,7 +209,9 @@ class StoryControls:
         def jobs(event):
             if event.client is not None and self._is_current(view):
                 view.error = ''
-                view.current_take_id = None
+                with self.session.lock:
+                    view.current_take_id = (self.session.active_take
+                                            if view.jobs.value == _CURRENT else None)
                 view.action_token = None
                 view.selected_index = None
                 view.bound_take = None
@@ -180,32 +220,56 @@ class StoryControls:
         @view.length.on_update
         def length(event):
             if event.client is not None and self._is_current(view):
-                self._refresh_view(view)
+                self.update()
 
         @view.cancel.on_click
         def cancel(_):
-            if not self._is_current(view):
-                return
-            identifier, data = self._data(view)
-            if identifier and data and data['status'] in _RUNNING | {'speech_failed'}:
-                self.workflow.cancel(identifier)
-            self.update()
+            with self.session.lock:
+                if not self._is_current(view):
+                    return
+                if view.actor_check.pending:
+                    view.actor_check.cancel()
+                    view.route_status = self._route_status = 'Performer check cancelled · scene preserved'
+                    self.update()
+                    return
+                identifier, data = self._data(view)
+                if identifier and data and data['status'] in _RUNNING | {'speech_failed'}:
+                    self.workflow.cancel(identifier)
+                self.update()
 
         @view.load.on_click
         def load(_):
             if not self._is_current(view):
                 return
-            identifier, _ = self._data(view)
-            if identifier:
-                self._load(view, identifier)
+            with self.session.lock:
+                busy = self.session.busy
+            if busy:
+                view.error = 'Wait for the current motion to finish before editing.'
+                self.update()
+                return
+            identifier, data = self._data(view)
+            if identifier and data and data['status'] == 'completed' and not data.get('loaded'):
+                if not self._load(view, identifier):
+                    self.update()
+                    return
+            if self._view_take(view, self._data(view)[1]) is not None:
+                navigate_tab(view.tabs, 1, _.client)
+                view.error = ''
+            else:
+                view.error = 'Select a ready scene before editing movements.'
             self.update()
 
         @view.review.on_click
         def review(_):
             if not self._is_current(view):
                 return
-            _, data = self._data(view)
-            take = self._loaded_take(data)
+            identifier, data = self._data(view)
+            if identifier and data and data['status'] == 'completed' and not data.get('loaded'):
+                if not self._load(view, identifier):
+                    self.update()
+                    return
+                _, data = self._data(view)
+            take = self._view_take(view, data)
             if take is None:
                 view.error = 'The scene take is unavailable. Load the scene again.'
             else:
@@ -223,6 +287,7 @@ class StoryControls:
                         view.current_take_id = None
                         view.action_token = None
                         view.error = ''
+                        self._close_view(view)
             self.update()
 
         @view.actions.on_update
@@ -233,6 +298,11 @@ class StoryControls:
                 with self.session.lock:
                     self._bind_action(view, self._view_take(view, data), view.selected_index)
                 view.error = ''
+                self._refresh_view(view)
+
+        @view.action_length.on_update
+        def action_length(event):
+            if event.client is not None and self._is_current(view):
                 self._refresh_view(view)
 
         @view.refresh_action.on_click
@@ -263,16 +333,31 @@ class StoryControls:
                     view.error = 'Wait for the current motion to finish before updating.'
                 else:
                     try:
-                        seconds = float(view.action_seconds.value)
-                        if not math.isfinite(seconds) or not 0.16 <= seconds <= 30:
-                            raise ValueError('Enter a movement length from 0.16 to 30 seconds.')
+                        seconds = None
+                        if view.action_length.value == 'Custom':
+                            try:
+                                seconds = float(view.action_seconds.value)
+                            except ValueError as exc:
+                                raise ValueError('Enter a movement length from 0.16 to 30 seconds.') from exc
+                            if not math.isfinite(seconds) or not 0.16 <= seconds <= 30:
+                                raise ValueError('Enter a movement length from 0.16 to 30 seconds.')
                         if not 1 <= len(view.action_prompt.value.strip()) <= 500:
                             raise ValueError('Enter a movement direction (1–500 characters).')
+                        if view.actor_approved != self._actor_context(view, 'edit'):
+                            if not view.actor_check.pending:
+                                view.actor_kind = 'edit'
+                                view.actor_check.start(view.action_prompt.value, self._actor_context(view))
+                                view.route_status = self._route_status = 'Checking requested performers…'
+                                view.error = ''
+                            self.update()
+                            return
+                        view.actor_approved = None
                         self._activate_g1()
                         self.session.set_mode('Live ARDY')
                         self.session.select_take(take.id)
                         if not self.session.submit_action_edit(
-                                view.action_prompt.value, index, 'replace', seconds=seconds):
+                                view.action_prompt.value, index, 'replace', seconds=seconds,
+                                automatic_timing=view.action_length.value == 'Auto'):
                             raise ValueError(self.session.status)
                         self._movement_edit = {'version': self.session.version,
                                                'take_id': take.id, 'owner': view.key,
@@ -285,10 +370,18 @@ class StoryControls:
                         view.error = str(exc)
             self.update()
 
+        view.submit_edit = edit
+
         @view.cancel_edit.on_click
         def cancel_edit(_):
             if not self._is_current(view):
                 return
+            with self.session.lock:
+                if view.actor_check.pending:
+                    view.actor_check.cancel()
+                    view.route_status = self._route_status = 'Performer check cancelled · scene preserved'
+                    self.update()
+                    return
             _, data = self._data(view)
             with self.session.lock:
                 take = self._view_take(view, data)
@@ -346,8 +439,115 @@ class StoryControls:
                     self._close_view(view)
             self.update()
 
+        for field in (view.prompt, view.seconds, view.action_prompt, view.action_seconds):
+            @field.on_update
+            def actor_input_changed(event):
+                with self.session.lock:
+                    if event.client is not None and view.actor_check.pending:
+                        view.actor_check.cancel()
+                        view.route_status = self._route_status = 'Direction changed · generate again to check performers'
+                        self.update()
         self._refresh_view(view)
         return view
+
+    def _actor_context(self, view, kind=None):
+        kind = kind or view.actor_kind
+        fields = ((view.prompt.value, view.length.value, view.seconds.value)
+                  if kind == 'create' else
+                  (view.action_prompt.value, view.action_length.value,
+                   view.action_seconds.value, view.action_token, view.selected_index,
+                   view.jobs.value))
+        return (kind, fields, scene_identity(self.session,
+                (self.core_session, self.paired_session, self.cast_session)))
+
+    def _poll_actor_check(self, view):
+        if not view.actor_check.pending:
+            return
+        with self.session.lock:
+            if not self._is_current(view):
+                return
+            outcome = view.actor_check.poll(self._actor_context(view))
+            if outcome is None:
+                return
+            intent, error = outcome
+            view.route_status = ''
+            if error:
+                view.error = self._route_status = error
+                return
+            try:
+                if intent.count in (2, 3):
+                    error = cast_route_error(intent.count, getattr(view, 'actor_seconds', None),
+                                             self.on_generate_cast, editing=view.actor_kind == 'edit')
+                    if error:
+                        raise ValueError(error)
+                    if not self.on_generate_cast(view.prompt.value, view.actor_seconds,
+                                                 view.client, actor_count=intent.count):
+                        raise ValueError('AI cast generation was not started. Your scene is preserved.')
+                    self._route_status = f'{intent.count} performers · AI cast'
+                    self._close_view(view)
+                elif view.actor_kind == 'edit':
+                    view.actor_approved = self._actor_context(view)
+                    view.submit_edit(SimpleNamespace(client=view.client))
+                else:
+                    identifier = self.workflow.submit(view.prompt.value, seconds=view.actor_seconds)
+                    label = f'{len(self.ids) + 1:02d} · {view.prompt.value.strip()[:52]}'
+                    self.ids[label] = identifier
+                    self._set(view.jobs, 'options', tuple(self.ids))
+                    self._set(view.jobs, 'value', label)
+                    view.error = ''
+                    view.current_take_id = None
+                    view.action_token = None
+                    view.bound_take = None
+                    self._route_status = 'One performer · full scene'
+            except (ValueError, RuntimeError) as exc:
+                view.error = self._route_status = str(exc)
+
+    def owns_take(self, take_id):
+        """Recognize transient scene jobs, including legacy edits without beat IDs."""
+        for identifier in tuple(self.ids.values()):
+            data = self.workflow.snapshot(identifier)
+            if data.get('loaded') and data.get('take_id') == take_id:
+                return True
+        return False
+
+    def open_for_movement(self, client, take_id, index):
+        """Open the exact active scene movement requested by a timeline click."""
+        owned = self.owns_take(take_id)
+        with self.session.lock:
+            take = self.session.takes.get(take_id)
+            if (take is None or self.session.active_take != take_id or
+                    not isinstance(index, int) or not 0 <= index < len(take.segments) or
+                    not (owned or take.segments[index].get('beat_id'))):
+                return False
+        view = self.open(client)
+        if view is None:
+            return False
+        with self.session.lock:
+            if (self.session.active_take != take_id or
+                    self.session.takes.get(take_id) is not take or
+                    index >= len(take.segments) or
+                    not (owned or take.segments[index].get('beat_id'))):
+                self._close_view(view)
+                return False
+            self._set(view.jobs, 'value', _CURRENT)
+            view.current_take_id = take_id
+            view.action_token = None
+            view.bound_take = None
+            view.selected_index = index
+        self._refresh_view(view)
+        choice = next((label for label, value in view.action_map.items()
+                       if value == index), None)
+        if choice is None:
+            self._close_view(view)
+            return False
+        with self.session.lock:
+            if self.session.active_take != take_id or self.session.takes.get(take_id) is not take:
+                self._close_view(view)
+                return False
+            self._set(view.actions, 'value', choice)
+            self._bind_action(view, take, index)
+        navigate_tab(view.tabs, 1, client)
+        return True
 
     def _native_active(self):
         return any(native is not None and native.snapshot().get('active', False)
@@ -412,6 +612,7 @@ class StoryControls:
         segment = take.segments[index]
         view.action_token = self._action_token(take, index)
         view.bound_take = take
+        self._set(view.action_length, 'value', 'Auto')
         self._set(view.action_prompt, 'value', segment['prompt'])
         self._set(view.action_seconds, 'value',
                   f'{(segment["end"] - segment["start"])/25:.2f}')
@@ -446,18 +647,39 @@ class StoryControls:
     def _refresh_view(self, view):
         if self._views.get(view.key) is not view:
             return
+        with self.session.lock:
+            active_take_id = (self.session.active_take
+                              if self.session.active_take in self.session.takes else None)
+        options = self._scene_options(active_take_id)
+        selected = view.jobs.value
+        self._set(view.jobs, 'options', options)
+        if selected not in options:
+            self._set(view.jobs, 'value', next(reversed(self.ids),
+                                               _CURRENT if active_take_id else 'No scenes yet'))
+            view.action_token = None
+            view.selected_index = None
+            view.bound_take = None
+        if view.jobs.value == _CURRENT and view.current_take_id != active_take_id:
+            previous_take_id = view.current_take_id
+            view.current_take_id = active_take_id
+            view.action_token = None
+            view.selected_index = None
+            if previous_take_id is not None and active_take_id is not None:
+                view.error = 'Current scene changed. Refresh movement before updating.'
         identifier, data = self._data(view)
-        job_take = self._loaded_take(data)
         take = self._view_take(view, data)
         movement_status, can_cancel = self._movement_state(view, take)
         state = data['status'] if data else 'ready'
-        detail = view.error or ((data.get('error') or data.get('speech_error')) if data else '') or ''
+        detail = view.error or view.route_status or ((data.get('error') or data.get('speech_error')) if data else '') or ''
         if data and state in _RUNNING:
             progress = data.get('progress') or {}
             completed = progress.get('completed_beats', 0)
             total = progress.get('total_beats', 0)
-            detail = detail or (f'Creating scene · {completed}/{total} movements' if total
-                                else 'Creating scene…')
+            attempt = data.get('attempt', 1)
+            label = (f'Retrying scene · attempt {attempt}/{data.get("max_attempts", 3)}'
+                     if attempt > 1 else 'Creating scene')
+            detail = detail or (f'{label} · {completed}/{total} movements' if total
+                                else label + '…')
         if movement_status and not view.error:
             failed = 'failed' in movement_status.lower() or 'stopped' in movement_status.lower()
             style = 'sz-progress error' if failed else 'sz-progress'
@@ -482,14 +704,15 @@ class StoryControls:
         else:
             status_content = ''
         self._set(view.status, 'content', status_content)
-        self._set(view.cancel, 'disabled', state not in _RUNNING | {'speech_failed'})
-        self._set(view.cancel, 'visible', state in _RUNNING | {'speech_failed'})
-        self._set(view.load, 'disabled', state != 'completed' or bool(data and data.get('loaded')))
-        self._set(view.load, 'visible', state == 'completed' and bool(data) and not data.get('loaded'))
-        self._set(view.jobs, 'visible', bool(self.ids))
+        self._set(view.cancel, 'disabled', not view.actor_check.pending and state not in _RUNNING | {'speech_failed'})
+        self._set(view.cancel, 'visible', view.actor_check.pending or state in _RUNNING | {'speech_failed'})
+        ready = take is not None or bool(data and state == 'completed')
+        self._set(view.load, 'disabled', not ready or self.session.busy)
+        self._set(view.load, 'visible', ready)
+        self._set(view.jobs, 'visible', len(options) > 1)
         self._set(view.seconds, 'visible', view.length.value == 'Custom')
         native_active = self._native_active()
-        self._set(view.generate, 'disabled', self.session.busy or
+        self._set(view.generate, 'disabled', view.actor_check.pending or self.session.busy or
                   (not native_active and not self.session.character_motion_enabled))
         plan = data.get('plan') if data else None
         beats = (plan.get('beats') or []) if plan else []
@@ -519,8 +742,10 @@ class StoryControls:
         self._set(view.warnings, 'content', ''.join(
             f'<div class="sz-note">{escape(str(w))}</div>' for w in warnings))
         self._set(view.details, 'visible', bool(plan or warnings))
-        self._set(view.cancel_edit, 'disabled', not can_cancel)
-        self._set(view.cancel_edit, 'visible', can_cancel)
+        self._set(view.edit, 'label', 'Checking performers…' if view.actor_check.pending and view.actor_kind == 'edit' else 'Update movement')
+        checking_edit = view.actor_check.pending and view.actor_kind == 'edit'
+        self._set(view.cancel_edit, 'disabled', not (can_cancel or checking_edit))
+        self._set(view.cancel_edit, 'visible', can_cancel or checking_edit)
         if take is not None:
             self._set(view.source, 'content',
                       f'<div class="sz-preview"><b>{escape(take.name)}</b> · '
@@ -531,8 +756,8 @@ class StoryControls:
         else:
             self._set(view.source, 'content',
                       '<div class="sz-note">Generate a scene to refine its movements.</div>')
-        self._set(view.review, 'disabled', job_take is None or self.session.busy)
-        self._set(view.review, 'visible', job_take is not None and self.session.active_take != job_take.id)
+        self._set(view.review, 'disabled', not ready or self.session.busy)
+        self._set(view.review, 'visible', ready)
         if take is None:
             view.action_map = {}
             view.action_token = None
@@ -576,6 +801,7 @@ class StoryControls:
         self._set(view.actions, 'disabled', take is None or not take.segments or self.session.busy)
         self._set(view.actions, 'visible', take is not None and bool(take.segments))
         self._set(view.timing, 'visible', take is not None and bool(take.segments))
+        self._set(view.action_seconds, 'visible', view.action_length.value == 'Custom')
         for handle in (view.action_prompt, view.action_seconds, view.edit, view.play):
             self._set(handle, 'disabled', not editable or self.session.busy)
         for handle in (view.action_prompt, view.action_seconds, view.edit, view.play):
@@ -592,7 +818,7 @@ class StoryControls:
         # preserves the one-prompt flow without replacing either native mode.
         for identifier in tuple(self.ids.values()):
             data = self.workflow.snapshot(identifier)
-            if (data and data['status'] == 'completed' and not data.get('loaded')
+            if (identifier not in self._voice_ids and data and data['status'] == 'completed' and not data.get('loaded')
                     and not self.session.busy and
                     not self._native_active() and not self._paired_activation_error()):
                 attempt = (identifier, self.session.project_revision)
@@ -603,14 +829,16 @@ class StoryControls:
                     except (ValueError, RuntimeError):
                         pass  # The explicit Load action surfaces the reason.
         for view in tuple(self._views.values()):
+            self._poll_actor_check(view)
             self._refresh_view(view)
         running = sum((self.workflow.snapshot(identifier) or {}).get('status') in _RUNNING
                       for identifier in self.ids.values())
         completed = sum((self.workflow.snapshot(identifier) or {}).get('status') == 'completed'
                         for identifier in self.ids.values())
-        summary = (f'{running} generating · {completed} completed' if self.ids else
+        summary = self._route_status or (f'{running} generating · {completed} completed' if self.ids else
                    'Build a sequence up to 120 seconds, then refine each movement.')
         self._set(self.sidebar_status, 'content', f'<div class="sz-note">{escape(summary)}</div>')
+        self._set(self.sidebar_status, 'visible', bool(self.ids or self._route_status))
 
     def close(self):
         if self._closed:

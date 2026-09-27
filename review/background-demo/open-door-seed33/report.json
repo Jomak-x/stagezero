@@ -1,0 +1,1345 @@
+{
+  "case": "door",
+  "seed": 33,
+  "prompt": "open Checkpoint door then go through Checkpoint door",
+  "source": "ARDY-Core-RP-20FPS-Horizon40",
+  "post_pose_edits": false,
+  "temple_scope": "ground courtyard only; stairs and raised bridge unsupported",
+  "state": {
+    "phase": "playing",
+    "status": "Spatial commands: 2/2 verified; completed. Every command reached its measured destination Playing generated motion.",
+    "frame": 139,
+    "total_frames": 240,
+    "buffer_frames": 101,
+    "playing": true,
+    "generated": true,
+    "inflight_request_id": null,
+    "queued_stages": 0,
+    "contact_open": false,
+    "failure": null,
+    "revision": 6,
+    "mode": "production",
+    "actor_ids": [
+      "actor_1"
+    ],
+    "active": true,
+    "epoch": 2,
+    "initialized": true,
+    "scene_changed_since_motion": false,
+    "available": true,
+    "schema": "Native Core27 / 20 fps (separate from G1)",
+    "example_available": true,
+    "route": {
+      "version": 1,
+      "actor_id": "actor_1",
+      "verb": "go_through",
+      "target_id": "door-1",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.00118,
+            -1.95677
+          ],
+          "role": "start"
+        },
+        {
+          "time_seconds": 0.1434,
+          "position_xz": [
+            0.0,
+            -2.05
+          ],
+          "role": "entry"
+        },
+        {
+          "time_seconds": 1.1434,
+          "position_xz": [
+            0.0,
+            -2.7
+          ],
+          "role": "center"
+        },
+        {
+          "time_seconds": 2.1434,
+          "position_xz": [
+            0.0,
+            -3.35
+          ],
+          "role": "exit"
+        }
+      ],
+      "geometry": {
+        "passage_width_m": 1.6,
+        "passage_height_m": 2.5,
+        "passage_depth_m": 0.12,
+        "yaw_degrees": 0.0,
+        "minimum_lateral_clearance_m": 0.46,
+        "source": "raised_procedural_door"
+      },
+      "assumptions": {
+        "units": "metres",
+        "up_axis": "+Y",
+        "ground_plane": "XZ",
+        "actor_radius_m": 0.28,
+        "actor_height_m": 1.65,
+        "obstacle_margin_m": 0.06,
+        "speed_mps": 0.65,
+        "scene_source": "object_metadata",
+        "motion_following_verified": false
+      },
+      "ground_support": {
+        "authored_floor": true,
+        "continuous_support_verified": true,
+        "floor_ids": [
+          "platform-99"
+        ],
+        "actor_footprint_margin_m": 0.28,
+        "floor_height_range_m": [
+          0.0,
+          0.0
+        ]
+      },
+      "schedule": {
+        "frames": 120,
+        "fps": 20,
+        "seconds": 6.0,
+        "travel_seconds": 2.1434,
+        "terminal_hold_frames": 40,
+        "horizons": 3,
+        "dense_root_targets_per_actor_per_horizon": 5,
+        "held_actor_id": null,
+        "sampled_route_clearance_m": null
+      }
+    },
+    "spatial_commands": {
+      "version": 1,
+      "text": "open Checkpoint door then go through Checkpoint door",
+      "actor_id": "actor_1",
+      "actions": [
+        {
+          "verb": "open",
+          "target_id": "door-1"
+        },
+        {
+          "verb": "go_through",
+          "target_id": "door-1"
+        }
+      ],
+      "status": "completed",
+      "action_index": 2,
+      "completed_actions": 2,
+      "legs": [
+        {
+          "action_index": 0,
+          "start_frame": 0,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "approach",
+            "target_id": "door-1",
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.0,
+                  0.0
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 3.0,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "role": "approach"
+              }
+            ],
+            "geometry": {
+              "target_center_xz": [
+                0.0,
+                -2.7
+              ],
+              "target_size_xz_m": [
+                1.6,
+                0.12
+              ],
+              "yaw_degrees": 0.0
+            },
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "ground_plane": "XZ",
+              "actor_radius_m": 0.28,
+              "actor_height_m": 1.65,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65,
+              "scene_source": "object_metadata",
+              "motion_following_verified": false
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "platform-99"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.0
+              ]
+            },
+            "schedule": {
+              "frames": 120,
+              "fps": 20,
+              "seconds": 6.0,
+              "travel_seconds": 3.0,
+              "terminal_hold_frames": 40,
+              "horizons": 3,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -0.0011810753494501114,
+              -1.9567744731903076
+            ],
+            "target_xz": [
+              0.0,
+              -1.95
+            ],
+            "arrival_error_m": 0.00687665805368247,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true,
+            "automatic_door_open_verified": true
+          },
+          "end_frame": 120
+        },
+        {
+          "action_index": 1,
+          "start_frame": 120,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "go_through",
+            "target_id": "door-1",
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  -0.00118,
+                  -1.95677
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 0.1434,
+                "position_xz": [
+                  0.0,
+                  -2.05
+                ],
+                "role": "entry"
+              },
+              {
+                "time_seconds": 1.1434,
+                "position_xz": [
+                  0.0,
+                  -2.7
+                ],
+                "role": "center"
+              },
+              {
+                "time_seconds": 2.1434,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "role": "exit"
+              }
+            ],
+            "geometry": {
+              "passage_width_m": 1.6,
+              "passage_height_m": 2.5,
+              "passage_depth_m": 0.12,
+              "yaw_degrees": 0.0,
+              "minimum_lateral_clearance_m": 0.46,
+              "source": "raised_procedural_door"
+            },
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "ground_plane": "XZ",
+              "actor_radius_m": 0.28,
+              "actor_height_m": 1.65,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65,
+              "scene_source": "object_metadata",
+              "motion_following_verified": false
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "platform-99"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.0
+              ]
+            },
+            "schedule": {
+              "frames": 120,
+              "fps": 20,
+              "seconds": 6.0,
+              "travel_seconds": 2.1434,
+              "terminal_hold_frames": 40,
+              "horizons": 3,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              0.0012579006142914295,
+              -3.3522651195526123
+            ],
+            "target_xz": [
+              0.0,
+              -3.35
+            ],
+            "arrival_error_m": 0.0025909613163960826,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": true,
+            "completed": true
+          },
+          "end_frame": 240
+        }
+      ],
+      "submitted_after_committed_frame": 0,
+      "detail": "Every command reached its measured destination"
+    },
+    "scene_reactions_enabled": true,
+    "scene_reactions_start_frame": 0,
+    "fps": 20,
+    "segments": [
+      {
+        "start": 0,
+        "end": 40,
+        "stage_id": "ea52d556dbd04143a3a776f90772f4f2",
+        "kind": "approach",
+        "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "65caa6e891a74a919a48a7b941db6969",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -0.26
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -0.52
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -0.78
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -1.04
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -1.3
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "approach",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 0,
+            "planned_only": true
+          },
+          "initial_placements": {
+            "actor_1": {
+              "position_xz": [
+                0.0,
+                0.0
+              ],
+              "yaw": 3.141592653589793
+            }
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "65caa6e891a74a919a48a7b941db6969",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "approach",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 40,
+        "end": 80,
+        "stage_id": "ac9ded8e4ecd4dfda8bcd6da2af50880",
+        "kind": "approach",
+        "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "9256fb8802084a2b9a82d8b38d8ab144",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -1.56
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -1.82
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "approach",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 1,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "9256fb8802084a2b9a82d8b38d8ab144",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 80,
+        "end": 120,
+        "stage_id": "9bc5bfc79f164841a2ce8bbdc24bca8e",
+        "kind": "approach",
+        "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "5b7ec965a8d044958ef1b9a9c4cdd4a6",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "approach",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 2,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "5b7ec965a8d044958ef1b9a9c4cdd4a6",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 120,
+        "end": 160,
+        "stage_id": "f1e582c81a8047a79307353da70d7f8e",
+        "kind": "approach",
+        "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "dd96755598874769a5b3493d023f0479",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 2,
+                "position_xz": [
+                  0.0,
+                  -2.05429
+                ],
+                "heading": 3.135681
+              },
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -2.21679
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -2.47679
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 22,
+                "position_xz": [
+                  0.0,
+                  -2.70429
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -2.73679
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -2.99679
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -3.25679
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "go_through",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 0,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "dd96755598874769a5b3493d023f0479",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 160,
+        "end": 200,
+        "stage_id": "56cbf5563a224a8c9bfc9bde64d8990e",
+        "kind": "approach",
+        "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "a626476684334cb6a47707996e916a32",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "go_through",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 1,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "a626476684334cb6a47707996e916a32",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 200,
+        "end": 240,
+        "stage_id": "2f74f843495e4427bcec3d292dab6cc2",
+        "kind": "approach",
+        "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+        "source": "ardy_core",
+        "request_id": "3ee02d5711fb46fabb0774db7ed70166",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "heading": 3.141592653589793
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "go_through",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 2,
+            "planned_only": true
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "3ee02d5711fb46fabb0774db7ed70166",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      }
+    ],
+    "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+  },
+  "wall_seconds": 7.92170399997849,
+  "calls": [
+    {
+      "index": 1,
+      "seed": 33,
+      "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -0.26
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -0.52
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -0.78
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -1.04
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -1.3
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.9214271669625305
+    },
+    {
+      "index": 2,
+      "seed": 33,
+      "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -1.56
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -1.82
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.8722924169851467
+    },
+    {
+      "index": 3,
+      "seed": 33,
+      "prompt": "Approach Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -1.95
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.8744781249552034
+    },
+    {
+      "index": 4,
+      "seed": 33,
+      "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 2,
+            "position_xz": [
+              0.0,
+              -2.05429
+            ],
+            "heading": 3.135681
+          },
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -2.21679
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -2.47679
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 22,
+            "position_xz": [
+              0.0,
+              -2.70429
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -2.73679
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -2.99679
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -3.25679
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.9418385830358602
+    },
+    {
+      "index": 5,
+      "seed": 33,
+      "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.8371270420029759
+    },
+    {
+      "index": 6,
+      "seed": 33,
+      "prompt": "Walk through Checkpoint door along the planned clear route, then stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -3.35
+            ],
+            "heading": 3.141592653589793
+          }
+        ]
+      },
+      "seconds": 0.839808417018503
+    }
+  ],
+  "inference_wait_seconds": 5.28697175096022,
+  "frames": 240,
+  "duration_seconds": 12.0,
+  "max_root_step_m": 0.050013281404972076,
+  "native_positions_exact": true,
+  "native_rotations_exact": true,
+  "native_features_exact": true,
+  "final_objects": [
+    {
+      "id": "wall-0",
+      "position": [
+        -2.5,
+        1.5,
+        -3.0
+      ],
+      "color": [
+        96,
+        103,
+        107
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "door-1",
+      "position": [
+        0.0,
+        3.75,
+        -2.7
+      ],
+      "color": [
+        179,
+        117,
+        59
+      ],
+      "active": true,
+      "opening_fraction": 1.0,
+      "trigger_frame": 56
+    },
+    {
+      "id": "crate-2",
+      "position": [
+        -2.4,
+        0.5,
+        -1.2
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-3",
+      "position": [
+        -1.9,
+        0.475,
+        -0.0
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "crate-4",
+      "position": [
+        -3.2,
+        0.5,
+        -2.0
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-5",
+      "position": [
+        -2.7,
+        0.475,
+        -0.8
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "crate-6",
+      "position": [
+        2.4,
+        0.5,
+        -2.0
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-7",
+      "position": [
+        2.9,
+        0.475,
+        -0.8
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "console-8",
+      "position": [
+        1.5,
+        0.6,
+        -2.5
+      ],
+      "color": [
+        76,
+        82,
+        89
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "checkpoint-wall-right",
+      "position": [
+        2.5,
+        1.5,
+        -3.0
+      ],
+      "color": [
+        96,
+        103,
+        107
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "platform-99",
+      "position": [
+        0.0,
+        -0.05,
+        0.0
+      ],
+      "color": [
+        87,
+        95,
+        105
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "exact_save_load": true
+}

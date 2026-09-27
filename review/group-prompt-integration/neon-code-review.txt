@@ -1,0 +1,12 @@
+Draft review — three actionable findings from the supplied modules:
+
+1. **P2 — Primary action bypasses the simultaneous-contact rejection.**  
+   `prompt_scene_plan.py`, `validate_plan`: concurrency validation checks `_three_contact()` against the original request and `concurrent_solos` prompts, but not `beat['prompt']`. A three-actor plan with a neutral request, a primary pair prompt such as “All three hug together,” and an actor_3 waving solo passes validation despite explicitly describing unsupported simultaneous three-body contact. Apply the same check to the primary action prompt before accepting concurrency.
+
+2. **P2 — Overlay duration guard permits more than the documented seven seconds.**  
+   `prompt_group_adapter.py`, `overlay_concurrent_third`: `60 <= end - start <= 300` accepts intervals up to ten seconds at 30 FPS, although both the error message and planner contract specify 2–7 seconds. For example, a matching eight-second beat and 240-frame action passes this guard. `validate_plan` rejects that duration, so correctly validated callers are protected, but this adapter’s own boundary check is inconsistent. Change the upper limit to 210 frames.
+
+3. **P2 — Adapter metadata discards generator warnings.**  
+   `prompt_group_adapter.py`, both build functions: after copying `clip.metadata`, each replaces its `warnings` with `list(plan['warnings'])`. Any warnings attached by generation or overlay are therefore lost from the returned `CastPerformance`. The overlay fallback restores only its newly constructed fallback warning, not other generator warnings. Preserve and merge the existing warnings with plan warnings rather than overwriting them.
+
+**Review limit:** Dispatch, motion-level geometry gates, and the implementations receiving the cancellation callback were not supplied. Their correctness—and end-to-end cancellation behavior—cannot be established here. No changes were applied or tests run.

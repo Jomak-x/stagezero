@@ -1,0 +1,107 @@
+## Separate presentation mode
+
+Implement **`KINEMATIC_TERRAIN_PRESENTATION`** as an offline postprocess. Preserve native motion verbatim outside this mode. Inside it, replace route translation, pelvis height, and leg articulation; retain native pelvis attitude and upper-body **local rotations**, transformed by route heading.
+
+Assume z-up. Require a valid hip–knee–ankle mapping, bind-length skeleton, and calibrated sole-to-ankle transforms. **Bind offsets alone do not establish rendered sole height.** Reject materially inconsistent native positions/rotations rather than fitting them silently.
+
+### 1. Plan contacts before solving poses
+
+For one short, shallow flight:
+
+- Extract approximate stance/swing intervals from native foot height and horizontal speed, with hysteresis. At 20 fps, treat these as timing proposals, not exact contacts; review or explicitly annotate ambiguous intervals.
+- Preserve native left/right order and approximate cadence. Adjust route speed to place alternating contacts on valid treads—do not force arbitrary route progress onto fixed cadence.
+- Place each landing near the centerline with native lateral stance width. Require the **whole sole footprint plus a margin** to lie on one horizontal tread. Never average heights across an edge.
+- Store immutable world-space stance anchors, including sole orientation. Maintain them until toe-off; never re-query and reposition an already planted foot.
+- For the minimal version, use flat, yaw-aligned planted feet. Ankle targets follow from the calibrated sole transform.
+
+Plan the entire flight and its entry/exit contacts before playback.
+
+### 2. Build collision-cleared swing targets
+
+Between old and new anchors:
+
+```text
+xy(t) = smooth endpoint interpolation
+z(t)  = smooth endpoint interpolation + planned clearance bump
+```
+
+Choose bump height and shape by sampling the **swept foot footprint**, not just the ankle:
+
+```text
+lowest_sole_z(t) >= highest_support_under_footprint(t) + clearance
+```
+
+Apply clearance away from intentional takeoff/landing contact. Raise the foot **before** crossing an upward edge; retain height until clear of a downward edge. Use near-zero endpoint velocity and blend native swing-foot rotation into flat landing orientation.
+
+Interpolate positions and slerp rotations between native 20 fps samples; validate trajectories with adaptive subdivision around stair edges. Interpolation alone does not guarantee clearance.
+
+### 3. Solve pelvis height from reachability—not native drift
+
+Keep route-controlled pelvis horizontal position and native pelvis attitude. For leg \(i\):
+
+- \(L_1,L_2\): bind segment lengths.
+- \(a_i\): target ankle position.
+- \(d_i\): hip offset from pelvis, transformed by pelvis attitude.
+- \(\rho_i=\|p_{xy}+d_{i,xy}-a_{i,xy}\|\).
+- Choose comfortable reach bounds \(D_{\min},D_{\max}\) from an allowed knee-flexion range; keep \(D_{\max}<L_1+L_2\).
+
+Assuming the hip stays above the ankle:
+
+\[
+I_i=\left[
+a_{i,z}-d_{i,z}+\sqrt{\max(0,D_{\min}^2-\rho_i^2)},
+\quad
+a_{i,z}-d_{i,z}+\sqrt{D_{\max}^2-\rho_i^2}
+\right].
+\]
+
+If \(\rho_i>D_{\max}\), that target is infeasible.
+
+Construct a preferred height:
+
+```text
+h_pref = planned support-elevation transition
+       + calibrated comfortable pelvis height
+       + bounded native vertical style residual
+```
+
+Use a small, zero-mean native residual—not accumulated native pelvis drift. Blend support elevation with anticipation through the transfer, rather than jumping to the newly contacted tread.
+
+Offline, solve:
+
+```text
+minimize Σ (h - h_pref)² + λv(Δh)² + λa(Δ²h)²
+subject to h ∈ intersection(I_left, I_right)
+           configured vertical speed/acceleration limits
+```
+
+Include both stance and swing targets. **Do not independently smooth height afterward:** that can invalidate reachability. If infeasible, replan contact spacing, timing, or swing shape; never stretch bones or slide anchors.
+
+### 4. Solve knees with a stable bend plane
+
+For each leg:
+
+```text
+u = normalize(ankle - hip)
+q = native knee displacement projected perpendicular to u
+q = normalize(q), with previous-frame sign/continuity constraint
+```
+
+If the projection is weak, use the previous transported bend direction, then a configured anatomical forward-bend direction. Smooth that direction within the allowed knee plane; do not let it flip near extension.
+
+With \(D=\|a-h\|\):
+
+\[
+x=\frac{L_1^2-L_2^2+D^2}{2D},\qquad
+k=h+xu+\sqrt{L_1^2-x^2}\,q.
+\]
+
+Reconstruct thigh/shin rotations with consistent bind-axis conventions and restrained native twist. Apply the planned foot orientation. Keep upper-body local rotations unchanged.
+
+### 5. Validate, then extend to repeated segments
+
+Check between frames: sole clearance, anchor slip, knee limits, leg crossing, pelvis derivatives, and comfortable reach. Horizontal top-surface queries alone **cannot certify shin/body collisions, overhangs, or balance**; add geometry checks where those matter.
+
+For repeated segments, carry forward absolute anchors, contact phase, knee-plane history, and pelvis boundary velocity. Plan overlapping horizons containing the next transfer; never reset height or phase independently at segment boundaries.
+
+**Stop/reject** on ambiguous contact timing, insufficient tread footprint, infeasible reach/height constraints, excessive required motion correction, or unresolved collision. Use a separately planned reachable two-foot hold only if one exists. This is a kinematic stair presentation controller—not a dynamically balanced or universally natural locomotion system.

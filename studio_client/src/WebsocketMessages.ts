@@ -1201,12 +1201,83 @@ export interface TimelinePromptMergeMessage {
 
 import type { CameraStudioStateMessage, CameraStudioCommandMessage } from "./cameraProtocol";
 
+/** StageZero voice commands are a hold-to-record or typed request queue. */
+export interface VoiceRecordingMessage {
+  type: "VoiceRecordingMessage";
+  request_id: string;
+  mime_type: string;
+  audio: Uint8Array<ArrayBuffer>;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceCommandMessage {
+  type: "VoiceCommandMessage";
+  request_id: string;
+  command: "submit" | "cancel";
+  text: string;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceStatusMessage {
+  type: "VoiceStatusMessage";
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+}
+export interface VoiceQueueRequest {
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+  target: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceQueueMessage {
+  type: "VoiceQueueMessage";
+  requests: VoiceQueueRequest[];
+}
+
+import type { DialogueAssetsMessage, DialoguePlaybackMessage } from "./VoicePlayback";
+import type { DialogueVoice, DialogueCharacter, DialogueLine } from "./ControlPanel/DialogueState";
+export interface DialogueCommandMessage {
+  type: "DialogueCommandMessage";
+  request_id: string;
+  command: "submit" | "retry" | "cancel" | "remove" | "catalog";
+  take_id?: string;
+  start_frame?: number;
+  character_id?: string;
+  text?: string;
+  voice_id?: string;
+  line_id?: string;
+}
+export interface DialogueVoicesMessage {
+  type: "DialogueVoicesMessage"; voices: DialogueVoice[]; available: boolean; detail: string;
+}
+export interface DialogueStatusMessage {
+  type: "DialogueStatusMessage"; request_id: string; line_id: string;
+  status: string; detail: string; retryable: boolean;
+}
+export interface DialogueStateMessage {
+  type: "DialogueStateMessage"; take_id: string; take_name: string; frame: number;
+  characters: DialogueCharacter[]; lines: DialogueLine[]; available: boolean; detail: string;
+}
+
 export type Message =
+  | DialogueCommandMessage
+  | DialogueVoicesMessage
+  | DialogueStatusMessage
+  | DialogueStateMessage
+  | DialogueAssetsMessage
+  | DialoguePlaybackMessage
   | NativePairClipMessage
   | NativePairTransportMessage
   | NativePairStatusMessage
   | CameraStudioStateMessage
   | CameraStudioCommandMessage
+  | VoiceRecordingMessage
+  | VoiceCommandMessage
+  | VoiceStatusMessage
+  | VoiceQueueMessage
   | CameraFrustumMessage
   | GlbMessage
   | ActorGlbLoadMessage

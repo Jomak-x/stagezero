@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "prompt": "Three people greet each other in turn: person 1 shakes hands with person 2 and releases; person 2 shakes hands with person 3 and releases; finally person 1 shakes hands with person 3. Then person 1 returns to greet person 2 with another handshake.",
+  "seed": 66,
+  "status": "rejected",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/baseline-main/market-four-beat-rotation/attempt-001/sources/scene-9c78f0d62f674c6d8f152fb7ab2473ca/pair-01.npz",
+      "seconds": 0.0017328750109300017,
+      "beat_index": 1,
+      "replayed_native_source": true,
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 2 and person 3 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_2"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_3"
+        }
+      ],
+      "sha256": "f715d8c336be6538139cb90dc54605d2da923ecf53ba31290c57e34c984bda12",
+      "used_in_performance": true
+    },
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/baseline-main/market-four-beat-rotation/attempt-001/sources/scene-9c78f0d62f674c6d8f152fb7ab2473ca/pair-00.npz",
+      "seconds": 0.002324083005078137,
+      "beat_index": 0,
+      "replayed_native_source": true,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 1 and person 2 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "2f10c3282ce1ff1adb4c5260e93a625bef152c2204201459e755baca7d3b12c0",
+      "used_in_performance": false
+    },
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/baseline-main/market-four-beat-rotation/attempt-001/sources/scene-9c78f0d62f674c6d8f152fb7ab2473ca/pair-02.npz",
+      "seconds": 0.0016054589650593698,
+      "beat_index": 2,
+      "replayed_native_source": true,
+      "actor_ids": [
+        "actor_1",
+        "actor_3"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 1 and person 3 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_3"
+        }
+      ],
+      "sha256": "399800e8cb837a318e90c2e294547f9b95dab59c6861429f221c06e76a096bbd",
+      "used_in_performance": false
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 9.59029421210289e-07
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.0068040419719181955
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 1,
+      "seconds": 0.0017328750109300017
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 0.002324083005078137
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 2,
+      "seconds": 0.0016054589650593698
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Four-beat partner rotation",
+    "prompt": "Three people greet each other in turn: person 1 shakes hands with person 2 and releases; person 2 shakes hands with person 3 and releases; finally person 1 shakes hands with person 3. Then person 1 returns to greet person 2 with another handshake.",
+    "actor_count": 3,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      },
+      {
+        "id": "actor_3",
+        "name": "Person 3",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 1 and person 2 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_2",
+          "actor_3"
+        ],
+        "prompt": "Person 2 and person 3 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_1",
+          "actor_3"
+        ],
+        "prompt": "Person 1 and person 3 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-4",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 1 returns to person 2 and they shake hands, then release.",
+        "seconds": 4.0
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.9,
+        "z": -1.5
+      },
+      "actor_2": {
+        "x": 0.9,
+        "z": -1.5
+      },
+      "actor_3": {
+        "x": 0.0,
+        "z": -3.3
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ],
+      "actor_3": [
+        [
+          0.0,
+          -3.3
+        ],
+        [
+          0.0,
+          -1.8
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 4,
+    "core_horizons": "sequential native330 history"
+  },
+  "idle_initializations": [
+    {
+      "actor_ids": [
+        "actor_3"
+      ],
+      "source": "intergen",
+      "source_beat_index": 1,
+      "source_actor_index": 1,
+      "source_frame": 15,
+      "waiting_pose_selection": {
+        "criterion": "lower hands, upright torso, standing leg extension and locally stable feet",
+        "source_frame": 15,
+        "baseline_frame": 0,
+        "changed_from_first_frame": true,
+        "eligible_frame_count": 12,
+        "minimum_score_improvement": 0.29272024631500243,
+        "baseline_metrics": {
+          "score": 1.4636012315750122,
+          "torso_tilt_degrees": 6.126766681671143,
+          "mean_hand_height_above_hips_m": 0.18580108880996704,
+          "mean_hand_horizontal_reach_m": 0.316253125667572,
+          "local_max_foot_xz_speed_mean_m_s": 0.09750652313232422,
+          "highest_support_above_native_floor_m": 0.0036541090812534094,
+          "standing_leg_extension_ratio": 1.145815134048462
+        },
+        "selected_metrics": {
+          "score": 0.8865235447883606,
+          "torso_tilt_degrees": 6.003028869628906,
+          "mean_hand_height_above_hips_m": 0.033193439245224,
+          "mean_hand_horizontal_reach_m": 0.27426877617836,
+          "local_max_foot_xz_speed_mean_m_s": 0.04751007631421089,
+          "highest_support_above_native_floor_m": 0.003266231855377555,
+          "standing_leg_extension_ratio": 1.1380306482315063
+        },
+        "thresholds": {
+          "maximum_torso_tilt_degrees": 20,
+          "maximum_hand_height_above_hips_m": 0.08,
+          "maximum_hand_horizontal_reach_m": 0.4,
+          "maximum_local_foot_speed_m_s": 0.35,
+          "maximum_support_above_native_floor_m": 0.1,
+          "minimum_standing_leg_extension_ratio": 0.7
+        },
+        "score_weights": {
+          "torso_tilt_degrees": 0.03333333333333333,
+          "hand_height_m": 3,
+          "hand_reach_m": 2,
+          "local_foot_speed_m_s": 0.6,
+          "support_height_m": 3
+        },
+        "joint_pose_modified": false,
+        "physical_contact_verified": false,
+        "display_policy": "one exact generated pose held stationary; no breathing or synthesized idle motion"
+      },
+      "yaw_radians": 0.0,
+      "translation": [
+        0.014028448611497879,
+        0.0,
+        -3.3390999019145964
+      ],
+      "display_policy": "explicit stationary hold of a real incoming native pose at the assigned start"
+    }
+  ],
+  "error": "Native replay has no archived source for this beat/seed",
+  "wall_seconds": 0.016548542014788836
+}

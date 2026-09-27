@@ -8,6 +8,7 @@ from takes import MAX_TAKES
 from duration_planning import plan_duration
 from studio_guide import GUIDE_HTML
 from studio_navigation import navigate_tab
+from scene_actor_intent import ActorPreflight, scene_identity, cast_route_error
 from prompt_assistant import needs_clarification
 from prompt_assistant_ui import PromptAssistantUI
 from scene_targets import resolve_targets
@@ -26,23 +27,17 @@ ROUTINE_STATUS_PREFIXES = (
 )
 
 STYLE = """<style>
-:root { --mantine-font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.mantine-Paper-root { background: #111923; }
-.mantine-ScrollArea-viewport { scrollbar-color: #344453 #111923; }
-.mantine-Tabs-list { padding: 0 10px; border-bottom: 1px solid #2a3644; gap: 0; }
-.mantine-Tabs-tab { flex: 1; padding: 9px 5px !important; font-size: 12px; font-weight: 600; color: #8fa3b8; }
-.mantine-Tabs-tab[data-active] { color: #87e8cd; border-color: #87e8cd; background: #182b30; }
-.mantine-Tabs-panel { padding-top: 6px; }
-.mantine-Button-root { min-height: 32px; border-radius: 7px; transition: background 120ms; }
-.mantine-Button-root[data-variant=outline] { border-color: #35495a; color: #d2e3ed; }
-.mantine-Button-root:disabled { opacity: .42; }
-.mantine-Input-input { background: #0c121b; border-color: #304052; border-radius: 6px; color: #e3edf6; }
-.mantine-Input-input:focus { border-color: #83dec7; }
-.mantine-Flex-root:has(> div > .mantine-Textarea-root) { flex-direction: column; align-items: stretch !important; gap: 6px; }
-.mantine-Flex-root:has(> div > .mantine-Textarea-root) > div { width: 100% !important; }
-.mantine-Textarea-input { min-height: 68px; line-height: 1.5; padding: 8px; }
-.mantine-Text-root label { color: #a0b1c1; letter-spacing: 0; font-size: 11px; }
-.mantine-Checkbox-label { color: #b6c7d5; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-ScrollArea-viewport { scrollbar-color: #344453 #111923; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root { min-height: 32px; border-radius: 8px; transition: background 120ms; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root[data-variant=outline] { border-color: #35495a; color: #d2e3ed; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Button-root:disabled { opacity: .42; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Input-input { background: #0c121b; border-color: #304052; border-radius: 8px; color: #e3edf6; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Input-input:focus { border-color: #83dec7; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Flex-root:has(> div > .mantine-Textarea-root) { flex-direction: column; align-items: stretch !important; gap: 6px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Flex-root:has(> div > .mantine-Textarea-root) > div { width: 100% !important; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Textarea-input { min-height: 68px; line-height: 1.5; padding: 8px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Text-root label { color: #a0b1c1; letter-spacing: 0; font-size: 11px; }
+:is(.sz-inspector,.sz-mobile-inspector) .mantine-Checkbox-label { color: #b6c7d5; }
 .sz-sub { color: #8fa3b8; font-size: 12px; line-height: 1.6; }
 .sz-section { margin: 5px 12px 7px; color: #f0f6fa; font-size: 13px; font-weight: 600; }
 .sz-section small { display: block; color: #8fa3b8; font-size: 11px; font-weight: 400; line-height: 1.45; margin-top: 2px; }
@@ -69,7 +64,7 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, cast_session=None, core_controls=None, on_native_open=None, on_g1_open=None, on_story_activate=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, cast_session=None, core_controls=None, on_native_open=None, on_g1_open=None, on_story_activate=None, on_generate_cast=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.core_session = core_session
@@ -78,6 +73,14 @@ class StudioUI:
         self.on_native_open = on_native_open
         self.on_g1_open = on_g1_open
         self.on_story_activate = on_story_activate
+        self.on_generate_cast = on_generate_cast
+        self._actor_check = ActorPreflight()
+        self._actor_kind = None
+        self._actor_client = None
+        self._actor_approved = None
+        self._single_actor_original = None
+        self._single_actor_input = None
+        self._actor_provenance = {}
         self._core_visibility = []
         self._legacy_motion_controls = []
         self.folder = project_folder
@@ -100,13 +103,10 @@ class StudioUI:
         self.status = gui.add_html('')
         from story_controls import StoryControls
         self.story_controls = StoryControls(gui, session, core_session=core_session, paired_session=paired_session, cast_session=cast_session,
-                                            on_story_activate=on_story_activate)
+                                            on_story_activate=on_story_activate, on_generate_cast=on_generate_cast)
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
         self.quick_actions = gui.add_button_group('Quick actions', ('New take', 'Guide'))
-        self.project_name = gui.add_text('Project name', initial_value='My performance')
-        self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD, color='gray')
-        self.files = gui.add_html('')
         self.tabs = gui.add_tab_group()
         with self.tabs.add_tab('Motion'):
             if core_controls is not None:
@@ -118,9 +118,6 @@ class StudioUI:
             self.timeline_command = gui.add_text('Timeline action command', initial_value='')
             self.timeline_command.visible = False
             self.motion_intro = gui.add_html('')
-            self.ideas_folder = gui.add_folder('Try a direction', expand_by_default=True)
-            with self.ideas_folder:
-                self.ideas = gui.add_button_group('Example directions', ('Wave', 'Walk', 'Dance'))
             self.action_heading = gui.add_html('')
             self.action_note = gui.add_html('')
             self.action_prompt = gui.add_text('Direction', initial_value='', multiline=True)
@@ -143,6 +140,9 @@ class StudioUI:
             self.duration_seconds = gui.add_text('New motion length (seconds, 0.16–30)', initial_value='4.16')
             self.duration_preview = gui.add_html('')
             self.generate = gui.add_button('Generate', icon=viser.Icon.SPARKLES)
+            self.ideas_folder = gui.add_folder('Need an idea?', expand_by_default=False)
+            with self.ideas_folder:
+                self.ideas = gui.add_button_group('Example directions', ('Wave', 'Walk', 'Dance'))
             self.cancel = gui.add_button('Cancel generation', color='gray', visible=False)
             self.motion_progress = gui.add_html('')
             self.advanced_folder = gui.add_folder('Advanced: change ending as a new version', expand_by_default=False)
@@ -189,7 +189,10 @@ class StudioUI:
             section(gui, 'Camera')
             camera.build_gui(gui)
         with self.tabs.add_tab('Project'):
-            section(gui, 'Open or start a project', 'Use Save project + download above to keep the current project.')
+            self.project_name = gui.add_text('Project name', initial_value='My performance')
+            self.save = gui.add_button('Save project + download', icon=viser.Icon.DOWNLOAD, color='gray')
+            self.files = gui.add_html('')
+            section(gui, 'Open or start a project', 'Save your work here before starting another project.')
             self.saved = gui.add_dropdown('Saved projects', ('No saved projects',))
             self.open = gui.add_button('Open selected project', color='gray')
             self.upload = gui.add_upload_button('Open project file', mime_type='.npz')
@@ -226,6 +229,14 @@ class StudioUI:
             value = False
         if getattr(handle, property_name) != value:
             setattr(handle, property_name, value)
+
+    def sync_voice_action(self, text):
+        """Show an accepted voice action in the existing motion editor."""
+        self._set(self.prompt, 'value', text)
+        self._set(self.edit_action, 'value', CREATE)
+        self._set(self.duration_mode, 'value', AUTO)
+        self._set(self.mode, 'value', self.session.mode)
+        self._prompt_feedback()
 
     @staticmethod
     def _valid_prompt(value):
@@ -271,6 +282,73 @@ class StudioUI:
                     s.character_motion_enabled, s.busy,
                     self._action_context() if action else self._generation_context())
 
+    def _actor_original(self, kind):
+        action = kind == 'edit'
+        target = self.action_prompt if action else self.prompt
+        assistant = self.action_assistant if action else self.prompt_assistant
+        # Provenance belongs to the unchanged text, not timing/editor settings.
+        # The assistant drops its application record when those settings change;
+        # retain just this text pair independently of its submission snapshot.
+        applied = assistant._applied
+        record = self._actor_provenance.get(kind)
+        if record is not None and record[0] != target.value:
+            self._actor_provenance.pop(kind, None)
+            record = None
+        if applied is not None and applied[2] == target.value:
+            if record is None:
+                record = (applied[2], applied[1])
+                self._actor_provenance[kind] = record
+        return record[1] if record is not None else target.value
+
+    def _actor_context(self, kind=None):
+        kind = kind or self._actor_kind
+        prompt = self.action_prompt.value if kind == 'edit' else self.prompt.value
+        fields = self._action_context() if kind == 'edit' else self._generation_context()
+        return (kind, prompt, self._actor_original(kind), fields, scene_identity(self.session,
+                (self.core_session, self.paired_session, self.cast_session)))
+
+    def _start_actor_check(self, kind, client):
+        self._actor_kind = kind
+        self._actor_client = client
+        prompt = self._actor_original(kind)
+        self._actor_prompt = prompt
+        if self._actor_check.start(prompt, self._actor_context()):
+            self._single_actor_original = None
+            self.session.status = 'Checking requested performers…'
+
+    def _poll_actor_check(self):
+        if not self._actor_check.pending:
+            return
+        with self.session.lock:
+            outcome = self._actor_check.poll(self._actor_context())
+            if outcome is None:
+                return
+            intent, error = outcome
+            if error:
+                self.session.status = error
+                return
+            try:
+                if intent.count in (2, 3):
+                    editing = self._actor_kind == 'edit' or self.edit_action.value != CREATE
+                    seconds = None if self.duration_mode.value == AUTO else self.duration_seconds.value
+                    error = cast_route_error(intent.count, seconds, self.on_generate_cast, editing=editing)
+                    if error:
+                        raise ValueError(error)
+                    if not self.on_generate_cast(self._actor_prompt, None, self._actor_client,
+                                                 actor_count=intent.count):
+                        raise ValueError('AI cast generation was not started. Your scene is preserved.')
+                    self.session.status = f'{intent.count} performers · AI cast'
+                elif self._actor_kind == 'edit':
+                    self._actor_approved = self._actor_context()
+                    self._submit_actor_edit(None)
+                else:
+                    self._single_actor_original = self._actor_prompt
+                    self._single_actor_input = self.prompt.value
+                    self.session.status = 'One performer · preparing motion direction'
+                    self.prompt_assistant.start_generation()
+            except (ValueError, RuntimeError) as exc:
+                self.session.status = str(exc)
+
     def _make_prompt_assistant(self, gui, *, action):
         target = self.action_prompt if action else self.prompt
 
@@ -288,9 +366,13 @@ class StudioUI:
             return True
 
         def generate_validated(text, expected_context, expected_scene, _original,
-                               submission_guard):
+                               submission_guard, _source="rewritten"):
             s = self.session
             with s.lock:
+                if (self._single_actor_original is None or
+                        _original.strip() not in {self._single_actor_original.strip(),
+                                                 (self._single_actor_input or '').strip()}):
+                    return False, 'Generate again to check the original requested performers.'
                 if (s.busy or not s.character_motion_enabled or not target.visible or
                         target.value != text or not self._valid_prompt(text) or
                         self._assistant_context(False) != expected_context or
@@ -514,15 +596,16 @@ class StudioUI:
         self._set(self.duration_preview, 'content', preview)
         self._set(self.duration_preview, 'visible', self._valid_prompt(self.prompt.value) and show_form)
         at_limit = len(self.session.takes) >= MAX_TAKES and choice != EXTEND
+        actor_pending = self._actor_check.pending
         assistant_pending = self.prompt_assistant.generation_in_progress()
-        disabled = (busy or assistant_pending or not self.session.character_motion_enabled or
+        disabled = (busy or actor_pending or assistant_pending or not self.session.character_motion_enabled or
                     not self._valid_prompt(self.prompt.value) or error is not None or at_limit)
         self._set(self.generate, 'disabled', disabled)
         retry = (self.session.status.startswith('Generation failed') and
                  self._generation_request_context == self._generation_context())
-        self._set(self.generate, 'label', 'Generating…' if busy else
+        self._set(self.generate, 'label', 'Checking performers…' if actor_pending else 'Generating…' if busy else
                   'Improving direction…' if assistant_pending and self.prompt_assistant._request_pending else
-                  'Answer prompt questions' if assistant_pending else
+                  'Review prompt assistant' if assistant_pending else
                   'Take limit reached' if at_limit else
                   'Retry generation' if retry else 'Generate motion')
 
@@ -684,6 +767,23 @@ class StudioUI:
                     return
                 if s.busy:
                     return
+                # Full-scene movements use the scene popup's Refine editor.
+                # Check under the session lock, then open the client-local
+                # popup outside it to avoid reversing the workflow lock order.
+                story_movement = (operation == 'replace' and
+                                  'beat_id' in take.segments[index])
+            owns_story = (operation == 'replace' and
+                          (story_movement or self.story_controls.owns_take(take_id)))
+            if owns_story and self.story_controls.open_for_movement(e.client, take_id, index):
+                self._last_timeline_nonce = nonce
+                self._clear_action_edit()
+                self.update()
+                return
+            with s.lock:
+                take = s.takes.get(s.active_take)
+                if (take is None or take.id != take_id or not 0 <= index < len(take.segments)
+                        or s.busy or not s.character_motion_enabled):
+                    return
                 self._last_timeline_nonce = nonce
                 self._begin_action_edit(take, index, operation)
                 selected = take.segments[index]
@@ -715,6 +815,12 @@ class StudioUI:
                 if error is not None:
                     s.status = error
                     return
+                if self._actor_approved != self._actor_context('edit'):
+                    if not self._actor_check.pending:
+                        self._start_actor_check('edit', getattr(_, 'client', None))
+                    self.update()
+                    return
+                self._actor_approved = None
                 assistant_pending = self.action_assistant.blocks_generation()
                 if (assistant_pending or
                         needs_clarification(self.action_prompt.value,
@@ -731,8 +837,14 @@ class StudioUI:
                     self._generation_started_at = time.perf_counter()
             self.update()
 
+        self._submit_actor_edit = save_action
+
         @self.cancel_action.on_click
         def cancel_action(_):
+            with s.lock:
+                if self._actor_check.pending and self._actor_kind == 'edit':
+                    self._actor_check.cancel()
+                    s.status = 'Performer check cancelled · stored motion preserved'
             with s.lock:
                 if s.busy:
                     return
@@ -804,24 +916,31 @@ class StudioUI:
             self.update()
 
         @self.generate.on_click
-        def generate(_):
+        def generate(event):
             with s.lock:
-                if not s.character_motion_enabled or s.busy or not self._valid_prompt(self.prompt.value):
+                if (not s.character_motion_enabled or s.busy or
+                        self._actor_check.pending or self.prompt_assistant.generation_in_progress() or
+                        not self._valid_prompt(self.prompt.value)):
                     return
                 take = s.takes.get(s.active_take)
                 _, error = self._generation_plan(take)
                 if error is not None:
                     s.status = error
                     return
-            self.prompt_assistant.start_generation()
+                self._start_actor_check('motion', getattr(event, 'client', None))
             self.update()
 
         @self.cancel.on_click
         def cancel(_):
             with s.lock:
-                if not s.busy: return
-                s.seek(s.frame)
-                s.status = 'Generation cancelled · stored motion preserved'
+                if self._actor_check.pending:
+                    self._actor_check.cancel()
+                    s.status = 'Performer check cancelled · stored motion preserved'
+                elif s.busy:
+                    s.seek(s.frame)
+                    s.status = 'Generation cancelled · stored motion preserved'
+                else:
+                    return
             self.update()
 
         @self.takes.on_update
@@ -833,6 +952,15 @@ class StudioUI:
                 if take_id is None: return
                 with s.lock:
                     if s.busy: return
+                    if self._active_motion_session() is not None:
+                        try:
+                            if self.on_story_activate is None:
+                                raise ValueError('Switch to One character before opening a take.')
+                            self.on_story_activate()
+                        except (ValueError, RuntimeError) as exc:
+                            s.project_status = str(exc)
+                            self.update()
+                            return
                     if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                     self._set(self.mode, 'value', 'Live ARDY')
                     self._clear_action_edit()
@@ -846,6 +974,15 @@ class StudioUI:
                 take_id = self.slot_ids[index] if index < len(self.slot_ids) else None
                 with s.lock:
                     if s.busy or take_id not in s.takes: return
+                    if self._active_motion_session() is not None:
+                        try:
+                            if self.on_story_activate is None:
+                                raise ValueError('Switch to One character before opening a take.')
+                            self.on_story_activate()
+                        except (ValueError, RuntimeError) as exc:
+                            s.project_status = str(exc)
+                            self.update()
+                            return
                     if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                     self._set(self.mode, 'value', 'Live ARDY')
                     self._clear_action_edit()
@@ -944,6 +1081,17 @@ class StudioUI:
                 with s.lock:
                     if s.busy: return
                 motion = self._active_motion_session()
+                if motion is not None and motion is self.core_session:
+                    data = motion.save()
+                    core_folder = self.folder.parent / 'core-projects'
+                    core_folder.mkdir(parents=True, exist_ok=True)
+                    path = core_folder / f'core-{time.time_ns()}.core.stagezero.npz'
+                    path.write_bytes(data)
+                    s.project_status = f'Saved Core motion: {path.name}'
+                    if e.client is not None:
+                        e.client.send_file_download(path.name, data)
+                    self.update()
+                    return
                 if motion is not None and motion in (self.cast_session, self.paired_session) and motion.snapshot().get('fps') == 30:
                     data = motion.save()
                     is_cast = motion is self.cast_session
@@ -986,6 +1134,10 @@ class StudioUI:
             try:
                 with s.lock:
                     if s.busy: return
+                    if self._active_motion_session() is not None:
+                        if self.on_story_activate is None:
+                            raise ValueError('Switch to One character before starting a new project.')
+                        self.on_story_activate()
                     s.new_project(self.folder)
                     self._clear_action_edit()
                     self._set(self.mode, 'value', s.mode)
@@ -1033,6 +1185,7 @@ class StudioUI:
     def update(self):
         """Synchronize the sidebar after the viewer advances the session clock."""
         self.story_controls.update()
+        self._poll_actor_check()
         s = self.session
         if self._active_motion_session() is None:
             for handle, visible in self._core_visibility:
@@ -1072,11 +1225,13 @@ class StudioUI:
             self._refresh_action_edit(take, s.busy)
             self._prompt_feedback()
             self._refresh_generation(take, s.busy)
+            self._actor_original('motion')
+            self._actor_original('edit')
             self.prompt_assistant.refresh(
                 visible=self.prompt.visible and s.character_motion_enabled, busy=s.busy)
             self.action_assistant.refresh(
                 visible=self.action_prompt.visible and s.character_motion_enabled, busy=s.busy)
-            self._set(self.cancel, 'visible', s.busy)
+            self._set(self.cancel, 'visible', s.busy or self._actor_check.pending)
             if s.busy:
                 if self._generation_started_at is None:
                     self._generation_started_at = time.perf_counter()
@@ -1095,12 +1250,12 @@ class StudioUI:
             self._set(self.motion_progress, 'visible', not action_progress and bool(progress))
             self._set(self.motion_progress, 'content', progress if not action_progress else '')
             intro = ('Select a motion-ready character to generate motion.' if not s.character_motion_enabled else
-                     'Choose Wave, Walk, or Dance below, or write your own direction. '
-                     'Set a length, then press Generate motion.')
+                     'Describe a movement, then press Generate motion. Need a prompt? Try an idea below.')
             heading = 'Create your first motion' if not s.takes else 'Start another take'
             self._set(self.motion_intro, 'content',
                       f'<div class="sz-intro"><b>{heading}</b>{intro}</div>')
-            self._set(self.motion_intro, 'visible', take is None and not s.busy)
+            self._set(self.motion_intro, 'visible', take is None and not s.busy and
+                      not s.character_motion_enabled)
             if take is None:
                 editor_state = 'New take draft' if live else 'Start a new take'
             elif self.edit_action.value == REPLACE:
@@ -1143,10 +1298,14 @@ class StudioUI:
                 self._set(control, 'disabled', take is None or s.busy)
             self._set(self.trim, 'disabled', not live or take is None or s.busy or s.frame < 3 or s.frame >= last_frame)
             active_motion = self._active_motion_session()
-            native_save = active_motion is not None and active_motion in (self.cast_session, self.paired_session) and active_motion.snapshot().get('fps') == 30
+            native_save = active_motion is not None and (active_motion is self.core_session or
+                (active_motion in (self.cast_session, self.paired_session) and active_motion.snapshot().get('fps') == 30))
             native_state = active_motion.snapshot() if native_save else {}
-            self._set(self.save, 'label', 'Save native performance + download' if native_save else 'Save project + download')
-            self._set(self.save, 'disabled', s.busy or (native_save and (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
+            save_label = ('Save Core motion + download' if active_motion is not None and active_motion is self.core_session else
+                          'Save native performance + download' if native_save else 'Save project + download')
+            self._set(self.save, 'label', save_label)
+            self._set(self.save, 'disabled', s.busy or (native_save and
+                (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
             self._set(self.open, 'disabled', not self.saved_map or s.busy)
             self._set(self.upload, 'disabled', s.busy)
             self._set(self.clear, 'disabled', s.busy)
@@ -1160,6 +1319,7 @@ class StudioUI:
             project_status = s.project_status or 'No project save in this session.'
             self._set(self.files, 'content',
                       f'<div class="sz-project-status" role="status">{escape(project_status)}</div>')
+            self._set(self.files, 'visible', bool(s.project_status))
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')
 

@@ -129,10 +129,24 @@ class CoreStudioControls:
             self.restart = gui.add_button("Restart", color="gray")
             self.frame = gui.add_slider("Frame", min=0, max=1, step=1, initial_value=0)
             with gui.add_folder("Move to a scene object", expand_by_default=False):
+                gui.add_markdown("Start an independent one-actor terrain take at a supported scene point. "
+                                 "Temple start: X=0, Z=0.85, yaw=π. Industrial switchback: X=0, Z=2, yaw=π. "
+                                 "Yaw uses radians. The ordinary Core take stays available when you switch back.")
+                self.terrain_start_x = gui.add_text("Terrain start X (m)", initial_value="0")
+                self.terrain_start_z = gui.add_text("Terrain start Z (m)", initial_value="0.85")
+                self.terrain_start_yaw = gui.add_text("Terrain start yaw (radians)", initial_value=str(math.pi))
+                self.terrain_start = gui.add_button("Start terrain actor here", color="gray")
+                self.terrain_aware = gui.add_checkbox("Terrain-aware movement", initial_value=False)
+                self.terrain_help = gui.add_markdown(
+                    "Ground movement: walk a distance, approach an exact object name or ID, "
+                    "or use a configured automatic proximity door. Stairs are unavailable in this mode.")
+                self.terrain_status = gui.add_markdown("Terrain-aware movement is off.")
                 self.nav_actor = gui.add_dropdown("Actor", ("Actor 1",), initial_value="Actor 1")
                 self.target = gui.add_dropdown("Object", ("No scene objects",), initial_value="No scene objects")
                 self.verb = gui.add_dropdown("Action", ("approach", "go_through"), initial_value="approach")
                 self.navigate = gui.add_button("Navigate to object")
+                self.spatial_text = gui.add_text("Spatial commands", initial_value="walk two metres forward then walk one metre left", multiline=True)
+                self.spatial_run = gui.add_button("Run spatial commands")
             self.retry = gui.add_button("Retry failed generation", color="gray")
             self.cancel = gui.add_button("Cancel pending motion", color="gray")
             with gui.add_folder("Core projects", expand_by_default=False):
@@ -185,6 +199,18 @@ class CoreStudioControls:
     def _placements(self, count):
         points = recommend_placements(self._scene_document(), count)
         return {f"actor_{index + 1}": point for index, point in enumerate(points)}
+
+    def _terrain_placements(self):
+        try:
+            x = float(self.terrain_start_x.value)
+            z = float(self.terrain_start_z.value)
+            yaw = float(self.terrain_start_yaw.value)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError("Terrain start X, Z, and yaw must be numbers") from exc
+        if (not all(math.isfinite(value) for value in (x, z, yaw)) or
+                abs(x) > 100 or abs(z) > 100 or abs(yaw) > math.pi):
+            raise ValueError("Terrain start X/Z must be within ±100 m and yaw within ±π radians")
+        return {"actor_1": {"position_xz": [x, z], "yaw": yaw}}
 
     @staticmethod
     def _face_each_other(placements):
@@ -449,6 +475,9 @@ class CoreStudioControls:
         @self.start.on_click
         def change_cast(_):
             def action():
+                snapshot = self._snapshot()
+                if snapshot.get("terrain_aware") or snapshot.get("terrain_pending"):
+                    raise ValueError("Turn off Terrain-aware movement before changing the ordinary cast.")
                 self._backup()
                 was_active = bool(self._snapshot().get("active"))
                 self.on_active(True)
@@ -576,6 +605,32 @@ class CoreStudioControls:
                 if self.verb.value not in self._target_actions.get(self.target.value, ()):
                     raise ValueError("That action is unavailable for this object.")
                 self.core.navigate(actor_id, target_id, self.verb.value)
+            self._run(action)
+
+        @self.spatial_run.on_click
+        def spatial_clicked(_):
+            def action():
+                actor_id = "actor_1" if self.nav_actor.value == "Actor 1" else "actor_2"
+                self.core.spatial_commands(actor_id, self.spatial_text.value)
+            self._run(action)
+
+        @self.terrain_aware.on_update
+        def terrain_aware_changed(event):
+            if event.client is not None and not self._syncing:
+                self._run(lambda: self.core.set_terrain_aware(bool(self.terrain_aware.value)))
+
+        @self.terrain_start.on_click
+        def terrain_start_clicked(_):
+            def action():
+                placements = self._terrain_placements()
+                scene = self._scene_document()
+                was_active = bool(self._snapshot().get("active"))
+                self.on_active(True)
+                try:
+                    self.core.start_terrain(scene_document=scene, placements=placements)
+                except Exception:
+                    self.on_active(was_active)
+                    raise
             self._run(action)
 
         @self.target.on_update
@@ -740,6 +795,10 @@ class CoreStudioControls:
         frames = int(snapshot.get("total_frames") or 0)
         current = int(snapshot.get("frame") or 0)
         phase = snapshot.get("phase")
+        terrain_aware = bool(snapshot.get("terrain_aware", False))
+        terrain_pending = bool(snapshot.get("terrain_pending", False))
+        terrain_take_available = bool(snapshot.get("terrain_take_available", False))
+        terrain_retry_available = bool(snapshot.get("terrain_retry_available", False))
         together_state = self._together_state(snapshot)
         if self._together_key is not None and self._together_key != together_state:
             self._together_plan = None
@@ -751,6 +810,33 @@ class CoreStudioControls:
         self._syncing = True
         try:
             self._set(self.enabled, "value", active)
+            self._set(self.terrain_aware, "value", terrain_aware)
+            self._set(self.terrain_aware, "disabled", not active or terrain_pending or
+                      not (terrain_take_available or (snapshot.get("initialized") and count == 1)))
+            self._set(self.terrain_start, "disabled", terrain_pending)
+            self._set(self.terrain_help, "content", (
+                "Terrain-aware movement: use up to four commands to walk up authored stairs, "
+                "cross a supported bridge, or 'open Temple gate then enter'. Name authored objects "
+                "exactly. The route needs rendered support and body clearance. Gates open automatically only "
+                "after observed proximity. Facing and foot placement are assisted. Descents and difficult "
+                "pivots are experimental and may reject. Hand contact, jumping, and crossing voids are unsupported."
+                if terrain_aware else
+                "Ground movement: walk a distance, approach an exact object name or ID, "
+                "or use a configured automatic proximity door. Stairs are unavailable in this mode."))
+            if not terrain_aware and terrain_take_available:
+                terrain_fallback = "A terrain take is saved. Turn on Terrain-aware movement to resume it."
+            elif not terrain_aware and count == 2:
+                terrain_fallback = "Terrain-aware movement needs one actor. Use Start terrain actor here."
+            elif not terrain_aware and not snapshot.get("initialized"):
+                terrain_fallback = "Use Start terrain actor here, or start a one-actor Core cast before toggling."
+            elif not terrain_aware:
+                terrain_fallback = "Terrain-aware movement is off."
+            else:
+                terrain_fallback = "Terrain-aware movement is ready for a spatial command."
+            terrain_status = str(snapshot.get("terrain_status") or terrain_fallback)
+            if terrain_pending:
+                terrain_status = "Terrain route in progress. Cancel keeps the last committed take. " + terrain_status
+            self._set(self.terrain_status, "content", self._mdx_text(terrain_status))
             if count != self._last_actor_count:
                 self._set(self.cast, "value", "Two actors" if count == 2 else "One actor")
                 self._last_actor_count = count
@@ -768,22 +854,25 @@ class CoreStudioControls:
                 self._set(self.verb, "value", self.verb.options[0])
             self._set(self.frame, "max", max(frames - 1, 1))
             self._set(self.frame, "value", min(current, max(frames - 1, 1)))
-            self._set(self.start, "disabled", not active)
-            self._set(self.generate, "disabled", not active or not available or not ids)
+            self._set(self.start, "disabled", not active or terrain_aware or terrain_pending)
+            self._set(self.generate, "disabled", not active or not available or not ids or terrain_aware or terrain_pending)
             together_ready = active and available and len(ids) == 2
-            self._set(self.together_start, "disabled", False)
-            self._set(self.together_preview_preset, "disabled", not together_ready)
-            self._set(self.together_plan_ai, "disabled", not together_ready or ai_pending)
+            self._set(self.together_start, "disabled", terrain_aware or terrain_pending)
+            self._set(self.together_preview_preset, "disabled", not together_ready or terrain_aware or terrain_pending)
+            self._set(self.together_plan_ai, "disabled", not together_ready or ai_pending or terrain_aware or terrain_pending)
             self._set(self.together_generate, "disabled", not together_ready or
-                      self._together_plan is None or self._together_key != together_state)
+                      self._together_plan is None or self._together_key != together_state or
+                      terrain_aware or terrain_pending)
             self._set(self.together_preview, "content", self._together_preview_text())
-            self._set(self.navigate, "disabled", not active or not available or not targets or not verbs or not ids)
+            self._set(self.navigate, "disabled", not active or not available or not targets or not verbs or not ids or terrain_aware or terrain_pending)
+            self._set(self.spatial_run, "disabled", not active or not available or not ids or terrain_pending)
             self._set(self.play, "disabled", not active or frames == 0)
             self._set(self.pause, "disabled", not active or frames == 0)
             self._set(self.restart, "disabled", not active or frames == 0)
             self._set(self.frame, "disabled", not active or frames == 0)
-            self._set(self.retry, "disabled", not active or not available or phase != "generation_failed")
-            self._set(self.cancel, "disabled", not active or phase not in ("generating", "queued", "buffering"))
+            retry_available = (terrain_retry_available if terrain_aware else phase == "generation_failed")
+            self._set(self.retry, "disabled", not active or not available or not retry_available or terrain_pending)
+            self._set(self.cancel, "disabled", not active or (phase not in ("generating", "queued", "buffering") and not terrain_pending))
             self._set(self.save, "disabled", frames == 0)
             self._set(self.open_saved, "disabled", not bool(self._saved_map))
             self._set(self.example_motion, "visible", bool(snapshot.get("example_available", False)))

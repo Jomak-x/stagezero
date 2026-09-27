@@ -1,0 +1,86 @@
+{
+  "case": {
+    "case": "market-four-beat-rotation",
+    "background": "market",
+    "seed": 66,
+    "plan": "plans/market-four-beat-rotation.json",
+    "purpose": "Supported four-beat limit with time left for approach; independent prescribed seed, not a retry of seed61."
+  },
+  "planner": "explicit frozen authored test plan; not a fresh AI planner run",
+  "plan_sha256": "d79e0db0ebfca4900927a64e55b4160ea4de4364f1d2d00a98efb14c75f402a5",
+  "scene_sha256": "35d841555e0c8fb822af77a5da288b24d963ac5d901afc71763be952023d6e8d",
+  "code_commit": "8e70b1c7322c14503780fee2047f4272251f044b",
+  "code_file_sha256": {
+    "experiments/trial_prompt_scene.py": "acb0a17b999d6f5b2fdf0273c0ed5e57bd045d8032c78ac42813d2a5a5345fda",
+    "experiments/review_interaction_v2.py": "114eec0d6fb7d788ef0e9fc878bcca19c73733a7ee669cf7e0dd1182027f8bb9",
+    "prompt_scene_builder.py": "e8881932d64a0809a0082bd8a1199907ece74ecdb31eeeea9f37aed68cefa49e",
+    "prompt_scene_plan.py": "01b44a4cd38827e36ac1328f5171575007d5ec7f4956956b71a104e37ac71313",
+    "cast_motion_refinement.py": "08a8704989a7ec039a0866b5b8f167226051a0757cbda180ff00460ca836a5a1",
+    "cast_observer_motion.py": "f9fcf75e893a79007b2c976894a6cdd09b5a2d0f0eb470d8c9f775dd68cf1320",
+    "paired_meetup.py": "dc0ddc119f44c6a5277e8c5e754b7f5a81093f9e25cd9e9c98d402ab00786743",
+    "native_pair_transition.py": "d4e46a3cb325dc780e5e32b8e4daa25089e2a5c660d6522421419f4c3a4c960e",
+    "interaction_scene_collision.py": "e3e2eb269fbaf70cee96060f3d3b3923ba252b9899b8de86c6050966f08a426c",
+    "cast_performance.py": "bdb2d8e205aa05a82b01ff5d425f5a7ac55e8d8a4f02d6e6170c0e0de483db31",
+    "native_wait_pose.py": "438e13ce0e093c415965c0fcf524c0d2c3b17b468ad84311246508c28118cc20",
+    "cast_observer_turn.py": "5e611efa6b8c2a528c9f47d124ec7608a59dd538de4757b33a0e217556fcba83",
+    "cast_observer_continuation.py": "335214bcd0b854c3f3ed4ca25755c3ce17167140f58bbcdf61a9b4d3ad6bcbff"
+  },
+  "runner_wall_seconds": 6.269343750027474,
+  "exit_code": 1,
+  "archive_sha256": null,
+  "source_archives": [
+    {
+      "manifest": "review/interaction-demo-final/fresh/market-four-beat-rotation/attempt-001/sources/scene-3f421121a9d0400483411565fb9d39af/manifest.json",
+      "sha256": "3f22774ff8a734a1d407032a9e1887bfe5c21449b2f24104638159e8ca2840cd",
+      "status": "rejected",
+      "sources": [
+        {
+          "name": "pair-01.npz",
+          "kind": "intergen",
+          "recorded_sha256": "f715d8c336be6538139cb90dc54605d2da923ecf53ba31290c57e34c984bda12",
+          "actual_sha256": "f715d8c336be6538139cb90dc54605d2da923ecf53ba31290c57e34c984bda12",
+          "hash_matches": true
+        },
+        {
+          "name": "pair-00.npz",
+          "kind": "intergen",
+          "recorded_sha256": "2f10c3282ce1ff1adb4c5260e93a625bef152c2204201459e755baca7d3b12c0",
+          "actual_sha256": "2f10c3282ce1ff1adb4c5260e93a625bef152c2204201459e755baca7d3b12c0",
+          "hash_matches": true
+        },
+        {
+          "name": "core-000.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "79ea56bb314012580821cc38cbeb6e2acea8ead20c4274a6f55c79d303cfd5e9",
+          "actual_sha256": "79ea56bb314012580821cc38cbeb6e2acea8ead20c4274a6f55c79d303cfd5e9",
+          "hash_matches": true
+        },
+        {
+          "name": "core-001.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "4f36ed76b464fd08780cb3f9238eadb44cf6ecde2b064dbb695db5dd39de4bac",
+          "actual_sha256": "4f36ed76b464fd08780cb3f9238eadb44cf6ecde2b064dbb695db5dd39de4bac",
+          "hash_matches": true
+        },
+        {
+          "name": "pair-02.npz",
+          "kind": "intergen",
+          "recorded_sha256": "399800e8cb837a318e90c2e294547f9b95dab59c6861429f221c06e76a096bbd",
+          "actual_sha256": "399800e8cb837a318e90c2e294547f9b95dab59c6861429f221c06e76a096bbd",
+          "hash_matches": true
+        }
+      ],
+      "all_archived_files": {
+        "core-000.npz": "79ea56bb314012580821cc38cbeb6e2acea8ead20c4274a6f55c79d303cfd5e9",
+        "core-001.npz": "4f36ed76b464fd08780cb3f9238eadb44cf6ecde2b064dbb695db5dd39de4bac",
+        "pair-00.json": "f99503aac4bc9e5520221352f7361d4926ae604a805b8d8237bdf7d945ef9069",
+        "pair-00.npz": "2f10c3282ce1ff1adb4c5260e93a625bef152c2204201459e755baca7d3b12c0",
+        "pair-01.json": "a50d3f20b02ee155532d0a4bc94514315e9d3eb9a37a0a459c48c2c955875a59",
+        "pair-01.npz": "f715d8c336be6538139cb90dc54605d2da923ecf53ba31290c57e34c984bda12",
+        "pair-02.json": "2ef7c0a920da8d20c6998c603ef64efde253c1bff1de7d73dd9f974777c8ab41",
+        "pair-02.npz": "399800e8cb837a318e90c2e294547f9b95dab59c6861429f221c06e76a096bbd"
+      }
+    }
+  ],
+  "raw_failures_preserved": true
+}

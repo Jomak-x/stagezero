@@ -384,6 +384,10 @@ class PairedResearchControlsTests(TestCase):
 
     def test_native_playing_phase_with_pending_request_blocks_pair_switch(self):
         self.assertTrue(native_core_has_pending_work({"phase": "playing",
+                                                      "inflight_request_id": None,
+                                                      "queued_stages": 0,
+                                                      "terrain_pending": True}))
+        self.assertTrue(native_core_has_pending_work({"phase": "playing",
                                                       "inflight_request_id": "native-1",
                                                       "queued_stages": 0}))
         self.assertTrue(native_core_has_pending_work({"phase": "playing",

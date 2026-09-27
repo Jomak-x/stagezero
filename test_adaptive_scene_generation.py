@@ -2,12 +2,50 @@ import copy
 import tempfile
 import unittest
 from unittest.mock import Mock
-from adaptive_scene_generation import AdaptiveSceneGenerator, asset_system_prompt, fit_generated_assets
+from adaptive_scene_generation import (AdaptiveSceneGenerator, asset_system_prompt,
+                                       explicit_traversal_request, fit_generated_assets,
+                                       layout_system_prompt)
 from scene_asset_library import AssetLibrary
 from scene_environments import make_room
 from scene_composition import validate_scene
 
 class AdaptiveTests(unittest.TestCase):
+    def test_explicit_traversal_guidance_is_scoped(self):
+        for request in ('walk up workshop stairs', 'descend loading steps',
+                        'cross the observatory bridge', 'climb a staircase'):
+            self.assertTrue(explicit_traversal_request(request), request)
+        for request in ('industrial workshop', 'bridge at sunset',
+                        'people walking through a market'):
+            self.assertFalse(explicit_traversal_request(request), request)
+        self.assertNotIn('box tread parts', asset_system_prompt())
+        self.assertNotIn('upper-body clearance', layout_system_prompt([]))
+        self.assertIn('single asset', asset_system_prompt(traversal=True))
+        guided = layout_system_prompt([], traversal=True)
+        for detail in ('rendered support continuously', '0.6m horizontal upper-body clearance',
+                       'open/proximity', 'route planner and native motion checks'):
+            self.assertIn(detail, guided)
+
+    def test_workshop_traversal_uses_layout_gateway(self):
+        asset = {'id': 'solid', 'name': 'Solid box', 'parts': [
+            {'shape': 'box', 'position': [0, 0, 0], 'size': [1, 1, 1],
+             'color': [120, 120, 120]}]}
+        layout = {'version': 3, 'name': 'Candidate route', 'assets': [],
+                  'objects': [{'id': 'support', 'name': 'Support slab', 'kind': 'custom',
+                               'asset': 'solid', 'position': [0, -.1, 0],
+                               'size': [4, .2, 4], 'color': [255, 255, 255],
+                               'interaction': {'action': 'none', 'trigger': 'none', 'radius': 0}}],
+                  'effects': [], 'lighting': 'neutral',
+                  'camera': {'position': [8, 4, 12], 'look_at': [0, 1, -3]}}
+        gateway = Mock()
+        gateway.request_json.return_value = layout
+        with tempfile.TemporaryDirectory() as directory:
+            result = AdaptiveSceneGenerator(gateway, AssetLibrary(directory),
+                                            prepared_assets=[asset]).generate(
+                'walk up workshop stairs and cross a bridge')
+        self.assertEqual(result['name'], 'Candidate route')
+        gateway.request_json.assert_called_once()
+        self.assertIn('rendered support continuously', gateway.request_json.call_args.args[0])
+
     @staticmethod
     def overlapping_facade():
         return {'id':'facade','name':'Windowed facade','parts':[

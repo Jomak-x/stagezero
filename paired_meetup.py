@@ -2,13 +2,14 @@
 from __future__ import annotations
 import hashlib
 import math
+import re
 import uuid
 from dataclasses import replace
 from collections.abc import Mapping
 import numpy as np
 from interaction_planner import _obstacles, _path, _intersects, _inside
 from interaction_scene import scene_objects
-from interaction_scene_collision import scene_collision
+from interaction_scene_collision import scene_collision, _body_proxies
 from native_pair_clip import NativePairClip, MAX_FRAMES
 from native_pair_geometry import check_native_pair_geometry
 from native_pair_transition import shared_place_pair, core_to_pair_anatomy, authored_direction_bridge, core27_to_native22
@@ -19,6 +20,56 @@ FPS, HORIZON, BLEND_FRAMES = 20, 40, 21
 # Acceptance bounds, not expected model precision or collision radii.
 MAX_TARGET_ERROR_M, MAX_ARRIVAL_ERROR_M, MIN_ROUTE_SEPARATION_M = .8, .4, .55
 MAX_ENTRY_ROOT_HEIGHT_GAP_M = .30
+
+# Classify only a short source prompt and send Core a fixed motion cue. The
+# source text is never copied into a worker request's actor prompts.
+_GUARD_INTENT = re.compile(r'\b(?:spar(?:ring)?|boxers?|kickbox(?:ing)?|punch(?:es|ing)?|jab(?:s|bing)?|fight(?:s|ing)?)\b|\bboxing\s+(?:match|bout|practice|spar)\b|\b(?:are|start|begin|people|persons|both|two)\s+boxing\b')
+_GREETING_INTENT = re.compile(r'\b(?:greet(?:s|ed|ing)?|hello|handshak(?:e|es|ing)|shake hands?|wave(?:s|d|ing)?|hug(?:s|ged|ging)?|embrace(?:s|d)?|high[- ]five)\b')
+_ENTRY_CUES = {
+    'ready': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.',
+        'A person faces their partner, feet planted and hands raised in a ready stance.',
+        'A person stands in place and turns to face their partner, relaxed and ready.'),
+    'relaxed': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with arms relaxed at their sides.',
+        'A person faces their partner, feet planted with arms relaxed at their sides, ready to greet.',
+        'A person stands in place and turns to face their partner, feet planted with arms relaxed at their sides.'),
+    'guard': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard.',
+        'A person faces their partner, feet planted with hands up in a boxing guard.',
+        'A person stands in place and turns to face their partner, feet planted with hands up in a boxing guard.'),
+}
+
+
+def _entry_posture(prompt):
+    """Choose one bounded Core cue; keep legacy readiness for unknown actions."""
+    if not isinstance(prompt, str):
+        return 'ready'
+    short = prompt[:500].casefold()
+    if _GUARD_INTENT.search(short):
+        return 'guard'
+    if _GREETING_INTENT.search(short):
+        return 'relaxed'
+    return 'ready'
+
+
+def _approach_body_clearance(approach, actor_ids):
+    """Measure every displayed noncontact frame using existing body spheres."""
+    first, first_radii = _body_proxies(approach[:, 0], 'native22')
+    second, second_radii = _body_proxies(approach[:, 1], 'native22')
+    clearance = (np.linalg.norm(first[:, :, None]-second[:, None, :], axis=-1)
+                 -first_radii[None, :, None]-second_radii[None, None, :])
+    per_frame = clearance.min(axis=(1, 2))
+    worst = np.unravel_index(clearance.argmin(), clearance.shape)
+    overlaps = np.flatnonzero(per_frame < 0.)
+    return {'checked': True, 'actor_ids': list(actor_ids), 'frames': len(approach), 'fps': 30,
+            'stage': 'displayed_core_approach', 'contact_allowed': False,
+            'proxy': 'named joint and limb midpoint spheres; all displayed frames',
+            'minimum_clearance_m': float(per_frame.min()), 'required_minimum_clearance_m': 0.,
+            'minimum_clearance_frame': int(worst[0]),
+            'minimum_clearance_proxy_indices': [int(worst[1]), int(worst[2])],
+            'overlap_frames': len(overlaps), 'overlap_frame_indices': overlaps.tolist(),
+            'passed': not len(overlaps), 'physical_contact_verified': False}
 
 
 def _checked_generated_geometry(world, scene, actor_ids, *, context):
@@ -71,7 +122,7 @@ def _minimum_separation(paths):
     return minimum
 
 
-def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled', initial_heading_ramp_seconds=0.):
+def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled', initial_heading_ramp_seconds=0., entry_posture='ready'):
     """Keep the same common duration and model target sampling for every route."""
     travel_windows = max(1, math.ceil(max(r['distance_m'] for r in routes)/speed/2.))
     arrival_seconds, windows = travel_windows*2., travel_windows+1
@@ -129,11 +180,10 @@ def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_poli
                     heading = math.atan2(math.sin(prior+smooth*delta), math.cos(prior+smooth*delta))
                 targets[aid].append({'frame': local, 'position_xz': point, 'heading': heading})
             if entry_policy == 'continuous':
-                prompts[aid] = ('A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.'
-                                if window*2 < arrival_seconds else
-                                'A person faces their partner, feet planted and hands raised in a ready stance.')
+                prompts[aid] = _ENTRY_CUES[entry_posture][0 if window*2 < arrival_seconds else 1]
             else:
-                prompts[aid] = ('A person stands in place and turns to face their partner, relaxed and ready.' if window == travel_windows or route['distance_m'] < .05 else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
+                prompts[aid] = (_ENTRY_CUES[entry_posture][2] if window == travel_windows or route['distance_m'] < .05
+                                else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
         horizons.append({'root_targets': targets, 'actor_prompts': prompts})
     samples = [[[s['x'], s['z']] for s in starts]]
     for horizon in horizons:
@@ -275,7 +325,7 @@ def _alternate_routes(routes, starts, scene, obstacles):
 
 def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                 meeting, speed_mps=.65, max_seconds=20, entry_policy='settled', arrival_standoff_m=None,
-                idle_route_padding_m=0., initial_heading_ramp_seconds=0.):
+                idle_route_padding_m=0., initial_heading_ramp_seconds=0., arrival_margin_m=0.):
     """CPU-only JSON plan. Starts are two world {x,z,yaw_degrees?} anchors.
 
     Meeting XZ anchors the native first-frame root midpoint, with optional yaw.
@@ -283,6 +333,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     bounds the approach; the complete take, including pair, has a 1000-frame cap.
     Optional arrival_standoff_m moves only Core arrival targets outward when
     native entry roots are closer. The native frames and every gate are unchanged.
+    arrival_margin_m adds a radial offset per actor after that minimum standoff;
+    enabling it also requires collision-clear displayed Core approach frames.
     """
     if not isinstance(pair_clip, NativePairClip) or pair_clip.metadata.get('model') != 'InterGen' or pair_clip.segments is not None:
         raise ValueError('Meeting requires an original native InterGen pair')
@@ -302,10 +354,12 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     maximum = _number(max_seconds, 'Maximum approach seconds', 4, 20)
     standoff = None if arrival_standoff_m is None else _number(
         arrival_standoff_m, 'Core arrival standoff', MIN_ROUTE_SEPARATION_M, .80)
+    arrival_margin = _number(arrival_margin_m, 'Core arrival margin per actor', 0., .20)
     idle_padding = _number(idle_route_padding_m, 'Extra idle route clearance', 0., .60)
     heading_ramp = _number(initial_heading_ramp_seconds, 'Initial heading ramp seconds', 0., 1.)
     if entry_policy not in ('settled', 'continuous'):
         raise ValueError('Unknown meeting entry policy')
+    entry_posture = _entry_posture(pair_clip.metadata.get('prompt', ''))
     yaw = math.radians(meeting.get('yaw_degrees', 0.))
     rotated = shared_place_pair(pair_clip.joints, yaw=yaw)
     center = rotated[0, :, 0].mean(axis=0)
@@ -315,13 +369,15 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     arrivals = native_entry.copy()
     axis = native_entry[1]-native_entry[0]
     native_separation = float(np.linalg.norm(axis))
-    if standoff is not None and native_separation < standoff:
+    target_separation = max(native_separation, standoff or 0.)+2*arrival_margin
+    if target_separation > native_separation:
         if native_separation < .05:
             raise ValueError('Native entry roots are too close to define safe Core standoff directions')
-        shift = axis/native_separation*(standoff-native_separation)/2
+        shift = axis/native_separation*(target_separation-native_separation)/2
         arrivals[0] -= shift
         arrivals[1] += shift
     arrival_standoff = {'requested_minimum_separation_m': standoff,
+        'additive_margin_per_actor_m': arrival_margin,
         'native_entry_root_separation_m': native_separation,
         'core_arrival_root_separation_m': float(np.linalg.norm(arrivals[1]-arrivals[0])),
         'native_entry_roots_xz': native_entry.tolist(), 'core_arrival_targets_xz': arrivals.tolist(),
@@ -358,7 +414,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                        'initial_yaw': initial, 'arrival_yaw': arrival, 'ground': ground,
                        'idle_departure': departure,
                        **({'entry_policy': entry_policy} if entry_policy == 'continuous' else {})})
-    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
+    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp, entry_posture)
     minimum = min(minimum, _route_separation(routes))
     rerouted = False
     if minimum < MIN_ROUTE_SEPARATION_M:
@@ -366,7 +422,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
             if _route_separation(candidate) < MIN_ROUTE_SEPARATION_M:
                 continue
             try:
-                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
+                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp, entry_posture)
             except ValueError:
                 continue
             if scheduled[-1] < MIN_ROUTE_SEPARATION_M:
@@ -381,10 +437,12 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     return {'version': 1, 'actor_ids': list(actor_ids), 'starts': starts, 'meeting': meeting,
             'placement': placement, 'routes': routes, 'horizons': horizons, 'arrival_seconds': arrival_seconds,
             'approach_seconds': arrival_seconds+1. if entry_policy == 'continuous' else windows*2,
-            'entry_policy': entry_policy, 'total_frames': frames, 'blend_frames': BLEND_FRAMES,
+            'entry_policy': entry_policy, 'entry_posture': entry_posture,
+            'total_frames': frames, 'blend_frames': BLEND_FRAMES,
             'minimum_planned_root_separation_m': minimum, 'native_geometry': geometry,
             'approach_rerouted': rerouted,
             'arrival_standoff': arrival_standoff,
+            'arrival_margin_m': arrival_margin,
             'idle_route_padding_m': idle_padding,
             'initial_heading_ramp_seconds': heading_ramp,
             'source_sha256': hashlib.sha256(pair_clip.joints.tobytes()).hexdigest(), 'planned_only': True,
@@ -396,7 +454,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
 def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                  meeting, speed_mps=.65, max_seconds=20, seed=92642,
                  cancelled=lambda: False, on_progress=None, on_core_chunk=None, entry_policy='settled',
-                 arrival_standoff_m=None, idle_route_padding_m=0., initial_heading_ramp_seconds=0.):
+                 arrival_standoff_m=None, idle_route_padding_m=0., initial_heading_ramp_seconds=0.,
+                 arrival_margin_m=0.):
     """Return local clip, playback placement, world joints, plan and metadata.
 
     on_progress(dict) reports windows. on_core_chunk('approach', index, clip,
@@ -407,7 +466,7 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         raise RuntimeError('Configure ARDY Core before generating a meeting')
     if type(seed) is not int or not 0 <= seed < 2**32:
         raise ValueError('Seed must be a uint32 integer')
-    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds, entry_policy=entry_policy, arrival_standoff_m=arrival_standoff_m, idle_route_padding_m=idle_route_padding_m, initial_heading_ramp_seconds=initial_heading_ramp_seconds)
+    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds, entry_policy=entry_policy, arrival_standoff_m=arrival_standoff_m, idle_route_padding_m=idle_route_padding_m, initial_heading_ramp_seconds=initial_heading_ramp_seconds, arrival_margin_m=arrival_margin_m)
     ids, placement = plan['actor_ids'], plan['placement']
     yaw = math.radians(placement['yaw_degrees']); offset = [placement['x'], 0., placement['z']]
     pair = shared_place_pair(pair_clip.joints, yaw=yaw, translation=offset)
@@ -460,6 +519,13 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
     times, new_times = np.arange(len(core))/FPS, np.arange(count)/30.
     resampled = np.stack([np.interp(new_times, times, col) for col in core.reshape(len(core), -1).T], axis=-1).reshape(count, 2, 27, 3)
     approach, refinement = core_to_pair_anatomy(resampled, pair)
+    clearance_report = {'checked': False, 'reason': 'Additive arrival margin is disabled'}
+    if plan['arrival_margin_m'] > 0.:
+        clearance_report = _approach_body_clearance(approach, ids)
+        if not clearance_report['passed']:
+            exc = ValueError('Core approach has unintended body-proxy overlap; meeting rejected')
+            exc.approach_body_clearance_report = clearance_report
+            raise exc
     # Measure the display boundary after anatomy adjustment: accurate XZ roots
     # and a velocity-safe bridge do not justify a large vertical pose drop.
     entry_height_gaps = pair[0, :, 0, 1]-approach[-1, :, 0, 1]
@@ -469,7 +535,9 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         raise ValueError(f'Meeting entry root-height gap for {ids[actor_index]} is '
                          f'{abs(entry_height_gaps[actor_index]):.2f} m, exceeding '
                          f'{MAX_ENTRY_ROOT_HEIGHT_GAP_M:.2f} m; meeting rejected')
-    bridge_candidates = (12, 15, 18, BLEND_FRAMES) if entry_policy == 'continuous' else (BLEND_FRAMES,)
+    # A passing shortest bridge can still be visibly brisk. Prefer the measured
+    # 0.7-second entry; retain bounded shorter alternatives and every gate.
+    bridge_candidates = (BLEND_FRAMES, 18, 15, 12) if entry_policy == 'continuous' else (BLEND_FRAMES,)
     for bridge_frames in bridge_candidates:
         try:
             entry, entry_report = authored_direction_bridge(approach, pair, left_fps=30, right_fps=30, frames=bridge_frames)
@@ -498,6 +566,7 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
                 'transition_provenance': {'source_pair_frames_modified': False, 'all_mechanical_gates_passed': True,
                     'boundaries': {'entry': entry_report}, 'refinement': {'approach': refinement}, 'gpu_jobs': len(clips), 'visual_acceptance': 'unverified'},
                 'approach_measurements': measured, 'arrival_errors_m': errors.tolist(),
+                'approach_body_clearance': clearance_report,
                 'arrival_standoff': plan['arrival_standoff'], 'arrival_target_errors_m': target_errors.tolist(),
                 'actual_arrival_native_offsets_xz': (core[-1, :, 0][:, [0, 2]]-pair[0, :, 0][:, [0, 2]]).tolist(),
                 'core_playback_selection': {'generated_frames': generated_core_frames, 'retained_frames': len(core),

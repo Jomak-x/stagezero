@@ -1,0 +1,19 @@
+{"phase": "planning"}
+{"phase": "beat", "beat_index": 0, "total_beats": 4, "actor_ids": ["actor_1", "actor_2"], "prompt": "Person 1 and person 2 shake hands, then release."}
+{"phase": "pair_generation", "beat_index": 0, "actor_ids": ["actor_1", "actor_2"]}
+{"phase": "approach", "completed_windows": 0, "total_windows": 2}
+{"phase": "approach", "completed_windows": 1, "total_windows": 2}
+Traceback (most recent call last):
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/experiments/trial_prompt_scene.py", line 106, in <module>
+    main()
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/experiments/trial_prompt_scene.py", line 97, in main
+    result = builder(scene, on_progress=lambda value: print(json.dumps(value), flush=True))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 895, in __call__
+    raise exc
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/prompt_scene_builder.py", line 779, in __call__
+    result = build_meetup(pair, client, planning_scene, actor_ids=active,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-baseline/Shellhacks/paired_meetup.py", line 516, in build_meetup
+    raise ValueError('Meeting entry transition rejected: '+ '; '.join(entry_report['rejection_reasons']))
+ValueError: Meeting entry transition rejected: sampled endpoint velocity exceeds tolerance

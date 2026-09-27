@@ -22,6 +22,8 @@ MAX_SECONDS = 30
 HOLD_FRAMES = HORIZON
 SAMPLE_FRAMES = (7, 15, 23, 31, 39)
 HELD_ACTOR_CLEARANCE_M = .65
+SPATIAL_SETTLE_SECONDS = .4
+SPATIAL_RAMP_SECONDS = .3
 
 
 def _finite(value: object, label: str, *, limit: float = 100) -> float:
@@ -90,6 +92,33 @@ def _heading_at(waypoints: list[dict], second: float, fallback: float,
     after = _point_at(waypoints, min(waypoints[-1]["time_seconds"], second + .1))
     dx, dz = after[0] - before[0], after[1] - before[1]
     return math.atan2(dx, dz) if math.hypot(dx, dz) > 1e-6 else fallback
+
+
+def _spatial_fraction(second: float, moving_seconds: float) -> float:
+    """Distance fraction with finite acceleration and a short terminal settle."""
+    duration = max(.01, moving_seconds - SPATIAL_SETTLE_SECONDS)
+    elapsed = max(0., min(duration, second))
+    ramp = min(SPATIAL_RAMP_SECONDS, duration / 4)
+    area = duration - ramp
+    if elapsed < ramp:
+        return elapsed * elapsed / (2 * ramp * area)
+    if elapsed > duration - ramp:
+        remaining = duration - elapsed
+        return 1. - remaining * remaining / (2 * ramp * area)
+    return (elapsed - ramp / 2) / area
+
+
+def _spatial_second_for_fraction(fraction: float, moving_seconds: float) -> float:
+    """Inverse of _spatial_fraction, used to retain exact route corners."""
+    duration = max(.01, moving_seconds - SPATIAL_SETTLE_SECONDS)
+    ramp = min(SPATIAL_RAMP_SECONDS, duration / 4)
+    area = duration - ramp
+    ramp_fraction = ramp / (2 * area)
+    if fraction <= ramp_fraction:
+        return math.sqrt(max(0., fraction) * 2 * ramp * area)
+    if fraction >= 1. - ramp_fraction:
+        return duration - math.sqrt(max(0., 1. - fraction) * 2 * ramp * area)
+    return fraction * area + ramp / 2
 
 
 def _planning_scene(scene: Mapping, actor_ids: tuple[str, ...], actor_id: str,
@@ -234,43 +263,77 @@ def validate_ground_path(scene, positions_xz, actor_radius_m=.28):
 
 
 def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
-                    actor_id: str, target_id: str, verb: str,
+                    actor_id: str, target_id: str | None = None, verb: str,
+                    target_xz: tuple | list | None = None,
                     last_clip: CanonicalClip | None = None,
                     initial_placements: Mapping | None = None,
                     affordances: Mapping | None = None,
-                    speed_mps: float = .65) -> tuple[list[StageSpec], dict]:
+                    speed_mps: float = .65, turn_before_travel: bool = False,
+                    gait_profile: str = "default") -> tuple[list[StageSpec], dict]:
     """Plan a target by ID and sample root goals per 40-frame model window.
 
-    Each stage contains five local-frame root targets per actor, including
-    frame 39. The last horizon holds the terminal position and heading. A
-    second actor receives stationary root targets throughout the route.
+    The default stage contains five local-frame root targets per actor,
+    including frame 39, followed by a terminal hold horizon. The explicit
+    spatial profile omits walking heading targets and settles within its last
+    travel horizon. A second actor stays constrained in place throughout.
     """
+    if type(turn_before_travel) is not bool:
+        raise ValueError("turn_before_travel must be a boolean")
+    if gait_profile not in ("default", "spatial"):
+        raise ValueError("Unknown navigation gait profile")
+    spatial = gait_profile == "spatial"
     ids = tuple(actor_ids)
     if not 1 <= len(ids) <= 2 or any(not isinstance(x, str) or not 1 <= len(x) <= 64 for x in ids) or len(set(ids)) != len(ids):
         raise ValueError("actor_ids must be one or two unique stable IDs")
     if actor_id not in ids:
         raise ValueError("selected actor is not in the stable actor set")
-    if verb not in ("approach", "go_through"):
-        raise ValueError("navigation supports approach or go_through")
-    if not isinstance(target_id, str) or not target_id:
+    if verb not in ("approach", "go_through", "move"):
+        raise ValueError("navigation supports approach or go_through or move")
+    if verb != "move" and (not isinstance(target_id, str) or not target_id):
         raise ValueError("target_id is required")
     speed = _finite(speed_mps, "speed_mps", limit=3)
     if speed < .2:
         raise ValueError("speed_mps must be at least .2")
     objects = scene_objects(scene)
     target = next((obj for obj in objects if obj.id == target_id), None)
-    if target is None:
+    if verb != "move" and target is None:
         raise ValueError(f"Unknown target_id: {target_id}")
     positions, yaws = _placements(ids, last_clip, initial_placements)
     start = positions[actor_id]
     planning_scene, held_actor = _planning_scene(scene, ids, actor_id, positions)
-    route = plan_action({"verb": verb, "actor_id": actor_id, "target_id": target_id},
-                        planning_scene, [start[0], 0., start[1]], affordances=affordances,
-                        speed_mps=speed)
+    if verb == "move":
+        if target_id is not None or not isinstance(target_xz, (list, tuple)) or len(target_xz) != 2:
+            raise ValueError("move requires only a world target_xz endpoint")
+        goal = tuple(_finite(v, "target_xz", limit=25) for v in target_xz)
+        # Reuse the same inflated obstacle visibility graph. An endpoint is not
+        # a scene object: adding a synthetic solid would block its own arrival.
+        from interaction_planner import _obstacles, _path, _waypoints
+        path = _path(tuple(start), goal, _obstacles(scene_objects(planning_scene), None, 1.65, .34), .34)
+        route = {"version": 1, "actor_id": actor_id, "verb": verb, "target_id": None,
+                 "waypoints": _waypoints(path, ["start"] + ["route"] * (len(path)-2) + ["arrival"], 0., speed),
+                 "geometry": {"target_xz": list(goal)},
+                 "assumptions": {"motion_following_verified": False, "actor_radius_m": .28,
+                                 "obstacle_margin_m": .06, "speed_mps": speed}}
+    else:
+        if target_xz is not None:
+            raise ValueError("Object navigation does not accept target_xz")
+        route = plan_action({"verb": verb, "actor_id": actor_id, "target_id": target_id},
+                            planning_scene, [start[0], 0., start[1]], affordances=affordances,
+                            speed_mps=speed)
     waypoints = route["waypoints"]
     travel_seconds = waypoints[-1]["time_seconds"] - waypoints[0]["time_seconds"]
     moving_windows = max(1, math.ceil(travel_seconds * FPS / HORIZON))
-    total_frames = (moving_windows + 1) * HORIZON
+    departure = yaws[actor_id]
+    for before, after in zip(waypoints, waypoints[1:]):
+        dx = after["position_xz"][0] - before["position_xz"][0]
+        dz = after["position_xz"][1] - before["position_xz"][1]
+        if math.hypot(dx, dz) > 1e-6:
+            departure = math.atan2(dx, dz)
+            break
+    difference = departure - yaws[actor_id]
+    turn_delta = math.atan2(math.sin(difference), math.cos(difference))
+    turn_windows = int((verb == "move" or turn_before_travel) and abs(turn_delta) > math.radians(30))
+    total_frames = (turn_windows + moving_windows + (0 if spatial else 1)) * HORIZON
     if total_frames > MAX_SECONDS * FPS:
         raise ValueError("Route plus terminal hold exceeds the 30-second generation cap")
     if any(abs(component) > 25 for waypoint in waypoints
@@ -280,33 +343,74 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
         raise ValueError("Actor placement exceeds the Core worker's ±25 m coordinate bounds")
     arrival = _arrival_heading(waypoints, yaws[actor_id])
     action = "Walk through" if verb == "go_through" else "Approach"
-    active_prompt = f"{action} {target.name} along the planned clear route, then stop."
-    actor_prompts = {aid: (active_prompt if aid == actor_id else "Stand in place and hold position.")
-                     for aid in ids}
+    active_prompt = ("A person walks forward naturally."
+                     if verb == "move" else f"{action} {target.name} along the planned clear route, then stop.")
+    if spatial:
+        active_prompt = "A person walks forward naturally."
+    moving_seconds = moving_windows * HORIZON / FPS
+    spatial_corner_frames = {}
+    if spatial and travel_seconds > 1e-8:
+        for waypoint in waypoints[1:-1]:
+            fraction = (waypoint["time_seconds"] - waypoints[0]["time_seconds"]) / travel_seconds
+            frame = max(0, min(moving_windows * HORIZON - 1,
+                               round(_spatial_second_for_fraction(fraction, moving_seconds) * FPS) - 1))
+            if frame in spatial_corner_frames and spatial_corner_frames[frame] != waypoint["position_xz"]:
+                raise ValueError("Route corners are too close in time for native root targets")
+            spatial_corner_frames[frame] = waypoint["position_xz"]
+    spatial_arrival_frame = (max(0, round((moving_seconds - SPATIAL_SETTLE_SECONDS) * FPS) - 1)
+                             if spatial else None)
     stages = []
     all_active_goals = []
     for stage_index in range(total_frames // HORIZON):
+        turning = stage_index < turn_windows
+        motion_stage = stage_index - turn_windows
         local_frames = set(SAMPLE_FRAMES)
-        for waypoint in waypoints[1:-1]:
+        if turning:
+            local_frames.add(0)
+        for waypoint in (() if turning else waypoints[1:-1]):
             global_frame = max(0, min(total_frames - 1,
                                       round(waypoint["time_seconds"] * FPS) - 1))
-            if global_frame // HORIZON == stage_index:
+            if global_frame // HORIZON == motion_stage:
                 local_frames.add(global_frame % HORIZON)
+        active_frames = set(local_frames)
+        if spatial and not turning:
+            active_frames = set(SAMPLE_FRAMES)
+            active_frames.update(frame % HORIZON for frame in spatial_corner_frames
+                                 if frame // HORIZON == motion_stage)
+            if spatial_arrival_frame // HORIZON == motion_stage:
+                active_frames.add(spatial_arrival_frame % HORIZON)
+                active_frames = {frame for frame in active_frames
+                                 if frame <= spatial_arrival_frame % HORIZON or frame == HORIZON - 1}
         goals = {aid: [] for aid in ids}
-        for local in sorted(local_frames):
-            global_frame = stage_index * HORIZON + local
+        for local in sorted(local_frames | active_frames):
+            global_frame = motion_stage * HORIZON + local
             second = (global_frame + 1) / FPS
-            active_xz = _point_at(waypoints, second)
-            active_yaw = _heading_at(waypoints, second, yaws[actor_id], arrival)
+            if turning:
+                fraction = local / (HORIZON - 1)
+                eased = fraction * fraction * (3 - 2 * fraction)
+                active_xz = start
+                yaw = yaws[actor_id] + turn_delta * eased
+                active_yaw = math.atan2(math.sin(yaw), math.cos(yaw))
+            else:
+                route_second = (waypoints[0]["time_seconds"]
+                                + _spatial_fraction(second, moving_seconds) * travel_seconds
+                                if spatial else second)
+                active_xz = (spatial_corner_frames[global_frame]
+                             if spatial and global_frame in spatial_corner_frames
+                             else _point_at(waypoints, route_second))
+                active_yaw = _heading_at(waypoints, route_second, yaws[actor_id], arrival)
             for aid in ids:
+                if local not in (active_frames if aid == actor_id else local_frames):
+                    continue
                 xz = active_xz if aid == actor_id else positions[aid]
                 yaw = active_yaw if aid == actor_id else yaws[aid]
                 # Decimal rounding can push exact pi to 3.141593, which the
                 # Core request boundary correctly rejects as outside [-pi,pi].
                 heading = max(-math.pi, min(math.pi, round(yaw, 6)))
-                goals[aid].append({"frame": local,
-                                   "position_xz": [round(xz[0], 5), round(xz[1], 5)],
-                                   "heading": heading})
+                goal = {"frame": local, "position_xz": [round(xz[0], 5), round(xz[1], 5)]}
+                if not (spatial and aid == actor_id and not turning):
+                    goal["heading"] = heading
+                goals[aid].append(goal)
         if any(len(items) > 24 for items in goals.values()):
             raise ValueError("Route needs too many model root constraints in one horizon")
         all_active_goals.extend(goals[actor_id])
@@ -314,10 +418,25 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
                     "navigation": {"verb": verb, "actor_id": actor_id,
                                    "target_id": target_id, "stage": stage_index,
                                    "planned_only": True}}
+        if spatial:
+            metadata["navigation"]["gait_profile"] = gait_profile
         if stage_index == 0 and last_clip is None:
             metadata["initial_placements"] = {
                 aid: {"position_xz": positions[aid], "yaw": yaws[aid]} for aid in ids}
-        stages.append(StageSpec(active_prompt, kind="approach", frames=HORIZON,
+        prompt = active_prompt
+        if verb == "move" or turning or spatial:
+            phase = "turn" if turning else "hold" if motion_stage == moving_windows else "walk"
+            metadata["navigation"]["phase"] = phase
+            if turning:
+                direction = "left" if turn_delta < 0 else "right"
+                prompt = f"A person turns {direction} in place, keeping an upright posture."
+            elif phase == "hold":
+                prompt = "A person stands upright and relaxed."
+            elif spatial and motion_stage == moving_windows - 1:
+                prompt = "A person walks forward naturally, then slows to a relaxed stop."
+        actor_prompts = {aid: (prompt if aid == actor_id else "Stand in place and hold position.")
+                         for aid in ids}
+        stages.append(StageSpec(prompt, kind="approach", frames=HORIZON,
                                 source="ardy_core", actor_prompts=actor_prompts,
                                 metadata=metadata))
     if held_actor is not None:
@@ -334,9 +453,21 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
     result = {**route, "ground_support": ground, "schedule": {"frames": total_frames, "fps": FPS,
                                     "seconds": total_frames / FPS,
                                     "travel_seconds": travel_seconds,
-                                    "terminal_hold_frames": HOLD_FRAMES,
+                                    **({"initial_turn_frames": turn_windows * HORIZON,
+                                        "movement_start_frame": turn_windows * HORIZON,
+                                        "initial_turn_radians": turn_delta if turn_windows else 0.}
+                                       if verb == "move" or turn_before_travel else {}),
+                                    "terminal_hold_frames": 0 if spatial else HOLD_FRAMES,
                                     "horizons": len(stages),
                                     "dense_root_targets_per_actor_per_horizon": len(SAMPLE_FRAMES),
                                     "held_actor_id": held_actor,
                                     "sampled_route_clearance_m": clearance}}
+    if spatial:
+        result["schedule"].update({
+            "gait_profile": gait_profile,
+            "terminal_settle_frames": round(SPATIAL_SETTLE_SECONDS * FPS),
+            "root_target_counts_by_horizon": [
+                {aid: len(stage.metadata["root_targets"][aid]) for aid in ids}
+                for stage in stages],
+        })
     return stages, result

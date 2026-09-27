@@ -27,7 +27,7 @@ class SceneCompositionTests(unittest.TestCase):
             'Industrial yard': (9, ['sparks', 'smoke', 'rain'], 'sunset', [179, 117, 59]),
             'Winter plaza': (8, ['snow'], 'moonlight', [185, 206, 220]),
         }
-        self.assertEqual(set(PRESETS), set(expected) | {'Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Designed apartment', 'Residential neighborhood', 'Market square', 'Warehouse workshop'})
+        self.assertEqual(set(PRESETS), set(expected) | {'Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Designed apartment', 'Residential neighborhood', 'Market square', 'Warehouse workshop', 'Traversable temple', 'Industrial switchback'})
         for name in expected:
             with self.subTest(name=name):
                 count, effect_kinds, lighting, accent = expected[name]

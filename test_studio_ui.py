@@ -143,6 +143,14 @@ class StudioUITests(unittest.TestCase):
         assistant_factory.start()
         self.addCleanup(assistant_factory.stop)
         self.temp = TemporaryDirectory()
+        from scene_actor_intent import ActorIntent
+        actor_classifier = patch('scene_actor_intent.classify_actor_intent', return_value=ActorIntent(1))
+        actor_classifier.start()
+        self.addCleanup(actor_classifier.stop)
+        actor_thread = patch('scene_actor_intent.Thread',
+                             side_effect=lambda *, target, **_kwargs: SimpleNamespace(start=target))
+        actor_thread.start()
+        self.addCleanup(actor_thread.stop)
         self.backend = ControlledBackend()
         self.session = DirectorSession(
             self.backend,
@@ -337,11 +345,11 @@ class StudioUITests(unittest.TestCase):
         self.assertEqual(self.session.kind, 'reference')
 
     def test_first_motion_examples_fill_draft_without_submitting(self):
-        self.assertTrue(self.ui.motion_intro.visible)
+        self.assertFalse(self.ui.motion_intro.visible)
         self.assertIn('Create your first motion', self.ui.motion_intro.content)
         self.assertTrue(self.ui.ideas_folder.visible)
-        self.assertLess(self.gui.handles.index(self.ui.ideas_folder),
-                        self.gui.handles.index(self.ui.prompt))
+        self.assertGreater(self.gui.handles.index(self.ui.ideas_folder),
+                           self.gui.handles.index(self.ui.generate))
         self.ui.ideas.click('Walk')
         self.assertEqual(self.ui.prompt.value, 'A person walks forward at a relaxed pace.')
         self.assertEqual(self.session.prompt, self.ui.prompt.value)
@@ -397,14 +405,16 @@ class StudioUITests(unittest.TestCase):
         self.assertFalse(self.ui.motion_progress.visible)
 
     def test_project_save_and_real_status_are_available_above_tabs(self):
-        self.assertLess(self.gui.handles.index(self.ui.project_name),
-                        self.gui.handles.index(self.ui.motion_intro))
-        self.assertLess(self.gui.handles.index(self.ui.save),
-                        self.gui.handles.index(self.ui.motion_intro))
+        self.assertGreater(self.gui.handles.index(self.ui.project_name),
+                           self.gui.handles.index(self.ui.motion_intro))
+        self.assertGreater(self.gui.handles.index(self.ui.save),
+                           self.gui.handles.index(self.ui.motion_intro))
         self.assertIn('No project save in this session', self.ui.files.content)
+        self.assertFalse(self.ui.files.visible)
         self.session.project_status = 'Unsaved changes · Save project stores every take'
         self.ui.update()
         self.assertIn('Unsaved changes', self.ui.files.content)
+        self.assertTrue(self.ui.files.visible)
         client = SimpleNamespace(send_file_download=Mock())
         self.ui.save.callbacks['click'](SimpleNamespace(client=client))
         self.assertIn('Saved ', self.ui.files.content)
@@ -466,6 +476,36 @@ class StudioUITests(unittest.TestCase):
         self.ui.save_action.click()
         self.session.submit_action_edit.assert_called_once_with(
             'Wave twice', 1, 'replace', seconds=3.0)
+
+    def test_timeline_scene_movement_opens_popup_without_seeking_or_legacy_editor(self):
+        take = self._seed_segmented_take()
+        self._timeline_edit(take.id, 0, 'replace', 'old-editor')
+        self.assertIsNotNone(self.ui.action_edit)
+        take.segments[0]['beat_id'] = 'scene-beat-1'
+        self.session.seek(75)
+        client = object()
+        payload = dict(take_id=take.id, index=0, operation='replace', nonce='scene-popup')
+        with (patch.object(self.ui.story_controls, 'open_for_movement', return_value=True) as open_movement,
+              patch('studio_ui.navigate_tab') as navigate):
+            self.ui.timeline_command.value = json.dumps(payload)
+            self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
+        open_movement.assert_called_once_with(client, take.id, 0)
+        navigate.assert_not_called()
+        self.assertIsNone(self.ui.action_edit)
+        self.assertEqual(self.session.frame, 75)
+        self.assertEqual(self.ui._last_timeline_nonce, 'scene-popup')
+
+    def test_timeline_recognizes_loaded_scene_after_legacy_edit_lost_beat_ids(self):
+        take = self._seed_segmented_take()
+        client = object()
+        payload = dict(take_id=take.id, index=1, operation='replace', nonce='legacy-scene')
+        with (patch.object(self.ui.story_controls, 'owns_take', return_value=True) as owns,
+              patch.object(self.ui.story_controls, 'open_for_movement', return_value=True) as open_movement):
+            self.ui.timeline_command.value = json.dumps(payload)
+            self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
+        owns.assert_called_once_with(take.id)
+        open_movement.assert_called_once_with(client, take.id, 1)
+        self.assertIsNone(self.ui.action_edit)
 
     def test_action_edit_explains_exact_following_regeneration(self):
         take = self._seed_segmented_take()
@@ -985,6 +1025,40 @@ class StudioUITests(unittest.TestCase):
         self.ui.quick_actions.click('New take')
         self.assertEqual(calls, ['g1'])
         self.assertFalse(state['active'])
+
+    def test_core_save_uses_visible_motion_instead_of_g1_project(self):
+        state = {'active': True, 'busy': False, 'capturing': False, 'total_frames': 12,
+                 'frame': 0, 'status': 'Core ready'}
+        core = SimpleNamespace(snapshot=lambda: dict(state), save=Mock(return_value=b'core archive'))
+        self.ui.core_session = core
+        self.ui.folder = Path(self.temp.name) / 'projects'
+        self.ui.folder.mkdir()
+        self.ui.update()
+        self.assertEqual(self.ui.save.label, 'Save Core motion + download')
+        client = SimpleNamespace(send_file_download=Mock())
+        self.ui.save.callbacks['click'](SimpleNamespace(client=client))
+        core.save.assert_called_once_with()
+        archive = next((Path(self.temp.name) / 'core-projects').glob('*.core.stagezero.npz'))
+        self.assertEqual(archive.read_bytes(), b'core archive')
+        self.assertFalse(list(self.ui.folder.glob('*.stagezero.npz')))
+        client.send_file_download.assert_called_once()
+
+    def test_new_project_and_take_selection_leave_native_mode(self):
+        state = {'active': True, 'busy': False, 'capturing': False, 'total_frames': 12,
+                 'fps': 30, 'frame': 0, 'status': 'Cast ready'}
+        self.ui.cast_session = SimpleNamespace(snapshot=lambda: dict(state))
+        handoffs = []
+        def handoff():
+            handoffs.append('g1')
+            state['active'] = False
+        self.ui.on_story_activate = handoff
+        take = self._seed_take()
+        self.ui.take_slots[0].click()
+        self.assertEqual(handoffs, ['g1'])
+        state['active'] = True
+        self.ui.clear.click()
+        self.assertEqual(handoffs, ['g1', 'g1'])
+        self.assertIsNone(self.session.active_take)
 
 
 

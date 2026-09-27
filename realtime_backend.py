@@ -56,7 +56,7 @@ def _rotations(value, shape: tuple[int | None, ...], name: str) -> np.ndarray:
 def validate_job(body: dict, *, pair_enabled: bool = False) -> dict:
     """Validate the HTTP boundary before any CUDA work or queue insertion."""
     allowed = {"request_id", "stage_kind", "frames", "prompt", "actor_ids", "seed",
-               "actor_prompts", "history", "root_targets", "target",
+               "actor_prompts", "history", "root_targets", "target", "coordinate_frames_y",
                "pair_sequence_id", "source_start_frame", "source_total_frames",
                "initial_placements", "hand_target"}
     if not isinstance(body, dict) or set(body) - allowed or not {"request_id", "stage_kind", "frames", "prompt", "actor_ids", "seed"} <= set(body):
@@ -95,6 +95,9 @@ def validate_job(body: dict, *, pair_enabled: bool = False) -> dict:
     placements = body.get("initial_placements", {})
     if not isinstance(placements, dict) or set(placements) - set(ids):
         raise ValueError("initial_placements must map actor IDs to placements")
+    frames_y = body.get("coordinate_frames_y", {})
+    if not isinstance(frames_y, dict) or set(frames_y) - set(ids):
+        raise ValueError("coordinate_frames_y must map actor IDs to terrain frame origins")
     actors = []
     for actor_id in ids:
         placement = placements.get(actor_id, {})
@@ -106,6 +109,8 @@ def validate_job(body: dict, *, pair_enabled: bool = False) -> dict:
             actor["initial_position_xz"] = placement["position_xz"]
         if "yaw" in placement:
             actor["initial_yaw"] = placement["yaw"]
+        if actor_id in frames_y:
+            actor["coordinate_frame_y"] = frames_y[actor_id]
         actors.append(actor)
     core_request = {"request_id": request_id, "frames": frames, "actors": actors}
     validate_request(core_request)

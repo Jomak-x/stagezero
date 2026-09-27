@@ -25,6 +25,8 @@ from realtime_client import RealtimeClient
 from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
 from studio_core_renderer import StudioCoreRenderer
+from voice_directing import VoiceDirecting
+from dialogue_directing import DialogueDirector
 from native_pair_session import NativePairSession
 from native_pair_renderer import NativePairRenderer
 from native_pair_controls import NativePairControls
@@ -40,7 +42,8 @@ MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
 def native_core_has_pending_work(snapshot):
     """A playing phase can still have queued or in-flight native work."""
     return (snapshot.get('inflight_request_id') is not None or
-            bool(snapshot.get('queued_stages')))
+            bool(snapshot.get('queued_stages')) or
+            bool(snapshot.get('terrain_pending')))
 
 
 def native_cast_camera_view(clip, placement, cast_roots, *, aspect=16/9):
@@ -91,7 +94,8 @@ def build_parser():
     parser.add_argument('--core-token-path', type=Path,
                         help='Core token file (defaults to --token-path); absent token permits replay only')
     parser.add_argument('--native-project', type=Path, help='Open an exact saved native cast performance at startup')
-    parser.add_argument('--native-pair-config', type=Path, help='Private native paired generation provider configuration; omit for reviewed playback')
+    parser.add_argument('--core-project', type=Path, help='Open an exact Core scene-direction archive for paused replay')
+    parser.add_argument('--native-pair-config', type=Path, help='Private native pair configuration; defaults to STAGEZERO_NATIVE_PAIR_CONFIG or .runtime/prompt-native-provider.json')
     return parser
 
 
@@ -134,6 +138,8 @@ def create_motion_backend(args):
 def main():
     parser = build_parser()
     args = parser.parse_args()
+    if args.core_project and (args.project or args.native_project):
+        parser.error('--core-project cannot be combined with another startup project')
     torch.set_num_threads(2)
     if args.reference_only:
         from ardy.skeleton import G1Skeleton34
@@ -148,9 +154,12 @@ def main():
     server.gui.configure_theme(dark_mode=True, control_layout='collapsible', control_width='large', show_logo=False, show_share_button=False, brand_color=(126, 224, 195))
     server.scene.set_up_direction('+y')
     server.scene.world_axes.visible = False
-    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment)
-    server.scene.configure_default_lights(enabled=True, cast_shadow=True)
-    server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.6)
+    server.scene.configure_environment_map(None if args.environment == 'none' else args.environment,
+                                           background=False, environment_intensity=.15)
+    server.scene.configure_default_lights(enabled=False)
+    server.scene.add_light_directional('/studio-key', color=(225, 234, 245), intensity=1.6,
+                                       position=(3, 6, 4), cast_shadow=True)
+    server.scene.add_light_ambient('/fill', color=(191, 215, 239), intensity=.2)
     floor = server.scene.add_box('/floor', color=(20, 28, 38), dimensions=(200, .1, 200), position=(0, -.07, 0), cast_shadow=False)
     grid = server.scene.add_grid('/ground-grid', plane='xz', width=200, height=200, cell_size=.5, section_size=2., cell_color=(44, 57, 70), section_color=(68, 87, 100), position=(0, .008, 0), fade_distance=30., fade_strength=2., shadow_opacity=0.)
     stage = trimesh.creation.cylinder(radius=2., height=.035, sections=96)
@@ -177,8 +186,9 @@ def main():
     core_client = (RealtimeClient(args.core_backend_url, token_path.read_text())
                    if token_path.is_file() and token_path.read_text().strip() else None)
     core = CoreStudioSession(core_client)
-    from native_pair_provider import NativePairProvider
-    pair_provider = NativePairProvider.from_config(args.native_pair_config) if args.native_pair_config else None
+    from native_pair_config import resolve_native_pair_provider
+    pair_resolution = resolve_native_pair_provider(args.native_pair_config, repo_root=ROOT)
+    pair_provider = pair_resolution.provider
     paired = NativePairSession(pair_provider)
     cast = CastPerformanceSession()
     from prompt_scene_plan import ScenePromptPlanner
@@ -186,6 +196,9 @@ def main():
     core.update_scene(session.scene_document())
     paired.update_scene(session.scene_document())
     core_renderer = StudioCoreRenderer(server, name_prefix="/core-cast")
+    # The opt-in display owns separate rig17 transforms. Never pass those
+    # transforms through the ordinary Core retargeter or native history.
+    terrain_renderer = None
     paired_renderer = NativePairRenderer(server)
     cast_renderer = CastPerformanceRenderer(server)
     native_render_lock = threading.RLock()
@@ -202,6 +215,7 @@ def main():
     cast_requested = False
     native_exporting = False
     last_core_clip = None
+    last_core_camera_stream = None
     last_cast_clip = None
     last_main_scene = session.scene_document()
     last_main_scene_revision = session.project_revision
@@ -249,7 +263,10 @@ def main():
                 entry = characters.active_entry
                 session.set_character_motion_enabled(entry is None or entry.retargeter is not None)
             actor_group.visible = mode is None
-            core_renderer.set_visible(core_requested)
+            terrain_display = core_requested and core.snapshot().get('terrain_aware', False)
+            core_renderer.set_visible(core_requested and not terrain_display)
+            if terrain_renderer is not None:
+                terrain_renderer.set_visible(terrain_display)
             paired_renderer.set_visible(paired_requested)
             cast_renderer.set_visible(cast_requested)
             camera.rebase(actor_root())
@@ -339,18 +356,36 @@ def main():
             camera._manual(client)
             set_cast_camera_view(client, position, center, fov)
 
-    def generate_prompt_cast(prompt, seed, client):
+    def cast_generation_readiness(source="generate"):
+        if core_client is None:
+            return "Configure the Core motion connection before generating performers."
+        if source == "generate" and pair_provider is None:
+            return pair_resolution.status
+        return None
+
+    def generate_prompt_cast(prompt, seed, client, *, actor_count=None):
         from prompt_scene_builder import PromptSceneBuilder
         with session.lock, native_render_lock:
             require_native_idle()
-            if pair_provider is None or core_client is None:
-                raise ValueError('Configure the existing native and Core providers before generating an AI cast.')
-            builder = PromptSceneBuilder(prompt, cast_planner, pair_provider, core_client,
+            readiness = cast_generation_readiness()
+            if readiness:
+                raise ValueError(readiness)
+            planner = cast_planner if actor_count is None else ScenePromptPlanner(expected_actor_count=actor_count)
+            builder = PromptSceneBuilder(prompt, planner, pair_provider, core_client,
                                          ROOT / '.runtime/prompt-scenes/generations', seed=seed)
             activate_cast(True)
             cast.build_performance(builder, session.scene_document(), request={'prompt': prompt, 'seed': seed})
             direction_marks.hide()
         return cast
+
+    def generate_scene_cast(prompt, seconds, client, *, actor_count):
+        if seconds is not None:
+            raise ValueError("Choose Auto length for a multi-person scene; describe action timing in the prompt.")
+        seed = int(cast_ui.seed.value) if cast_ui is not None else 42
+        generate_prompt_cast(prompt, seed, client, actor_count=actor_count)
+        if cast_ui is not None:
+            cast_ui.prompt.value = prompt
+        return True
 
     def frame_native_cast(client):
         if client is None:
@@ -400,7 +435,11 @@ def main():
         request = validate_request(request)
         with session.lock, native_render_lock:
             require_native_idle()
-            preview_paired_direction(request, client)
+            if request['source'] == 'generate':
+                readiness = cast_generation_readiness()
+                if readiness:
+                    raise ValueError(readiness)
+            request = preview_paired_direction(request, client)['request']
             activate_paired(True)
             paired.select_pair(*request['actor_ids'])
             builder = PairedSceneBuilder(request, pair_provider, core_client, ROOT / '.runtime/paired-scenes')
@@ -457,13 +496,14 @@ def main():
             cast_ui = StudioCastControls(gui, cast, on_generate=generate_prompt_cast,
                 on_frame=frame_prompt_cast, on_export=lambda client: export_native_performance(client, composed=True),
                 on_open=open_native_project, provider_available=pair_provider is not None and core_client is not None,
-                output_root=ROOT / '.runtime/cast-projects')
+                output_root=ROOT / '.runtime/cast-projects', generation_readiness=cast_generation_readiness)
         prompt_cast_folder.visible = False
         with gui.add_folder('Two-person scene', expand_by_default=True) as pair_folder:
             direction_ui = PairedDirectionControls(gui, paired, on_generate=generate_paired_direction,
                 on_preview=preview_paired_direction, on_frame_cast=frame_native_cast,
                 on_active=activate_paired, scene_provider=session.scene_document,
-                on_export=lambda client: pair_ui.start_capture(client), on_edit=direction_marks.hide)
+                on_export=lambda client: pair_ui.start_capture(client), on_edit=direction_marks.hide,
+                generation_readiness=cast_generation_readiness)
         with gui.add_folder('Cast, playback and files', expand_by_default=False) as cast_folder:
             pair_ui = NativePairControls(gui, paired, session, on_active=activate_paired,
                 project_folder=ROOT / '.runtime/native-pair-projects', on_capture=export_native_pair,
@@ -490,6 +530,12 @@ def main():
         if paired_requested:
             return paired_renderer.actor_root()
         if core_requested and core.snapshot()['total_frames']:
+            if core.snapshot().get('terrain_aware', False):
+                with core._lock:
+                    presentation = core.terrain_presentation()
+                    if presentation is not None:
+                        frame = min(core.snapshot()['frame'], presentation.frames - 1)
+                        return tuple(float(value) for value in presentation.positions[0, frame, 0])
             return core_renderer.actor_root()
         return characters.actor_root()
     camera = StudioCamera(server, actor_root)
@@ -519,6 +565,10 @@ def main():
             show_grid=bool(gate_ui['grid'].value),
             show_platform=bool(gate_ui['stage'].value),
         )
+        if core_requested and core.snapshot().get('terrain_aware', False):
+            # Terrain takes use their authored support, including narrow
+            # courtyards. A generic stage/grid would overlap it or hide gaps.
+            visibility = (False, False, False)
         if visibility == surface_state:
             return
         surface_state = visibility
@@ -569,12 +619,31 @@ def main():
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
                   characters.build_gui, core_session=core, paired_session=paired, cast_session=cast,
                   core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project,
-                  on_story_activate=activate_story)
+                  on_story_activate=activate_story, on_generate_cast=generate_scene_cast)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core, paired_session=paired, cast_session=cast)
 
     if args.native_project:
         open_native_project(args.native_project.read_bytes())
+    if args.core_project:
+        core.load_project(args.core_project.read_bytes())
+        session.load_scene_document(core.scene_document)
+        core.pause()
+        core.seek(0)
+        activate_core(True)
+
+    def activate_voice_motion():
+        activate_story()
+
+    voice = VoiceDirecting(server, session, workflow=ui.story_controls.workflow,
+                           on_single_action_submitted=ui.sync_voice_action,
+                           on_story_submitted=ui.story_controls.register_voice_job,
+                           on_motion_activate=activate_voice_motion)
+
+    dialogue = DialogueDirector(session, server, enabled=lambda: not (core_requested or paired_requested or cast_requested))
+    server.on_client_connect(dialogue.connected)
+    for client in server.get_clients().values():
+        dialogue.connected(client)
 
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
@@ -634,7 +703,9 @@ def main():
             pose_changed = key != previous or characters.revision != previous_character
             # Main-session lock always precedes the render lock; capture never
             # acquires the main-session lock while holding the render lock.
-            with session.lock, native_render_lock:
+            # Keep the native clock, scene snapshot and optional rig17 display
+            # on one committed revision while a terrain append publishes.
+            with session.lock, native_render_lock, core._lock:
                 if not native_exporting and not paired.snapshot().get('capturing') and not cast.snapshot()['capturing']:
                     if session.project_revision != last_main_scene_revision:
                         current_main_scene = session.scene_document()
@@ -669,20 +740,42 @@ def main():
                                 frame_prompt_cast(client)
                     if cast_requested and not cast_state['total_frames']:
                         cast_document = session.scene_document()
-                    if core_state['epoch'] != core_document_epoch:
+                    document_key = (core_state['epoch'], core_state.get('terrain_aware', False),
+                                    core_state.get('terrain_display_revision', 0))
+                    if document_key != core_document_epoch:
                         core_document = core.scene_document
-                        core_document_epoch = core_state['epoch']
+                        core_document_epoch = document_key
                     if paired_state['revision'] != paired_document_revision:
                         paired_document = paired.scene_document
                         paired_document_revision = paired_state['revision']
-                    core_key = (core_state.get('epoch'), core_state['revision'], core_state['total_frames'])
+                    terrain_display = core_state.get('terrain_aware', False)
+                    core_key = (core_state.get('epoch'), core_state['revision'], core_state['total_frames'],
+                                terrain_display, core_state.get('terrain_display_revision', 0))
                     paired_key = (paired_state.get('epoch'), paired_state['revision'], paired_state['total_frames'])
                     if core_requested and core_state['total_frames']:
-                        if core_key != last_core_clip:
-                            core_renderer.set_clip(core.timeline_clip())
-                            last_core_clip = core_key
-                        core_renderer.tick(core_state['frame'])
-                    core_renderer.set_visible(core_requested and bool(core_state['total_frames']))
+                        if terrain_display:
+                            presentation = core.terrain_presentation()
+                            if presentation is not None:
+                                if terrain_renderer is None:
+                                    from terrain_assisted_renderer import TerrainAssistedRenderer
+                                    terrain_renderer = TerrainAssistedRenderer(server, name_prefix="/terrain-core-cast")
+                                if core_key != last_core_clip:
+                                    terrain_renderer.set_presentation(presentation, actor_ids=presentation.actor_ids)
+                                    last_core_clip = core_key
+                                terrain_renderer.tick(core_state['frame'])
+                        else:
+                            if core_key != last_core_clip:
+                                core_renderer.set_clip(core.timeline_clip())
+                                last_core_clip = core_key
+                            core_renderer.tick(core_state['frame'])
+                    camera_stream = (core_state.get('epoch'), terrain_display,
+                                     core_state.get('terrain_display_revision', 0) if terrain_display else None)
+                    if core_requested and camera_stream != last_core_camera_stream:
+                        camera.rebase(actor_root())
+                        last_core_camera_stream = camera_stream
+                    core_renderer.set_visible(core_requested and not terrain_display and bool(core_state['total_frames']))
+                    if terrain_renderer is not None:
+                        terrain_renderer.set_visible(core_requested and terrain_display and bool(core_state['total_frames']))
                     paired_renderer.set_visible(paired_requested)
                     cast_renderer.set_visible(cast_requested and bool(cast_state['total_frames']))
                     actor_group.visible = not (core_requested or paired_requested or cast_requested)
@@ -732,6 +825,12 @@ def main():
                             # these objects; the UI labels it a backdrop.
                             states = [{'id': o['id'], 'position': o['position'],
                                        'color': o['color'], 'active': False} for o in objects]
+                            if core_requested and core_state.get('scene_reactions_enabled'):
+                                from core_scene_reactions import object_states as core_object_states
+                                states = core_object_states(doc, core.timeline_clip(), int(display_frame),
+                                    enabled=True, start_frame=core_state.get('scene_reactions_start_frame', 0),
+                                    terrain=core_state.get('terrain_navigation_enabled', False),
+                                    terrain_start_frame=core_state.get('terrain_navigation_start_frame', 0))
                             object_layer.update(objects, {'objects': states,
                                 'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
                                 'lighting': doc.get('lighting', 'neutral'),
@@ -765,6 +864,8 @@ def main():
                     if ui_due:
                         ui.update()
                         core_ui.tick()
+                        voice.update()
+                        dialogue.update()
                         pair_ui.tick()
                         cast_ui.tick()
                         prompt_cast_folder.visible = cast_requested
@@ -778,12 +879,16 @@ def main():
                     last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
+        voice.close()
+        dialogue.close()
         ui.story_controls.close()
         session.reset()
         core.close()
         paired.close()
         cast.close()
         core_renderer.remove()
+        if terrain_renderer is not None:
+            terrain_renderer.remove()
         paired_renderer.remove()
         cast_renderer.remove()
         characters.close()

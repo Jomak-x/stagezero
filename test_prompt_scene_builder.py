@@ -98,8 +98,9 @@ class BuilderTests(unittest.TestCase):
         for activity in result.metadata['segment_activity']:
             for aid in activity['held_actor_ids']:
                 chunk = result.joints[activity['start_frame']:activity['end_frame_exclusive'], result.actor_ids.index(aid)]
-                np.testing.assert_array_equal(chunk, np.repeat(chunk[:1], len(chunk), axis=0))
-        np.testing.assert_array_equal(result.joints[0, 0], result.joints[-1, 0])
+                np.testing.assert_array_equal(chunk[:, [0, 1, 2, 4, 5, 7, 8, 10, 11]], np.repeat(chunk[:1, [0, 1, 2, 4, 5, 7, 8, 10, 11]], len(chunk), axis=0))
+        self.assertGreater(result.metadata["motion_refinement"]["observer_motion"]["applied_actor_frames"], 0)
+        self.assertFalse(result.metadata["motion_refinement"]["source_pair_frames_modified"])
 
     def test_pair_alignment_is_shared_rigid_and_preserves_every_frame(self):
         source = np.repeat(np.stack([self.pose+[-1, 0, 0], self.pose+[1, 0, 0]])[None], 60, axis=0)
@@ -134,7 +135,8 @@ class BuilderTests(unittest.TestCase):
         beats = [{'id': 'beat-1', 'actor_ids': ['actor_1', 'actor_2'], 'prompt': 'Face each other.', 'seconds': 1}]
         result = self.build(3, beats, provider)
         np.testing.assert_allclose(result.joints[-30:, :2], pair_joints, atol=1e-12)
-        np.testing.assert_array_equal(result.joints[:, 2], np.repeat(result.joints[:1, 2], result.frames, axis=0))
+        np.testing.assert_array_equal(result.joints[:, 2][:, [0, 7, 8, 10, 11]], np.repeat(result.joints[:1, 2][:, [0, 7, 8, 10, 11]], result.frames, axis=0))
+        self.assertGreater(np.max(np.abs(result.joints[:, 2, 20]-result.joints[:1, 2, 20])), .01)
         self.assertEqual([s['source'] for s in result.metadata['segments']], ['ardy_core', 'authored_transition', 'intergen'])
         self.assertTrue(all(len(r['actor_ids']) <= 2 for r in self.client.requests))
 
@@ -267,14 +269,19 @@ class BuilderTests(unittest.TestCase):
         expected = incoming.joints[0, 1].copy()
         expected[:, 0] += 6-expected[0, 0]
         expected[:, 2] -= expected[0, 2]
-        np.testing.assert_array_equal(result.joints[0, 2], expected)
+        np.testing.assert_allclose(result.joints[0, 2, 0], expected[0])
+        from experiments.native_pair_rig import PARENTS
+        np.testing.assert_allclose(
+            np.linalg.norm(result.joints[0, 2, 1:]-result.joints[0, 2, np.array(PARENTS[1:])], axis=1),
+            np.linalg.norm(expected[1:]-expected[np.array(PARENTS[1:])], axis=1))
+        self.assertIn('actor_3', result.metadata['placement']['initial_source_staging']['observer_orientation'])
         manifest = json.loads(Path(result.metadata['source_manifest']).read_text())
         idle = manifest['idle_initializations'][0]
         self.assertEqual((idle['source'], idle['source_beat_index'], idle['source_actor_index']), ('intergen', 1, 1))
         np.testing.assert_allclose(result.joints[-30:, 2]-result.joints[-30:, 2, :1], incoming.joints[:, 1]-incoming.joints[:, 1, :1])
 
     def test_distant_later_pair_runs_real_core_travel_not_long_authored_bridge(self):
-        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        pair = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1.8, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
         provider = SimpleNamespace(generate=lambda *a, **kw: pair, last_raw_archive=None)
         beats = [{'id': 'beat-1', 'actor_ids': ['actor_1'], 'prompt': 'Stand.', 'seconds': 2},
                  {'id': 'beat-2', 'actor_ids': ['actor_1', 'actor_2'], 'prompt': 'Face each other.', 'seconds': 1}]
@@ -438,7 +445,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_actual_idle_collision_is_archived_and_retried_with_fresh_core_history(self):
         first = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[3, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
-        later = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
+        later = NativePairClip(np.repeat(np.stack([self.pose, self.pose+[1.8, 0, 0]])[None], 30, axis=0), metadata={'model': 'InterGen'})
         sources = iter((first, later))
         provider = SimpleNamespace(generate=lambda *args, **kwargs: next(sources), last_raw_archive=None)
         original = self.client.wait

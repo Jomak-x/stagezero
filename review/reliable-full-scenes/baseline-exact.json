@@ -1,0 +1,329 @@
+{
+  "archive_format": "stagezero",
+  "active_take_id": "1e502310-6f57-42d7-b93c-b19aa7cf2df4",
+  "selected_take_id": "1e502310-6f57-42d7-b93c-b19aa7cf2df4",
+  "take": {
+    "take_id": "1e502310-6f57-42d7-b93c-b19aa7cf2df4",
+    "take_name": "20-Meter Sprint, Fall, Dance, and Backflip",
+    "fps": 25,
+    "frames": 416,
+    "seconds": 16.64,
+    "body_length_m": 0.5111913681030273,
+    "segment_count": 7,
+    "structural_checks": [
+      {
+        "name": "segment_coverage",
+        "passed": true,
+        "observed": {
+          "covered_frames": 416,
+          "take_frames": 416
+        },
+        "requirement": "Contiguous segments cover every take frame"
+      }
+    ],
+    "segments": [
+      {
+        "index": 0,
+        "beat_id": "beat-1",
+        "prompt": "A person sprints forward for 20 meters with strong arm pumps.",
+        "start": 0,
+        "end": 100,
+        "frames": 100,
+        "seconds": 4.0,
+        "metrics": {
+          "root_path_length_m": 6.485624150675729,
+          "root_net_displacement_m": 5.397968930168459,
+          "root_vertical_range_m": 0.12149059772491455,
+          "root_mean_planar_speed_mps": 1.6377838764332648,
+          "pose_mean_joint_speed_body_lengths_per_second": 1.467573125929598,
+          "pose_p90_joint_speed_body_lengths_per_second": 2.373804156113616,
+          "pose_active_frame_fraction": 1.0,
+          "torso_min_dot_up": 0.8935770485084553,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.6467302441596985
+        },
+        "checks": [
+          {
+            "name": "travel_displacement",
+            "passed": false,
+            "observed": 5.397968930168459,
+            "requirement": "Planar net displacement >= 15.000 m (75% of requested 20 m)"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "beat_id": "beat-2",
+        "prompt": "A person stops quickly.",
+        "start": 100,
+        "end": 125,
+        "frames": 25,
+        "seconds": 1.0,
+        "metrics": {
+          "root_path_length_m": 0.10087707030902494,
+          "root_net_displacement_m": 0.09084268286993913,
+          "root_vertical_range_m": 0.032131314277648926,
+          "root_mean_planar_speed_mps": 0.105080281571901,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.3117578471658536,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.7229765948466909,
+          "pose_active_frame_fraction": 0.4166666666666667,
+          "torso_min_dot_up": 0.9896184094390148,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7473840713500977
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.021110621854953413,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.02896804314392252,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "beat_id": "beat-3",
+        "prompt": "A person falls to the ground.",
+        "start": 125,
+        "end": 155,
+        "frames": 30,
+        "seconds": 1.2,
+        "metrics": {
+          "root_path_length_m": 0.04515459574237329,
+          "root_net_displacement_m": 0.01986023911962749,
+          "root_vertical_range_m": 0.0037253499031066895,
+          "root_mean_planar_speed_mps": 0.038926375639976966,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.03978377354474817,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.04675743900479535,
+          "pose_active_frame_fraction": 0.0,
+          "torso_min_dot_up": 0.9980173275670328,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7453502416610718
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.00289125632070551,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.003176052552021634,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "fall_terminal_low_pose",
+            "passed": false,
+            "observed": 0.7453502416610718,
+            "requirement": "Median root elevation above ankles in final five frames <= 0.332 m (0.65 body lengths)"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "beat_id": "beat-4",
+        "prompt": "A person pushes up from lying on the floor and stands upright.",
+        "start": 155,
+        "end": 228,
+        "frames": 73,
+        "seconds": 2.92,
+        "metrics": {
+          "root_path_length_m": 0.38568953129123873,
+          "root_net_displacement_m": 0.06482133078171441,
+          "root_vertical_range_m": 0.2587079405784607,
+          "root_mean_planar_speed_mps": 0.13391997614279122,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.8783040756021644,
+          "pose_p90_joint_speed_body_lengths_per_second": 1.711437771393283,
+          "pose_active_frame_fraction": 0.7222222222222222,
+          "torso_min_dot_up": 0.3906532703983559,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.747708261013031
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.003776879814697347,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.003882970689362111,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "recovery_terminal_upright",
+            "passed": true,
+            "observed": true,
+            "requirement": "Final 10 frames satisfy story_recovery upright pose proxy"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "beat_id": "beat-5",
+        "prompt": "A person stands upright.",
+        "start": 228,
+        "end": 253,
+        "frames": 25,
+        "seconds": 1.0,
+        "metrics": {
+          "root_path_length_m": 0.01762323352941325,
+          "root_net_displacement_m": 0.015225980698604435,
+          "root_vertical_range_m": 0.0006194710731506348,
+          "root_mean_planar_speed_mps": 0.018357534926472137,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.11752696527820446,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.24156841404017226,
+          "pose_active_frame_fraction": 0.0,
+          "torso_min_dot_up": 0.9840706063031779,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7491696774959564
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0015051487778995776,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.010438508538331712,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "standing_terminal_upright",
+            "passed": true,
+            "observed": true,
+            "requirement": "Final 10 frames satisfy story_recovery upright pose proxy"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "beat_id": "beat-6",
+        "prompt": "A person dances in place.",
+        "start": 253,
+        "end": 378,
+        "frames": 125,
+        "seconds": 5.0,
+        "metrics": {
+          "root_path_length_m": 0.02678576097514452,
+          "root_net_displacement_m": 0.007511279302713189,
+          "root_vertical_range_m": 0.00128096342086792,
+          "root_mean_planar_speed_mps": 0.005400355035311395,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.01223867764038625,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.01935091948683423,
+          "pose_active_frame_fraction": 0.0,
+          "torso_min_dot_up": 0.9924535620761114,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7489870488643646
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0013356772193678656,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.0018652806998892889,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "sustained_motion_activity",
+            "passed": false,
+            "observed": 0.0,
+            "requirement": "At least half the frames exceed 0.3 leg lengths/second of articulated motion; this does not classify dance style"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "beat_id": "beat-7",
+        "prompt": "A person performs a backflip.",
+        "start": 378,
+        "end": 416,
+        "frames": 38,
+        "seconds": 1.52,
+        "metrics": {
+          "root_path_length_m": 0.14724033906811085,
+          "root_net_displacement_m": 0.13987970467440167,
+          "root_vertical_range_m": 0.0790901780128479,
+          "root_mean_planar_speed_mps": 0.09948671558656139,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.8463429787476787,
+          "pose_p90_joint_speed_body_lengths_per_second": 2.208735093214563,
+          "pose_active_frame_fraction": 0.6486486486486487,
+          "torso_min_dot_up": 0.8789835533823701,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7257875502109528
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0013666942908348043,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.00260146118623404,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "backflip_torso_inversion",
+            "passed": false,
+            "observed": 0,
+            "requirement": "Torso dot(up) <= -0.5 for at least 3 consecutive frames"
+          },
+          {
+            "name": "backflip_terminal_upright",
+            "passed": true,
+            "observed": true,
+            "requirement": "Final 10 frames satisfy story_recovery upright pose proxy"
+          }
+        ]
+      }
+    ],
+    "passed": false,
+    "failed_checks": [
+      {
+        "segment": 0,
+        "name": "travel_displacement"
+      },
+      {
+        "segment": 2,
+        "name": "fall_terminal_low_pose"
+      },
+      {
+        "segment": 5,
+        "name": "sustained_motion_activity"
+      },
+      {
+        "segment": 6,
+        "name": "backflip_torso_inversion"
+      }
+    ],
+    "interpretation": "Geometric proxies only; visual quality and full prompt adherence require review."
+  }
+}

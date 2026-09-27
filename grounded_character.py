@@ -480,13 +480,20 @@ class GroundedCharacter:
 
     def clip_payload(self, positions, rotations, *, preserve_root_height=False,
                      preserve_wrists=False, wrist_target_space='retargeted_root',
-                     preserve_feet=False, floor_y=None, floor_offsets=None, fps=20.):
+                     preserve_feet=False, floor_y=None, floor_offsets=None, fps=20.,
+                     source_terrain_geometry=None, render_terrain_geometry=None):
         """JSON-ready fitted arrays [actors,frames,17,...] for native clips."""
         p,r=np.asarray(positions),np.asarray(rotations)
         if p.ndim==3:p,r=p[None],r[None]
         if p.ndim!=4 or p.shape[2:]!=(27,3) or r.shape!=p.shape[:-1]+(3,3):
             raise ValueError('Expected Core clip [actors,frames,27,3] and matching rotations')
-        if preserve_feet and floor_y is None:
+        terrain_mode=source_terrain_geometry is not None or render_terrain_geometry is not None
+        if terrain_mode and (source_terrain_geometry is None or render_terrain_geometry is None):
+            raise ValueError('Terrain fitting requires both source and render geometry')
+        if terrain_mode and any(not callable(getattr(geometry,'support_height',None))
+                                for geometry in (source_terrain_geometry,render_terrain_geometry)):
+            raise TypeError('Terrain geometry must provide support_height')
+        if preserve_feet and floor_y is None and not terrain_mode:
             raise ValueError('Foot mesh clearance requires an explicit floor_y')
         fitted_p=np.empty(p.shape[:2]+(17,3));fitted_r=np.empty(p.shape[:2]+(17,3,3))
         for actor in range(len(p)):
@@ -507,7 +514,7 @@ class GroundedCharacter:
             errors=np.linalg.norm(fitted_p[:,:,[5,8]]-targets,axis=-1)
             provenance['wrist_target_error_m']={'max':float(errors.max()),'mean':float(errors.mean()),
                 'unreachable_fraction':float(np.mean(errors>.005))}
-        if floor_y is not None or floor_offsets is not None:
+        if floor_y is not None or floor_offsets is not None or terrain_mode:
             if (floor_y is not None and not np.isfinite(floor_y)) or not np.isfinite(fps) or fps<=0:
                 raise ValueError('Floor and positive frame rate must be finite')
             if floor_offsets is not None:
@@ -517,7 +524,11 @@ class GroundedCharacter:
             calibrations=[]
             for actor in range(len(p)):
                 if floor_offsets is None:
-                    shift,details=self._floor_calibration(p[actor],fitted_p[actor],fitted_r[actor],float(floor_y),float(fps))
+                    if terrain_mode:
+                        shift,details=self._terrain_calibration(p[actor],fitted_p[actor],fitted_r[actor],
+                            source_terrain_geometry,render_terrain_geometry,float(fps))
+                    else:
+                        shift,details=self._floor_calibration(p[actor],fitted_p[actor],fitted_r[actor],float(floor_y),float(fps))
                 else:
                     shift=float(floor_offsets[actor])
                     details={'applied':True,'offset_m':shift,'floor_y':floor_y,
@@ -533,7 +544,8 @@ class GroundedCharacter:
                 floor_offset=provenance['floor_offsets'][actor]
                 for frame in range(p.shape[1]):
                     corrections.append(self._preserve_feet(p[actor,frame],fitted_p[actor,frame],
-                        fitted_r[actor,frame],float(floor_y),floor_offset))
+                        fitted_r[actor,frame],float(floor_y) if floor_y is not None else None,
+                        floor_offset,source_terrain_geometry,render_terrain_geometry))
             provenance['preserve_native_feet']=False
             provenance['foot_retarget']={
                 'method':'causal vertical mesh clearance from existing fitted ankles; fixed-length leg IK; smooth native near-ground eligibility; no downward snap',
@@ -542,16 +554,43 @@ class GroundedCharacter:
                 'max_sole_target_lift_m':max(row['max_sole_target_lift_m'] for row in corrections),
                 'max_unreachable_target_error_m':max(row['max_unreachable_target_error_m'] for row in corrections),
                 'unreachable_fraction':float(np.mean([row['unreachable_fraction'] for row in corrections]))}
+            if terrain_mode:
+                provenance['foot_retarget'].update({
+                    'support_mode':'explicit terrain-relative source toes and rendered sole vertices',
+                    'max_ankle_displacement_m':max(row['max_ankle_displacement_m'] for row in corrections),
+                    'max_knee_angle_change_deg':max(row['max_knee_angle_change_deg'] for row in corrections),
+                    'max_remaining_sole_penetration_m':max(row['max_remaining_sole_penetration_m'] for row in corrections),
+                    'reach_limited_fraction':float(np.mean([row['reach_limited_fraction'] for row in corrections]))})
         return {'fitted_positions':fitted_p.tolist(),'fitted_rotations':fitted_r.tolist(),
                 'character_provenance':provenance}
 
-    def _preserve_feet(self, source, positions, rotations, floor_y, floor_offset):
+    @staticmethod
+    def _support_height(geometry,x,z,y):
+        height=geometry.support_height(float(x),float(z),float(y),max_step_up=.45,max_drop=2.)
+        if height is None:return None
+        if not np.isfinite(height):raise ValueError('Terrain support height must be finite')
+        return float(height)
+
+    def _sole_vertices(self, surface, positions, rotations):
+        si=self.skin_indices[surface];sw=self.skin_weights[surface]
+        local=self.vertices[surface,None]-self.rest[si]
+        return np.sum((np.einsum('vwij,vwj->vwi',rotations[si],local)+positions[si])*sw[...,None],axis=1)
+
+    @staticmethod
+    def _knee_angle(hip,knee,ankle):
+        upper=hip-knee;lower=ankle-knee
+        cosine=np.dot(upper,lower)/max(np.linalg.norm(upper)*np.linalg.norm(lower),1e-12)
+        return float(np.degrees(np.arccos(np.clip(cosine,-1.,1.))))
+
+    def _preserve_feet(self, source, positions, rotations, floor_y, floor_offset,
+                       source_terrain_geometry=None, render_terrain_geometry=None):
         """Frame-local mesh clearance, leaving nonpenetrating motion intact."""
-        errors=[];lifts=[]
+        errors=[];lifts=[];ankle_displacements=[];knee_changes=[];remaining=[];limited=[]
         for side,(thigh,knee,foot),surface in zip(('Left','Right'),((9,10,11),(12,13,14)),self.foot_surface_indices):
             target=positions[foot].copy()
             original_target=target.copy()
             pole=positions[knee].copy()
+            original_angle=self._knee_angle(positions[thigh],positions[knee],positions[foot]) if render_terrain_geometry is not None else 0.
             lengths=(np.linalg.norm(self.rest[knee]-self.rest[thigh]),
                      np.linalg.norm(self.rest[foot]-self.rest[knee]))
             def solve():
@@ -562,25 +601,82 @@ class GroundedCharacter:
                 rotations[knee]=_align_direction(old_lower,end-middle)@rotations[knee]
                 positions[knee],positions[foot]=middle,end
             # Continuous support eligibility avoids a threshold-crossing pop.
-            u=np.clip((.30-source[self.core_idx[side+'ToeBase'],1])/.15,0.,1.)
+            toe=source[self.core_idx[side+'ToeBase']]
+            if source_terrain_geometry is None:
+                clearance=toe[1]
+            else:
+                support=self._support_height(source_terrain_geometry,toe[0],toe[2],toe[1])
+                clearance=toe[1]-support if support is not None else np.inf
+            u=np.clip((.30-clearance)/.15,0.,1.)
             eligibility=u*u*(3.-2.*u)
             if eligibility>0 and len(surface):
-                si=self.skin_indices[surface];sw=self.skin_weights[surface]
-                local=self.vertices[surface,None]-self.rest[si]
                 floor_target=None
                 for _ in range(3):
-                    v=np.sum((np.einsum('vwij,vwj->vwi',rotations[si],local)+positions[si])*sw[...,None],axis=1)
-                    if floor_target is None:
-                        initial_y=float(v[:,1].min())
-                        floor_target=initial_y+max(0.,floor_y-initial_y)*eligibility
-                    penetration=float(floor_target-v[:,1].min())
+                    v=self._sole_vertices(surface,positions,rotations)
+                    if render_terrain_geometry is None:
+                        if floor_target is None:
+                            initial_y=float(v[:,1].min())
+                            floor_target=initial_y+max(0.,floor_y-initial_y)*eligibility
+                        penetration=float(floor_target-v[:,1].min())
+                    else:
+                        supports=[self._support_height(render_terrain_geometry,row[0],row[2],row[1]) for row in v]
+                        if floor_target is None:
+                            floor_target=np.asarray([row[1]+max(0.,height-row[1])*eligibility
+                                if height is not None else -np.inf for row,height in zip(v,supports)])
+                        penetration=float(np.max(floor_target-v[:,1]))
                     if penetration<=1e-6:break
                     target[1]+=penetration+1e-5
                     solve()
             lifts.append(float(target[1]-original_target[1]))
             errors.append(float(np.linalg.norm(positions[foot]-target)))
-        return {'max_sole_target_lift_m':max(lifts),'max_unreachable_target_error_m':max(errors),
+            if render_terrain_geometry is not None:
+                ankle_displacements.append(float(np.linalg.norm(positions[foot]-original_target)))
+                knee_changes.append(abs(self._knee_angle(positions[thigh],positions[knee],positions[foot])-original_angle))
+                v=self._sole_vertices(surface,positions,rotations) if len(surface) else np.empty((0,3))
+                supports=[self._support_height(render_terrain_geometry,row[0],row[2],row[1]) for row in v]
+                remaining.append(max([max(0.,height-row[1]) for row,height in zip(v,supports)
+                                      if height is not None] or [0.]))
+                limited.append(errors[-1]>.005)
+        result={'max_sole_target_lift_m':max(lifts),'max_unreachable_target_error_m':max(errors),
                 'unreachable_fraction':float(np.mean(np.asarray(errors)>.005))}
+        if render_terrain_geometry is not None:
+            result.update(max_ankle_displacement_m=max(ankle_displacements),
+                max_knee_angle_change_deg=max(knee_changes),
+                max_remaining_sole_penetration_m=max(remaining),
+                reach_limited_fraction=float(np.mean(limited)))
+        return result
+
+    def _terrain_calibration(self, source, positions, rotations, source_geometry, render_geometry, fps):
+        """One fixed shift from terrain-relative native contacts and fitted soles."""
+        clearances=[]
+        for bone,core in ((11,self.core_idx['LeftToeBase']),(14,self.core_idx['RightToeBase'])):
+            selected=self.weights[:,bone]>=.5
+            if not np.any(selected):continue
+            sole=selected&(self.vertices[:,1]<=self.vertices[selected,1].min()+.015)
+            ids=np.flatnonzero(sole)
+            if len(ids)>128:ids=ids[np.linspace(0,len(ids)-1,128).astype(int)]
+            toe=source[:,core]
+            velocity=np.linalg.norm(np.gradient(toe,axis=0)*fps,axis=-1) if len(toe)>1 else np.zeros(len(toe))
+            supports=np.asarray([self._support_height(source_geometry,row[0],row[2],row[1])
+                                 for row in toe],dtype=object)
+            native_clearance=np.asarray([row[1]-height if height is not None else np.inf
+                                         for row,height in zip(toe,supports)])
+            finite=native_clearance[np.isfinite(native_clearance)]
+            if not len(finite):continue
+            baseline=np.quantile(finite,.1)
+            grounded=(native_clearance<=baseline+.025)&(velocity<.35)&(native_clearance<.15)
+            for frame in np.flatnonzero(grounded):
+                world=self._sole_vertices(ids,positions[frame],rotations[frame])
+                local=[row[1]-height for row in world
+                       if (height:=self._support_height(render_geometry,row[0],row[2],row[1])) is not None]
+                if local:clearances.append(float(min(local)))
+        if len(clearances)<3:
+            return 0.,{'applied':False,'offset_m':0.,'reason':'insufficient terrain-relative support samples'}
+        reference=float(np.quantile(clearances,.1))
+        shift=float(np.clip(-reference,-.15,.15))
+        return shift,{'applied':True,'offset_m':shift,'support_sample_count':len(clearances),
+            'reference_support_clearance_m':reference,
+            'method':'single clip-wide terrain-relative sole translation; no frame snapping'}
 
     def _floor_calibration(self, source, positions, rotations, floor_y, fps):
         """One disclosed clip-wide translation estimated only from support feet.

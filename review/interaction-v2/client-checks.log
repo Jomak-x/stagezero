@@ -1,0 +1,150 @@
+
+> viser@0.1.0 typecheck
+> tsc --noEmit
+
+
+> viser@0.1.0 test
+> node --experimental-strip-types --test src/*.test.mjs tests/*.test.mjs src/mesh/*.test.mjs
+
+(node:29940) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/ControlPanel/DialogueState.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ an older snapshot keeps a newly submitted line until acknowledged (0.613583ms)
+✔ a newer status wins over an older snapshot for the same attempt (0.104583ms)
+✔ catalog and take eligibility work in either arrival order (0.068292ms)
+✔ retry stays queued through a stale saved-line snapshot (0.089917ms)
+(node:29941) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/VoiceCommands.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ queue snapshots preserve newer local requests until acknowledged (1.201792ms)
+(node:29942) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/VoicePlayback.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ dialogue follows pause, resume, seek, speed, loop, and take switch (0.973542ms)
+✔ superseded decode cannot install stale audio or acknowledge an old take (0.135458ms)
+✔ decode failure waits for user recovery; silent playback invalidates late decodes (0.149083ms)
+(node:29943) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/WorldTransformUtils.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ root +Y pose is available to camera commands in the same socket batch (0.979ms)
+(node:29944) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/cameraNavigation.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a click and tiny pointer jitter never begin a camera drag (0.342666ms)
+✔ pan moves the camera and target together in the screen plane (0.495917ms)
+✔ look keeps the camera fixed, target distance constant, and pitch upright (0.131666ms)
+✔ walk forward stays level even when looking down (0.073292ms)
+✔ dolly has bounded, monotonic sensitivity (0.072625ms)
+(node:29945) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/cameraStore.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ camera state and command envelopes are isolated per viewer (0.652916ms)
+✔ older same-project states cannot roll back a camera edit (0.174959ms)
+(node:29946) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/cameraTimelineMath.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ camera cuts form hard-cut durations ending at the take length (1.221625ms)
+✔ a dragged cut replaces an occupied frame in either direction (0.24ms)
+✔ the final one-frame cut keeps a clickable block at the edge (0.122292ms)
+✔ dragging snaps to whole frames and stays within the take (0.076208ms)
+(node:29947) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/mesh/ActorGlbLifecycle.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a failed replacement retries an interrupted committed load (0.317625ms)
+✔ rejecting B leaves an in-flight retry of committed A intact (0.065541ms)
+(node:29948) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/mesh/ActorGlbRendering.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ ground offset uses world units while model scale remains local (1.10425ms)
+✔ placement defaults legacy loads to zero and stays isolated per actor (0.186958ms)
+✔ controlled skinned GLB is not culled against stale bind bounds (0.183208ms)
+(node:29949) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/mesh/NativePairPlayback.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ integer skin matches authored influence affine sum with source limb scaling (0.68375ms)
+✔ local clock continues through absent, delayed, and duplicated socket updates (0.263625ms)
+✔ pause seek resume and exact capture remain authoritative (0.480875ms)
+✔ queued controls, revisions, removal, and reconnect cannot revive stale takes (0.207917ms)
+✔ malformed binary, weights, indices, and memory shapes retain the valid take (0.701375ms)
+✔ mesh interpolation reuses geometry and buffers and capture lands exactly (0.544583ms)
+(node:29950) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/mesh/SkinnedMeshTexture.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ skinned human PNG maps retain glTF material channels and release on replacement (0.951292ms)
+(node:29951) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/serverCamera.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a cut from Y-up to a straight-down shot preserves the exact target (1.689125ms)
+✔ successive rolled and up-vector cuts preserve both endpoints (1.199209ms)
+(node:29952) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/mesh/GlbLoadGuard.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ an older GLB result is discarded after a replacement starts (1.043416ms)
+✔ unmounted GLB results are disposed and stale errors can be suppressed (0.122791ms)
+(node:29953) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/MessageThrottle.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ different GUI controls are not lost within one throttle interval (0.903209ms)
+✔ trailing seek is sent, intermediate values coalesce, dispose cancels pending work (0.17075ms)
+(node:29954) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/timeline/studioActions.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ studio action identifiers carry the take, index, and command address (0.502875ms)
+✔ each timeline command uses the button update protocol (0.095708ms)
+✔ transport commands use action zero and the same update protocol (0.098583ms)
+(node:29955) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/timeline/normalize.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ playhead-only update reuses all static timeline arrays (0.70175ms)
+✔ a changed entry invalidates only its array and keeps the new value (0.174208ms)
+✔ entry order, prompt constraints, and changed scalar fields survive reuse (0.11975ms)
+✔ layout and configuration changes invalidate every static array even if input arrays are reused (0.557ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 169.844416
+Browserslist: browsers data (caniuse-lite) is 13 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+vite v7.3.1 building client environment for production...
+transforming...
+
+new URL("./",import.meta.url) doesn't exist at build time, it will remain unchanged to be resolved at runtime. If this is intended, you can use the /* @vite-ignore */ comment to suppress this warning.
+[plugin vite:resolve] Module "module" has been externalized for browser compatibility, imported by "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/Splatting/WasmSorter/Sorter.mjs". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin vite:resolve] Module "module" has been externalized for browser compatibility, imported by "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/studio_client/src/Splatting/WasmSorter/Sorter.mjs". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 8037 modules transformed.
+rendering chunks...
+computing gzip size...
+build/index.html                                      0.91 kB │ gzip:   0.50 kB
+build/assets/Sorter-Df0J3ZWJ.wasm                    21.16 kB │ gzip:   8.97 kB
+build/assets/WebsocketServerWorker-v85DDgJK.js       24.76 kB
+build/assets/SplatSortWorker-Be22OZKX.js             27.49 kB
+build/assets/index-D8RN9Nk0.css                     235.73 kB │ gzip:  36.55 kB
+build/assets/__vite-browser-external-BIHI7g3E.js      0.03 kB │ gzip:   0.05 kB
+build/assets/index-D3HmfJ2r.js                    2,876.76 kB │ gzip: 871.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.64s

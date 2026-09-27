@@ -1,0 +1,837 @@
+{
+  "case": "door",
+  "seed": 33,
+  "sparse_targets": false,
+  "sparse_walk": false,
+  "prompt": "open Checkpoint door then go through Checkpoint door",
+  "source": "ARDY-Core-RP-20FPS-Horizon40",
+  "post_pose_edits": false,
+  "temple_scope": "ground courtyard only; stairs and raised bridge unsupported",
+  "state": {
+    "phase": "playing",
+    "status": "Spatial commands: 2/2 verified; completed. Every command reached its measured destination Playing generated motion.",
+    "frame": 18,
+    "total_frames": 80,
+    "buffer_frames": 62,
+    "playing": true,
+    "generated": true,
+    "inflight_request_id": null,
+    "queued_stages": 0,
+    "contact_open": false,
+    "failure": null,
+    "revision": 2,
+    "mode": "production",
+    "actor_ids": [
+      "actor_1"
+    ],
+    "active": true,
+    "epoch": 2,
+    "initialized": true,
+    "scene_changed_since_motion": false,
+    "available": true,
+    "schema": "Native Core27 / 20 fps (separate from G1)",
+    "example_available": true,
+    "route": {
+      "version": 1,
+      "actor_id": "actor_1",
+      "verb": "go_through",
+      "target_id": "door-1",
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            0.00563,
+            -1.96208
+          ],
+          "role": "start"
+        },
+        {
+          "time_seconds": 0.0734,
+          "position_xz": [
+            0.0,
+            -2.05
+          ],
+          "role": "entry"
+        },
+        {
+          "time_seconds": 0.6151,
+          "position_xz": [
+            0.0,
+            -2.7
+          ],
+          "role": "center"
+        },
+        {
+          "time_seconds": 1.1568,
+          "position_xz": [
+            0.0,
+            -3.35
+          ],
+          "role": "exit"
+        }
+      ],
+      "geometry": {
+        "passage_width_m": 1.6,
+        "passage_height_m": 1.920166015625,
+        "passage_depth_m": 0.12,
+        "yaw_degrees": 0.0,
+        "minimum_lateral_clearance_m": 0.46,
+        "source": "raised_procedural_door"
+      },
+      "assumptions": {
+        "units": "metres",
+        "up_axis": "+Y",
+        "ground_plane": "XZ",
+        "actor_radius_m": 0.28,
+        "actor_height_m": 1.65,
+        "obstacle_margin_m": 0.06,
+        "speed_mps": 1.2,
+        "scene_source": "object_metadata",
+        "motion_following_verified": false
+      },
+      "ground_support": {
+        "authored_floor": true,
+        "continuous_support_verified": true,
+        "floor_ids": [
+          "platform-99"
+        ],
+        "actor_footprint_margin_m": 0.28,
+        "floor_height_range_m": [
+          0.0,
+          0.0
+        ]
+      },
+      "schedule": {
+        "frames": 40,
+        "fps": 20,
+        "seconds": 2.0,
+        "travel_seconds": 1.1568,
+        "initial_turn_frames": 0,
+        "movement_start_frame": 0,
+        "initial_turn_radians": 0.0,
+        "terminal_hold_frames": 0,
+        "horizons": 1,
+        "dense_root_targets_per_actor_per_horizon": 5,
+        "held_actor_id": null,
+        "sampled_route_clearance_m": null,
+        "gait_profile": "spatial",
+        "terminal_settle_frames": 8,
+        "root_target_counts_by_horizon": [
+          {
+            "actor_1": 7
+          }
+        ]
+      }
+    },
+    "spatial_commands": {
+      "version": 1,
+      "text": "open Checkpoint door then go through Checkpoint door",
+      "actor_id": "actor_1",
+      "actions": [
+        {
+          "verb": "open",
+          "target_id": "door-1"
+        },
+        {
+          "verb": "go_through",
+          "target_id": "door-1"
+        }
+      ],
+      "status": "completed",
+      "action_index": 2,
+      "completed_actions": 2,
+      "legs": [
+        {
+          "action_index": 0,
+          "start_frame": 0,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "approach",
+            "target_id": "door-1",
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.0,
+                  0.0
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.625,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ],
+                "role": "approach"
+              }
+            ],
+            "geometry": {
+              "target_center_xz": [
+                0.0,
+                -2.7
+              ],
+              "target_size_xz_m": [
+                1.6,
+                0.12
+              ],
+              "yaw_degrees": 0.0
+            },
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "ground_plane": "XZ",
+              "actor_radius_m": 0.28,
+              "actor_height_m": 1.65,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 1.2,
+              "scene_source": "object_metadata",
+              "motion_following_verified": false
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "platform-99"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.0
+              ]
+            },
+            "schedule": {
+              "frames": 40,
+              "fps": 20,
+              "seconds": 2.0,
+              "travel_seconds": 1.625,
+              "initial_turn_frames": 0,
+              "movement_start_frame": 0,
+              "initial_turn_radians": 0.0,
+              "terminal_hold_frames": 0,
+              "horizons": 1,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null,
+              "gait_profile": "spatial",
+              "terminal_settle_frames": 8,
+              "root_target_counts_by_horizon": [
+                {
+                  "actor_1": 5
+                }
+              ]
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              0.005629901308566332,
+              -1.962079405784607
+            ],
+            "target_xz": [
+              0.0,
+              -1.95
+            ],
+            "arrival_error_m": 0.01332695887490441,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true,
+            "automatic_door_open_verified": true
+          },
+          "end_frame": 40
+        },
+        {
+          "action_index": 1,
+          "start_frame": 40,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "go_through",
+            "target_id": "door-1",
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.00563,
+                  -1.96208
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 0.0734,
+                "position_xz": [
+                  0.0,
+                  -2.05
+                ],
+                "role": "entry"
+              },
+              {
+                "time_seconds": 0.6151,
+                "position_xz": [
+                  0.0,
+                  -2.7
+                ],
+                "role": "center"
+              },
+              {
+                "time_seconds": 1.1568,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ],
+                "role": "exit"
+              }
+            ],
+            "geometry": {
+              "passage_width_m": 1.6,
+              "passage_height_m": 1.920166015625,
+              "passage_depth_m": 0.12,
+              "yaw_degrees": 0.0,
+              "minimum_lateral_clearance_m": 0.46,
+              "source": "raised_procedural_door"
+            },
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "ground_plane": "XZ",
+              "actor_radius_m": 0.28,
+              "actor_height_m": 1.65,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 1.2,
+              "scene_source": "object_metadata",
+              "motion_following_verified": false
+            },
+            "ground_support": {
+              "authored_floor": true,
+              "continuous_support_verified": true,
+              "floor_ids": [
+                "platform-99"
+              ],
+              "actor_footprint_margin_m": 0.28,
+              "floor_height_range_m": [
+                0.0,
+                0.0
+              ]
+            },
+            "schedule": {
+              "frames": 40,
+              "fps": 20,
+              "seconds": 2.0,
+              "travel_seconds": 1.1568,
+              "initial_turn_frames": 0,
+              "movement_start_frame": 0,
+              "initial_turn_radians": 0.0,
+              "terminal_hold_frames": 0,
+              "horizons": 1,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null,
+              "gait_profile": "spatial",
+              "terminal_settle_frames": 8,
+              "root_target_counts_by_horizon": [
+                {
+                  "actor_1": 7
+                }
+              ]
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -0.0016820942983031273,
+              -3.3687665462493896
+            ],
+            "target_xz": [
+              0.0,
+              -3.35
+            ],
+            "arrival_error_m": 0.01884178068439555,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": true,
+            "completed": true
+          },
+          "end_frame": 80
+        }
+      ],
+      "submitted_after_committed_frame": 0,
+      "detail": "Every command reached its measured destination"
+    },
+    "scene_reactions_enabled": true,
+    "scene_reactions_start_frame": 0,
+    "fps": 20,
+    "segments": [
+      {
+        "start": 0,
+        "end": 40,
+        "stage_id": "3e5bfcdc74994526b10615594458f42f",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally, then slows to a relaxed stop.",
+        "source": "ardy_core",
+        "request_id": "01a9f9fbfd3f463093607283e42663d2",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -0.375
+                ]
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -0.975
+                ]
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -1.575
+                ]
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ]
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -1.95
+                ]
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "approach",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 0,
+            "planned_only": true,
+            "gait_profile": "spatial",
+            "phase": "walk"
+          },
+          "initial_placements": {
+            "actor_1": {
+              "position_xz": [
+                0.0,
+                0.0
+              ],
+              "yaw": 3.141592653589793
+            }
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "01a9f9fbfd3f463093607283e42663d2",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "approach",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      },
+      {
+        "start": 40,
+        "end": 80,
+        "stage_id": "d94a4849a84b4fbb9d2451d4ceb09e9c",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally, then slows to a relaxed stop.",
+        "source": "ardy_core",
+        "request_id": "d0a8d504060b407689dbb1575cbf31fc",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 3,
+                "position_xz": [
+                  0.0,
+                  -2.05
+                ]
+              },
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  -2.22886
+                ]
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  -2.65596
+                ]
+              },
+              {
+                "frame": 16,
+                "position_xz": [
+                  0.0,
+                  -2.7
+                ]
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  -3.08306
+                ]
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ]
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  -3.35
+                ]
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "go_through",
+            "actor_id": "actor_1",
+            "target_id": "door-1",
+            "stage": 0,
+            "planned_only": true,
+            "gait_profile": "spatial",
+            "phase": "walk"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "open Checkpoint door then go through Checkpoint door"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "d0a8d504060b407689dbb1575cbf31fc",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 33
+        }
+      }
+    ],
+    "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+  },
+  "wall_seconds": 1.7544880410423502,
+  "calls": [
+    {
+      "index": 1,
+      "seed": 33,
+      "prompt": "A person walks forward naturally, then slows to a relaxed stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -0.375
+            ]
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -0.975
+            ]
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -1.575
+            ]
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -1.95
+            ]
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -1.95
+            ]
+          }
+        ]
+      },
+      "seconds": 0.7806860000127926
+    },
+    {
+      "index": 2,
+      "seed": 33,
+      "prompt": "A person walks forward naturally, then slows to a relaxed stop.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 3,
+            "position_xz": [
+              0.0,
+              -2.05
+            ]
+          },
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              -2.22886
+            ]
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              -2.65596
+            ]
+          },
+          {
+            "frame": 16,
+            "position_xz": [
+              0.0,
+              -2.7
+            ]
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              -3.08306
+            ]
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              -3.35
+            ]
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              -3.35
+            ]
+          }
+        ]
+      },
+      "seconds": 0.8900402080034837
+    }
+  ],
+  "inference_wait_seconds": 1.6707262080162764,
+  "frames": 80,
+  "duration_seconds": 4.0,
+  "max_root_step_m": 0.08950582891702652,
+  "native_positions_exact": true,
+  "native_rotations_exact": true,
+  "native_features_exact": true,
+  "final_objects": [
+    {
+      "id": "wall-0",
+      "position": [
+        -2.5,
+        1.5,
+        -3.0
+      ],
+      "color": [
+        96,
+        103,
+        107
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "door-1",
+      "position": [
+        0.0,
+        3.75,
+        -2.7
+      ],
+      "color": [
+        179,
+        117,
+        59
+      ],
+      "active": true,
+      "opening_fraction": 1.0,
+      "trigger_frame": 28
+    },
+    {
+      "id": "crate-2",
+      "position": [
+        -2.4,
+        0.5,
+        -1.2
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-3",
+      "position": [
+        -1.9,
+        0.475,
+        -0.0
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "crate-4",
+      "position": [
+        -3.2,
+        0.5,
+        -2.0
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-5",
+      "position": [
+        -2.7,
+        0.475,
+        -0.8
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "crate-6",
+      "position": [
+        2.4,
+        0.5,
+        -2.0
+      ],
+      "color": [
+        131,
+        101,
+        66
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "barrel-7",
+      "position": [
+        2.9,
+        0.475,
+        -0.8
+      ],
+      "color": [
+        75,
+        109,
+        126
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "console-8",
+      "position": [
+        1.5,
+        0.6,
+        -2.5
+      ],
+      "color": [
+        76,
+        82,
+        89
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "checkpoint-wall-right",
+      "position": [
+        2.5,
+        1.5,
+        -3.0
+      ],
+      "color": [
+        96,
+        103,
+        107
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "platform-99",
+      "position": [
+        0.0,
+        -0.05,
+        0.0
+      ],
+      "color": [
+        87,
+        95,
+        105
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "exact_save_load": true
+}

@@ -30,6 +30,13 @@ The normal studio launcher remains `run-director.command`. No recorded motion fi
 
 Cast archives use `.cast.stagezero.npz`, 1–3 native22 display tracks at 30 fps. They do not overwrite G1’s 34-joint/25-fps or Core’s 27-joint/20-fps archives, histories or timelines. Native paired sources retain their own exact features. Browser-local playback transfers prepared motion once.
 
-ARDY Core generates solo actions and travel. InterGen generates each active pair together. Three-person scenes sequence pairs while others hold a real source pose. Authored transitions are labeled; they are not learned contact dynamics. Waiting poses, foot glide and contact remain variable. Complex dance/fall/help-up/hug composition is still unvalidated. InterGen's noncommercial research license continues to apply.
+ARDY Core generates solo actions and travel. InterGen generates each active pair together. Three-person scenes sequence pairs while nonparticipants receive labeled authored observer continuation: initial meeting-facing staging, eased arm relaxation, small attention turns, and upper-body settling. Pelvis, legs, and feet remain exact during each waiting span; active InterGen frames are unchanged. Authored transitions remain labeled and are not learned contact dynamics. Waiting stance, foot glide and contact remain variable. See [interaction quality evidence](../review/interaction-quality/README.md) for complete before/after captures and rejected ankle-planting trials. Complex dance/fall/help-up/hug composition is still unvalidated. InterGen's noncommercial research license continues to apply.
 
 Full earlier source archives, failed cases, visual captures and timings are preserved in `review/prompt-scenes/`. Main-UI integration verification is in `review/main-cast-ui/`. Do not treat numerical gates as animation quality guarantees.
+
+
+## Simultaneous independent actions
+
+The same AI cast prompt now supports one simultaneous action for up to three people: “Three people celebrate together in place for six seconds,” or “Two people shake hands while the third waves.” The planner selects independent Core tracks explicitly; existing serial pair plans keep their original pipeline. Independent actions last 2–10 seconds, and a pair with a concurrent third action lasts 2–7 seconds plus its approach. Failed third-track transitions retain the original performance and show a visible fallback notice.
+
+This is loose group behavior, not a physically coordinated three-person contact model or synchronized choreography. Ten-person generation is still an offline research probe. See `review/group-prompt-integration/README.md` for the verified prompt examples, complete videos and reproduction.

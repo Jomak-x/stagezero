@@ -1,0 +1,380 @@
+## Assessment
+
+**The supplied code establishes dense root steering, but does not establish whether ARDY’s condition encoder also masks pitch, roll, root height, or velocity.** That encoder and `Root2DConstraintSet` implementation are not included. It would be unjustified to claim either that they do or that they cannot.
+
+My recommended first experiment is:
+
+1. Compare **unconstrained versus current constraints** with identical generation settings.
+2. Remove **heading from the walking actor’s travel targets**, retaining all five XZ samples.
+3. Only then test fewer XZ samples.
+
+Do not change the model, CFG, prompts, history retention, or output poses in the first experiment. Keep all changes confined to explicitly requested navigation.
+
+This is a review and implementation draft; nothing has been applied or tested.
+
+## 1. What the files actually show
+
+### Constraint construction
+
+`plan_navigation()` normally produces goals at:
+
+```text
+frame:       7    15    23    31    39
+time (s):   .40   .80  1.20  1.60  2.00
+```
+
+Those times follow the planner’s `(global_frame + 1) / FPS` convention. Whether this matches the model’s initial-frame convention needs a test, not an assumed correction.
+
+Each goal contains both:
+
+```python
+{"frame": local, "position_xz": [...], "heading": yaw}
+```
+
+There can be **more than five targets**:
+
+- Turning stages add frame 0.
+- Intermediate route waypoints add their own frames.
+- The second actor receives targets at the same sampled frames.
+
+`build_conditions()` passes these to:
+
+```python
+Root2DConstraintSet(
+    ...,
+    root_2d=...,
+    global_root_heading=...,
+)
+```
+
+It does **not explicitly pass** root Y, pitch, roll, or velocity. However, the actual feature values and masks come from:
+
+```python
+model.motion_rep.create_conditions_from_constraints_batched(...)
+```
+
+The existing checks validate shape, finiteness, and temporal overlap—not which feature channels are constrained.
+
+| Quantity | Established from these files |
+|---|---|
+| Root XZ | Explicit target |
+| Heading | Explicit target at every navigation sample |
+| Pitch/roll | No explicit caller value; encoder behavior unknown |
+| Root height | No explicit caller value; encoder behavior unknown |
+| Velocity | No explicit caller value; encoder behavior unknown |
+| Average travel speed | Indirectly prescribed by timed XZ goals |
+| Foot contact | Not explicitly constrained here |
+
+**Important distinction:** prescribing positions every 0.4 seconds restricts average planar velocity even if no velocity feature is masked. That alone could conflict with the generated stride.
+
+Likewise, a heading scalar might be encoded as genuinely yaw-only conditioning, or expanded into a larger orientation representation. Only inspecting the installed encoder and masks can settle that.
+
+### Other plausible contributors
+
+These are testable hypotheses, not diagnoses:
+
+- **Heading targets suppress natural variation.** Constant route heading at frequent samples may reduce pelvis sway or interact poorly with orientation features.
+- **Timed translation fights the preferred stride.** The default `.65 m/s` may not match the unconstrained motion generated for the same prompt.
+- **Sharp route bends demand abrupt changes.** Piecewise-linear XZ goals and local tangent headings do not define a smooth, stride-aware turn.
+- **Travel and stopping instructions conflict.** Object-navigation stages repeatedly use “then stop,” including intermediate windows. Their terminal hold also keeps that same prompt.
+- **Long artificial transitions.** Turning consumes 40 frames, followed by a separate 40-frame terminal hold. These are schedule decisions, not evidence of natural motion timing.
+- **Short continuation context.** After each window, runtime retains four frames—0.2 seconds. This might affect gait continuity, but should not be changed before comparing constrained and unconstrained runs using the same context.
+- **Decode/continuation behavior needs checking.** Final decoding concatenates generated chunks without supplied history. The comment mentions velocity-integrated roots, but the representation implementation is absent. Compare equivalent segmented and continuous generation before concluding this causes sliding.
+
+The runtime contains no visible post-generation pose corrections. A visually bad result need not imply a pose patch.
+
+## 2. Minimal ablation
+
+Use **one actor**, a straight supported route aligned with its starting heading, the same walking prompt, placement, seed, history, number of windows, CFG, and denoising steps.
+
+For the first comparison, use a fixed-duration travel segment without the turn or terminal hold. Test transitions separately afterward.
+
+| Run | Conditioning | Question |
+|---|---|---|
+| A | No root targets; no hook | Is gait already hunched/stiff/sliding? |
+| B | Current five XZ + heading samples | What does current steering change? |
+| C | Same five XZ samples; omit heading | Is heading conditioning the main contributor? |
+| D | XZ at frame 39 only on a straight segment | Is timed positional density the main contributor? |
+
+For routed experiments, D must retain corner targets. Even then, sparse targets do **not** guarantee safe interpolation.
+
+For A, create a direct runtime request with `root_targets=[]` and `condition_hook=None`. **Do not run it as a supposedly verified spatial action.** `build_conditions()` should return `(None, None)`.
+
+That is the **unconstrained branch of this wrapper**. A separate native ARDY public-generation baseline would also be useful, but its API and implementation are not supplied. Do not invent that invocation or assume this wrapper is identical to it.
+
+### Additional high-value control
+
+Generate an unconstrained walking clip, then use its **own measured root XZ and headings** as targets in a same-seed constrained rerun.
+
+- If gait degrades with a trajectory the model itself produced, arbitrary route speed is not a sufficient explanation.
+- If it stays natural there but degrades on the planned `.65 m/s` route, timing or route compatibility becomes a stronger explanation.
+
+This is still an experiment, not a proof of the encoder’s semantics.
+
+## 3. Concrete minimal code change
+
+### `realtime_navigation.py`: trusted planner-side ablation switch
+
+Keep the existing behavior as the default while reviewing results. Do not add this switch to ordinary generation or the HTTP request schema.
+
+Add to `plan_navigation()`:
+
+```python
+# Add at the end of the keyword-only parameters:
+root_ablation: str = "current",
+```
+
+Validate near the start:
+
+```python
+if root_ablation not in ("current", "walk_xz", "walk_sparse_xz"):
+    raise ValueError("Unknown root-conditioning ablation")
+```
+
+Inside the stage loop, before constructing the goals:
+
+```python
+turning = stage_index < turn_windows
+motion_stage = stage_index - turn_windows
+travelling = not turning and motion_stage < moving_windows
+
+local_frames = set(SAMPLE_FRAMES)
+mandatory_frames = {HORIZON - 1}
+
+if turning:
+    local_frames.add(0)
+
+for waypoint in (() if turning else waypoints[1:-1]):
+    global_frame = max(
+        0,
+        min(total_frames - 1,
+            round(waypoint["time_seconds"] * FPS) - 1),
+    )
+    if global_frame // HORIZON == motion_stage:
+        local = global_frame % HORIZON
+        local_frames.add(local)
+        mandatory_frames.add(local)
+```
+
+Replace the existing unconditional goal append with:
+
+```python
+is_active_travel = aid == actor_id and travelling
+
+if (
+    root_ablation == "walk_sparse_xz"
+    and is_active_travel
+    and local not in mandatory_frames
+):
+    continue
+
+goal = {
+    "frame": local,
+    "position_xz": [round(xz[0], 5), round(xz[1], 5)],
+}
+
+if not (
+    is_active_travel
+    and root_ablation in ("walk_xz", "walk_sparse_xz")
+):
+    goal["heading"] = heading
+
+goals[aid].append(goal)
+```
+
+After creating `metadata`, record the experiment only when selected:
+
+```python
+if root_ablation != "current":
+    metadata["navigation"]["root_ablation"] = root_ablation
+```
+
+This implementation:
+
+- Leaves `"current"` target construction unchanged.
+- Uses the runtime’s **already-supported optional heading**.
+- Changes only the active actor’s travel goals.
+- Preserves turning, terminal hold, and held-actor conditioning.
+- Requires no model changes or fabricated feature indices.
+
+The current schedule field:
+
+```python
+"dense_root_targets_per_actor_per_horizon": len(SAMPLE_FRAMES)
+```
+
+is only a nominal base count, even before this change. Actual counts vary. Add accurate counts, at least for experiment metadata:
+
+```python
+if root_ablation != "current":
+    result["schedule"]["root_ablation"] = root_ablation
+    result["schedule"]["root_target_counts_by_horizon"] = [
+        {
+            aid: len(stage.metadata["root_targets"][aid])
+            for aid in ids
+        }
+        for stage in stages
+    ]
+```
+
+**Do not promote the sparse option simply because it looks better.** It may improve gait while worsening route adherence. If C wins, promote heading omission for explicit navigation travel only.
+
+Also verify the unsupplied stage-to-worker adapter preserves a missing `heading`; the runtime supports it, but that intervening adapter is not available for review.
+
+## 4. Audit the actual vectors before changing masks
+
+Do not “fix” this by zeroing guessed ranges in a 330-dimensional tensor. The feature layout is not supplied.
+
+A small offline diagnostic can inspect the actual result without changing generation:
+
+```python
+def condition_entries(observed, mask, row=0):
+    """Numeric diagnostic only; feature meanings require the ARDY layout."""
+    import torch
+
+    if mask is None:
+        return []
+
+    indices = torch.nonzero(mask[row] != 0, as_tuple=False)
+    return [
+        {
+            "window_frame": int(frame),
+            "feature_index": int(feature),
+            "mask": float(mask[row, frame, feature].item()),
+            "normalized_value": float(
+                observed[row, frame, feature].item()
+            ),
+        }
+        for frame, feature in indices.cpu().tolist()
+    ]
+```
+
+Run `build_conditions()` separately for a single target:
+
+1. XZ only.
+2. Same XZ plus heading `0`.
+3. Same XZ plus heading `.2`.
+4. Shift XZ while holding heading constant.
+5. Repeat with history lengths 0 and 4.
+
+Inspect **both values and masks**, including all frames, not only the requested target frame. The current code permits conditioning additional future frames.
+
+Then consult the actual ARDY feature layout and encoder implementation to answer:
+
+- Does XZ-only activate any orientation, Y, or velocity channels?
+- Which channels are added by heading?
+- Are orientation targets yaw-only, or a complete orientation with a chosen up axis?
+- Does the encoder derive velocities or neighboring-frame constraints?
+- Are unrelated feature channels masked with default values?
+- How are absolute goals transformed into the representation’s coordinate frame?
+
+A zero in `observed` is not evidence of a physical zero: it may be normalized, and an unmasked value is not a constraint. If inspecting physical values, use the representation’s official unnormalization and interpret only the relevant channels.
+
+If the encoder expands heading into a full root orientation, **omitting heading is the minimal supported ablation**. A custom yaw-only encoder should wait until the representation’s semantics are actually available.
+
+## 5. Measurements and regression tests
+
+### Gait and adherence
+
+Record per seed and per phase:
+
+- Root XZ error at targets **and between targets**.
+- Measured speed versus scheduled speed.
+- Actual heading error, currently missing from runtime metrics.
+- Root height distribution and vertical oscillation.
+- Root tilt and torso posture separately; root tilt alone does not measure hunching.
+- Foot horizontal displacement during estimated stance.
+- Foot-ground penetration and clearance.
+- Continuity across frames 39/40, 79/80, etc.
+
+Foot-slip estimates need known foot joints and a documented contact heuristic or native contact output. Neither joint mapping nor native contact channels are supplied. Do not invent indices or label a heuristic “verified contact.”
+
+Minimal heading metric addition inside the target metrics loop:
+
+```python
+root_idx = self.model.skeleton.root_idx
+forward = rotations[row, target["frame"], root_idx, :, 2]
+horizontal = math.hypot(float(forward[0]), float(forward[2]))
+
+actual_heading = (
+    math.atan2(float(forward[0]), float(forward[2]))
+    if horizontal > 1e-6 else None
+)
+
+heading_error = None
+if actual_heading is not None and "heading" in target:
+    delta = actual_heading - target["heading"]
+    heading_error = abs(math.atan2(math.sin(delta), math.cos(delta)))
+```
+
+Add those values to the metric record. This uses the same forward-axis convention as `_placements()`.
+
+### Preservation tests
+
+Require:
+
+1. **Ordinary, targetless generation:** same text, seeds, history, placement, CFG, denoising, and `(None, None)` conditions before and after.
+2. **Default planner output:** `"current"` reproduces existing goals and prompts.
+3. **`walk_xz`:** only active travel headings disappear.
+4. **`walk_sparse_xz`:** active travel keeps frame 39 and corner frames; held actor and turn/hold goals remain unchanged.
+5. **Frame mapping:** offset 40, history length 4, target output frame 47 maps to window frame 11.
+6. **Native condition masks:** no unintended masked channels, based on the real representation layout.
+7. **No output edits:** no root snapping, foot locking, or pose straightening introduced.
+
+Do not route ordinary prompts into spatial planning merely because they mention walking. The supplied `SpatialSequence.start()` is explicit, but the surrounding dispatcher is absent, so complete isolation cannot be certified from these files alone.
+
+## 6. Temple stairs → bridge → door: actual gaps
+
+### What exists
+
+- XZ routing and sampled root steering.
+- Conservative planned root-footprint support checks.
+- Sequential replanning from committed motion.
+- Measured terminal arrival and an observed root aperture crossing.
+- A trusted native-constraint extension point.
+- An automatic-proximity-door workflow, dependent on unsupplied scene-reaction code.
+
+### What is not implemented here
+
+**Stairs/elevation**
+
+- Commands explicitly reject vertical navigation in unsupported clauses.
+- Route targets have no Y coordinate.
+- Ground validation only accepts qualifying floors with top elevation within `.1 m` of zero and rejects support-height variation above `.03 m`.
+- No stair transition plan, foot placement schedule, swing clearance, or elevated-support completion check exists.
+
+**Bridge**
+
+- A flat, sufficiently wide, continuous authored floor might pass the existing support check.
+- An elevated bridge is outside the current support assumptions.
+- No observed whole-body/foot containment or rail-clearance validation is shown.
+- With no authored ground, support is explicitly unverified.
+
+**Door**
+
+- “Open” means approach a configured automatic proximity door.
+- Hand-operated doors are unsupported.
+- The opening check is a scene/passage check, not measured hand contact or handle actuation.
+- Root crossing does not establish whole-body collision-free passage.
+
+**Execution verification**
+
+`measure_completion()` checks terminal arrival and, when relevant, root crossing. It does not verify that the generated trajectory stayed inside the planned support corridor or avoided every obstacle. A verified planned path is not a verified generated traversal.
+
+### How native terrain constraints could fit
+
+The existing `condition_hook` is the appropriate experimental integration point, **if the installed ARDY version actually supports the needed constraints**. These files do not establish a native terrain class or its API.
+
+A model-native implementation would need:
+
+1. Explicit support geometry: stair treads, elevations, bridge deck and boundaries.
+2. A height-aware route with supported transitions—not just XZ waypoints.
+3. Window-local native constraints for suitable support/foot positions and swing clearance, or a genuine terrain representation if ARDY supports one.
+4. Root-height freedom relative to support; do not force the pelvis to terrain height or a constant absolute height.
+5. Constraint-mask audits so foot or terrain targets do not accidentally prescribe an entire rigid body pose.
+6. Per-window measurements of generated contact, clearance, penetration, and progress.
+7. Stop/replan behavior when those measurements fail.
+
+The hook already receives `generated_offset`, `history_length`, and `current_history`, and existing checks prevent conditions overlapping immutable history. That is useful infrastructure—not evidence that the loaded model can reliably negotiate stairs.
+
+**Recommended order:** establish a natural straight constrained gait first, audit encoder semantics, then test one measured height transfer, then a short stair flight, then bridge traversal, and only then compose the door sequence. Keep unsupported capabilities explicitly rejected until each has measured evidence.

@@ -38,7 +38,8 @@ class StudioCoreRenderer:
     """
 
     def __init__(self, server, *, asset_paths=None, floor_y: float = 0.0,
-                 name_prefix: str = "/actor/core", paired_retarget: bool = False) -> None:
+                 name_prefix: str = "/actor/core", paired_retarget: bool = False,
+                 terrain_geometry=None, source_terrain_geometry=None) -> None:
         if type(paired_retarget) is not bool:
             raise ValueError("paired_retarget must be a boolean")
         self.paired_retarget = paired_retarget
@@ -52,6 +53,16 @@ class StudioCoreRenderer:
             raise ValueError("Core actors need distinct character assets")
         self.server = server
         self.floor_y = float(floor_y)
+        if source_terrain_geometry is not None and terrain_geometry is None:
+            raise ValueError("source_terrain_geometry requires terrain_geometry")
+        self.terrain_geometry = terrain_geometry
+        self.source_terrain_geometry = (terrain_geometry if source_terrain_geometry is None
+                                        else source_terrain_geometry)
+        for geometry in (self.terrain_geometry, self.source_terrain_geometry):
+            if geometry is not None and not callable(getattr(geometry, "support_height", None)):
+                raise TypeError("Terrain geometry must provide support_height")
+        self._terrain_diagnostics = None
+        self._terrain_diagnostic_frames = 0
         self.characters = tuple(GroundedCharacter(path) for path in paths)
         self._paired_root_height_offset = None
         if self.paired_retarget:
@@ -137,7 +148,7 @@ class StudioCoreRenderer:
         return deepcopy(self._fitting_provenance)
 
     def _fit_actor(self, index: int, clip: CanonicalClip, start: int,
-                   offset: float | None) -> tuple[np.ndarray, np.ndarray, float]:
+                   offset: float | None) -> tuple[np.ndarray, np.ndarray, float, dict | None]:
         character = self.characters[index]
         native_positions = clip.positions[index:index + 1, start:]
         native_rotations = clip.rotations[index:index + 1, start:]
@@ -149,16 +160,21 @@ class StudioCoreRenderer:
                 clip.positions[index:index + 1, :sample],
                 clip.rotations[index:index + 1, :sample],
                 preserve_wrists=False, floor_y=self.floor_y,
+                source_terrain_geometry=self.source_terrain_geometry,
+                render_terrain_geometry=self.terrain_geometry,
             )
             offset = float(calibrated["character_provenance"]["floor_offsets"][0])
         payload = character.clip_payload(
             native_positions, native_rotations, preserve_wrists=self.paired_retarget,
             wrist_target_space="retargeted_root",
             preserve_feet=True, floor_y=self.floor_y, floor_offsets=[offset],
+            source_terrain_geometry=self.source_terrain_geometry,
+            render_terrain_geometry=self.terrain_geometry,
         )
         return (np.asarray(payload["fitted_positions"][0], dtype=np.float32),
                 np.asarray(payload["fitted_rotations"][0], dtype=np.float32),
-                offset)
+                offset,
+                payload["character_provenance"].get("foot_retarget") if self.terrain_geometry is not None else None)
 
     def set_clip(self, clip: CanonicalClip) -> None:
         """Fit a replacement or newly appended immutable Core timeline."""
@@ -190,6 +206,8 @@ class StudioCoreRenderer:
                     clip.rotations[index:index + 1, :sample],
                     preserve_wrists=True, wrist_target_space="retargeted_root",
                     floor_y=self.floor_y,
+                    source_terrain_geometry=self.source_terrain_geometry,
+                    render_terrain_geometry=self.terrain_geometry,
                 )
                 estimates.append(float(payload["character_provenance"]["floor_offsets"][0]))
             offsets = (max(estimates),) * 2
@@ -207,6 +225,26 @@ class StudioCoreRenderer:
         self._fitted_positions = new_positions
         self._fitted_rotations = new_rotations
         self._floor_offsets = tuple(row[2] for row in fitted)
+        if self.terrain_geometry is not None:
+            suffix_frames = clip.frames - start
+            if append and self._terrain_diagnostics is not None:
+                previous_frames = self._terrain_diagnostic_frames
+                combined = []
+                for prior, row in zip(self._terrain_diagnostics, fitted):
+                    current = row[3]
+                    merged = deepcopy(current)
+                    for key in ("max_sole_target_lift_m", "max_unreachable_target_error_m",
+                                "max_ankle_displacement_m", "max_knee_angle_change_deg",
+                                "max_remaining_sole_penetration_m"):
+                        merged[key] = max(prior[key], current[key])
+                    for key in ("unreachable_fraction", "reach_limited_fraction"):
+                        merged[key] = ((prior[key] * previous_frames + current[key] * suffix_frames)
+                                       / clip.frames)
+                    combined.append(merged)
+                self._terrain_diagnostics = combined
+            else:
+                self._terrain_diagnostics = [row[3] for row in fitted]
+            self._terrain_diagnostic_frames = clip.frames
         self._fitting_provenance = self._measure_fitting(clip)
         if self._frame is not None:
             self.tick(min(self._frame, clip.frames - 1))
@@ -221,6 +259,9 @@ class StudioCoreRenderer:
             "floor_method": ("common maximum of initial actor support offsets; reused on append"
                              if self.paired_retarget else "independent initial actor support offsets; reused on append"),
         }
+        if self.terrain_geometry is not None:
+            result["terrain_support"] = "explicit source toe and render sole support queries"
+            result["foot_clearance"] = deepcopy(self._terrain_diagnostics)
         if not self.paired_retarget:
             return result
         wrists = [self.characters[0].core_idx[name] for name in ("LeftHand", "RightHand")]

@@ -210,11 +210,14 @@ def _temple_assets():
             _part("box", (0, .14, .465), (.99, .09, .07), shade),
         ]),
         _asset("temple-stairs", "Broad ceremonial stone steps", [
-            _part("box", (0, -.40, .36), (1, .20, .25), stone),
-            _part("box", (0, -.23, .20), (1, .20, .25), stone),
-            _part("box", (0, -.06, .04), (1, .20, .25), stone),
-            _part("box", (0, .11, -.12), (1, .20, .25), stone),
-            _part("box", (0, .28, -.28), (1, .20, .25), stone),
+            *[_part("box", (0, -.44 + i * .10, .40 - i * .10),
+                    (1, .12, .18), stone) for i in range(9)],
+            _part("box", (-.46, -.03, .03), (.025, .84, .90), shade, repeat=((2, 1, 1), (.92, 0, 0))),
+            _part("box", (-.46, .20, -.44), (.05, .10, .08), moss, repeat=((2, 1, 1), (.92, 0, 0))),
+        ]),
+        _asset("temple-far-stairs", "Broad far ceremonial stone steps", [
+            *[_part("box", (0, -.44 + i * .08, .40 - i * .08),
+                    (1, .12, .15), stone) for i in range(11)],
             _part("box", (-.46, -.03, .03), (.025, .84, .90), shade, repeat=((2, 1, 1), (.92, 0, 0))),
             _part("box", (-.46, .20, -.44), (.05, .10, .08), moss, repeat=((2, 1, 1), (.92, 0, 0))),
         ]),
@@ -292,13 +295,21 @@ def make_temple(seed=0):
     # Keep paving above the forest floor to prevent coplanar surface flicker.
     scene.add("Starting court", "temple-terrace", (0, -.18, 0), (10.0, .4, 8.0))
     scene.add("Raised approach", "temple-terrace", (0, 1.05, -6.2), (8.0, 2.1, 5.0))
-    scene.add("Ceremonial stairs", "temple-stairs", (0, 1.05, -3.7), (4.0, 2.1, 3.4))
+    # Keep the rising treads in front of the solid terrace. The final tread
+    # meets its leading edge instead of disappearing into its stone body.
+    scene.add("Ceremonial stairs", "temple-stairs", (0, 1.03, -2.3), (4.0, 2.14, 3.4))
+    # The bridge landing is nearly a metre above the raised approach. A broad,
+    # shallow second flight makes that change in height visible and walkable.
+    # Its last tread meets the landing's front edge at z=-7.9.
+    scene.add("Bridge approach stairs", "temple-stairs", (0, 2.45, -6.8), (4.0, .9, 2.7))
     scene.add("Near bridge landing", "temple-terrace", (0, 1.5, -9.3), (5.2, 3.0, 2.8))
     # The plank top is at raw y=-.2425. Its rendered y is about -.257 after
     # the mesh-bound normalization, so this center meets both 3 m landings.
     scene.add("Suspended ravine bridge", "temple-bridge", (0, 3.7706, -14.0), (2.5, 3.0, 8.8))
     scene.add("Far bridge landing", "temple-terrace", (0, 1.5, -18.7), (5.2, 3.0, 2.8))
-    scene.add("Far ceremonial stairs", "temple-stairs", (0, 4.3, -20.5), (4.0, 2.6, 3.4))
+    # Extend the far flight to the bridge edge. Eleven broad treads keep each
+    # rise below .23 m while reaching the original high dais without a jump.
+    scene.add("Far ceremonial stairs", "temple-far-stairs", (0, 4.2, -19.03), (4.0, 2.6, 4.3))
     scene.add("High temple dais", "temple-terrace", (0, 2.8, -24.0), (12, 5.6, 7.0))
     scene.add("Temple threshold", "temple-arch", (0, 6.8, -22.4), (5.4, 8.0, 2.1))
     scene.add("Temple crown", "temple-roof", (0, 11.1, -26.8), (10.0, 4.8, 6.4))

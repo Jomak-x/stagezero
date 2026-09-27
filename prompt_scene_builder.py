@@ -2,7 +2,7 @@
 
 Core's native330 history is used only between consecutive Core horizons.
 InterGen's native262 features are archived, never converted to Core features.
-Inactive tracks hold a previously generated pose and are explicitly disclosed.
+Inactive tracks receive separately labeled authored observer continuation.
 """
 from __future__ import annotations
 
@@ -26,68 +26,54 @@ from native_pair_transition import (authored_direction_bridge, core27_to_native2
                                     core_to_pair_anatomy, shared_place_pair)
 from paired_meetup import build_meetup, plan_meetup, _minimum_separation, _heading, _checked_generated_geometry
 from realtime_navigation import validate_ground_path
+from native_wait_pose import select_native_wait_pose
 from scene_objects import make_object
 from studio_interaction_scene import adapt_studio_scene
 
 ARRIVAL_STANDOFF_M = .60
+ARRIVAL_MARGIN_M = .08
 IDLE_ROUTE_PADDING_M = .25
 INITIAL_HEADING_RAMP_SECONDS = 1.
 
 
-def select_native_wait_pose(joints, actor_index):
-    """Choose an unchanged native pose only when it is clearly better for waiting.
 
-    These are observable posture/stability heuristics, not a contact solver or
-    an animation generator. The first frame remains the fallback.
+def build_compatible_meetup(*args, source_paths=lambda: (), **kwargs):
+    """Try improved arrival clearance, then main's original arrival policy once.
+
+    Only the new body-sphere gate permits this retry. Existing geometry,
+    continuity, cancellation and worker failures keep their original behavior.
+    The caller archives every raw Core result before either policy is checked.
     """
-    native = np.asarray(joints)
-    if (native.ndim != 4 or native.shape[1:] != (2, 22, 3) or len(native) < 4
-            or actor_index not in (0, 1) or not np.isfinite(native).all()):
-        raise ValueError('Waiting pose selection requires finite native pair joints')
-    actor = native[:, actor_index]
-    torso = actor[:, 9]-actor[:, 0]
-    angles = np.degrees(np.arctan2(np.linalg.norm(torso[:, [0, 2]], axis=1), torso[:, 1]))
-    hands_above_hips = np.maximum(actor[:, [20, 21], 1]-actor[:, 0, None, 1], 0.).mean(axis=1)
-    hand_reach = np.linalg.norm(actor[:, [20, 21]][:, :, [0, 2]]-actor[:, 0, None][:, :, [0, 2]], axis=2).mean(axis=1)
-    feet = actor[:, [7, 8, 10, 11]]
-    steps = np.linalg.norm(np.diff(feet[:, :, [0, 2]], axis=0)*30, axis=-1).max(axis=1)
-    speeds = np.array([np.mean(steps[max(0, frame-2):min(len(steps), frame+3)]) for frame in range(len(actor))])
-    floor = float(np.quantile(actor[:, [10, 11], 1], .05))
-    support = np.stack([actor[:, [7, 10], 1].min(axis=1), actor[:, [8, 11], 1].min(axis=1)], axis=1)
-    foot_height = support.max(axis=1)-floor
-    leg_length = np.stack([np.linalg.norm(actor[:, hip]-actor[:, knee], axis=1)
-                           +np.linalg.norm(actor[:, knee]-actor[:, ankle], axis=1)
-                           for hip, knee, ankle in ((1, 4, 7), (2, 5, 8))], axis=1).mean(axis=1)
-    standing = (actor[:, 0, 1]-support.mean(axis=1))/np.maximum(leg_length, 1e-6)
-    scores = angles/30+hands_above_hips*3+hand_reach*2+speeds*.6+foot_height*3
-    eligible = ((angles <= 20) & (hands_above_hips <= .08) & (hand_reach <= .40)
-                & (speeds <= .35) & (foot_height <= .10) & (standing >= .70))
-    candidates = np.flatnonzero(eligible)
-    chosen = int(candidates[np.argmin(scores[candidates])]) if len(candidates) else 0
-    improvement = max(.15, float(scores[0])*.20)
-    if scores[0]-scores[chosen] < improvement:
-        chosen = 0
-
-    def metrics(index):
-        return {'score': float(scores[index]), 'torso_tilt_degrees': float(angles[index]),
-                'mean_hand_height_above_hips_m': float(hands_above_hips[index]),
-                'mean_hand_horizontal_reach_m': float(hand_reach[index]),
-                'local_max_foot_xz_speed_mean_m_s': float(speeds[index]),
-                'highest_support_above_native_floor_m': float(foot_height[index]),
-                'standing_leg_extension_ratio': float(standing[index])}
-
-    report = {'criterion': 'lower hands, upright torso, standing leg extension and locally stable feet',
-        'source_frame': chosen, 'baseline_frame': 0, 'changed_from_first_frame': chosen != 0,
-        'eligible_frame_count': len(candidates), 'minimum_score_improvement': improvement,
-        'baseline_metrics': metrics(0), 'selected_metrics': metrics(chosen),
-        'thresholds': {'maximum_torso_tilt_degrees': 20, 'maximum_hand_height_above_hips_m': .08,
-                       'maximum_hand_horizontal_reach_m': .40, 'maximum_local_foot_speed_m_s': .35,
-                       'maximum_support_above_native_floor_m': .10, 'minimum_standing_leg_extension_ratio': .70},
-        'score_weights': {'torso_tilt_degrees': 1/30, 'hand_height_m': 3, 'hand_reach_m': 2,
-                          'local_foot_speed_m_s': .6, 'support_height_m': 3},
-        'joint_pose_modified': False, 'physical_contact_verified': False,
-        'display_policy': 'one exact generated pose held stationary; no breathing or synthesized idle motion'}
-    return actor[chosen].copy(), report
+    before = set(source_paths())
+    try:
+        return build_meetup(*args, **kwargs)
+    except ValueError as exc:
+        clearance = getattr(exc, 'approach_body_clearance_report', None)
+        if not clearance or kwargs.get('arrival_margin_m', 0.) <= 0:
+            raise
+        recovery = {'reason': str(exc), 'enhanced_clearance': clearance,
+                    'enhanced_arrival_margin_m': kwargs['arrival_margin_m'],
+                    'fallback_arrival_margin_m': 0.,
+                    'policy': 'one same-seed retry with original arrival targets and original acceptance gates',
+                    'seed_changed': False, 'native_pair_frames_modified': False,
+                    'enhanced_source_archives': [p for p in source_paths() if p not in before],
+                    'status': 'retrying_original_arrival_policy'}
+        fallback_before = set(source_paths())
+        fallback = dict(kwargs, arrival_margin_m=0.)
+        try:
+            if kwargs.get('cancelled', lambda: False)():
+                raise RuntimeError('Meeting generation cancelled before compatibility retry')
+            result = build_meetup(*args, **fallback)
+        except Exception as retry_error:
+            recovery.update(status='original_arrival_policy_rejected', error=str(retry_error))
+            retry_error.arrival_margin_recovery = recovery
+            raise
+        else:
+            recovery['status'] = 'accepted_original_arrival_policy'
+            result['metadata']['arrival_margin_recovery'] = recovery
+            return result
+        finally:
+            recovery['fallback_source_archives'] = [p for p in source_paths() if p not in fallback_before]
 
 
 def pair_source_prompt(prompt, actor_ids, actors):
@@ -209,11 +195,25 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
         for aid in idle_ids:
             root = candidate_poses[aid][0]
             candidate_poses[aid] += np.array([starts[aid]['x']-root[0], 0., starts[aid]['z']-root[2]])
+            # Initial observers face the meeting before playback begins. This
+            # rigid authored staging precedes all floor/body clearance gates;
+            # it is not a planted-foot turn inside the performance.
+            pose = candidate_poses[aid]
+            origin = pose[0].copy()
+            direction = np.array([meeting['x']-origin[0], meeting['z']-origin[2]])
+            if 'yaw_degrees' not in starts[aid] and np.linalg.norm(direction) > .1:
+                yaw = math.atan2(direction[0], direction[1])-_heading(pose)
+                c, s = math.cos(yaw), math.sin(yaw)
+                rotation = np.array([[c, 0., s], [0., 1., 0.], [-s, 0., c]])
+                candidate_poses[aid] = (pose-origin) @ rotation.T + origin
+                record.setdefault('observer_orientation', {})[aid] = {
+                    'yaw_radians': yaw, 'target_xz': [meeting['x'], meeting['z']],
+                    'method': 'initial rigid source-pose staging toward meeting; root preserved'}
         try:
             planning_scene, proxies = _scene_with_idle_roots(scene, candidate_poses, active)
             route = plan_meetup(pair, planning_scene, actor_ids=active, starts=[starts[aid] for aid in active],
                                 meeting=meeting, entry_policy='continuous', speed_mps=.85,
-                                arrival_standoff_m=ARRIVAL_STANDOFF_M, idle_route_padding_m=IDLE_ROUTE_PADDING_M)
+                                arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M, idle_route_padding_m=IDLE_ROUTE_PADDING_M)
             all_ids = tuple(actor['id'] for actor in plan['actors'])
             world = np.stack([placed[:, active.index(aid)] if aid in active else
                               np.repeat(candidate_poses[aid][None], len(placed), axis=0) for aid in all_ids], axis=1)
@@ -237,6 +237,7 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
         selected['starts'] = starts
         selected['initial_source_staging'] = {'candidate': label, 'explicit_starts_preserved': sorted(explicit),
             'candidate_count': len(reports), 'planning_only': True,
+            'observer_orientation': record.get('observer_orientation', {}),
             'selection': 'shortest approach duration, then total route distance; source-oriented starts win ties'}
         return selected, candidate_poses, planning_scene, proxies
     reason = reports[-1].get('rejection', 'no feasible source-aware start') if reports else 'no staging candidates'
@@ -306,7 +307,7 @@ def select_later_meeting(pair, scene, plan, placement, poses, active, prior, *,
                     direct_rejection = str(exc)
             if bridge is None:
                 route = plan_meetup(pair, planning_scene, actor_ids=active, starts=starts, meeting=meeting,
-                    entry_policy='continuous', speed_mps=.85, arrival_standoff_m=ARRIVAL_STANDOFF_M,
+                    entry_policy='continuous', speed_mps=.85, arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M,
                     idle_route_padding_m=idle_route_padding_m, initial_heading_ramp_seconds=INITIAL_HEADING_RAMP_SECONDS)
         except ValueError as exc:
             record['rejection'] = str(exc)
@@ -359,11 +360,11 @@ def generate_later_approach(pair, client, scene, plan, placement, poses, active,
             on_progress({'phase': 'pair_approach_attempt', 'attempt': attempt, 'maximum_attempts': 3,
                          'actor_ids': list(active), 'idle_route_padding_m': padding})
         try:
-            result = build_meetup(pair, client, selected['planning_scene'], actor_ids=active,
+            result = build_compatible_meetup(pair, client, selected['planning_scene'], actor_ids=active,
                 starts=selected['starts'], meeting=selected['meeting'], entry_policy='continuous', speed_mps=.85,
-                arrival_standoff_m=ARRIVAL_STANDOFF_M, idle_route_padding_m=padding,
+                arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M, idle_route_padding_m=padding,
                 initial_heading_ramp_seconds=INITIAL_HEADING_RAMP_SECONDS,
-                seed=seed, cancelled=cancelled, on_progress=on_progress)
+                source_paths=source_paths, seed=seed, cancelled=cancelled, on_progress=on_progress)
             entry, report = _bridge(prior, result['joints'][:2], maximum_frames=30)
             _checked_generated_geometry(entry, selected['planning_scene'], active,
                                         context={'stage': 'prior_to_core_entry', 'fps': 30})
@@ -394,7 +395,7 @@ def _bridge(left, right, *, maximum_frames=21):
         raise ValueError('Scene beat root-height gap exceeds 0.30 m; cannot invent a fall or get-up transition')
     a = np.repeat(left, 2, axis=1) if count == 1 else left
     b = np.repeat(right, 2, axis=1) if count == 1 else right
-    candidates = tuple(frames for frames in (12, 15, 18, 21, 24, 27, 30) if frames <= maximum_frames)
+    candidates = tuple(frames for frames in (21, 24, 27, 30) if frames <= maximum_frames)
     if not candidates or maximum_frames not in (21, 30):
         raise ValueError('Bridge search is bounded to 21 or 30 frames')
     for frames in candidates:
@@ -593,6 +594,37 @@ class PromptSceneBuilder:
             beats = plan['beats']
             if not 1 <= len(beats) <= 4:
                 raise ValueError('Scene plan requires one to four beats')
+            concurrent = any('concurrent_solos' in beat for beat in beats)
+            if concurrent:
+                # The ordinary planner already validates these plans. Repeat the
+                # check at the builder boundary for injected/replayed planners.
+                from prompt_scene_plan import validate_plan
+                plan = validate_plan(plan, scene, expected_prompt=self.prompt)
+                beats = plan['beats']
+                manifest['plan'] = plan
+                if len(beats[0]['actor_ids']) == 1:
+                    from prompt_group_adapter import build_independent_solos
+                    progress('concurrent_core', actor_ids=list(ids))
+                    if self.core_client is None:
+                        raise RuntimeError('Configure ARDY Core before generating a scene')
+                    concurrent_started = time.monotonic()
+                    result, generated = build_independent_solos(
+                        self.core_client, scene, plan, seed=self.seed, output_root=folder,
+                        cancelled=cancelled)
+                    manifest['timings'].append({'stage': 'independent_concurrent_core',
+                                                'seconds': time.monotonic()-concurrent_started})
+                    metadata = result.metadata
+                    metadata['wall_seconds'] = time.monotonic()-started
+                    metadata['stage_timings'] = manifest['timings']
+                    result = CastPerformance(result.actor_ids, result.joints, metadata=metadata)
+                    manifest.update(status='complete', frames=result.frames,
+                        duration_seconds=result.frames/30,
+                        concurrency_status=result.metadata['concurrency_status'],
+                        group_manifest=str(generated['manifest']),
+                        wall_seconds=metadata['wall_seconds'])
+                    save()
+                    progress('complete', frames=result.frames, duration_seconds=result.frames/30)
+                    return result
             minimum_frames = 0
             for beat in beats:
                 active = beat['actor_ids']
@@ -677,7 +709,8 @@ class PromptSceneBuilder:
                                  'start_frame': total, 'end_frame_exclusive': total+count, 'frames': count})
                 activities.append({'start_frame': total, 'end_frame_exclusive': total+count,
                                    'active_actor_ids': list(active), 'held_actor_ids': [a for a in ids if a not in active],
-                                   'inactive_motion': 'explicit stationary hold of last real generated pose'})
+                                   'contact_actor_ids': list(active) if contact else [],
+                                   'inactive_motion': 'authored stationary-root observer continuation after composition'})
                 geometry.append(report); parts.append(world); total += count
                 poses.update({aid: world[-1, i].copy() for i, aid in enumerate(ids)})
 
@@ -760,11 +793,12 @@ class PromptSceneBuilder:
                                 aid: (poses[aid][0, [0, 2]]-original_idle_roots[aid]).tolist() for aid in entry['actor_ids']}
                         manifest['placement'] = placement
                         save()
-                        result = build_meetup(pair, client, planning_scene, actor_ids=active,
+                        result = build_compatible_meetup(pair, client, planning_scene, actor_ids=active,
                             starts=[placement['starts'][aid] for aid in active], meeting=placement['meeting'],
                             entry_policy='continuous', speed_mps=.85, seed=self.seed, cancelled=cancelled,
-                            arrival_standoff_m=ARRIVAL_STANDOFF_M,
+                            arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M,
                             idle_route_padding_m=IDLE_ROUTE_PADDING_M,
+                            source_paths=lambda: [item['path'] for item in manifest['sources'] if item['source'] == 'ardy_core'],
                             on_progress=on_progress)
                         for segment in result['metadata']['segments']:
                             chunk = result['joints'][segment['start_frame']:segment['end_frame_exclusive']]
@@ -819,13 +853,59 @@ class PromptSceneBuilder:
             check_cancel()
             finish_prefetch()
             joints = np.concatenate(parts)
+            # Preserve the exact pre-refinement composition, including failures,
+            # so authored observer/planting changes have a reproducible ablation.
+            unrefined_path = folder/'unrefined-cast.npz'
+            np.savez_compressed(unrefined_path, joints=joints)
+            manifest['unrefined_composition'] = str(unrefined_path)
+            from cast_observer_continuation import continue_released_observers
+            def record_observer(record):
+                manifest.setdefault('observer_continuations', []).append(record)
+                save()
+            observer_started = time.monotonic()
+            joints, activities, observer_turns = continue_released_observers(
+                joints, ids, segments, activities, client=client, scene=scene,
+                folder=folder, seed=self.seed, scene_checker=check_cast_geometry,
+                cancelled=cancelled,
+                source_paths=lambda: [item['path'] for item in manifest['sources'] if item['source'] == 'ardy_core'],
+                on_record=record_observer)
+            manifest['timings'].append({'stage': 'observer_core_continuation',
+                                        'seconds': time.monotonic()-observer_started})
+            from cast_motion_refinement import refine_cast_motion, RefinementRejected
+            refinement_started = time.monotonic()
+            try:
+                joints, refinement = refine_cast_motion(joints, ids, segments, activities, seed=self.seed)
+            except RefinementRejected as exc:
+                candidate_path = folder/'refined-cast-candidate.npz'
+                np.savez_compressed(candidate_path, joints=exc.candidate_joints)
+                manifest['refined_composition'] = str(candidate_path)
+                manifest['motion_refinement'] = exc.refinement_report
+                save()
+                raise
+            manifest['motion_refinement'] = refinement
+            candidate_path = folder/'refined-cast-candidate.npz'
+            np.savez_compressed(candidate_path, joints=joints)
+            manifest['refined_composition'] = str(candidate_path)
+            save()
+            refined_geometry = []
+            for segment, activity in zip(segments, activities):
+                check_cancel()
+                refined_geometry.append(check_cast_geometry(
+                    joints[max(0, segment['start_frame']-1):segment['end_frame_exclusive']],
+                    scene, ids, contact_pair=activity['contact_actor_ids']))
+            manifest['motion_refinement'] = refinement
+            manifest['timings'].append({'stage': 'authored_cast_refinement_and_validation',
+                                        'seconds': time.monotonic()-refinement_started})
             manifest.update(status='complete', frames=len(joints), duration_seconds=len(joints)/30,
                             wall_seconds=time.monotonic()-started)
             save()
             metadata = {'version': 1, 'model': 'ARDY Core + InterGen' if any(s['source'] == 'intergen' for s in segments) else 'ARDY Core',
                         'prompt': self.prompt, 'title': plan.get('title', self.prompt), 'fps': 30, 'frames': len(joints),
                         'actor_ids': list(ids), 'plan': plan, 'placement': placement, 'segments': segments,
-                        'segment_activity': activities, 'scene_geometry': geometry, 'transition_boundaries': boundaries,
+                        'segment_activity': activities, 'scene_geometry': refined_geometry, 'transition_boundaries': boundaries,
+                        'pre_refinement_scene_geometry': geometry, 'motion_refinement': refinement,
+                        'observer_continuations': observer_turns,
+                        'unrefined_composition': str(unrefined_path),
                         'source_manifest': str(folder/'manifest.json'), 'sources': manifest['sources'],
                         'stage_timings': manifest['timings'], 'wall_seconds': manifest['wall_seconds'],
                         'prefetch': manifest['prefetch'],
@@ -834,6 +914,27 @@ class PromptSceneBuilder:
                         'physical_contact_verified': False, 'animation_accepted': False,
                         'features': 'Separate real source archives only; no cross-model features or joint three-person model.'}
             result = CastPerformance(actor_ids=ids, joints=joints, fps=30, metadata=metadata)
+            if concurrent:
+                from prompt_group_adapter import overlay_concurrent_third
+                progress('concurrent_core', actor_ids=['actor_3'])
+                concurrent_started = time.monotonic()
+                result, generated = overlay_concurrent_third(
+                    self.core_client, result, scene, plan, seed=self.seed, output_root=folder,
+                    cancelled=cancelled)
+                manifest['timings'].append({'stage': 'pair_concurrent_third_core',
+                                            'seconds': time.monotonic()-concurrent_started})
+                updated = result.metadata
+                updated['wall_seconds'] = time.monotonic()-started
+                updated['stage_timings'] = manifest['timings']
+                result = CastPerformance(result.actor_ids, result.joints, metadata=updated)
+                manifest['group_manifest'] = str(generated['manifest'])
+                manifest['concurrency_status'] = result.metadata['concurrency_status']
+                if generated['fallback']:
+                    manifest['status'] = 'complete_with_concurrency_fallback'
+                    manifest['concurrency_fallback'] = result.metadata['concurrency_fallback']
+                    manifest['plan'] = result.metadata['plan']
+                manifest['wall_seconds'] = updated['wall_seconds']
+                save()
             progress('complete', frames=len(joints), duration_seconds=len(joints)/30)
             return result
         except Exception as exc:
@@ -842,6 +943,10 @@ class PromptSceneBuilder:
             with source_lock:
                 if pair_errors and not external_cancelled():
                     exc = pair_errors[0]
+            if hasattr(exc, 'approach_body_clearance_report'):
+                manifest['failure_diagnostics'] = {'approach_body_clearance': exc.approach_body_clearance_report}
+            if hasattr(exc, 'arrival_margin_recovery'):
+                manifest.setdefault('failure_diagnostics', {})['arrival_margin_recovery'] = exc.arrival_margin_recovery
             manifest.update(status='cancelled' if external_cancelled() else 'rejected', error=str(exc), wall_seconds=time.monotonic()-started)
             save()
             raise exc

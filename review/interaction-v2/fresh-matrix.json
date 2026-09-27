@@ -1,0 +1,835 @@
+{
+  "schema_version": 1,
+  "comparison_type": "fresh Core and InterGen motion; identical saved PR26 plan and seed per case",
+  "visual_acceptance": "unverified",
+  "measurement_limits": [
+    "Grounded ankle/toe height and sliding are joint and walkable-slab proxies, not shoe contact or force.",
+    "Wrist distance is not palm or finger contact.",
+    "Body overlap uses sampled spheres, not rendered mesh collision.",
+    "Numeric array equality of active paired display frames does not establish whole-scene visual quality.",
+    "Observer turn acceptance below is mechanical/geometry only; full playback remains required."
+  ],
+  "cases": [
+    {
+      "case": "city-handshake-s42",
+      "background": "city",
+      "seed": 42,
+      "held_out": false,
+      "plan": "review/interaction-quality/plans/city-handshake.json",
+      "plan_sha256": "ffea92933b0cd3b7c9cf337b88ebf348a61af0bb8cbd9a93241812da0f7cae68",
+      "archive": "review/interaction-v2/fresh/city-handshake-s42/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "345a99b67f3c10a143419b0d81740af2acd9423c988b25b002d0a9cd6af95708",
+      "generation_wall_seconds": 4.46248516702326,
+      "generation_exit_code": 0,
+      "frames": 231,
+      "duration_seconds": 7.7,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 6,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 240,
+      "same_attempt_max_root_delta_m": 0.0,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.9786757901929476,
+      "minimum_intended_torso_proxy_clearance_m": 0.39088634916225806,
+      "held_foot_proxies": [],
+      "intended_hand_contact_proxies": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.18393311777763574,
+          "nearest_wrist_p50_m": 0.24341290913003574,
+          "frames_under_15cm": 0,
+          "longest_under_15cm_seconds": 0.0,
+          "first_under_15cm_frame": null
+        }
+      ],
+      "authored_transition_max_boundary_joint_step_m": 0.04524021876267598,
+      "pair_handoffs": [],
+      "metrics": "review/interaction-v2/fresh/city-handshake-s42/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/city-handshake-s42/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 3,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    },
+    {
+      "case": "city-handshake-s43",
+      "background": "city",
+      "seed": 43,
+      "held_out": true,
+      "plan": "review/interaction-quality/plans/city-handshake.json",
+      "plan_sha256": "ffea92933b0cd3b7c9cf337b88ebf348a61af0bb8cbd9a93241812da0f7cae68",
+      "archive": "review/interaction-v2/fresh/city-handshake-s43/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "ce4d62dc7a3d83f48e9fca8e5991d19e6970666459b08d31fca1235f261ce1bc",
+      "generation_wall_seconds": 4.100940000033006,
+      "generation_exit_code": 0,
+      "frames": 231,
+      "duration_seconds": 7.7,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 6,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 240,
+      "same_attempt_max_root_delta_m": 0.0,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.7266939319499601,
+      "minimum_intended_torso_proxy_clearance_m": 0.5026369851272258,
+      "held_foot_proxies": [],
+      "intended_hand_contact_proxies": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.19725127461169475,
+          "nearest_wrist_p50_m": 0.2965784910483815,
+          "frames_under_15cm": 0,
+          "longest_under_15cm_seconds": 0.0,
+          "first_under_15cm_frame": null
+        }
+      ],
+      "authored_transition_max_boundary_joint_step_m": 0.05097140816103276,
+      "pair_handoffs": [],
+      "metrics": "review/interaction-v2/fresh/city-handshake-s43/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/city-handshake-s43/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 3,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    },
+    {
+      "case": "industrial-spar-s45",
+      "background": "industrial",
+      "seed": 45,
+      "held_out": false,
+      "plan": "review/interaction-quality/plans/industrial-spar.json",
+      "plan_sha256": "f3db54f0e49fbb1f8b71704d93c92cf64fb52783d8dfc5029151df6442f05b32",
+      "archive": "review/interaction-v2/fresh/industrial-spar-s45/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "218c54c41c5446a851d9bc9c454cb13a5e7a6acc3093bdc5937a91e37052e965",
+      "generation_wall_seconds": 5.431275583978277,
+      "generation_exit_code": 0,
+      "frames": 381,
+      "duration_seconds": 12.7,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 7,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 420,
+      "same_attempt_max_root_delta_m": 0.0,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.09644629047281646,
+      "minimum_intended_torso_proxy_clearance_m": 0.3778361724000535,
+      "held_foot_proxies": [],
+      "intended_hand_contact_proxies": [],
+      "authored_transition_max_boundary_joint_step_m": 0.021403546326782742,
+      "pair_handoffs": [],
+      "metrics": "review/interaction-v2/fresh/industrial-spar-s45/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/industrial-spar-s45/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 3,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    },
+    {
+      "case": "market-three-s42",
+      "background": "market",
+      "seed": 42,
+      "held_out": false,
+      "plan": "review/interaction-quality/plans/market-three.json",
+      "plan_sha256": "70f790b48d0f37a2d5fe012218fa1b33cdd53f2a4e7bf7cf72511cf477ea3c67",
+      "archive": "review/interaction-v2/fresh/market-three-s42/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "8c8917b4d63f85ef5444398314102ea5f75dfc4e2187c6df3f25287a23ce49c1",
+      "generation_wall_seconds": 11.683256041025743,
+      "generation_exit_code": 0,
+      "frames": 502,
+      "duration_seconds": 16.733333333333334,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 13,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 480,
+      "same_attempt_max_root_delta_m": 0.030397566112757988,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [
+        {
+          "actor_id": "actor_1",
+          "status": "accepted_by_mechanical_and_geometry_gates",
+          "start_frame": 231,
+          "end_frame_exclusive": 502,
+          "initial_heading_error_degrees": 115.07051637261046,
+          "selected_final_heading_error_degrees": 2.343731223750344,
+          "selected_tail_settled": true,
+          "candidate_count": 1,
+          "rejected_candidates": [],
+          "generated_spans": [
+            {
+              "start_frame": 0,
+              "end_frame_exclusive": 21,
+              "source": "authored_transition",
+              "model_generated": false
+            },
+            {
+              "start_frame": 21,
+              "end_frame_exclusive": 81,
+              "source": "ardy_core",
+              "model_generated": true,
+              "display_processing": "native anatomy direction fit; linear 20 to 30fps interpolation",
+              "source_frames": 40
+            },
+            {
+              "start_frame": 81,
+              "end_frame_exclusive": 271,
+              "source": "stationary_hold",
+              "model_generated": false,
+              "settled_tail_passed": true
+            }
+          ],
+          "maximum_root_excursion_m": 0.008622954630960107
+        }
+      ],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.20394140791125076,
+      "minimum_intended_torso_proxy_clearance_m": -0.04286489464119997,
+      "held_foot_proxies": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "held_frames": 271,
+          "toe_gap_p95_m": 0.035114199345160746,
+          "ankle_gap_p95_m": 0.0716733969807462,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.11538444266384677,
+          "held_support_candidate_steps": 270
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "held_frames": 271,
+          "toe_gap_p95_m": 0.027634332180023202,
+          "ankle_gap_p95_m": 0.06813041857295005,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.3043514362489336,
+          "held_support_candidate_steps": 270
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "left",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.08335407286882401,
+          "ankle_gap_p95_m": 0.14079822063446046,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": null,
+          "held_support_candidate_steps": 0
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "right",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.10354963898658753,
+          "ankle_gap_p95_m": 0.1486622041463852,
+          "toe_over_10cm_frames": 231,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": null,
+          "held_support_candidate_steps": 0
+        }
+      ],
+      "intended_hand_contact_proxies": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.09122761894370066,
+          "nearest_wrist_p50_m": 0.27420116300931985,
+          "frames_under_15cm": 11,
+          "longest_under_15cm_seconds": 0.3,
+          "first_under_15cm_frame": 111
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.02127618665255145,
+          "nearest_wrist_p50_m": 0.08846788027245098,
+          "frames_under_15cm": 91,
+          "longest_under_15cm_seconds": 2.8,
+          "first_under_15cm_frame": 387
+        }
+      ],
+      "authored_transition_max_boundary_joint_step_m": 0.046880100727957244,
+      "pair_handoffs": [
+        {
+          "from_pair": [
+            "actor_1",
+            "actor_2"
+          ],
+          "to_pair": [
+            "actor_2",
+            "actor_3"
+          ],
+          "between_frames": 151,
+          "between_body_overlap_proxy": [
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_2"
+              ],
+              "minimum_body_proxy_clearance_m": 0.643840598967991,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 1.70625529069875,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_2",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 0.29791159161320696,
+              "body_proxy_overlap_frames": 0
+            }
+          ],
+          "shared_actor_facing_change_degrees": {
+            "actor_2": 9.396794906326381
+          },
+          "shared_actor_root_travel_m": {
+            "actor_2": 2.268785212531991
+          },
+          "max_intervening_joint_step_m": 0.11484061193920989
+        }
+      ],
+      "metrics": "review/interaction-v2/fresh/market-three-s42/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/market-three-s42/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 7,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        },
+        {
+          "source": "pair-01.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    },
+    {
+      "case": "market-three-s48",
+      "background": "market",
+      "seed": 48,
+      "held_out": false,
+      "plan": "review/interaction-quality/plans/market-three.json",
+      "plan_sha256": "70f790b48d0f37a2d5fe012218fa1b33cdd53f2a4e7bf7cf72511cf477ea3c67",
+      "archive": "review/interaction-v2/fresh/market-three-s48/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "73d86819da39d844e9cf63f6d1d385364614610f63985a4f3920ea0a3eb5bfd2",
+      "generation_wall_seconds": 12.71660145802889,
+      "generation_exit_code": 0,
+      "frames": 496,
+      "duration_seconds": 16.533333333333335,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 13,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 480,
+      "same_attempt_max_root_delta_m": 0.030229595174996786,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [
+        {
+          "actor_id": "actor_1",
+          "status": "accepted_by_mechanical_and_geometry_gates",
+          "start_frame": 231,
+          "end_frame_exclusive": 496,
+          "initial_heading_error_degrees": 129.37670806124302,
+          "selected_final_heading_error_degrees": 1.2299644423049156,
+          "selected_tail_settled": true,
+          "candidate_count": 1,
+          "rejected_candidates": [],
+          "generated_spans": [
+            {
+              "start_frame": 0,
+              "end_frame_exclusive": 21,
+              "source": "authored_transition",
+              "model_generated": false
+            },
+            {
+              "start_frame": 21,
+              "end_frame_exclusive": 81,
+              "source": "ardy_core",
+              "model_generated": true,
+              "display_processing": "native anatomy direction fit; linear 20 to 30fps interpolation",
+              "source_frames": 40
+            },
+            {
+              "start_frame": 81,
+              "end_frame_exclusive": 265,
+              "source": "stationary_hold",
+              "model_generated": false,
+              "settled_tail_passed": true
+            }
+          ],
+          "maximum_root_excursion_m": 0.011241314467904804
+        }
+      ],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.0640687330120145,
+      "minimum_intended_torso_proxy_clearance_m": -0.1073538994542701,
+      "held_foot_proxies": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "held_frames": 265,
+          "toe_gap_p95_m": 0.029056856632232675,
+          "ankle_gap_p95_m": 0.07004513732203309,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.3160123436688177,
+          "held_support_candidate_steps": 264
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "held_frames": 265,
+          "toe_gap_p95_m": 0.05248749975810821,
+          "ankle_gap_p95_m": 0.08793918788244716,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.09994128487031005,
+          "held_support_candidate_steps": 264
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "left",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.012678025513887414,
+          "ankle_gap_p95_m": 0.05123432934284211,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.0,
+          "held_support_candidate_steps": 230
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "right",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.01524732470512391,
+          "ankle_gap_p95_m": 0.05934173822402955,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.0,
+          "held_support_candidate_steps": 230
+        }
+      ],
+      "intended_hand_contact_proxies": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.010468028229853266,
+          "nearest_wrist_p50_m": 0.19423256136438255,
+          "frames_under_15cm": 34,
+          "longest_under_15cm_seconds": 0.5,
+          "first_under_15cm_frame": 115
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.026604248859159716,
+          "nearest_wrist_p50_m": 0.1005534181094881,
+          "frames_under_15cm": 103,
+          "longest_under_15cm_seconds": 2.4,
+          "first_under_15cm_frame": 391
+        }
+      ],
+      "authored_transition_max_boundary_joint_step_m": 0.0767461664233708,
+      "pair_handoffs": [
+        {
+          "from_pair": [
+            "actor_1",
+            "actor_2"
+          ],
+          "to_pair": [
+            "actor_2",
+            "actor_3"
+          ],
+          "between_frames": 145,
+          "between_body_overlap_proxy": [
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_2"
+              ],
+              "minimum_body_proxy_clearance_m": 0.0640687330120145,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 1.4892066912775777,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_2",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 0.656738346144077,
+              "body_proxy_overlap_frames": 0
+            }
+          ],
+          "shared_actor_facing_change_degrees": {
+            "actor_2": 136.6815897533071
+          },
+          "shared_actor_root_travel_m": {
+            "actor_2": 1.3354126345567707
+          },
+          "max_intervening_joint_step_m": 0.11211992824652822
+        }
+      ],
+      "metrics": "review/interaction-v2/fresh/market-three-s48/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/market-three-s48/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 7,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        },
+        {
+          "source": "pair-01.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    },
+    {
+      "case": "market-three-s49",
+      "background": "market",
+      "seed": 49,
+      "held_out": true,
+      "plan": "review/interaction-quality/plans/market-three.json",
+      "plan_sha256": "70f790b48d0f37a2d5fe012218fa1b33cdd53f2a4e7bf7cf72511cf477ea3c67",
+      "archive": "review/interaction-v2/fresh/market-three-s49/attempt-001/scene.cast.stagezero.npz",
+      "archive_sha256": "36ca3c4cf7e1b098f55fc2997e2adb16ba5c6f420640120576cdfc6e1bc594a8",
+      "generation_wall_seconds": 12.625855416001286,
+      "generation_exit_code": 0,
+      "frames": 483,
+      "duration_seconds": 16.1,
+      "source_manifest_statuses": [
+        "complete"
+      ],
+      "source_record_sha256_all_verified": true,
+      "source_manifest_file_count": 14,
+      "same_attempt_active_intergen_display_equal": true,
+      "same_attempt_active_intergen_actor_frames": 480,
+      "same_attempt_max_root_delta_m": 0.035654759870887856,
+      "pr26_active_intergen_display_equal": true,
+      "pr26_raw_intergen_archive_byte_hashes_equal": false,
+      "observer_turns": [
+        {
+          "actor_id": "actor_1",
+          "status": "accepted_by_mechanical_and_geometry_gates",
+          "start_frame": 231,
+          "end_frame_exclusive": 483,
+          "initial_heading_error_degrees": 164.26625712889003,
+          "selected_final_heading_error_degrees": 2.591314712378217,
+          "selected_tail_settled": true,
+          "candidate_count": 2,
+          "rejected_candidates": [
+            {
+              "index": 0,
+              "reasons": [
+                "maximum_tail_joint_speed_m_s exceeds limit"
+              ]
+            }
+          ],
+          "generated_spans": [
+            {
+              "start_frame": 0,
+              "end_frame_exclusive": 21,
+              "source": "authored_transition",
+              "model_generated": false
+            },
+            {
+              "start_frame": 21,
+              "end_frame_exclusive": 141,
+              "source": "ardy_core",
+              "model_generated": true,
+              "display_processing": "native anatomy direction fit; linear 20 to 30fps interpolation",
+              "source_frames": 80
+            },
+            {
+              "start_frame": 141,
+              "end_frame_exclusive": 252,
+              "source": "stationary_hold",
+              "model_generated": false,
+              "settled_tail_passed": true
+            }
+          ],
+          "maximum_root_excursion_m": 0.01609529359856793
+        }
+      ],
+      "unintended_body_proxy_overlap_frames": 0,
+      "minimum_unintended_body_proxy_clearance_m": 0.16738449352912954,
+      "minimum_intended_torso_proxy_clearance_m": 0.011645440376410021,
+      "held_foot_proxies": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "held_frames": 252,
+          "toe_gap_p95_m": 0.03287034988403321,
+          "ankle_gap_p95_m": 0.07249182732465624,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.10037925273419923,
+          "held_support_candidate_steps": 236
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "held_frames": 252,
+          "toe_gap_p95_m": 0.05297736206581383,
+          "ankle_gap_p95_m": 0.09310236223514763,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.21299784014456463,
+          "held_support_candidate_steps": 251
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "left",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.04510172665119172,
+          "ankle_gap_p95_m": 0.08666043937206269,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.0,
+          "held_support_candidate_steps": 230
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "right",
+          "held_frames": 231,
+          "toe_gap_p95_m": 0.035036051869392404,
+          "ankle_gap_p95_m": 0.07427291035652162,
+          "toe_over_10cm_frames": 0,
+          "ankle_over_20cm_frames": 0,
+          "held_toe_slip_p95_m_s": 0.0,
+          "held_support_candidate_steps": 230
+        }
+      ],
+      "intended_hand_contact_proxies": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.0640479442578642,
+          "nearest_wrist_p50_m": 0.2215288864158103,
+          "frames_under_15cm": 25,
+          "longest_under_15cm_seconds": 0.36666666666666664,
+          "first_under_15cm_frame": 111
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "window_frames": 120,
+          "nearest_wrist_min_m": 0.013814575296317484,
+          "nearest_wrist_p50_m": 0.11621904042350895,
+          "frames_under_15cm": 69,
+          "longest_under_15cm_seconds": 2.0,
+          "first_under_15cm_frame": 379
+        }
+      ],
+      "authored_transition_max_boundary_joint_step_m": 0.05377410198443867,
+      "pair_handoffs": [
+        {
+          "from_pair": [
+            "actor_1",
+            "actor_2"
+          ],
+          "to_pair": [
+            "actor_2",
+            "actor_3"
+          ],
+          "between_frames": 132,
+          "between_body_overlap_proxy": [
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_2"
+              ],
+              "minimum_body_proxy_clearance_m": 0.5407272505743385,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_1",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 1.41231880060066,
+              "body_proxy_overlap_frames": 0
+            },
+            {
+              "actor_ids": [
+                "actor_2",
+                "actor_3"
+              ],
+              "minimum_body_proxy_clearance_m": 0.7330249028770545,
+              "body_proxy_overlap_frames": 0
+            }
+          ],
+          "shared_actor_facing_change_degrees": {
+            "actor_2": 114.45783317122147
+          },
+          "shared_actor_root_travel_m": {
+            "actor_2": 1.5632897298707569
+          },
+          "max_intervening_joint_step_m": 0.09811512260283692
+        }
+      ],
+      "metrics": "review/interaction-v2/fresh/market-three-s49/attempt-001/metrics-v2.json",
+      "provenance": "review/interaction-v2/fresh/market-three-s49/attempt-001/generation-provenance.json",
+      "scene_geometry_checked_segments": 7,
+      "all_scene_segments_geometry_checked": true,
+      "refinement_worsened_unintended_body_proxy_overlap_frames": 0,
+      "animation_accepted": false,
+      "visual_acceptance": "unverified",
+      "pr26_intergen_numeric_source_arrays": [
+        {
+          "source": "pair-00.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        },
+        {
+          "source": "pair-01.npz",
+          "numeric_fields": [
+            "features",
+            "joints",
+            "smoothed_joints"
+          ],
+          "all_numeric_arrays_equal": true
+        }
+      ]
+    }
+  ]
+}
