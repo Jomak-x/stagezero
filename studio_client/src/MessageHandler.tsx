@@ -29,6 +29,7 @@ import { nativePairPlayback, advanceNativePairPlayback, renderNativePairNow } fr
 import { publishActorGlbControl } from "./mesh/ActorGlbProtocol";
 import { applyCameraState } from "./cameraStore";
 import { setServerCameraTarget } from "./serverCamera";
+import { receiveVoiceQueue, receiveVoiceStatus } from "./VoiceCommands";
 
 /** Returns a handler for all incoming messages. */
 function useMessageHandler() {
@@ -142,6 +143,14 @@ function useMessageHandler() {
     }
 
     switch (message.type) {
+      case "VoiceStatusMessage": {
+        receiveVoiceStatus(message);
+        return;
+      }
+      case "VoiceQueueMessage": {
+        receiveVoiceQueue(message);
+        return;
+      }
       case "NativePairClipMessage": {
         try {
           const loaded = nativePairPlayback.load(message);

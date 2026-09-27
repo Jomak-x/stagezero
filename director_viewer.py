@@ -25,6 +25,7 @@ from realtime_client import RealtimeClient
 from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
 from studio_core_renderer import StudioCoreRenderer
+from voice_directing import VoiceDirecting
 from native_pair_session import NativePairSession
 from native_pair_renderer import NativePairRenderer
 from native_pair_controls import NativePairControls
@@ -576,6 +577,14 @@ def main():
     if args.native_project:
         open_native_project(args.native_project.read_bytes())
 
+    def activate_voice_motion():
+        activate_story()
+
+    voice = VoiceDirecting(server, session, workflow=ui.story_controls.workflow,
+                           on_single_action_submitted=ui.sync_voice_action,
+                           on_story_submitted=ui.story_controls.register_voice_job,
+                           on_motion_activate=activate_voice_motion)
+
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
@@ -765,6 +774,7 @@ def main():
                     if ui_due:
                         ui.update()
                         core_ui.tick()
+                        voice.update()
                         pair_ui.tick()
                         cast_ui.tick()
                         prompt_cast_folder.visible = cast_requested
@@ -778,6 +788,7 @@ def main():
                     last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
+        voice.close()
         ui.story_controls.close()
         session.reset()
         core.close()

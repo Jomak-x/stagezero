@@ -8,6 +8,7 @@ import { WsWorkerIncoming, WsWorkerOutgoing } from "./WebsocketServerWorker";
 import { resetNativePairPlayback } from "./mesh/NativePairPlayback";
 import { resetActorGlbProtocol } from "./mesh/ActorGlbProtocol";
 import { resetCameraState } from "./cameraStore";
+import { resetVoiceCommands } from "./VoiceCommands";
 
 /** Component for handling websocket connections. */
 export function WebsocketMessageProducer() {
@@ -25,6 +26,7 @@ export function WebsocketMessageProducer() {
     worker.onmessage = (event) => {
       const data: WsWorkerOutgoing = event.data;
       if (data.type === "connected") {
+        resetVoiceCommands();
         resetCameraState(viewer);
         resetActorGlbProtocol();
         resetNativePairPlayback();
@@ -35,6 +37,7 @@ export function WebsocketMessageProducer() {
           postToWorker({ type: "send", message: message });
         };
       } else if (data.type === "closed") {
+        resetVoiceCommands();
         resetNativePairPlayback();
         resetCameraState(viewer);
         resetGui();
@@ -65,6 +68,7 @@ export function WebsocketMessageProducer() {
     }
     postToWorker({ type: "set_server", server: server });
     return () => {
+      resetVoiceCommands();
       resetNativePairPlayback();
       resetCameraState(viewer);
       postToWorker({ type: "close" });

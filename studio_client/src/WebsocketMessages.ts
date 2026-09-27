@@ -1201,12 +1201,52 @@ export interface TimelinePromptMergeMessage {
 
 import type { CameraStudioStateMessage, CameraStudioCommandMessage } from "./cameraProtocol";
 
-export type Message =
+/** StageZero voice commands are a hold-to-record or typed request queue. */
+export interface VoiceRecordingMessage {
+  type: "VoiceRecordingMessage";
+  request_id: string;
+  mime_type: string;
+  audio: Uint8Array<ArrayBuffer>;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceCommandMessage {
+  type: "VoiceCommandMessage";
+  request_id: string;
+  command: "submit" | "cancel";
+  text: string;
+  target?: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceStatusMessage {
+  type: "VoiceStatusMessage";
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+}
+export interface VoiceQueueRequest {
+  request_id: string;
+  status: string;
+  detail: string;
+  transcript: string;
+  retryable: boolean;
+  target: "auto" | "single_action" | "full_scene";
+}
+export interface VoiceQueueMessage {
+  type: "VoiceQueueMessage";
+  requests: VoiceQueueRequest[];
+}
+
+export type Message = 
   | NativePairClipMessage
   | NativePairTransportMessage
   | NativePairStatusMessage
   | CameraStudioStateMessage
   | CameraStudioCommandMessage
+  | VoiceRecordingMessage
+  | VoiceCommandMessage
+  | VoiceStatusMessage
+  | VoiceQueueMessage
   | CameraFrustumMessage
   | GlbMessage
   | ActorGlbLoadMessage

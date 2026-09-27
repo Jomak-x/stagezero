@@ -27,6 +27,7 @@ class StoryControls:
         self._views = {}
         self._drafts = {}
         self._automatic_attempts = set()
+        self._voice_ids = set()
         self._movement_edit = None
         self._closed = False
         self.open_button = gui.add_button('Full scene')
@@ -48,6 +49,21 @@ class StoryControls:
     def _data(self, view):
         identifier = self.ids.get(view.jobs.value)
         return (identifier, self.workflow.snapshot(identifier)) if identifier else (None, None)
+
+    def register_voice_job(self, identifier):
+        """Expose a voice-submitted scene in the existing scene list."""
+        if self._closed or identifier in self.ids.values():
+            return
+        data = self.workflow.snapshot(identifier)
+        prompt = data.get('prompt', '').strip()
+        label = f'{len(self.ids) + 1:02d} · {prompt[:52] or "Voice scene"}'
+        self.ids[label] = identifier
+        self._voice_ids.add(identifier)
+        for view in tuple(self._views.values()):
+            previous = view.jobs.value
+            self._set(view.jobs, 'options', tuple(self.ids))
+            if previous not in self.ids:
+                self._set(view.jobs, 'value', label)
 
     def _is_current(self, view):
         return not self._closed and self._views.get(view.key) is view
@@ -708,7 +724,7 @@ class StoryControls:
         # preserves the one-prompt flow without replacing either native mode.
         for identifier in tuple(self.ids.values()):
             data = self.workflow.snapshot(identifier)
-            if (data and data['status'] == 'completed' and not data.get('loaded')
+            if (identifier not in self._voice_ids and data and data['status'] == 'completed' and not data.get('loaded')
                     and not self.session.busy and
                     not self._native_active() and not self._paired_activation_error()):
                 attempt = (identifier, self.session.project_revision)

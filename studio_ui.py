@@ -227,6 +227,14 @@ class StudioUI:
         if getattr(handle, property_name) != value:
             setattr(handle, property_name, value)
 
+    def sync_voice_action(self, text):
+        """Show an accepted voice action in the existing motion editor."""
+        self._set(self.prompt, 'value', text)
+        self._set(self.edit_action, 'value', CREATE)
+        self._set(self.duration_mode, 'value', AUTO)
+        self._set(self.mode, 'value', self.session.mode)
+        self._prompt_feedback()
+
     @staticmethod
     def _valid_prompt(value):
         return 1 <= len(value.strip()) <= 500
