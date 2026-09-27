@@ -1,4 +1,4 @@
-"""Neon reference image → our private GPU worker → textured character GLB."""
+"""Gemini reference image → our private GPU worker → textured character GLB."""
 import json
 import math
 import os
@@ -14,7 +14,7 @@ from character_reference import validate_reference
 
 
 class SelfHostedCharacterGenerator:
-    source = 'neon-trellis'
+    source = 'gemini-trellis'
 
     def __init__(self, reference_generator, token, url='http://127.0.0.1:8770', *,
                  transport=None, clock=None, sleep=None, deadline=1800, poll_interval=2):
@@ -48,13 +48,13 @@ class SelfHostedCharacterGenerator:
 
     @classmethod
     def from_env(cls):
-        from neon_character_reference import NeonCharacterReference
+        from gemini_character_reference import GeminiCharacterReference
         token_path = Path(__file__).resolve().parent / '.runtime/api-token'
         try:
             token = token_path.read_text().strip()
         except OSError:
             raise ValueError('Character worker is not configured; run the character backend launcher') from None
-        return cls(NeonCharacterReference.from_env(), token,
+        return cls(GeminiCharacterReference.from_env(), token,
                    os.environ.get('STAGEZERO_CHARACTER_BACKEND_URL', 'http://127.0.0.1:8770'))
 
     def _request(self, method, path, *, data=None, limit=128000, check=None):
@@ -118,7 +118,7 @@ class SelfHostedCharacterGenerator:
                 progress('1 / 3 · Reusing your completed design…')
                 self.reference_image = seeded[1]
             else:
-                progress('1 / 3 · Designing the character with Neon…')
+                progress('1 / 3 · Designing the character with Gemini…')
                 self.reference_image = self.reference_generator.generate(prompt.strip(), progress=progress, cancelled=cancelled)
             check()
             if not isinstance(self.reference_image, bytes) or len(self.reference_image) > 10 * 1024 * 1024:

@@ -96,8 +96,8 @@ With Neon, the model is selected by workflow when no role override is set:
 | Custom prop geometry and assets | `gpt-6-astra` | `STAGEZERO_SCENE_ASSET_MODEL` |
 | Scene layout | `gpt-5-6-sol` | `STAGEZERO_SCENE_LAYOUT_MODEL` |
 | Grounded scene action planning | `gpt-6-astra` | `STAGEZERO_SCENE_AI_MODEL` |
-| Character design | `gpt-6-astra` | `STAGEZERO_CHARACTER_DESIGN_MODEL` |
-| Character reference image | `gpt-6-astra` | `STAGEZERO_CHARACTER_IMAGE_MODEL` |
+
+Character creation uses the direct Gemini API; see [character setup](CHARACTERS.md) for `GEMINI_API_KEY`.
 
 Set only the overrides you need in the same private file or process environment.
 For Neon, `STAGEZERO_OBJECT_MODEL` applies to general objects and scenes; it does

@@ -58,7 +58,7 @@ class GeneratedCharacterCatalogTests(unittest.TestCase):
         self.assertIsNone(self.controls.active_id)
         self.assertEqual(self.controls.selection_revision, revision)
         sidecar = json.loads((self.root / asset_id / 'generated.json').read_text())
-        self.assertEqual(sidecar, {'version': 1, 'source': 'neon-trellis',
+        self.assertEqual(sidecar, {'version': 1, 'source': 'gemini-trellis',
                                    'asset_id': asset_id, 'prompt': 'Original explorer'})
 
         self.assertTrue(self.controls.select_generated(asset_id, 'client-1', revision))
@@ -111,6 +111,17 @@ class GeneratedCharacterCatalogTests(unittest.TestCase):
         sidecar = self.root / asset_id / 'generated.json'
         self.assertLessEqual(sidecar.stat().st_size, 4096)
         self.assertEqual(json.loads(sidecar.read_text())['prompt'], prompt)
+        with patch('character_controls.GlbCharacterRenderer', BrowserBridge):
+            restarted = CharacterControls(self.server, self.session, self.skeleton, self.root)
+        self.assertIsInstance(restarted.entries[asset_id].retargeter, GeneratedCharacterRetargeter)
+
+    def test_legacy_neon_origin_still_uses_generated_rig(self):
+        asset_id = self.add_generated()
+        sidecar = self.root / asset_id / 'generated.json'
+        doc = json.loads(sidecar.read_text())
+        doc['source'] = 'neon-trellis'
+        sidecar.write_text(json.dumps(doc))
+        self.assertTrue(self.controls._generated_origin(asset_id))
         with patch('character_controls.GlbCharacterRenderer', BrowserBridge):
             restarted = CharacterControls(self.server, self.session, self.skeleton, self.root)
         self.assertIsInstance(restarted.entries[asset_id].retargeter, GeneratedCharacterRetargeter)

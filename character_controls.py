@@ -103,7 +103,7 @@ class CharacterControls:
                 return False
             doc = json.loads(path.read_text())
             return (isinstance(doc, dict) and doc.get('version') == 1
-                    and doc.get('source') == 'neon-trellis' and doc.get('asset_id') == asset_id)
+                    and doc.get('source') in ('neon-trellis', 'gemini-trellis') and doc.get('asset_id') == asset_id)
         except (OSError, ValueError):
             return False
 
@@ -142,7 +142,7 @@ class CharacterControls:
             try:
                 with tempfile.NamedTemporaryFile('w', dir=folder, prefix='.generated-', suffix='.tmp', encoding='utf-8', delete=False) as f:
                     staged = Path(f.name)
-                    json.dump({'version': 1, 'source': 'neon-trellis', 'asset_id': asset.sha256,
+                    json.dump({'version': 1, 'source': 'gemini-trellis', 'asset_id': asset.sha256,
                                'prompt': prompt.strip()}, f, ensure_ascii=False)
                 staged.replace(folder / 'generated.json')
             finally:

@@ -13,7 +13,7 @@ from character_reference import validate_reference
 
 
 _STAGES = {
-    '1 / 3 · Designing the character with Neon…': 'Designing appearance',
+    '1 / 3 · Designing the character with Gemini…': 'Designing appearance',
     '1 / 3 · Reusing your completed design…': 'Reusing appearance',
     '2 / 3 · Building geometry and textures on our GPU…': 'Building 3D character',
     '3 / 3 · Loading the textured 3D character…': 'Finishing character',
@@ -27,6 +27,17 @@ _GPU_STAGES = frozenset({
     'Exporting the textured mesh', 'Finishing the character',
 })
 _ERRORS = {
+    'Set GEMINI_API_KEY in the environment or .runtime/characters.env':
+        'Set GEMINI_API_KEY in the environment or .runtime/characters.env',
+    'Gemini authentication failed; check GEMINI_API_KEY and image model access':
+        'Gemini authentication failed; check GEMINI_API_KEY and image model access',
+    'Gemini quota exceeded; check API billing and quota or try again later':
+        'Gemini quota exceeded; check API billing and quota or try again later',
+    'Gemini character connection failed; try again': 'Gemini character connection failed; try again',
+    'Gemini returned no character image; try a different description':
+        'Gemini returned no character image; try a different description',
+    'Gemini character reference generation timed out': 'Gemini character reference generation timed out',
+
     'Character worker is not configured; run the character backend launcher':
         'Character creation is not set up. Start the character backend.',
     'Cannot reach the character GPU; start its backend and private tunnel':
