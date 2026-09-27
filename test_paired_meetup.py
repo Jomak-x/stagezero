@@ -1,5 +1,6 @@
 """CPU tests of planning, transport contracts, rejection and native preservation."""
 import json
+import math
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -204,6 +205,63 @@ class MeetupTests(unittest.TestCase):
                    {'mechanical_gate_passed': False, 'rejection_reasons': ['too fast']})):
             with self.assertRaisesRegex(ValueError, 'transition rejected'):
                 self.build(self.client())
+
+    def test_continuous_city_entry_is_aligned_clear_and_bounded(self):
+        root = Path(__file__).parent
+        pair = load_source(root/'review/two-character/platform-integration/block37/block37.native.npz')
+        scene = json.loads((root/'review/scene-integration/live-city.json').read_text())
+        plan = plan_meetup(pair, scene, actor_ids=IDS,
+                           starts=[{'x': -3, 'z': -1}, {'x': 3, 'z': 1}],
+                           meeting={'x': 0, 'z': 0, 'yaw_degrees': 90},
+                           speed_mps=.85, entry_policy='continuous')
+        self.assertLess(plan['approach_seconds'], 7.)
+        self.assertEqual(plan['approach_seconds']-plan['arrival_seconds'], 1.)
+        self.assertGreaterEqual(_route_separation(plan['routes']), .55)
+        for route in plan['routes']:
+            a, b = route['points'][-2:]
+            tangent = math.atan2(b[0]-a[0], b[1]-a[1])
+            self.assertAlmostEqual(tangent, route['arrival_yaw'])
+            targets = [(index*40+t['frame'], t['heading']) for index, horizon in enumerate(plan['horizons'])
+                       for t in horizon['root_targets'][route['actor_id']]]
+            for (f, first), (g, second) in zip(targets, targets[1:]):
+                if g/20 >= plan['arrival_seconds']-1.9:
+                    delta = math.atan2(math.sin(second-first), math.cos(second-first))
+                    self.assertLess(abs(math.degrees(delta))*20/(g-f), 150.)
+            self.assertTrue(route['ground']['continuous_support_verified'])
+
+    def test_continuous_build_archives_full_horizons_and_preserves_full_pair(self):
+        client = self.client(); archive = []
+        result = self.build(client, entry_policy='continuous', on_core_chunk=lambda *args: archive.append(args))
+        selection = result['metadata']['core_playback_selection']
+        self.assertEqual(selection['generated_frames'], 40*len(archive))
+        self.assertEqual(selection['retained_frames'], round(result['plan']['approach_seconds']*20))
+        self.assertLess(selection['retained_frames'], selection['generated_frames'])
+        self.assertEqual(result['plan']['blend_frames'], 12)
+        self.assertEqual(result['plan']['total_frames'], len(result['joints']))
+        np.testing.assert_array_equal(result['clip'].joints[-self.pair.frames:], self.pair.joints)
+        for request in client.requests:
+            validate_job(request)
+
+    def test_continuous_short_bridge_failure_uses_existing_gate_and_longer_bridge(self):
+        from paired_meetup import authored_direction_bridge
+        attempts = []
+        def gate(*args, **kwargs):
+            attempts.append(kwargs['frames'])
+            bridge, report = authored_direction_bridge(*args, **kwargs)
+            if kwargs['frames'] == 12:
+                report.update(mechanical_gate_passed=False, rejection_reasons=['velocity'])
+            return bridge, report
+        with patch('paired_meetup.authored_direction_bridge', side_effect=gate):
+            result = self.build(self.client(), entry_policy='continuous')
+        self.assertEqual(attempts, [12, 15])
+        self.assertEqual(result['plan']['blend_frames'], 15)
+        self.assertFalse(result['metadata']['animation_accepted'])
+
+    def test_unknown_entry_policy_rejected_before_core(self):
+        client = self.client()
+        with self.assertRaisesRegex(ValueError, 'entry policy'):
+            self.build(client, entry_policy='unknown')
+        self.assertEqual(client.requests, [])
 
 
 if __name__ == '__main__': unittest.main()

@@ -10,6 +10,9 @@ from native_pair_session import REVIEWED_HANDSHAKE, REVIEWED_SPARRING
 from native_pair_transition import shared_place_pair
 from native_pair_geometry import check_native_pair_geometry
 
+DEFAULT_ENTRY_POLICY = 'continuous'
+DEFAULT_SPEED_MPS = .85
+
 
 def validate_request(request):
     if not isinstance(request, dict):
@@ -98,12 +101,13 @@ def resolve_meeting(request, clip, scene):
     raise ValueError('There is not enough clear ground beside that landmark for this interaction. Choose a custom meeting point.')
 
 
-def preview_direction(request, scene):
+def preview_direction(request, scene, *, entry_policy=DEFAULT_ENTRY_POLICY, speed_mps=DEFAULT_SPEED_MPS):
     from paired_meetup import plan_meetup
     r = validate_request(request)
     clip = library_clip('handshake' if r['source'] == 'generate' else r['source'])
     r = resolve_meeting(r, clip, scene)
-    plan = plan_meetup(clip, scene, actor_ids=r['actor_ids'], starts=r['starts'], meeting=r['meeting'])
+    plan = plan_meetup(clip, scene, actor_ids=r['actor_ids'], starts=r['starts'], meeting=r['meeting'],
+                       entry_policy=entry_policy, speed_mps=speed_mps)
     return {'request': r, 'plan': plan, 'summary': ('Route preview using reference interaction; fresh motion is checked again.'
             if r['source'] == 'generate' else 'Both routes and the interaction area fit the current scene.')}
 
@@ -129,11 +133,13 @@ class InteractionPromptPlanner:
 
 
 class PairedSceneBuilder:
-    def __init__(self, request, provider, core_client, output_root, planner=None):
+    def __init__(self, request, provider, core_client, output_root, planner=None, *,
+                 entry_policy=DEFAULT_ENTRY_POLICY, speed_mps=DEFAULT_SPEED_MPS):
         self.request = validate_request(request)
         self.provider, self.core_client = provider, core_client
         self.output_root = Path(output_root)
         self.planner = planner or InteractionPromptPlanner()
+        self.entry_policy, self.speed_mps = entry_policy, speed_mps
 
     def __call__(self, scene, *, cancelled=lambda: False, on_progress=lambda *args: None):
         from paired_meetup import plan_meetup, build_meetup
@@ -156,7 +162,7 @@ class PairedSceneBuilder:
         try:
             progress('Checking start markers and meeting space…')
             # Cheap reference preflight catches invalid markers before expensive generation.
-            preview_direction(r, scene)
+            preview_direction(r, scene, entry_policy=self.entry_policy, speed_mps=self.speed_mps)
             if r['source'] == 'generate':
                 if self.provider is None:
                     raise ValueError('Pair generation is unavailable; choose Handshake or Sparring for the reviewed library.')
@@ -170,11 +176,13 @@ class PairedSceneBuilder:
                 **({'features': clip.features} if clip.features is not None else {}), metadata=np.array(json.dumps(clip.metadata)))
             r = resolve_meeting(r, clip, scene)
             progress('Planning two routes with a shared arrival time…')
-            plan = plan_meetup(clip, scene, actor_ids=r['actor_ids'], starts=r['starts'], meeting=r['meeting'])
+            plan = plan_meetup(clip, scene, actor_ids=r['actor_ids'], starts=r['starts'], meeting=r['meeting'],
+                               entry_policy=self.entry_policy, speed_mps=self.speed_mps)
             (folder/'request.json').write_text(json.dumps(r, indent=2)+'\n')
             (folder/'plan.json').write_text(json.dumps(plan, indent=2)+'\n')
             result = build_meetup(clip, self.core_client, scene, actor_ids=r['actor_ids'], starts=r['starts'],
                                   meeting=r['meeting'], seed=r['seed'], cancelled=cancelled,
+                                  entry_policy=self.entry_policy, speed_mps=self.speed_mps,
                                   on_progress=progress, on_core_chunk=chunk)
             progress('Checking the complete scene…')
             output = result['clip']

@@ -31,7 +31,7 @@ class NativePairSession:
         self._progress = None
         self._context_source = None
         self._scene = scene_copy(EMPTY_SCENE)
-        self._frame = self._revision = self._epoch = 0
+        self._frame = self._revision = self._epoch = self._transport_revision = 0
         self._play_started = None
 
     def _open(self):
@@ -461,6 +461,7 @@ class NativePairSession:
                 self._frame = 0
             self._playing = True
             self._play_started = self._clock() - self._frame / FPS
+            self._transport_revision += 1
         return self.snapshot()
 
     def pause(self):
@@ -469,6 +470,7 @@ class NativePairSession:
             self._tick(self._clock())
             self._playing = False
             self._play_started = None
+            self._transport_revision += 1
         return self.snapshot()
 
     def restart(self):
@@ -483,6 +485,7 @@ class NativePairSession:
             self._frame = frame
             if self._playing:
                 self._play_started = self._clock() - frame / FPS
+            self._transport_revision += 1
         return self.snapshot()
 
     def _tick(self, now):
@@ -529,6 +532,7 @@ class NativePairSession:
             return {'active': self._active, 'available': self.available, 'initialized': bool(frames),
                     'placement': dict(self._placement), 'cast': json_copy(self._cast), 'selected_pair': list(self._pair), 'actor_ids': list(self._pair),
                     'phase': phase, 'status': messages[phase], 'total_frames': frames, 'frame': self._frame,
+                    'transport_revision': self._transport_revision,
                     'playing': self._playing, 'revision': self._revision, 'epoch': self._epoch, 'fps': FPS,
                     'source': self._clip.source if self._clip is not None else 'InterGen', 'schema': SCHEMA,
                     'composed': composed, 'hand_pose': metadata.get('render_hand_pose', 'relaxed'),
@@ -551,6 +555,7 @@ class NativePairSession:
             self._playing = False
             self._play_started = None
             self._capturing = True
+            self._transport_revision += 1
         return self.snapshot()
 
     def capture_seek(self, frame):
@@ -560,6 +565,7 @@ class NativePairSession:
             if type(frame) is not int or not 0 <= frame < self._clip.frames:
                 raise ValueError('Native capture frame is outside the clip')
             self._frame = frame
+            self._transport_revision += 1
         return self.snapshot()
 
     def end_capture(self, frame=0):
@@ -570,6 +576,7 @@ class NativePairSession:
             self._frame = max(0, min(int(frame), self._clip.frames - 1))
             self._playing = False
             self._play_started = None
+            self._transport_revision += 1
         return self.snapshot()
 
     def save(self):

@@ -34,6 +34,9 @@ def _capture_locked(session, renderer, client, output, state, flush, render_lock
     with render_lock or nullcontext():
         renderer.sync_cast(state)
         renderer.set_clip(clip)
+    local_playback = getattr(renderer, "local_playback", None)
+    if local_playback is not None:
+        local_playback.require_ready(client)
     archive = session.save()
     (output / 'scene.native-pair.stagezero.npz').write_bytes(archive)
     frames, fps = state['total_frames'], state['fps']
@@ -52,6 +55,8 @@ def _capture_locked(session, renderer, client, output, state, flush, render_lock
             with render_lock or nullcontext():
                 session.capture_seek(frame)
                 renderer.tick(frame)
+                if local_playback is not None:
+                    local_playback.update(session.snapshot(), enabled=True)
                 if render_frame is not None:
                     render_frame(frame, state)
                 if flush is not None:

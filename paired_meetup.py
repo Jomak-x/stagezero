@@ -5,7 +5,7 @@ import math
 import uuid
 from collections.abc import Mapping
 import numpy as np
-from interaction_planner import _obstacles, _path
+from interaction_planner import _obstacles, _path, _intersects
 from interaction_scene import scene_objects
 from native_pair_clip import NativePairClip, MAX_FRAMES
 from native_pair_geometry import check_native_pair_geometry
@@ -53,12 +53,17 @@ def _minimum_separation(paths):
     return minimum
 
 
-def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames):
+def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled'):
     """Keep the same common duration and model target sampling for every route."""
     travel_windows = max(1, math.ceil(max(r['distance_m'] for r in routes)/speed/2.))
     arrival_seconds, windows = travel_windows*2., travel_windows+1
-    frames = windows*60+BLEND_FRAMES+pair_frames
-    if windows*2 > maximum or frames > MAX_FRAMES:
+    approach_seconds = windows*2.
+    if entry_policy == 'continuous':
+        arrival_seconds = max(2., math.ceil(max(r['distance_m'] for r in routes)/speed*FPS)/FPS)
+        approach_seconds = arrival_seconds+1.
+        windows = math.ceil(approach_seconds/2.)
+    frames = round(approach_seconds*FPS)*3//2+BLEND_FRAMES+pair_frames
+    if approach_seconds > maximum or frames > MAX_FRAMES:
         raise ValueError('Meeting route exceeds the 20-second approach or 1000-frame take limit; move starts closer')
     horizons = []
     for window in range(windows):
@@ -78,14 +83,30 @@ def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames):
             for local in sorted(samples):
                 second = (window*HORIZON+local+1)/FPS
                 point, heading = _sample(route['points'], route['distance_m']*min(1., second/arrival_seconds))
-                if second >= arrival_seconds:
+                if entry_policy == 'continuous' and second > arrival_seconds-2.:
+                    # Spread the final turn across the moving approach, instead
+                    # of asking Core to reverse heading at a short route corner.
+                    turn_start = max(0., arrival_seconds-2.)
+                    _, prior = _sample(route['points'], route['distance_m']*turn_start/arrival_seconds)
+                    prior = route['initial_yaw'] if prior is None else prior
+                    delta = math.atan2(math.sin(route['arrival_yaw']-prior), math.cos(route['arrival_yaw']-prior))
+                    alpha = min(1., (second-turn_start)/(arrival_seconds-.15-turn_start))
+                    heading = prior+(alpha*alpha*(3-2*alpha))*delta
+                if second >= arrival_seconds and entry_policy == 'continuous':
+                    heading = route['arrival_yaw']
+                elif second >= arrival_seconds:
                     _, prior = _sample(route['points'], max(0., route['distance_m']-1e-6))
                     prior = route['initial_yaw'] if prior is None else prior
                     delta = math.atan2(math.sin(route['arrival_yaw']-prior), math.cos(route['arrival_yaw']-prior))
                     heading = prior+min(1., (second-arrival_seconds)/1.)*delta
                 heading = route['arrival_yaw'] if heading is None else math.atan2(math.sin(heading), math.cos(heading))
                 targets[aid].append({'frame': local, 'position_xz': point, 'heading': heading})
-            prompts[aid] = ('A person stands in place and turns to face their partner, relaxed and ready.' if window == travel_windows or route['distance_m'] < .05 else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
+            if entry_policy == 'continuous':
+                prompts[aid] = ('A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.'
+                                if window*2 < arrival_seconds else
+                                'A person faces their partner, feet planted and hands raised in a ready stance.')
+            else:
+                prompts[aid] = ('A person stands in place and turns to face their partner, relaxed and ready.' if window == travel_windows or route['distance_m'] < .05 else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
         horizons.append({'root_targets': targets, 'actor_prompts': prompts})
     samples = [[[s['x'], s['z']] for s in starts]]
     for horizon in horizons:
@@ -106,6 +127,44 @@ def _route_separation(routes):
                 times.add(min(1., distance/route['distance_m']))
     paths = [[_sample(r['points'], r['distance_m']*t)[0] for r in routes] for t in sorted(times)]
     return _minimum_separation(np.asarray(paths))
+
+
+def _entry_route(points, arrival_yaw, scene, obstacles):
+    """Round clear corners and reach the native pose along its forward tangent.
+
+    All sampled curve chords get the same obstacle/floor checks as straight
+    routes. Obstacle corners that cannot be rounded retain their safe routing.
+    This affects Core targets only; no generated or native pose is edited.
+    """
+    end = np.asarray(points[-1], dtype=float)
+    if math.dist(points[0], end) < .05:
+        return points
+    lead = end-.5*np.array([math.sin(arrival_yaw), math.cos(arrival_yaw)])
+    tail = _path(tuple(points[-2]), tuple(lead), obstacles, .34)
+    # A blocked final tangent is not silently replaced by a different heading.
+    if any(_intersects(tuple(lead), tuple(end), box, .34) for box in obstacles):
+        raise ValueError('Native entry tangent overlaps scene geometry')
+    routed = [np.asarray(p, dtype=float) for p in points[:-2]+list(tail)+[end]]
+    rounded = [routed[0].tolist()]
+    for before, corner, after in zip(routed, routed[1:], routed[2:]):
+        incoming, outgoing = corner-before, after-corner
+        a, b = float(np.linalg.norm(incoming)), float(np.linalg.norm(outgoing))
+        if min(a, b) < 1e-6:
+            continue
+        cut = min(.65, a*.4, b*.4)
+        left, right = corner-incoming/a*cut, corner+outgoing/b*cut
+        curve = [(1-t)**2*left+2*(1-t)*t*corner+t*t*right for t in np.linspace(0, 1, 9)]
+        clear = not any(_intersects(tuple(x), tuple(y), box, .34)
+                        for x, y in zip(curve, curve[1:]) for box in obstacles)
+        if clear:
+            try:
+                validate_ground_path(scene, [p.tolist() for p in curve])
+            except ValueError:
+                clear = False
+        rounded.extend([p.tolist() for p in curve] if clear else [corner.tolist()])
+    rounded.append(end.tolist())
+    validate_ground_path(scene, rounded)
+    return rounded
 
 
 def _alternate_routes(routes, starts, scene, obstacles):
@@ -130,6 +189,8 @@ def _alternate_routes(routes, starts, scene, obstacles):
                     first = _path(tuple(start), tuple(waypoint), obstacles, .34)
                     last = _path(tuple(waypoint), tuple(end), obstacles, .34)
                     points = [list(p) for p in first+last[1:]]
+                    if route.get('entry_policy') == 'continuous':
+                        points = _entry_route(points, route['arrival_yaw'], scene, obstacles)
                     if any(abs(v) > 25 for point in points for v in point):
                         continue
                     ground = validate_ground_path(scene, points)
@@ -147,7 +208,7 @@ def _alternate_routes(routes, starts, scene, obstacles):
 
 
 def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
-                meeting, speed_mps=.65, max_seconds=20):
+                meeting, speed_mps=.65, max_seconds=20, entry_policy='settled'):
     """CPU-only JSON plan. Starts are two world {x,z,yaw_degrees?} anchors.
 
     Meeting XZ anchors the native first-frame root midpoint, with optional yaw.
@@ -170,6 +231,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     meeting = anchor(meeting, 'Meeting')
     speed = _number(speed_mps, 'Walking speed', .2, 1.5)
     maximum = _number(max_seconds, 'Maximum approach seconds', 4, 20)
+    if entry_policy not in ('settled', 'continuous'):
+        raise ValueError('Unknown meeting entry policy')
     yaw = math.radians(meeting.get('yaw_degrees', 0.))
     rotated = shared_place_pair(pair_clip.joints, yaw=yaw)
     center = rotated[0, :, 0].mean(axis=0)
@@ -184,16 +247,19 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
         start = [starts[i]['x'], starts[i]['z']]
         end = pair[0, i, 0, [0, 2]].tolist()
         points = [list(p) for p in _path(tuple(start), tuple(end), obstacles, .34)]
+        arrival = _heading(pair[0, i])
+        if entry_policy == 'continuous':
+            points = _entry_route(points, arrival, adapted, obstacles)
         if any(abs(v) > 25 for p in points for v in p):
             raise ValueError('Meeting route exceeds the Core worker ±25 m bounds')
         ground = validate_ground_path(adapted, points)
         length = sum(math.dist(a, b) for a, b in zip(points, points[1:]))
         _, first = _sample(points, 0.)
-        arrival = _heading(pair[0, i])
         initial = math.radians(starts[i]['yaw_degrees']) if 'yaw_degrees' in starts[i] else (arrival if first is None else first)
         routes.append({'actor_id': aid, 'points': points, 'distance_m': length,
-                       'initial_yaw': initial, 'arrival_yaw': arrival, 'ground': ground})
-    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames)
+                       'initial_yaw': initial, 'arrival_yaw': arrival, 'ground': ground,
+                       **({'entry_policy': entry_policy} if entry_policy == 'continuous' else {})})
+    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy)
     minimum = min(minimum, _route_separation(routes))
     rerouted = False
     if minimum < MIN_ROUTE_SEPARATION_M:
@@ -201,7 +267,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
             if _route_separation(candidate) < MIN_ROUTE_SEPARATION_M:
                 continue
             try:
-                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames)
+                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy)
             except ValueError:
                 continue
             if scheduled[-1] < MIN_ROUTE_SEPARATION_M:
@@ -215,7 +281,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
         raise ValueError('Actor routes cross too closely and no bounded clear detour fits; move the starts or meeting spot')
     return {'version': 1, 'actor_ids': list(actor_ids), 'starts': starts, 'meeting': meeting,
             'placement': placement, 'routes': routes, 'horizons': horizons, 'arrival_seconds': arrival_seconds,
-            'approach_seconds': windows*2, 'total_frames': frames, 'blend_frames': BLEND_FRAMES,
+            'approach_seconds': arrival_seconds+1. if entry_policy == 'continuous' else windows*2,
+            'entry_policy': entry_policy, 'total_frames': frames, 'blend_frames': BLEND_FRAMES,
             'minimum_planned_root_separation_m': minimum, 'native_geometry': geometry,
             'approach_rerouted': rerouted,
             'source_sha256': hashlib.sha256(pair_clip.joints.tobytes()).hexdigest(), 'planned_only': True,
@@ -226,7 +293,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
 
 def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                  meeting, speed_mps=.65, max_seconds=20, seed=92642,
-                 cancelled=lambda: False, on_progress=None, on_core_chunk=None):
+                 cancelled=lambda: False, on_progress=None, on_core_chunk=None, entry_policy='settled'):
     """Return local clip, playback placement, world joints, plan and metadata.
 
     on_progress(dict) reports windows. on_core_chunk('approach', index, clip,
@@ -237,7 +304,7 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         raise RuntimeError('Configure ARDY Core before generating a meeting')
     if type(seed) is not int or not 0 <= seed < 2**32:
         raise ValueError('Seed must be a uint32 integer')
-    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds)
+    plan = plan_meetup(pair_clip, scene, actor_ids=actor_ids, starts=starts, meeting=meeting, speed_mps=speed_mps, max_seconds=max_seconds, entry_policy=entry_policy)
     ids, placement = plan['actor_ids'], plan['placement']
     yaw = math.radians(placement['yaw_degrees']); offset = [placement['x'], 0., placement['z']]
     pair = shared_place_pair(pair_clip.joints, yaw=yaw, translation=offset)
@@ -276,6 +343,9 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         check_native_pair_geometry(core27_to_native22(clip.positions).transpose(1, 0, 2, 3), scene, actor_ids=ids)
         clips.append(clip)
     core = np.concatenate([c.positions for c in clips], axis=1).transpose(1, 0, 2, 3)
+    generated_core_frames = len(core)
+    if entry_policy == 'continuous':
+        core = core[:round(plan['approach_seconds']*FPS)]
     errors = np.linalg.norm(core[-1, :, 0][:, [0, 2]]-pair[0, :, 0][:, [0, 2]], axis=-1)
     if float(errors.max()) > MAX_ARRIVAL_ERROR_M:
         raise ValueError('Core did not reach both meeting entry positions; meeting rejected')
@@ -294,9 +364,20 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
         raise ValueError(f'Meeting entry root-height gap for {ids[actor_index]} is '
                          f'{abs(entry_height_gaps[actor_index]):.2f} m, exceeding '
                          f'{MAX_ENTRY_ROOT_HEIGHT_GAP_M:.2f} m; meeting rejected')
-    entry, entry_report = authored_direction_bridge(approach, pair, left_fps=30, right_fps=30, frames=BLEND_FRAMES)
+    bridge_candidates = (12, 15, 18, BLEND_FRAMES) if entry_policy == 'continuous' else (BLEND_FRAMES,)
+    for bridge_frames in bridge_candidates:
+        try:
+            entry, entry_report = authored_direction_bridge(approach, pair, left_fps=30, right_fps=30, frames=bridge_frames)
+        except ValueError:
+            if bridge_frames == bridge_candidates[-1]:
+                raise
+            continue
+        if entry_report['mechanical_gate_passed']:
+            break
     if not entry_report['mechanical_gate_passed']:
         raise ValueError('Meeting entry transition rejected: '+ '; '.join(entry_report['rejection_reasons']))
+    plan['blend_frames'] = len(entry)
+    plan['total_frames'] = len(approach)+len(entry)+len(pair)
     world = np.concatenate([approach, entry, pair])
     geometry = check_native_pair_geometry(world, scene, actor_ids=ids)
     check_cancel(); start = len(approach)+len(entry)
@@ -312,6 +393,8 @@ def build_meetup(pair_clip, client, scene, *, actor_ids=('actor_1', 'actor_2'), 
                 'transition_provenance': {'source_pair_frames_modified': False, 'all_mechanical_gates_passed': True,
                     'boundaries': {'entry': entry_report}, 'refinement': {'approach': refinement}, 'gpu_jobs': len(clips), 'visual_acceptance': 'unverified'},
                 'approach_measurements': measured, 'arrival_errors_m': errors.tolist(),
+                'core_playback_selection': {'generated_frames': generated_core_frames, 'retained_frames': len(core),
+                    'source_fps': FPS, 'selection': 'contiguous prefix; raw horizons archived separately'},
                 'entry_root_height_gaps_m': entry_height_gaps.tolist(),
                 'max_entry_root_height_gap_m': MAX_ENTRY_ROOT_HEIGHT_GAP_M, 'animation_accepted': False,
                 'physical_contact_verified': False, 'features': 'No unified model features; preserve source archives separately.'}

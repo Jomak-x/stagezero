@@ -5,6 +5,7 @@ import threading
 import io
 import numpy as np
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from native_pair_capture import capture_pair
@@ -163,6 +164,98 @@ class NativePairCaptureTests(unittest.TestCase):
         self.assertFalse(mutex.locked())
         self.assertFalse(self.session.snapshot()['capturing'])
         self.assertEqual(self.session.snapshot()['frame'], 42)
+
+    def test_local_capture_requires_current_revision_for_the_exporting_client(self):
+        client = SimpleNamespace(client_id=7)
+        events = []
+        # This tab acknowledged the previous take; another tab loaded the new one.
+        acknowledgements = {7: 6, 8: 7}
+        playback = SimpleNamespace(revision=6)
+        renderer = FakeRenderer()
+        renderer.local_playback = playback
+
+        def load_clip(clip):
+            self.assertIs(clip, self.session.timeline_clip())
+            playback.revision = 7
+            events.append(('load', playback.revision))
+
+        def require_ready(requested_client):
+            self.assertIs(requested_client, client)
+            self.assertEqual(events, [('load', 7)])
+            events.append(('ready', requested_client.client_id, playback.revision))
+            if acknowledgements.get(requested_client.client_id) != playback.revision:
+                raise RuntimeError('Reload this browser before exporting the current take')
+
+        renderer.set_clip = load_clip
+        playback.require_ready = require_ready
+        with patch('native_pair_capture.subprocess.Popen') as encoder, \
+             patch('native_pair_capture.get_render_with_timeout') as render:
+            with self.assertRaisesRegex(RuntimeError, 'Reload this browser'):
+                capture_pair(self.session, renderer, client, Path(self.folder.name)/'unready')
+        encoder.assert_not_called()
+        render.assert_not_called()
+        self.assertEqual(events, [('load', 7), ('ready', 7, 7)])
+        self.assertFalse((Path(self.folder.name)/'unready'/'scene.native-pair.stagezero.npz').exists())
+        self.assertFalse(self.session.snapshot()['capturing'])
+        self.assertEqual(self.session.snapshot()['frame'], 42)
+        self.session.play()  # A rejected export must not retain its capture lease.
+
+    def test_local_capture_publishes_exact_frames_without_optional_scene_callback(self):
+        self.session.load_source(NativePairClip(self.session.timeline_clip().joints[:4]))
+        self.session.seek(2)
+        client = SimpleNamespace(client_id=7)
+        mutex = threading.Lock()
+        events = []
+        commands = []
+        renderer = FakeRenderer()
+        renderer.set_clip = lambda clip: events.append(('load', clip.frames))
+        renderer.tick = lambda frame: events.append(('actor', frame))
+
+        def require_ready(requested_client):
+            self.assertIs(requested_client, client)
+            self.assertEqual(events, [('load', 4)])
+            events.append(('ready', client.client_id))
+
+        def update(state, enabled):
+            self.assertTrue(mutex.locked())
+            self.assertTrue(enabled)
+            self.assertTrue(state['capturing'])
+            self.assertFalse(state['playing'])
+            self.assertEqual(events[-1], ('actor', state['frame']))
+            commands.append(state)
+            events.append(('transport', state['frame']))
+
+        renderer.local_playback = SimpleNamespace(require_ready=require_ready, update=update)
+        encoder = FakeEncoder()
+        encoder.stdin = io.BytesIO()
+        encoder.poll = lambda: 0
+
+        def flush():
+            self.assertTrue(mutex.locked())
+            frame = self.session.snapshot()['frame']
+            self.assertEqual(events[-1], ('transport', frame))
+            events.append(('flush', frame))
+
+        def render(requested_client, **kwargs):
+            self.assertIs(requested_client, client)
+            self.assertTrue(mutex.locked())
+            frame = self.session.snapshot()['frame']
+            self.assertEqual(events[-3:], [('actor', frame), ('transport', frame), ('flush', frame)])
+            events.append(('render', frame))
+            return np.zeros((720, 1280, 3), dtype=np.uint8)
+
+        with patch('native_pair_capture.subprocess.Popen', return_value=encoder), \
+             patch('native_pair_capture.get_render_with_timeout', side_effect=render):
+            # Deliberately omit render_frame: transport is mandatory capture work.
+            capture_pair(self.session, renderer, client, Path(self.folder.name)/'local',
+                         render_lock=mutex, flush=flush)
+        self.assertEqual([state['frame'] for state in commands], list(range(4)))
+        revisions = [state['transport_revision'] for state in commands]
+        self.assertTrue(all(left < right for left, right in zip(revisions, revisions[1:])))
+        self.assertEqual([frame for event, frame in events if event == 'render'], list(range(4)))
+        self.assertFalse(mutex.locked())
+        self.assertFalse(self.session.snapshot()['capturing'])
+        self.assertEqual(self.session.snapshot()['frame'], 2)
 
     def test_camera_fit_includes_placed_full_trajectory_and_cast(self):
         from director_viewer import native_cast_camera_view

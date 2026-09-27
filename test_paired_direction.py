@@ -164,6 +164,44 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(json.loads((folder / "report.json").read_text()), expected["report"])
         self.assertEqual(result["clip"].metadata["direction_request"]["actor_ids"], ["ava", "ben"])
 
+    def test_preview_preflight_and_generation_share_defaults_and_explicit_overrides(self):
+        # Use real library geometry and routes: the visible preview must be the
+        # same plan that is archived for generation, including historical replay.
+        for name, options, policy, speed in (
+                ('default', {}, 'continuous', .85),
+                ('historical', {'entry_policy': 'settled', 'speed_mps': .65}, 'settled', .65)):
+            with self.subTest(name=name):
+                expected = preview_direction(request(), SCENE, **options)['plan']
+                builder = PairedSceneBuilder(request(), None, self.core, self.root/name, **options)
+                compiled = {'clip': self.clip, 'placement': expected['placement'], 'report': {}}
+                with (patch('paired_direction.preview_direction', wraps=preview_direction) as preflight,
+                      patch('paired_meetup.build_meetup', return_value=compiled) as build):
+                    builder(SCENE)
+                self.assertEqual(preflight.call_args.kwargs, {'entry_policy': policy, 'speed_mps': speed})
+                self.assertEqual(build.call_args.kwargs['entry_policy'], policy)
+                self.assertEqual(build.call_args.kwargs['speed_mps'], speed)
+                folder, = (self.root/name).iterdir()
+                self.assertEqual(json.loads((folder/'plan.json').read_text()), expected)
+                self.assertEqual(expected['entry_policy'], policy)
+
+    def test_trial_cli_defaults_and_explicit_historical_settings_reach_builder(self):
+        from experiments import trial_paired_direction as trial
+        request_path, scene_path, token_path = [self.root/name for name in ('request.json', 'scene.json', 'token')]
+        request_path.write_text(json.dumps(request())); scene_path.write_text(json.dumps(SCENE))
+        token_path.write_text('test-only-token')
+        for name, flags, policy, speed in (
+                ('default', [], 'continuous', .85),
+                ('historical', ['--entry-policy', 'settled', '--speed-mps', '.65'], 'settled', .65)):
+            with self.subTest(name=name):
+                argv = ['trial', '--request', str(request_path), '--scene', str(scene_path),
+                        '--token', str(token_path), '--output', str(self.root/name), *flags]
+                result = {'clip': self.clip, 'placement': {}}
+                with (patch('sys.argv', argv), patch('builtins.print'),
+                      patch.object(trial, 'RealtimeClient'), patch.object(trial, 'encode_project', return_value=b'test'),
+                      patch.object(trial, 'PairedSceneBuilder', return_value=Mock(return_value=result)) as factory):
+                    trial.main()
+                self.assertEqual(factory.call_args.kwargs, {'entry_policy': policy, 'speed_mps': speed})
+
 
 if __name__ == "__main__":
     unittest.main()

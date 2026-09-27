@@ -5,6 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { ViewerContext } from "./ViewerContext";
 import { syncSearchParamServer } from "./SearchParamsUtils";
 import { WsWorkerIncoming, WsWorkerOutgoing } from "./WebsocketServerWorker";
+import { resetNativePairPlayback } from "./mesh/NativePairPlayback";
 import { resetActorGlbProtocol } from "./mesh/ActorGlbProtocol";
 import { resetCameraState } from "./cameraStore";
 
@@ -26,6 +27,7 @@ export function WebsocketMessageProducer() {
       if (data.type === "connected") {
         resetCameraState(viewer);
         resetActorGlbProtocol();
+        resetNativePairPlayback();
         resetGui();
         resetScene();
         viewer.useGui.setState({ websocketConnected: true });
@@ -33,6 +35,7 @@ export function WebsocketMessageProducer() {
           postToWorker({ type: "send", message: message });
         };
       } else if (data.type === "closed") {
+        resetNativePairPlayback();
         resetCameraState(viewer);
         resetGui();
         viewer.useGui.setState({ websocketConnected: false });
@@ -62,6 +65,7 @@ export function WebsocketMessageProducer() {
     }
     postToWorker({ type: "set_server", server: server });
     return () => {
+      resetNativePairPlayback();
       resetCameraState(viewer);
       postToWorker({ type: "close" });
       viewerMutable.sendMessage = (message) =>

@@ -34,6 +34,7 @@ class NativePairRenderer:
         self._visible = False
         self._removed = False
         self._idle = {}
+        self.local_playback = None
 
     def sync_cast(self, snapshot):
         cast, pair = validate_cast(snapshot['cast'], snapshot['selected_pair'])
@@ -103,6 +104,9 @@ class NativePairRenderer:
             self.actors[identifier].set_pose(pose)
             self._idle[identifier] = pose
         self._frame = None
+        if self.local_playback is not None:
+            self.local_playback.load([(identifier, self.actors[identifier]) for identifier in self._pair],
+                                     fps=self._clip.fps, frames=self._clip.frames)
         self.tick(0)
 
     def set_clip(self, clip):
@@ -120,8 +124,9 @@ class NativePairRenderer:
             raise ValueError('Native renderer frame is outside the clip')
         if frame == self._frame:
             return
-        for identifier in self._pair:
-            self.actors[identifier].set_frame(frame)
+        if self.local_playback is None:
+            for identifier in self._pair:
+                self.actors[identifier].set_frame(frame)
         self._frame = frame
 
     set_frame = tick
@@ -156,6 +161,8 @@ class NativePairRenderer:
 
     def remove(self):
         if not self._removed:
+            if self.local_playback is not None:
+                self.local_playback.clear()
             for actor in self.actors.values():
                 actor.remove()
             self._removed = True

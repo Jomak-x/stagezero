@@ -197,6 +197,10 @@ def main():
     core_document_epoch = None
     paired_document = paired.scene_document
     paired_document_revision = None
+    from native_pair_playback import NativePairPlaybackController
+    native_playback = NativePairPlaybackController(server,
+        get_state=lambda: dict(paired.snapshot(), enabled=paired_requested))
+    paired_renderer.local_playback = native_playback
 
     def activate_core(active):
         nonlocal core_requested, paired_requested
@@ -258,6 +262,7 @@ def main():
         camera.rebase(actor_root())
 
     def render_native_capture_frame(frame, state):
+        native_playback.update(paired.snapshot(), enabled=paired_requested)
         # Called under native_render_lock after the exact actor pose is set.
         # Do not acquire the main session lock here: live updates acquire that
         # lock before native_render_lock. The paired scene is immutable during
@@ -583,6 +588,7 @@ def main():
                             last_paired_clip = paired_key
                         paired_renderer.tick(paired_state['frame'])
                     paired_renderer.set_visible(paired_requested)
+                    native_playback.update(paired_state, enabled=paired_requested)
                     actor_group.visible = not (core_requested or paired_requested)
                     rendered_root = actor_root()
                     if ((core_requested and core_state['total_frames']) or
