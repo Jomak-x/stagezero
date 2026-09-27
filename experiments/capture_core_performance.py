@@ -9,6 +9,11 @@ Experimental --canonical plus --scene replays paired InterGen research arrays
 retargeted to Core27 at 20 fps, without a native project or ARDY history claim.
 The supplied scene is a backdrop; renderer body fitting may alter contacts.
 
+Explicit --assisted plus --scene displays saved offline-assisted positions and
+rotations as a visual proof. It builds a CanonicalClip without native features,
+keeps the retargeter's fixed neutral root-height correction, uses no additional
+clip floor shift, and disables the renderer's second foot-clearance pass.
+
 Example:
     python experiments/capture_core_performance.py \
         --archive review/studio-core/browser-two-actors.core.stagezero.npz \
@@ -38,6 +43,7 @@ sys.path.insert(0, str(ROOT))
 from object_scene import ObjectSceneLayer  # noqa: E402
 from scene_composition import validate_scene  # noqa: E402
 from scene_ground import has_authored_ground  # noqa: E402
+from realtime_clip import CanonicalClip  # noqa: E402
 from studio_core_renderer import StudioCoreRenderer  # noqa: E402
 from studio_core_session import CoreStudioSession  # noqa: E402
 from studio_server import create_studio_server  # noqa: E402
@@ -100,13 +106,107 @@ def get_render_with_timeout(client, *, width: int, height: int, timeout: float) 
     return pixels
 
 
+class AssistedPresentationRenderer(StudioCoreRenderer):
+    """Retarget assisted poses with the fixed neutral offset and no second IK."""
+
+    def _fit_actor(self, index: int, clip: CanonicalClip, start: int,
+                   offset: float | None) -> tuple[np.ndarray, np.ndarray, float, dict | None]:
+        if offset not in (None, 0, 0.0):
+            raise ValueError("Assisted presentation requires a fixed zero floor offset")
+        character = self.characters[index]
+        payload = character.clip_payload(
+            clip.positions[index:index + 1, start:],
+            clip.rotations[index:index + 1, start:],
+            preserve_root_height=False,
+            preserve_wrists=False,
+            preserve_feet=False,
+            floor_y=self.floor_y,
+            floor_offsets=[0.0],
+            fps=float(clip.fps),
+        )
+        floor_offset = float(payload["character_provenance"]["floor_offsets"][0])
+        if floor_offset != 0.0:
+            raise ValueError("Assisted presentation retarget unexpectedly changed its floor offset")
+        return (np.asarray(payload["fitted_positions"][0], dtype=np.float32),
+                np.asarray(payload["fitted_rotations"][0], dtype=np.float32),
+                0.0, None)
+
+    def _measure_fitting(self, clip: CanonicalClip) -> dict:
+        result = super()._measure_fitting(clip)
+        result.update({
+            "floor_offsets_m": [0.0] * len(clip.actor_ids),
+            "floor_method": "explicit fixed zero floor translation; no clip-derived calibration",
+            "preserve_native_feet": False,
+            "foot_clearance_pass": False,
+            "retarget_root_height_method": "fixed neutral Core-to-mesh sole alignment",
+            "retarget_root_height_offset_m": [
+                float(self.characters[index].root_height_offset)
+                for index in range(len(clip.actor_ids))
+            ],
+        })
+        return result
+
+
+def load_assisted_clip(archive: Path) -> tuple[CanonicalClip, dict]:
+    """Load only the saved assisted pose arrays; never attach native history."""
+    import zipfile
+    from terrain_assisted_session import _validate_array_headers
+    if archive.stat().st_size > 64_000_000:
+        raise ValueError("Assisted archive exceeds the 64 MB limit")
+    with zipfile.ZipFile(archive) as zipped:
+        entries = zipped.infolist()
+        if (len(entries) > 16 or len({entry.filename for entry in entries}) != len(entries)
+                or sum(entry.file_size for entry in entries) > 200_000_000
+                or any(entry.flag_bits & 1 or not entry.filename.endswith('.npy')
+                       for entry in entries)):
+            raise ValueError("Assisted archive has unexpected or oversized entries")
+        _validate_array_headers(zipped, entries)
+    with np.load(archive, allow_pickle=False) as data:
+        required = {"positions", "rotations", "assisted_presentation"}
+        missing = sorted(required - set(data.files))
+        if missing:
+            raise ValueError(f"Assisted archive is missing required arrays: {missing}")
+        if np.asarray(data["assisted_presentation"]).shape != () or not bool(data["assisted_presentation"]):
+            raise ValueError("Assisted archive must be explicitly marked assisted_presentation=true")
+        positions = np.array(data["positions"], dtype=np.float32, copy=True)
+        rotations = np.array(data["rotations"], dtype=np.float32, copy=True)
+        source_fields = set(data.files)
+        accepted = (bool(data["accepted"]) if "accepted" in source_fields
+                    and np.asarray(data["accepted"]).shape == () else None)
+    if positions.ndim != 3 or positions.shape[1:] != (27, 3):
+        raise ValueError("Assisted positions must have shape [frames, 27, 3]")
+    if rotations.shape != (positions.shape[0], 27, 3, 3):
+        raise ValueError("Assisted rotations must have shape [frames, 27, 3, 3]")
+    clip = CanonicalClip.from_arrays(
+        positions[None], rotations[None], actor_ids=("assisted",),
+        source="offline_assisted_presentation",
+        metadata={
+            "source_format": "saved assisted Core27 positions and rotations",
+            "native_features_loaded": False,
+            "accepted": accepted,
+        },
+        native_features=None,
+    )
+    return clip, {
+        "source_fields": sorted(source_fields),
+        "native_positions_present_in_source_archive": "native_positions" in source_fields,
+        "native_rotations_present_in_source_archive": "native_rotations" in source_fields,
+        "native_features_present_in_source_archive": "native_features" in source_fields,
+        "accepted": accepted,
+    }
+
+
 def capture(args: argparse.Namespace) -> dict:
     paired_project = getattr(args, "paired_project", None)
+    assisted_source = getattr(args, "assisted", None)
+    assisted = assisted_source is not None
     research = paired_project is not None or getattr(args, "canonical", None) is not None
-    archive = (paired_project or (args.canonical if research else args.archive)).resolve()
+    offline = research or assisted
+    source = paired_project or args.canonical or assisted_source or args.archive
+    archive = source.resolve()
     content = archive.read_bytes()
     if len(content) > 64_000_000:
-        raise ValueError("Native Core archive exceeds the Studio's 64 MB limit")
+        raise ValueError("Motion archive exceeds the Studio's 64 MB limit")
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
     video = output / "performance.mp4"
@@ -118,12 +218,15 @@ def capture(args: argparse.Namespace) -> dict:
     if existing:
         raise FileExistsError(f"Capture output already exists: {existing[0]}")
 
-    with (nullcontext(None) if research else CoreStudioSession()) as session:
-        if research:
+    assisted_fields: dict | None = None
+    with (nullcontext(None) if offline else CoreStudioSession()) as session:
+        if offline:
             if paired_project is not None:
                 from paired_scene import decode_project
                 clip, scene, _ = decode_project(content)
-            else:
+                capture_label = "StageZero paired InterGen research capture"
+                button_label = "Start exact research capture"
+            elif research:
                 from experiments.trial_paired_scene import load_research_clip
                 clip, content = load_research_clip(archive)
                 if args.scene is None or not args.scene.is_file():
@@ -131,8 +234,17 @@ def capture(args: argparse.Namespace) -> dict:
                 if args.scene.stat().st_size > 900_000:
                     raise ValueError("Research capture scene exceeds its size limit")
                 scene = validate_scene(json.loads(args.scene.read_text()))
-            capture_label = "StageZero paired InterGen research capture"
-            button_label = "Start exact research capture"
+                capture_label = "StageZero paired InterGen research capture"
+                button_label = "Start exact research capture"
+            else:
+                if args.scene is None or not args.scene.is_file():
+                    raise ValueError("Assisted presentation capture requires an explicit --scene JSON file")
+                if args.scene.stat().st_size > 900_000:
+                    raise ValueError("Assisted presentation scene exceeds its size limit")
+                clip, assisted_fields = load_assisted_clip(archive)
+                scene = validate_scene(json.loads(args.scene.read_text()))
+                capture_label = "StageZero assisted visual proof"
+                button_label = "Start assisted visual proof"
         else:
             state = session.load(content)
             clip = session.timeline_clip()
@@ -164,9 +276,10 @@ def capture(args: argparse.Namespace) -> dict:
             if getattr(args, "terrain_support", False):
                 from scene_interaction_geometry import SceneInteractionGeometry
                 terrain = SceneInteractionGeometry.from_scene(scene)
-            renderer = StudioCoreRenderer(server, name_prefix="/core-cast",
-                                          terrain_geometry=terrain,
-                                          paired_retarget=bool(getattr(args, "paired_retarget", False)))
+            renderer_type = AssistedPresentationRenderer if assisted else StudioCoreRenderer
+            renderer = renderer_type(server, name_prefix="/core-cast",
+                                     terrain_geometry=terrain,
+                                     paired_retarget=bool(getattr(args, "paired_retarget", False)))
             renderer.set_clip(clip)
             renderer.tick(0)
             renderer.set_visible(True)
@@ -174,6 +287,11 @@ def capture(args: argparse.Namespace) -> dict:
             objects = scene["objects"]
             static_states = [{"id": obj["id"], "position": obj["position"],
                               "color": obj["color"], "active": False} for obj in objects]
+            # Publish every prop before the texture/geometry settling period;
+            # otherwise the first recorded frame can contain a partial scene.
+            layer.update(objects, {"objects": static_states,
+                "assets": scene.get("assets", []), "effects": scene["effects"],
+                "lighting": scene["lighting"], "seconds": 0.})
 
             camera = scene.get("camera", {"position": [3.0, 2.7, 8.0],
                                           "look_at": [0.0, 1.2, 0.0]})
@@ -223,10 +341,12 @@ def capture(args: argparse.Namespace) -> dict:
                 for frame in range(captured_frames):
                     renderer.tick(frame)
                     states = static_states
-                    if not research and state.get("scene_reactions_enabled"):
+                    if not offline and state.get("scene_reactions_enabled"):
                         from core_scene_reactions import object_states
                         states = object_states(scene, clip, frame, enabled=True,
-                            start_frame=state.get("scene_reactions_start_frame", 0))
+                            start_frame=state.get("scene_reactions_start_frame", 0),
+                            terrain=state.get("terrain_navigation_enabled", False),
+                            terrain_start_frame=state.get("terrain_navigation_start_frame", 0))
                     layer.update(objects, {"objects": states,
                         "assets": scene.get("assets", []), "effects": scene["effects"],
                         "lighting": scene["lighting"], "seconds": frame / 20.})
@@ -288,7 +408,40 @@ def capture(args: argparse.Namespace) -> dict:
                 "first_frame_sha256": sha256_file(first_frame),
                 "last_frame_sha256": sha256_file(last_frame),
             }
-            if research:
+            if assisted:
+                manifest.update({
+                    "capture_kind": "Offline assisted terrain presentation WebGL replay",
+                    "source": "assisted_presentation",
+                    "research_only": True,
+                    "assisted_presentation": True,
+                    "accepted": assisted_fields["accepted"],
+                    "source_archive": str(archive),
+                    "source_archive_sha256": hashlib.sha256(content).hexdigest(),
+                    "source_archive_fields": assisted_fields["source_fields"],
+                    "source_positions_sha256": sha256_array(clip.positions),
+                    "source_rotations_sha256": sha256_array(clip.rotations),
+                    "native_positions_present_in_source_archive": assisted_fields["native_positions_present_in_source_archive"],
+                    "native_rotations_present_in_source_archive": assisted_fields["native_rotations_present_in_source_archive"],
+                    "native_features_present_in_source_archive": assisted_fields["native_features_present_in_source_archive"],
+                    "native_features_loaded_into_clip": False,
+                    "native_features_used_for_render": False,
+                    "native_core_project": False,
+                    "assisted_canonical_clip": {
+                        "source": clip.source,
+                        "fps": clip.fps,
+                        "frames": clip.frames,
+                        "native_features": None,
+                    },
+                    "canonical_total_frames": clip.frames,
+                    "fps": clip.fps,
+                    "scene_source": str(args.scene.resolve()),
+                    "scene_conditioned": False,
+                    "physical_contact_verified": False,
+                    "rendering_note": "Saved assisted positions and rotations were retargeted to the existing skinned character. The fixed neutral root-height correction was applied; clip floor translation is fixed at zero; no second foot-clearance or foot-IK pass was used.",
+                    "fitting_provenance": renderer.fitting_provenance,
+                    "capture_note": "Offline visual presentation only. One render per saved assisted frame in order; no interpolation. This does not claim native ARDY features, native Core generation, streaming behavior, or verified physical contact.",
+                })
+            elif research:
                 manifest.update({
                     "capture_kind": "InterGen research retargeted canonical WebGL replay",
                     "source": "intergen", "research_only": True,
@@ -326,7 +479,9 @@ def main() -> None:
     inputs.add_argument("--paired-project", type=Path, help="Saved separate paired research project from Studio")
     inputs.add_argument("--canonical", type=Path,
                         help="Experimental .intergen.canonical.npz from trial_paired_scene.py")
-    parser.add_argument("--scene", type=Path, help="Explicit scene JSON required only with --canonical")
+    inputs.add_argument("--assisted", type=Path,
+                        help="Saved offline-assisted presentation .npz; no native features are loaded")
+    parser.add_argument("--scene", type=Path, help="Explicit scene JSON required with --canonical or --assisted")
     parser.add_argument("--terrain-support", action="store_true", help="Explicit terrain-relative sole fitting; native arrays remain unchanged")
     parser.add_argument("--paired-retarget", action="store_true", help="Preserve paired world wrists and a common floor translation")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -359,11 +514,13 @@ def main() -> None:
         parser.error("--fov must be 1–120 degrees")
     if args.paired_retarget and args.canonical is None and args.paired_project is None:
         parser.error("--paired-retarget requires research motion")
-    source = args.paired_project or args.canonical or args.archive
+    if args.assisted is not None and (args.terrain_support or args.paired_retarget):
+        parser.error("--assisted cannot be combined with terrain-support or paired-retarget fitting")
+    source = args.paired_project or args.canonical or args.assisted or args.archive
     if not source.is_file():
         parser.error(f"Motion input does not exist: {source}")
-    if args.canonical is not None and (args.scene is None or not args.scene.is_file()):
-        parser.error("--canonical requires an existing --scene JSON file")
+    if (args.canonical is not None or args.assisted is not None) and (args.scene is None or not args.scene.is_file()):
+        parser.error("--canonical and --assisted require an existing --scene JSON file")
     if (args.archive is not None or args.paired_project is not None) and args.scene is not None:
         parser.error("Native --archive uses its saved scene; --scene is only for research --canonical")
     capture(args)

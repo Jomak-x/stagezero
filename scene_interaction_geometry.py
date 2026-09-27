@@ -124,15 +124,43 @@ class SceneInteractionGeometry:
         self._primitive_offsets = np.asarray(offsets).reshape((-1, 3))
         self._primitive_extents = np.asarray(extents).reshape((-1, 3))
         self._primitive_shapes = np.asarray(shapes)
+        # Each rendered part has a fixed affine world-to-part transform.  A
+        # world AABB of its (radius-expanded) local box rejects distant parts
+        # before the exact box/sphere/cylinder/cone calculation below.
+        if len(self._primitive_extents):
+            inverse = np.linalg.inv(self._primitive_transforms)
+            self._primitive_world_centres = -np.einsum(
+                'ni,nij->nj', self._primitive_offsets, inverse)
+            self._primitive_padding = np.linalg.norm(
+                self._primitive_transforms[:, [0, 2]], axis=1)
+            absolute_inverse = np.abs(inverse)
+            self._primitive_world_half = np.einsum(
+                'ni,nij->nj', self._primitive_extents, absolute_inverse)
+            self._primitive_world_radius_half = np.einsum(
+                'ni,nij->nj', self._primitive_padding, absolute_inverse)
+        else:
+            self._primitive_world_centres = np.zeros((0, 3))
+            self._primitive_padding = np.zeros((0, 3))
+            self._primitive_world_half = np.zeros((0, 3))
+            self._primitive_world_radius_half = np.zeros((0, 3))
         self._custom_ids = {obj['id'] for obj, *_ in solids}
         triangles = np.asarray([s.triangle for s in surfaces], dtype=float).reshape((-1, 3, 3))
         self._triangles = triangles
+        self._triangle_a, self._triangle_b, self._triangle_c = (
+            triangles[:, 0], triangles[:, 1], triangles[:, 2])
         if len(triangles):
             x = triangles[:, :, 0]
             z = triangles[:, :, 2]
             self._xz_bounds = np.column_stack((x.min(axis=1), x.max(axis=1), z.min(axis=1), z.max(axis=1)))
+            a, b, c = self._triangle_a, self._triangle_b, self._triangle_c
+            self._triangle_denominator = ((b[:, 2]-c[:, 2])*(a[:, 0]-c[:, 0]) +
+                                          (c[:, 0]-b[:, 0])*(a[:, 2]-c[:, 2]))
+            self._triangle_y_bounds = np.column_stack((triangles[:, :, 1].min(axis=1),
+                                                        triangles[:, :, 1].max(axis=1)))
         else:
             self._xz_bounds = np.zeros((0, 4))
+            self._triangle_denominator = np.zeros(0)
+            self._triangle_y_bounds = np.zeros((0, 2))
 
     @classmethod
     def from_scene(cls, scene, *, include_studio_floor=None):
@@ -216,21 +244,34 @@ class SceneInteractionGeometry:
         if not len(self._primitive_extents):
             return False
         point = np.asarray((x, y, z), dtype=float)
-        local = np.einsum('i,nij->nj', point, self._primitive_transforms) + self._primitive_offsets
-        padding = radius * np.linalg.norm(self._primitive_transforms[:, [0, 2]], axis=1)
-        extent = self._primitive_extents + padding
+        if radius >= 0.:
+            half = self._primitive_world_half + radius*self._primitive_world_radius_half
+            # Inclusive with a small numerical margin: the exact local test
+            # below remains authoritative, including at rotated boundaries.
+            candidates = np.flatnonzero(np.all(
+                np.abs(point-self._primitive_world_centres) <= half+1e-7,
+                axis=1))
+        else:
+            # Preserve the previous behaviour for the unusual negative-radius
+            # caller instead of relying on an invalid expanded AABB.
+            candidates = np.arange(len(self._primitive_extents))
+        if ignore_object_ids and len(candidates):
+            candidates = candidates[~np.isin(np.asarray(self._primitive_ids)[candidates],
+                                              tuple(ignore_object_ids))]
+        if not len(candidates):
+            return False
+        local = np.einsum('i,nij->nj', point, self._primitive_transforms[candidates]) + self._primitive_offsets[candidates]
+        extent = self._primitive_extents[candidates] + radius*self._primitive_padding[candidates]
         normalized = local / np.maximum(extent, 1e-9)
         hit = np.all(np.abs(normalized) < 1. - 1e-6, axis=1)
-        sphere = self._primitive_shapes == 'sphere'
+        sphere = self._primitive_shapes[candidates] == 'sphere'
         hit[sphere] &= np.sum(normalized[sphere]**2, axis=1) < 1.
-        round_parts = np.isin(self._primitive_shapes, ('cylinder', 'cone'))
+        round_parts = np.isin(self._primitive_shapes[candidates], ('cylinder', 'cone'))
         radial = np.sum(normalized[:, [0, 2]]**2, axis=1)
-        cone = self._primitive_shapes == 'cone'
+        cone = self._primitive_shapes[candidates] == 'cone'
         allowed = np.ones(len(radial))
         allowed[cone] = ((1.-normalized[cone, 1]) / 2.)**2
         hit[round_parts] &= radial[round_parts] < allowed[round_parts]
-        if ignore_object_ids:
-            hit &= ~np.isin(self._primitive_ids, tuple(ignore_object_ids))
         return bool(np.any(hit))
 
     def _inside_solid(self, x, y, z):
@@ -244,26 +285,29 @@ class SceneInteractionGeometry:
             return None
         x, z, current_y = float(x), float(z), float(current_y)
         plausible = np.flatnonzero((bounds[:, 0] - 1e-6 <= x) & (x <= bounds[:, 1] + 1e-6) &
-                                   (bounds[:, 2] - 1e-6 <= z) & (z <= bounds[:, 3] + 1e-6))
-        highest = None
-        for i in plausible:
-            tri = self._triangles[i]
-            a, b, c = tri
-            denom = (b[2] - c[2]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[2] - c[2])
-            if abs(denom) < 1e-10:
-                continue
-            u = ((b[2] - c[2]) * (x - c[0]) + (c[0] - b[0]) * (z - c[2])) / denom
-            v = ((c[2] - a[2]) * (x - c[0]) + (a[0] - c[0]) * (z - c[2])) / denom
-            w = 1 - u - v
-            if min(u, v, w) < -1e-5:
-                continue
-            height = u*a[1] + v*b[1] + w*c[1]
-            if current_y - max_drop - 1e-5 <= height <= current_y + max_step_up + 1e-5:
-                if self._inside_solid(x, height + .03, z):
-                    continue
-                if highest is None or height > highest:
-                    highest = float(height)
-        return highest
+                                   (bounds[:, 2] - 1e-6 <= z) & (z <= bounds[:, 3] + 1e-6) &
+                                   (self._triangle_y_bounds[:, 0] <= current_y+max_step_up+1e-5) &
+                                   (self._triangle_y_bounds[:, 1] >= current_y-max_drop-1e-5) &
+                                   (np.abs(self._triangle_denominator) >= 1e-10))
+        if not len(plausible):
+            return None
+        # Batch barycentric tests, then inspect highest candidates first. Sole
+        # fitting makes many queries; checking every lower/duplicate triangle
+        # against every solid needlessly dominated replay time.
+        a, b, c = (self._triangle_a[plausible], self._triangle_b[plausible],
+                   self._triangle_c[plausible])
+        denominator = self._triangle_denominator[plausible]
+        u = ((b[:, 2]-c[:, 2])*(x-c[:, 0]) + (c[:, 0]-b[:, 0])*(z-c[:, 2]))/denominator
+        v = ((c[:, 2]-a[:, 2])*(x-c[:, 0]) + (a[:, 0]-c[:, 0])*(z-c[:, 2]))/denominator
+        w = 1-u-v
+        heights = u*a[:, 1] + v*b[:, 1] + w*c[:, 1]
+        valid = ((np.minimum(np.minimum(u, v), w) >= -1e-5)
+                 & (heights >= current_y-max_drop-1e-5)
+                 & (heights <= current_y+max_step_up+1e-5))
+        for height in np.unique(heights[valid])[::-1]:
+            if not self._inside_solid(x, float(height)+.03, z):
+                return float(height)
+        return None
 
     def obstacle_at(self, x, y, z, radius=0.0, ignore_object_ids=()):
         """Occupied rendered parts, preserving gaps in custom arches/bridges.

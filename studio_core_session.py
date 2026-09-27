@@ -102,6 +102,8 @@ class CoreStudioSession:
         metadata = self._director.project_metadata.get("studio_core", {})
         enabled = self.scene_reactions_enabled
         return {"enabled": enabled or enabling,
+                "terrain": metadata.get("terrain_navigation_version") == 1,
+                "terrain_start_frame": metadata.get("terrain_navigation_start_frame", 0),
                 "start_frame": metadata.get("scene_reactions_start_frame", 0) if enabled
                                else self._director.total_frames if enabling else 0}
 
@@ -378,19 +380,25 @@ class CoreStudioSession:
             raise ValueError(f"Native continuation root discontinuity ({root_steps.max():.2f} m); last good motion retained")
 
     @staticmethod
-    def _check_geometry(clip, scene, *, history=None, reaction_history=None, enabled=False, start_frame=0):
+    def _check_geometry(clip, scene, *, history=None, reaction_history=None, enabled=False, start_frame=0,
+                        terrain=False, terrain_start_frame=0):
         from studio_interaction_scene import adapt_studio_scene
         from core_scene_reactions import check_reactive_geometry
         from interaction_metrics import pair_separation
         from realtime_navigation import validate_ground_path
-        adapted = adapt_studio_scene(scene)
-        check_reactive_geometry(clip, scene, reaction_history if enabled else history,
-                                enabled=enabled, start_frame=start_frame)
-        for index, actor_id in enumerate(clip.actor_ids):
-            root_path = clip.positions[index, :, 0, :][:, [0, 2]]
-            if history is not None:
-                root_path = np.vstack((history.positions[index, -1, 0, [0, 2]], root_path))
-            validate_ground_path(adapted["scene"], root_path, actor_radius_m=.28)
+        if terrain:
+            from core_terrain_validation import validate_terrain_clip
+            validate_terrain_clip(clip, scene, history=reaction_history if enabled else history,
+                                  enabled=enabled, start_frame=start_frame, terrain_start_frame=terrain_start_frame)
+        else:
+            adapted = adapt_studio_scene(scene)
+            check_reactive_geometry(clip, scene, reaction_history if enabled else history,
+                                    enabled=enabled, start_frame=start_frame)
+            for index, actor_id in enumerate(clip.actor_ids):
+                root_path = clip.positions[index, :, 0, :][:, [0, 2]]
+                if history is not None:
+                    root_path = np.vstack((history.positions[index, -1, 0, [0, 2]], root_path))
+                validate_ground_path(adapted["scene"], root_path, actor_radius_m=.28)
         if len(clip.actor_ids) == 2:
             report = pair_separation(clip.positions[0], clip.positions[1],
                                     skeleton_a="core27", skeleton_b="core27",
@@ -432,10 +440,14 @@ class CoreStudioSession:
                           example_available=self.example_available, route=_copy(self._route),
                           spatial_commands=_copy(self._spatial_sequence.report),
                           scene_reactions_enabled=self.scene_reactions_enabled,
+                          terrain_navigation_enabled=self._reaction_options()["terrain"],
+                          terrain_navigation_start_frame=self._reaction_options()["terrain_start_frame"],
                           scene_reactions_start_frame=self._reaction_options()["start_frame"],
                           fps=FPS, segments=self._director.segments,
                           geometry_check="sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)")
             spatial = self._spatial_sequence.report
+            if result["terrain_navigation_enabled"]:
+                result["geometry_check"] = "rendered support, sampled raw Core soles and body clearance; no pose correction; not mesh physics"
             if spatial:
                 result["status"] = (f"Spatial commands: {spatial['completed_actions']}/{len(spatial['actions'])} verified; "
                                     f"{spatial['status']}. " + spatial.get("detail", "") + " " + result["status"])
@@ -505,6 +517,13 @@ class CoreStudioSession:
                 raise ValueError("Invalid native scene reaction provenance")
         elif "scene_reactions_start_frame" in metadata:
             raise ValueError("Native scene reaction start requires a supported version")
+        if "terrain_navigation_version" in metadata:
+            version = metadata["terrain_navigation_version"]
+            start = metadata.get("terrain_navigation_start_frame", 0)
+            if type(version) is not int or version != 1 or type(start) is not int or not 0 <= start <= director.total_frames:
+                raise ValueError("Invalid native terrain navigation provenance")
+        elif "terrain_navigation_start_frame" in metadata:
+            raise ValueError("Native terrain start requires a supported version")
         place = _placements(director.actor_ids, metadata["initial_placements"])
         with self._lock:
             self._ensure_open()

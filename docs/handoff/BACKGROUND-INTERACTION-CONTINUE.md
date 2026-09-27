@@ -1,8 +1,24 @@
 # Continue background/object interaction — PR #30
 
-Last updated: 2026-09-27. User requested a checkpoint and transfer to another Codex app, **not a claim that the temple demo is finished**.
+Last updated: 2026-09-27. The latest continuation below supersedes the older native-only checkpoint retained afterward.
 
-## Start here
+## Latest continuation: actual character rig
+
+Read [the new evidence and implementation checkpoint](../../review/terrain-assisted/README.md) before resuming the older steps below. The user has now authorized a bounded, explicitly terrain-assisted alternative if it looks acceptable; ordinary/main motion must remain unchanged.
+
+Current isolated checkout: `/Users/jakob/.codex-micheal/worktrees/temple-route-finish/shellhacks`. The user authorized a new local ownership registry at `/Users/jakob/codestuff/shellhacks/.runtime/agent-coordination/` because both old-machine paths were absent. Another worker uses the primary checkout; do not switch or edit it. Its preview reads this worktree's `studio_client/build`, so preserve that build.
+
+One additional native shallow-flight trial still failed. The decisive finding is that Core27 contact does not survive retargeting: the displayed legs/shoes have different dimensions. The new `terrain_assisted_rig.py` solves the actual character's 17-bone transforms after a single retarget, then `terrain_assisted_renderer.py` draws them directly. The short saved proof has zero measured actual sole penetration/slip. It replaces cadence/leg motion and adjusts pelvis Y; it is not native ARDY stair motion. The separate `terrain_assisted_viewer.py` does not modify ordinary Studio generation/rendering.
+
+Reusable stairs/bridge/gate planning, measured elevated reactions, private native buffering, separate archives, CPU-only re-assistance, cancellation, and a real shallow temple fixture are implemented. **The full real-GPU route and actual-rig assistance now pass all four actions in 360 frames, with complete 20 fps videos inspected at normal speed.** The wider renamed Copper observatory also passes using the same native take. Rotated/translated scenes, other headings, blocked/missing geometry and ambiguous targets have CPU coverage. Ordinary/main motion is preserved.
+
+Start with `review/terrain-assisted/full-route/performance.mp4` or `PYTHONPATH=vendor/ardy python terrain_assisted_viewer.py --project review/terrain-assisted/full-route/proof.assisted.npz --port 24997`. The viewer supports replay, seek, editable initial placement and explicit new takes against an existing Core backend. It does not publish into ordinary Studio. New-take HTTP generation was not exercised through the browser in this session; GPU generation used the official runtime adapter, with exact history/request tests. `accepted=false` remains a user-style/promotion distinction; `visual_review=reviewed_at_1x` records actual inspection.
+
+The first user-provided RunPod is reachable through a dedicated Jupyter kernel; SSH endpoints timed out. No new pod was provisioned. The user subsequently approved the 37 Python dependencies and scene upload; automatic review then allowed the full native-only test in `/workspace/temple-route-01a0e1c2`. The shared process was left untouched. Credentials and kernel state are in a private `/private/tmp` file, never in this repository. Complete native evidence is saved in `review/terrain-assisted/full-route/native_terrain.npz`, allowing CPU assistance without repeating inference. Two startup-only adapter errors produced zero frames before the successful run; their callback and prompt classification fixes have regression tests. The final contact fixes enforce the original knee bound inside the optimizer and correct restart/short-approach step timing; no thresholds were widened. Final focused verification: 94 passing tests.
+
+Use the ready local interpreter `/private/tmp/temple-route-venv/bin/python` and `PYTHONPATH=.:vendor/ardy`. Local Viser/HTTP processes need permission for loopback binding. `login=False` avoids slow shell startup on this host. Do not repeat the old native matrix or the rejected Core27-only contact experiment.
+
+## Earlier native-only checkpoint (historical)
 
 Continue branch `codex/background-demo-finish`, PR https://github.com/Jomak-x/stagezero/pull/30. On this machine reuse `/Users/jakob/.codex/worktrees/background-demo-finish/Shellhacks`. Do not use the dirty primary checkout for implementation or overwrite unrelated work. On a different machine fetch/check out the PR and initialize its pinned submodule (`git submodule update --init --recursive`). Read `AGENTS.md` and the coordination registry before changing shared resources. The AGENTS path mentions a previous machine; on this host the actual registry is `/Users/jakob/Desktop/Shellhacks/.runtime/agent-coordination/`. Own claim: `background-demo-finish.json`.
 

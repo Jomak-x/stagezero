@@ -1,6 +1,7 @@
 """Bounded spatial language and measured completion for native Core motion.
 
-No pose edits, object recognition, vertical movement, or hand-operated doors.
+No pose edits, object recognition, or hand-operated doors. Explicit terrain
+commands use rendered support geometry and require measured native validation.
 Relative directions mean turn and walk from the committed root's local heading.
 """
 from __future__ import annotations
@@ -12,6 +13,7 @@ import numpy as np
 
 from realtime_navigation import _placements, plan_navigation
 from studio_interaction_scene import resolve_target
+from core_terrain_navigation import plan_terrain_command
 
 MAX_ACTIONS = 4
 MAX_DISTANCE_M = 8.
@@ -19,16 +21,47 @@ ARRIVAL_TOLERANCE_M = .30
 _NUMBERS = {name: i for i, name in enumerate(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight"))}
 _DISTANCE = r"(\d+(?:\.\d+)?|zero|one|two|three|four|five|six|seven|eight)\s*(?:m|metres?|meters?)"
 _DIRECTION = r"(forward|forwards|backward|backwards|back|left|right)"
+_ACTION_START = r"(?:walk|go|move|climb|ascend|descend|cross|open|enter|approach)\b"
+
+
+def _action_clauses(text, adapted):
+    """Keep commas inside exact target names before recognizing action commas."""
+    protected = set()
+    for obj in adapted["objects"]:
+        name = obj["name"]
+        if "," not in name:
+            continue
+        for found in re.finditer(re.escape(name), text, re.I):
+            before = text[:found.start()]
+            if not re.search(r"(?:^|[,;]\s*|\bthen\s+|\band\s+)"
+                             r"(?:open|approach|enter|(?:walk|go|move)\s+to|(?:walk|go)\s+through)"
+                             r"\s+(?:(?:the|a|an)\s+)?$", before, re.I):
+                continue
+            protected.update(found.start()+index for index, char in enumerate(found.group())
+                             if char == ",")
+    separator = re.compile(rf"\s*(?:,?\s+then\s+|;|,\s*(?:and\s+)?(?={_ACTION_START})"
+                           rf"|\s+and\s+(?={_ACTION_START}))\s*", re.I)
+    clauses = []
+    start = 0
+    for found in separator.finditer(text):
+        comma = text.find(",", found.start(), found.end())
+        if comma in protected:
+            continue
+        clauses.append(text[start:found.start()].strip())
+        start = found.end()
+    clauses.append(text[start:].strip())
+    return clauses
 
 
 def parse_commands(text, adapted):
     """Full-match every clause and resolve every object before changing work."""
     if not isinstance(text, str) or not text.strip() or len(text) > 600:
         raise ValueError("Spatial command must contain 1–600 characters")
-    clauses = re.split(r"\s*(?:,?\s+then\s+|;)\s*", text.strip().rstrip("."), flags=re.I)
+    clauses = _action_clauses(text.strip().rstrip("."), adapted)
     if not 1 <= len(clauses) <= MAX_ACTIONS:
         raise ValueError(f"Use at most {MAX_ACTIONS} ordered actions")
     actions = []
+    prior_gate = None
     for clause in clauses:
         if re.match(r"(?:close|unlock|push|pull)\b", clause, re.I):
             raise ValueError("Door actuation is unsupported; approach a proximity door, then go through only once it is open")
@@ -44,35 +77,113 @@ def parse_commands(text, adapted):
             if not .25 <= distance <= MAX_DISTANCE_M:
                 raise ValueError("Each relative walk must be between 0.25 and 8 metres")
             actions.append({"verb": "move", "direction": direction.lower(), "distance_m": distance})
+            prior_gate = None
             continue
-        match = re.fullmatch(r"(open|approach|(?:walk|go|move)\s+to|(?:walk|go)\s+through)\s+(.+)", clause, re.I)
+        terrain_match = re.fullmatch(r"(?:(?:walk|go|move|climb)\s+(up|down)|(?:(ascend|descend)))\s+(.+)", clause, re.I)
+        if terrain_match:
+            verb = "ascend" if (terrain_match[1] or terrain_match[2]).lower() in ("up", "ascend") else "descend"
+            target = _resolve_terrain_name(adapted, terrain_match[3], "stairs")
+            actions.append({"verb": verb, **target})
+            prior_gate = None
+            continue
+        terrain_match = re.fullmatch(r"(?:(?:walk|go|move)\s+across|cross)\s+(.+)", clause, re.I)
+        if terrain_match:
+            actions.append({"verb": "cross", **_resolve_terrain_name(adapted, terrain_match[1], "bridge")})
+            prior_gate = None
+            continue
+        if re.fullmatch(r"enter", clause, re.I):
+            if prior_gate is None:
+                raise ValueError("Enter needs a preceding open gate command or an explicit target")
+            actions.append({"verb": "go_through", **prior_gate})
+            prior_gate = None
+            continue
+        match = re.fullmatch(r"(open|approach|enter|(?:walk|go|move)\s+to|(?:walk|go)\s+through)\s+(.+)", clause, re.I)
         if not match:
-            if re.search(r"\b(stairs?|steps?|upstairs|downstairs|climb|ascend|descend|jump)\b", clause, re.I):
-                raise ValueError("Stairs, climbing, and vertical navigation are unsupported")
+            if re.search(r"\bjump\b", clause, re.I):
+                raise ValueError("Jumping across terrain is unsupported")
             raise ValueError(f"Unsupported spatial clause: {clause!r}. Use 'walk 2 metres forward', 'approach object', or 'go through object', joined by 'then'.")
-        verb = "open" if match[1].lower() == "open" else "go_through" if match[1].lower().endswith("through") else "approach"
+        verb = "open" if match[1].lower() == "open" else "go_through" if match[1].lower().endswith("through") or match[1].lower() == "enter" else "approach"
         name = match[2].strip()
-        # Exact IDs/names win, including names beginning with 'the'.
-        try:
-            target_id = resolve_target(adapted, name)
-        except ValueError:
-            if not name.lower().startswith("the "):
-                raise
-            target_id = resolve_target(adapted, name[4:])
-        target = next(obj for obj in adapted["objects"] if obj["id"] == target_id)
+        target_ref = _resolve_terrain_name(adapted, name, "gate" if verb in ("open", "go_through") else None)
+        target_id = target_ref.get("target_id")
+        target = next((obj for obj in adapted["objects"] if obj["id"] == target_id), None)
         if verb == "open":
-            obj = next(obj for obj in adapted["scene"]["objects"] if obj["id"] == target_id)
-            interaction = obj.get("interaction", {})
-            if (obj["kind"] != "door" or interaction.get("trigger") != "proximity"
-                    or interaction.get("action") != "open"):
-                raise ValueError("Open supports configured automatic proximity doors only; hand-operated doors are unsupported")
-        if verb not in target["actions"] and target["kind"] != "door":
+            from core_terrain_navigation import _objects_for_alias
+            candidates = ([next(obj for obj in adapted["scene"]["objects"] if obj["id"] == target_id)]
+                          if target_id else _objects_for_alias(adapted["scene"], target_ref["target_alias"]))
+            for obj in candidates:
+                interaction = obj.get("interaction", {})
+                if (obj["kind"] != "door" or interaction.get("trigger") != "proximity"
+                        or interaction.get("action") != "open"):
+                    raise ValueError("Open supports configured automatic proximity doors only; hand-operated doors are unsupported")
+        if target is not None and verb not in target["actions"] and target["kind"] != "door":
             raise ValueError(f"{target_id} has no verified open passage")
-        actions.append({"verb": verb, "target_id": target_id})
+        actions.append({"verb": verb, **target_ref})
+        prior_gate = target_ref if verb == "open" else None
+    terrain_context = adapted.get("terrain_active") is True
+    for action in actions:
+        if terrain_context:
+            action["terrain"] = True
+        if action["verb"] in ("ascend", "descend", "cross"):
+            terrain_context = True
     return actions
 
 
+def _resolve_terrain_name(adapted, name, category):
+    """Resolve exact names, then only supported generic nouns and qualifiers."""
+    from core_terrain_navigation import _objects_for_alias
+    name = name.strip()
+    try:
+        return {"target_id": resolve_target(adapted, name)}
+    except ValueError as exc:
+        if "ambiguous" in str(exc).lower():
+            raise
+        if name.lower().startswith("the "):
+            try:
+                return {"target_id": resolve_target(adapted, name[4:])}
+            except ValueError as inner:
+                if "ambiguous" in str(inner).lower():
+                    raise
+    if category is None:
+        raise ValueError("Unknown navigation target; choose an exact scene object")
+    simple = name.casefold().strip()
+    words = re.findall(r"[a-z0-9]+", simple)
+    if " ".join(words) != simple:
+        raise ValueError("Unknown terrain target; use an exact name or supported noun")
+    while words and words[0] in ("the", "a", "an"):
+        words.pop(0)
+    nouns = {"stairs": ("stair", "stairs", "step", "steps"),
+             "bridge": ("bridge", "walkway"), "gate": ("gate", "door")}
+    noun = category if words and words[-1] in nouns[category] else None
+    if noun is None:
+        raise ValueError("Unknown terrain target; choose an authored object or supported affordance")
+    options = _objects_for_alias(adapted["scene"], noun)
+    scene_words = set(re.findall(r"[a-z0-9]+", adapted["scene"].get("name", "").casefold()))
+    qualifiers = words[:-1]
+    options = [obj for obj in options if all(
+        word in scene_words or word in set(re.findall(r"[a-z0-9]+", obj.get("name", "").casefold()))
+        for word in qualifiers)]
+    if not options:
+        raise ValueError("Unknown terrain target qualifier; choose an exact authored name")
+    if len(options) == 1:
+        return {"target_id": options[0]["id"]}
+    if noun != "stairs" or any(word not in scene_words for word in qualifiers):
+        raise ValueError(f"{noun} target is ambiguous; name the exact object")
+    return {"target_alias": noun}
+
+
 def plan_command(action, adapted, actor_ids, actor_id, last_clip, initial_placements):
+    source = adapted.get("original_scene", adapted["scene"])
+    targets = [obj for obj in source["objects"]
+               if obj["id"] == action.get("target_id")]
+    elevated_target = any(obj["kind"] == "door" and
+                          abs(obj["position"][1]-obj["size"][1]/2) > .1
+                          for obj in targets)
+    if (action["verb"] in ("ascend", "descend", "cross") or
+            action.get("target_alias") is not None or
+            action.get("terrain") is True or adapted.get("terrain_active") is True
+            or elevated_target):
+        return plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initial_placements)
     args = dict(actor_id=actor_id, verb="approach" if action["verb"] == "open" else action["verb"], last_clip=last_clip,
                 initial_placements=initial_placements, affordances=adapted["affordances"], turn_before_travel=True,
                 gait_profile="spatial", speed_mps=1.2)
@@ -104,6 +215,14 @@ def measure_completion(route, clip, start_frame):
     report = {"terminal_xz": roots[-1].tolist(), "target_xz": end.tolist(),
               "arrival_error_m": error, "arrival_tolerance_m": tolerance,
               "arrival_verified": error <= tolerance, "crossing_verified": None}
+    if route.get("terrain_navigation_version") == 1:
+        target_root_y = route["waypoints"][-1]["support_y"] + .95
+        root_y = float(clip.positions[actor, -1, 0, 1])
+        height_error = abs(root_y-target_root_y)
+        report.update(terminal_root_y=root_y, target_root_y=target_root_y,
+                      root_height_error_m=height_error,
+                      root_height_verified=height_error <= .25)
+        report["arrival_verified"] &= report["root_height_verified"]
     if route["verb"] == "go_through":
         points = route["waypoints"]
         center = np.asarray(next(w["position_xz"] for w in points if w["role"] == "center"))
@@ -155,8 +274,13 @@ class SpatialSequence:
         from core_scene_reactions import evaluated_scene
         from studio_interaction_scene import adapt_studio_scene
         session = self.session
-        return adapt_studio_scene(evaluated_scene(session._scene, session._director.timeline_clip(),
-                                                  **session._reaction_options(enabling=enabling)))
+        options = session._reaction_options(enabling=enabling)
+        scene = evaluated_scene(session._scene, session._director.timeline_clip(), **options)
+        result = adapt_studio_scene(scene)
+        result["original_scene"] = session._scene
+        result["terrain_active"] = (
+            session._director.project_metadata.get("studio_core", {}).get("terrain_navigation_version") == 1)
+        return result
 
     def start(self, actor_id, text):
         from realtime_clip import MAX_CLIP_FRAMES
@@ -185,9 +309,23 @@ class SpatialSequence:
         import copy
         session = self.session
         index = self.report["action_index"]
+        action = self.report["actions"][index]
+        if action.get("target_alias") and route.get("target_id"):
+            alias = action.pop("target_alias")
+            action["target_id"] = route["target_id"]
+            # A bare "enter" is bound to the specific gate selected by open.
+            if action["verb"] == "open" and index + 1 < len(self.report["actions"]):
+                following = self.report["actions"][index + 1]
+                if following["verb"] == "go_through" and following.get("target_alias") == alias:
+                    following.pop("target_alias")
+                    following["target_id"] = route["target_id"]
         for stage in stages:
             stage.metadata["spatial_command"] = {"action_index": index, "text": self.report["text"]}
         session._director.queue_sequence(stages)
+        if route.get("terrain_navigation_version") == 1:
+            metadata = session._director.project_metadata.setdefault("studio_core", {})
+            metadata.setdefault("terrain_navigation_version", 1)
+            metadata.setdefault("terrain_navigation_start_frame", session._director.total_frames)
         self.report["legs"].append({"action_index": index, "start_frame": session._director.total_frames,
                                     "route": copy.deepcopy(route), "measurement": None})
         session._route = route
@@ -203,14 +341,25 @@ class SpatialSequence:
             leg["measurement"] = measure_completion(leg["route"], session._director.timeline_clip(), leg["start_frame"])
             action = self.report["actions"][self.report["action_index"]]
             if action["verb"] == "open":
-                from interaction_scene import scene_objects, passage_for
-                target = next(obj for obj in scene_objects(self.adapted()["scene"])
-                              if obj.id == action["target_id"])
-                try:
-                    passage_for(target, None, actor_height_m=1.65)
-                    opened = True
-                except ValueError:
-                    opened = False
+                adapted = self.adapted()
+                if leg["route"].get("terrain_navigation_version") == 1:
+                    from core_terrain_navigation import resolve_terrain_object
+                    terminal = np.asarray(session._director.timeline_clip().positions[
+                        session._director.actor_ids.index(self.report["actor_id"]), -1, 0])
+                    target = resolve_terrain_object(action, adapted, terminal)
+                    original = next(obj for obj in adapted["original_scene"]["objects"]
+                                    if obj["id"] == target["id"])
+                    opened = (target["kind"] == "door" and
+                              target["position"][1]-original["position"][1] >= original["size"][1]-.03)
+                else:
+                    from interaction_scene import scene_objects, passage_for
+                    target = next(obj for obj in scene_objects(adapted["scene"])
+                                  if obj.id == action["target_id"])
+                    try:
+                        passage_for(target, None, actor_height_m=1.65)
+                        opened = True
+                    except ValueError:
+                        opened = False
                 leg["measurement"]["automatic_door_open_verified"] = opened
                 leg["measurement"]["completed"] &= opened
             if not leg["measurement"]["completed"]:

@@ -759,7 +759,9 @@ def main():
                             if core_requested and core_state.get('scene_reactions_enabled'):
                                 from core_scene_reactions import object_states as core_object_states
                                 states = core_object_states(doc, core.timeline_clip(), int(display_frame),
-                                    enabled=True, start_frame=core_state.get('scene_reactions_start_frame', 0))
+                                    enabled=True, start_frame=core_state.get('scene_reactions_start_frame', 0),
+                                    terrain=core_state.get('terrain_navigation_enabled', False),
+                                    terrain_start_frame=core_state.get('terrain_navigation_start_frame', 0))
                             object_layer.update(objects, {'objects': states,
                                 'effects': doc.get('effects', []), 'assets': doc.get('assets', []),
                                 'lighting': doc.get('lighting', 'neutral'),
