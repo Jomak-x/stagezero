@@ -407,6 +407,19 @@ def _bridge(left, right, *, maximum_frames=21):
             continue
         if report['mechanical_gate_passed']:
             return out[:, :count], report
+    if report['rejection_reasons'] == ['sampled endpoint velocity exceeds tolerance']:
+        # Variable native bone lengths can make tangent-only seams impossible.
+        # Match measured samples with a locally bounded correction, retaining
+        # every speed, anatomy and downstream scene geometry gate.
+        for frames in candidates:
+            try:
+                out, corrected = authored_direction_bridge(a, b, left_fps=30, right_fps=30,
+                    frames=frames, match_sampled_endpoints=True)
+            except ValueError:
+                continue
+            if corrected['mechanical_gate_passed']:
+                corrected['uncorrected_endpoint_velocity_error_m_s'] = report['max_endpoint_velocity_error_m_s']
+                return out[:, :count], corrected
     raise ValueError('Scene beat transition rejected: '+'; '.join(report['rejection_reasons']))
 
 

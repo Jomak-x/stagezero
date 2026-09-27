@@ -511,6 +511,21 @@ class BuilderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'root-height gap'):
             _bridge(source, target)
 
+    def test_scene_bridge_recovers_measured_radial_seam_without_longer_duration(self):
+        from native_pair_transition import PARENTS
+        source = np.repeat(np.stack([self.pose, self.pose+[2, 0, 0]])[None], 4, axis=0)
+        target = source.copy()
+        direction = source[-1, :, 20]-source[-1, :, PARENTS[20]]
+        direction /= np.linalg.norm(direction, axis=-1, keepdims=True)
+        source[-2, :, 20] -= .02*direction
+        original = source.copy()
+        bridge, report = _bridge(source, target)
+        self.assertEqual(len(bridge), 21)
+        self.assertTrue(report['sampled_endpoint_correction'])
+        self.assertTrue(report['mechanical_gate_passed'])
+        self.assertLess(report['max_endpoint_velocity_error_m_s'], 1e-12)
+        np.testing.assert_array_equal(source, original)
+
     def test_budget_rejected_before_gpu_and_no_truncation(self):
         beats = [{'id': f'beat-{i}', 'actor_ids': ['actor_1'], 'prompt': 'Stand.', 'seconds': 10} for i in range(4)]
         with self.assertRaisesRegex(ValueError, '1000-frame'):
