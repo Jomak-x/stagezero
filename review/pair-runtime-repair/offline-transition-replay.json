@@ -1,0 +1,38 @@
+{
+  "source_generation": "scene-48f8a88cecbf44c290e1a8fc6c8987f5",
+  "prompt": "Two people start at independent start points they walk towards each other and then start sparring each other but in the end they hug once they are done",
+  "replay_policy": "CPU only; original archived native sources and Core arrays. No network or new model generation. Four initial Core requests matched archived actor IDs, seeds, stage kinds, root targets and initial placements.",
+  "status": "complete",
+  "frames": 547,
+  "seconds": 18.233333333333334,
+  "native_action_frames": [210, 90],
+  "native_action_preservation": "Both original sources compare array_equal after the recorded shared rigid placement sequence.",
+  "core_archives_consumed": 4,
+  "geometry_checks": "All normal builder checks passed on the default empty studio scene.",
+  "recovery": "A 21-frame direct transition connects sparring to hug and avoids the unnecessary second Core approach. Existing speed, endpoint velocity, source proportion and geometry gates remain unchanged. The optional radial correction adds a 15% segment-distortion limit, matching the existing Cartesian bridge's limit.",
+  "boundary": {
+    "frames": 21,
+    "sampled_endpoint_correction_support_frames": 5,
+    "max_endpoint_velocity_error_m_s": 2.1228933251263785e-15,
+    "max_joint_speed_m_s": 1.8229455820035452,
+    "max_segment_distortion_fraction": 0.05057860606940401,
+    "min_ankle_toe_height_m": 0.015703231959472465,
+    "mechanical_gate_passed": true,
+    "source_pair_frames_modified": false
+  },
+  "baseline_failed_core_entry": {
+    "21_frame_velocity_error_m_s": 0.49422,
+    "30_frame_velocity_error_m_s": 0.50263,
+    "90_frame_velocity_error_m_s": 0.52751,
+    "diagnosis": "Tangent-only bone interpolation omits measured radial velocity and sampled angular displacement. Extending duration cannot resolve this seam."
+  },
+  "tests": {
+    "focused_total": 46,
+    "passed": 46,
+    "modules": ["test_native_pair_transition", "test_prompt_scene_builder"],
+    "environment": "Existing project .venv with main's vendor/ardy on PYTHONPATH. The semantic mapping test reads main's vendor checkout because this worktree omits it."
+  },
+  "recovered_project": "/tmp/transition-replay-results/recovered.cast.stagezero.npz",
+  "replay_manifest": "/tmp/transition-replay-results/scene-4a5bc1816a544237aeb40b97f42484cb/manifest.json",
+  "visual_acceptance": "Offline replay does not establish visual acceptance; live UI review recorded separately."
+}

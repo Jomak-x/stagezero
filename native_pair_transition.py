@@ -239,13 +239,16 @@ def _hermite(p0, p1, v0, v1, t, duration):
 def authored_direction_bridge(left, right, *, left_fps, right_fps, output_fps=30.,
                               frames=21, max_speed_m_s=5.,
                               max_endpoint_velocity_error_m_s=.35,
-                              max_bone_length_change_fraction=.20):
+                              max_bone_length_change_fraction=.20,
+                              match_sampled_endpoints=False):
     """Author a length-preserving direction bridge; report real sampled seams.
 
     Uses normalized Hermite interpolation of bone directions with tangential
     endpoint velocity, and linear interpolation of each endpoint bone length.
     Root Hermite motion uses measured velocity. This avoids Cartesian limb
     shortening. Finite-difference velocity still differs and is explicitly gated.
+    Optional sampled endpoint correction matches one measured sample per seam,
+    with radial correction bounded to 15% of interpolated segment length.
     No contact frame is edited and there is no foot-lock or collision solve.
     """
     a, b = _pair(left, min_frames=2), _pair(right, min_frames=2)
@@ -273,9 +276,32 @@ def authored_direction_bridge(left, right, *, left_fps, right_fps, output_fps=30
         raise ValueError('Direction bridge crosses an ambiguous opposite-bone orientation')
     blended = raw/norms
     lengths = (1-alpha[:, None, None])*la[1] + alpha[:, None, None]*lb[0]
+    reference_lengths = lengths.copy()
+    root = _hermite(a[-1, :, 0], b[0, :, 0], (a[-1, :, 0]-a[-2, :, 0])*fa,
+                    (b[1, :, 0]-b[0, :, 0])*fb, alpha[:, None, None], duration)
+    if match_sampled_endpoints:
+        # Native positions have measured radial as well as angular velocity.
+        # Tangent-only interpolation cannot reproduce those finite differences.
+        # Match one extrapolated sample at each seam, fading its correction over
+        # five inserted frames. The interior retains the original interpolation;
+        # bounded support avoids duration-dependent Hermite length overshoot.
+        samples = np.stack([a[-1]+(a[-1]-a[-2])*fa/fps,
+                            b[0]-(b[1]-b[0])*fb/fps])
+        sample_directions, sample_lengths = directions(samples)
+        width = min(5, frames/2)
+        phase = np.clip(1-np.arange(frames)/width, 0, 1)
+        weight = phase*phase*(3-2*phase)
+        for edge, fade in ((0, weight), (-1, weight[::-1])):
+            sample = 0 if edge == 0 else 1
+            blended += fade[:, None, None, None]*(sample_directions[sample]-blended[edge])
+            lengths += fade[:, None, None]*(sample_lengths[sample]-lengths[edge])
+            root += fade[:, None, None]*(samples[sample, :, 0]-root[edge])
+        direction_norms = np.linalg.norm(blended, axis=-1, keepdims=True)
+        if np.any(direction_norms < .1) or np.any(lengths < 1e-6):
+            raise ValueError('Sampled endpoint correction creates degenerate anatomical segments')
+        blended /= direction_norms
     out = np.empty((frames, 2, 22, 3))
-    out[:, :, 0] = _hermite(a[-1, :, 0], b[0, :, 0], (a[-1, :, 0]-a[-2, :, 0])*fa,
-                            (b[1, :, 0]-b[0, :, 0])*fb, alpha[:, None, None], duration)
+    out[:, :, 0] = root
     for joint, parent in enumerate(PARENTS[1:], 1):
         out[:, :, joint] = out[:, :, parent] + blended[:, :, joint-1]*lengths[:, :, joint-1, None]
     path = np.concatenate([a[-1:], out, b[:1]])
@@ -284,29 +310,35 @@ def authored_direction_bridge(left, right, *, left_fps, right_fps, output_fps=30
                        (b[0]-out[-1])*fps-(b[1]-b[0])*fb])
     error = float(np.linalg.norm(errors, axis=-1).max())
     proportion_change = float(np.max(abs(lb[0]/la[1]-1)))
+    distortion = float(np.max(abs(lengths/reference_lengths-1)))
     reasons = []
     if speed > max_speed_m_s: reasons.append('authored bridge exceeds maximum joint speed')
     if error > max_endpoint_velocity_error_m_s: reasons.append('sampled endpoint velocity exceeds tolerance')
     if proportion_change > max_bone_length_change_fraction: reasons.append('source endpoint proportions differ beyond tolerance')
+    if distortion > .15: reasons.append('sampled endpoint correction distorts anatomical segment lengths')
     feet = path[:, :, [7, 8, 10, 11]]
     foot_step = np.linalg.norm(np.diff(feet[..., [0, 2]], axis=0), axis=-1)
     report = {
         'source': 'authored direction transition', 'model_generated': False,
         'method': 'normalized Hermite bone directions, endpoint lengths, and root Hermite',
+        'sampled_endpoint_correction': bool(match_sampled_endpoints),
+        'sampled_endpoint_correction_support_frames': min(5, frames/2) if match_sampled_endpoints else 0,
         'frames': frames, 'fps': fps, 'source_pair_frames_modified': False,
         'input_boundary': boundary_diagnostics(a, b, left_fps=fa, right_fps=fb),
         'max_joint_speed_m_s': speed, 'max_endpoint_velocity_error_m_s': error,
         'max_source_endpoint_length_change_fraction': proportion_change,
+        'max_segment_distortion_fraction': distortion,
         'max_bone_length_interpolation_error_m': float(np.max(abs(_lengths(out)-lengths))),
         'min_ankle_toe_height_m': float(feet[..., 1].min()),
         'max_ankle_toe_xz_travel_m': float(foot_step.sum(axis=0).max()),
         'thresholds': {'max_speed_m_s': max_speed_m_s,
                        'max_endpoint_velocity_error_m_s': max_endpoint_velocity_error_m_s,
+                       'max_segment_distortion_fraction': .15,
                        'max_bone_length_change_fraction': max_bone_length_change_fraction},
         'mechanical_gate_passed': not reasons, 'rejection_reasons': reasons,
         'foot_lock': False, 'contact_preserved_in_bridge': False, 'visual_acceptance': 'unverified',
         'limitations': ['Authored motion, not jointly generated with Core.',
-                       'Bone directions and lengths are interpolated; no limb shortening from position blending.',
+                       'Bone directions are normalized; optional endpoint radial corrections are separately bounded.',
                        'Endpoint velocity is measured at sampled frames; continuous derivatives alone are not proof.',
                        'No foot locking, floor, partner-contact or obstacle solve.'],
     }

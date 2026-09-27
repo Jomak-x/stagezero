@@ -276,12 +276,34 @@ class NativePairPlaybackTests(unittest.TestCase):
                             self.assertEqual(result.result(timeout=1.), revision)
                 revision = self.load()
 
+    def test_late_connect_callback_preserves_acknowledged_clip(self):
+        revision = self.load()
+        client = self.server.clients[1]
+        self.server.ack(1, revision)
+        self.server.connected(client)
+        self.assertEqual(self.controller.require_ready(client, timeout=0), revision)
+
+    def test_wire_success_acknowledgement_and_export_resend(self):
+        revision = self.load()
+        client = self.server.clients[1]
+        message = _messages.Message.deserialize(msgspec.msgpack.encode({
+            'type': 'NativePairStatusMessage', 'revision': revision, 'status': 'loaded'}))
+        self.assertIs(type(message), NativePairStatusMessage)
+        original = client._websock_connection.queue_message
+        def reack(packet):
+            original(packet)
+            self.server.handlers[NativePairStatusMessage](1, message)
+        client._websock_connection.queue_message = reack
+        with patch.object(self.controller._ready, 'wait'):
+            self.assertEqual(self.controller.require_ready(client, timeout=.1), revision)
+        self.assertEqual(len(client.messages), 2)
+
     def test_capture_readiness_timeout_is_bounded_and_never_exports_an_unloaded_tab(self):
         self.load()
         client = self.server.clients[1]
         with self.assertRaisesRegex(RuntimeError, 'not loaded local playback'):
             self.controller.require_ready(client, timeout=.001)
-        for timeout in (-1, 6, float('inf'), float('nan'), True):
+        for timeout in (-1, 31, float('inf'), float('nan'), True):
             with self.assertRaises(ValueError):
                 self.controller.require_ready(client, timeout=timeout)
         self.controller.clear()
@@ -327,9 +349,9 @@ class NativePairPlaybackTests(unittest.TestCase):
             self.assertTrue(timer.return_value.daemon)
             self.controller._readiness_notice(client, revision)
             self.assertEqual(len(notifications), 1)
-            self.assertEqual(notifications[0]['title'], 'Reload for local playback')
-            self.assertFalse(notifications[0]['auto_close'])
-            self.assertIn('Reload this tab', notifications[0]['body'])
+            self.assertEqual(notifications[0]['title'], 'Loading performance')
+            self.assertEqual(notifications[0]['auto_close'], 5000)
+            self.assertIn('still loading', notifications[0]['body'])
             self.server.ack(1, revision)
             self.controller._readiness_notice(client, revision)
             self.assertEqual(len(notifications), 1)

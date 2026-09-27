@@ -164,6 +164,7 @@ class NativePairPlaybackController:
         self._enabled = False
         self._last_key = None
         self._client_status = {}
+        self._ack_clients = {}
         self._sent_clients = set()
         self._readiness_timers = {}
         server._websock_server.register_handler(NativePairStatusMessage, self._handle_status)
@@ -191,19 +192,21 @@ class NativePairPlaybackController:
             return (self._clip is not None and
                     self.server.get_clients().get(client.client_id) is client and
                     self._client_status.get(client.client_id, {}).get('revision') == self._revision and
-                    self._client_status.get(client.client_id, {}).get('status') == 'loaded')
+                    self._client_status.get(client.client_id, {}).get('status') == 'loaded' and
+                    self._ack_clients.get(client.client_id) is client)
 
-    def require_ready(self, client, *, timeout=5.0):
-        """Wait at most five seconds for this tab before allowing local capture.
+    def require_ready(self, client, *, timeout=30.0):
+        """Wait at most thirty seconds for this tab before allowing local capture.
 
         Returns the acknowledged clip revision. A replacement during the wait
         aborts capture so an export cannot silently switch to a different take.
         """
-        if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0 <= timeout <= 5:
-            raise ValueError('Native playback readiness timeout must be in [0,5] seconds')
+        if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0 <= timeout <= 30:
+            raise ValueError('Native playback readiness timeout must be in [0,30] seconds')
         deadline = time.monotonic() + timeout
         with self._ready:
             revision = self._revision
+            resent = False
             while True:
                 if self._clip is None or self._revision != revision:
                     raise RuntimeError('The local playback clip changed or was removed. Reload this tab and retry export.')
@@ -211,7 +214,7 @@ class NativePairPlaybackController:
                         client.client_id not in self._sent_clients):
                     raise RuntimeError('This playback tab disconnected. Reload this tab and retry export.')
                 status = self._client_status.get(client.client_id, {})
-                if status.get('revision') == revision:
+                if status.get('revision') == revision and self._ack_clients.get(client.client_id) is client:
                     if status.get('status') == 'loaded':
                         return revision
                     if status.get('status') == 'error':
@@ -219,6 +222,11 @@ class NativePairPlaybackController:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise RuntimeError('This tab has not loaded local playback. Reload this tab to update the viewer, then retry export.')
+                if not resent and timeout > 0:
+                    # Re-acknowledge an already loaded revision after a missed status.
+                    # Never bypass the per-tab acknowledgement for capture.
+                    client._websock_connection.queue_message(self._clip)
+                    resent = True
                 self._ready.wait(remaining)
 
     def _cancel_readiness_timer(self, client_id):
@@ -243,9 +251,14 @@ class NativePairPlaybackController:
             self._readiness_timers.pop(client.client_id, None)
             try:
                 self.require_ready(client, timeout=0)
-            except RuntimeError as exc:
-                client.add_notification(title='Reload for local playback', body=str(exc),
-                                        color='red', auto_close=False)
+            except RuntimeError:
+                status = self._client_status.get(client.client_id, {})
+                failed = status.get('revision') == revision and status.get('status') == 'error'
+                client.add_notification(
+                    title='Playback could not load' if failed else 'Loading performance',
+                    body=('Reload this tab and retry playback.' if failed else
+                          'The performance is still loading in this tab. Export will wait for it to finish.'),
+                    color='red' if failed else 'blue', auto_close=False if failed else 5000)
 
     def load(self, actors, fps=30, frames=None):
         if type(fps) not in (int, float) or fps != 30:
@@ -260,6 +273,7 @@ class NativePairPlaybackController:
             self._payload_bytes = size
             self._last_key = None
             self._client_status.clear()
+            self._ack_clients.clear()
             for client_id in tuple(self._readiness_timers):
                 self._cancel_readiness_timer(client_id)
             clients = self.server.get_clients()
@@ -307,6 +321,7 @@ class NativePairPlaybackController:
             self._enabled = False
             self._last_key = None
             self._client_status.clear()
+            self._ack_clients.clear()
             self._sent_clients.clear()
             for client_id in tuple(self._readiness_timers):
                 self._cancel_readiness_timer(client_id)
@@ -323,7 +338,12 @@ class NativePairPlaybackController:
             with self._lock:
                 if version != (self._revision, self._sequence):
                     continue
-                self._client_status.pop(client.client_id, None)
+                if self.server.get_clients().get(client.client_id) is not client:
+                    return
+                if self._ack_clients.get(client.client_id) is not client:
+                    self._client_status.pop(client.client_id, None)
+                    self._ack_clients.pop(client.client_id, None)
+                # load() can already have received this connection's acknowledgement.
                 if self._clip is None:
                     return
                 self._sent_clients.add(client.client_id)
@@ -338,6 +358,7 @@ class NativePairPlaybackController:
         with self._lock:
             self._sent_clients.discard(client.client_id)
             self._client_status.pop(client.client_id, None)
+            self._ack_clients.pop(client.client_id, None)
             self._cancel_readiness_timer(client.client_id)
             self._ready.notify_all()
 
@@ -347,6 +368,7 @@ class NativePairPlaybackController:
                     message.revision != self._revision or client_id not in self._sent_clients or
                     message.status not in ('loaded', 'error')):
                 return
+            self._ack_clients[client_id] = self.server.get_clients().get(client_id)
             self._client_status[client_id] = {'revision': message.revision, 'status': message.status,
                 'error': message.error[:500] if isinstance(message.error, str) else None}
             if message.status == 'loaded':

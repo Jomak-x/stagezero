@@ -122,6 +122,39 @@ class NativePairTransitionTests(unittest.TestCase):
         self.assertFalse(report['mechanical_gate_passed'])
         self.assertIn('sampled endpoint velocity exceeds tolerance', report['rejection_reasons'])
 
+    def test_sampled_correction_matches_radial_velocity_without_touching_sources_or_interior(self):
+        left, right = self.pair.copy(), self.pair.copy()
+        direction = left[-1, :, 20]-left[-1, :, PARENTS[20]]
+        direction /= np.linalg.norm(direction, axis=-1, keepdims=True)
+        left[-2, :, 20] -= .025*direction
+        right[1, :, 21, 2] += .01
+        saved = left.copy(), right.copy()
+        original, rejected = authored_direction_bridge(left, right, left_fps=20, right_fps=30)
+        bridge, report = authored_direction_bridge(left, right, left_fps=20, right_fps=30,
+                                                   match_sampled_endpoints=True)
+        self.assertIn('sampled endpoint velocity exceeds tolerance', rejected['rejection_reasons'])
+        self.assertTrue(report['mechanical_gate_passed'], report['rejection_reasons'])
+        np.testing.assert_allclose((bridge[0]-left[-1])*30, (left[-1]-left[-2])*20, atol=1e-13)
+        np.testing.assert_allclose((right[0]-bridge[-1])*30, (right[1]-right[0])*30, atol=1e-13)
+        np.testing.assert_allclose(bridge[5:-5], original[5:-5], atol=1e-14)
+        np.testing.assert_array_equal(left, saved[0]); np.testing.assert_array_equal(right, saved[1])
+        self.assertLess(report['max_segment_distortion_fraction'], .15)
+
+    def test_sampled_correction_rejects_large_radial_deformation(self):
+        left = self.pair.copy()
+        vector = left[-1, :, 20]-left[-1, :, PARENTS[20]]
+        left[-2, :, 20] -= .3*vector
+        _, report = authored_direction_bridge(left, self.pair, left_fps=30, right_fps=30,
+                                              match_sampled_endpoints=True)
+        self.assertFalse(report['mechanical_gate_passed'])
+        self.assertIn('sampled endpoint correction distorts anatomical segment lengths', report['rejection_reasons'])
+
+    def test_sampled_correction_still_rejects_fast_travel(self):
+        _, report = authored_direction_bridge(self.pair, self.pair+[20, 0, 0], left_fps=30,
+                                              right_fps=30, match_sampled_endpoints=True)
+        self.assertFalse(report['mechanical_gate_passed'])
+        self.assertIn('authored bridge exceeds maximum joint speed', report['rejection_reasons'])
+
     def test_composition_preserves_pair_and_discloses_every_segment(self):
         from native_pair_clip import NativePairClip
         core = np.zeros((8, 2, 27, 3))
