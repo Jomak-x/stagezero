@@ -539,8 +539,11 @@ class StoryControls:
             progress = data.get('progress') or {}
             completed = progress.get('completed_beats', 0)
             total = progress.get('total_beats', 0)
-            detail = detail or (f'Creating scene · {completed}/{total} movements' if total
-                                else 'Creating scene…')
+            attempt = data.get('attempt', 1)
+            label = (f'Retrying scene · attempt {attempt}/{data.get("max_attempts", 3)}'
+                     if attempt > 1 else 'Creating scene')
+            detail = detail or (f'{label} · {completed}/{total} movements' if total
+                                else label + '…')
         if movement_status and not view.error:
             failed = 'failed' in movement_status.lower() or 'stopped' in movement_status.lower()
             style = 'sz-progress error' if failed else 'sz-progress'

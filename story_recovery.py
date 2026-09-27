@@ -11,7 +11,7 @@ import numpy as np
 from motion_quality import JOINT_INDEX, ROOT, SHOULDERS
 
 
-RECOVERY_PATTERN = (r'\b(?:get(?:s|ting)? up|stand(?:s|ing)? up|'
+RECOVERY_PATTERN = (r'\b(?:get(?:s|ting)? (?:back )?up|stand(?:s|ing)? (?:back )?up|'
                     r'ris(?:e|es|ing) (?:back )?to (?:their |his |her |the )?feet|'
                     r'push(?:es|ing)? up from lying)\b')
 NEGATION = re.compile(r"\b(?:not|never|without|avoid|don't|doesn't)\b", re.I)
@@ -27,10 +27,23 @@ _QUALITY_FAILURE = re.compile(
 _QUALITY_REASONS = frozenset(('intra_clip_jump', 'foot_slide', 'joint_jump', 'horizon_seam',
                               'history_seam', 'floor_penetration', 'invalid_rotations',
                               'nonfinite_positions'))
+_CURRENT_QUALITY_FAILURE = re.compile(
+    r'^(?:RuntimeError: )?Motion quality rejected [1-3] attempts?: '
+    r'((?:floor penetration|motion discontinuity|non-finite poses|invalid pose data|invalid motion)'
+    r'(?:, (?:floor penetration|motion discontinuity|non-finite poses|invalid pose data|invalid motion))*)'
+    r'\. No motion committed\.$', re.I)
+_CURRENT_QUALITY_REASONS = {
+    'floor penetration': 'floor_penetration', 'motion discontinuity': 'intra_clip_jump',
+    'non-finite poses': 'nonfinite_positions', 'invalid pose data': 'invalid_rotations',
+}
 
 
 def quality_failure_reasons(error):
     """Recognize only the backend's bounded quality rejection, never transport errors."""
+    current = _CURRENT_QUALITY_FAILURE.fullmatch(str(error))
+    if current is not None:
+        return tuple(_CURRENT_QUALITY_REASONS[part] for part in current.group(1).lower().split(', ')
+                     if part in _CURRENT_QUALITY_REASONS)
     match = _QUALITY_FAILURE.fullmatch(str(error))
     if match is None:
         return None

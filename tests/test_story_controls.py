@@ -258,6 +258,18 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(reopened.length.value, 'Auto')
         self.assertIn('Creating scene', reopened.status.content)
 
+    def test_popup_shows_whole_scene_retry_attempt_and_reset_progress(self):
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        job = self.controls.workflow.jobs[identifier]
+        job.update(attempt=2, max_attempts=3)
+        job['progress']['completed_beats'] = 0
+        self.controls.update()
+        self.assertIn('Retrying scene', view.status.content)
+        self.assertIn('attempt 2/3', view.status.content)
+        self.assertIn('0/4 movements', view.status.content)
+        self.assertFalse(view.cancel.disabled)
+
     def test_open_modal_receives_other_clients_scenes_and_current_take(self):
         self.session.takes['scene-take'] = self.session.scene_take
         self.session.active_take = 'scene-take'

@@ -1,0 +1,585 @@
+{
+  "archive_format": "stagezero",
+  "active_take_id": "cee938e8-0d18-47a7-b6e0-e4da95027c26",
+  "selected_take_id": "cee938e8-0d18-47a7-b6e0-e4da95027c26",
+  "take": {
+    "take_id": "cee938e8-0d18-47a7-b6e0-e4da95027c26",
+    "take_name": "Continuous Movement Performance",
+    "fps": 25,
+    "frames": 1800,
+    "seconds": 72.0,
+    "body_length_m": 0.5110169053077698,
+    "segment_count": 14,
+    "structural_checks": [
+      {
+        "name": "segment_coverage",
+        "passed": true,
+        "observed": {
+          "covered_frames": 1800,
+          "take_frames": 1800
+        },
+        "requirement": "Contiguous segments cover every take frame"
+      }
+    ],
+    "segments": [
+      {
+        "index": 0,
+        "beat_id": "beat-1",
+        "prompt": "A person walks forward.",
+        "start": 0,
+        "end": 200,
+        "frames": 200,
+        "seconds": 8.0,
+        "metrics": {
+          "root_path_length_m": 6.7330605753492865,
+          "root_net_displacement_m": 6.695454891694019,
+          "root_vertical_range_m": 0.03757137060165405,
+          "root_mean_planar_speed_mps": 0.8458618813252873,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.6349609599425681,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.80353465261717,
+          "pose_active_frame_fraction": 1.0,
+          "torso_min_dot_up": 0.9887780649661041,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7048180103302002
+        },
+        "checks": [
+          {
+            "name": "travel_displacement",
+            "passed": true,
+            "observed": 6.695454891694019,
+            "requirement": "Planar net displacement >= 0.383 m (0.75 body lengths)"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "beat_id": "beat-2",
+        "prompt": "A person turns left.",
+        "start": 200,
+        "end": 250,
+        "frames": 50,
+        "seconds": 2.0,
+        "metrics": {
+          "root_path_length_m": 1.7980560156743581,
+          "root_net_displacement_m": 1.6319717767173458,
+          "root_vertical_range_m": 0.04174149036407471,
+          "root_mean_planar_speed_mps": 0.9173755182012031,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.8419973217854297,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.9981689409731638,
+          "pose_active_frame_fraction": 1.0,
+          "torso_min_dot_up": 0.9926714568321554,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.654081404209137
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0858780000450445,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.078277343907106,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "beat_id": "beat-3",
+        "prompt": "A person jogs forward.",
+        "start": 250,
+        "end": 450,
+        "frames": 200,
+        "seconds": 8.0,
+        "metrics": {
+          "root_path_length_m": 5.722389821178831,
+          "root_net_displacement_m": 5.660179156355399,
+          "root_vertical_range_m": 0.04107487201690674,
+          "root_mean_planar_speed_mps": 0.718893193615431,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.6028785224237236,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.9637934510666853,
+          "pose_active_frame_fraction": 0.8391959798994975,
+          "torso_min_dot_up": 0.9902719259864795,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7502557039260864
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.06361759633192111,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.07464605474917779,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "travel_displacement",
+            "passed": true,
+            "observed": 5.660179156355399,
+            "requirement": "Planar net displacement >= 0.383 m (0.75 body lengths)"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "beat_id": "beat-4",
+        "prompt": "A person stops moving.",
+        "start": 450,
+        "end": 500,
+        "frames": 50,
+        "seconds": 2.0,
+        "metrics": {
+          "root_path_length_m": 0.13859961675258078,
+          "root_net_displacement_m": 0.10775758797121728,
+          "root_vertical_range_m": 0.020065665245056152,
+          "root_mean_planar_speed_mps": 0.07071409017988815,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.09184000509544664,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.19751462473870654,
+          "pose_active_frame_fraction": 0.0,
+          "torso_min_dot_up": 0.9965656375926328,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7280294001102448
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0012958817160241651,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.00218927021666436,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "beat_id": "beat-5",
+        "prompt": "A person waves one hand.",
+        "start": 500,
+        "end": 600,
+        "frames": 100,
+        "seconds": 4.0,
+        "metrics": {
+          "root_path_length_m": 0.8056034362801855,
+          "root_net_displacement_m": 0.6612713025281195,
+          "root_vertical_range_m": 0.02316516637802124,
+          "root_mean_planar_speed_mps": 0.20343521118186503,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.25593173977931094,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.6052188494031854,
+          "pose_active_frame_fraction": 0.32323232323232326,
+          "torso_min_dot_up": 0.9967394179183211,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7506646513938904
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.015812510318388488,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.012810297198764604,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "beat_id": "beat-6",
+        "prompt": "A person sidesteps left.",
+        "start": 600,
+        "end": 750,
+        "frames": 150,
+        "seconds": 6.0,
+        "metrics": {
+          "root_path_length_m": 2.8348122980563892,
+          "root_net_displacement_m": 2.7169121398042098,
+          "root_vertical_range_m": 0.0633465051651001,
+          "root_mean_planar_speed_mps": 0.4756396473248975,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.46307269480576146,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.6370409600361613,
+          "pose_active_frame_fraction": 0.8657718120805369,
+          "torso_min_dot_up": 0.9535217613866624,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7213312983512878
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0031942832602297358,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.005160226032205413,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "travel_displacement",
+            "passed": true,
+            "observed": 2.7169121398042098,
+            "requirement": "Planar net displacement >= 0.383 m (0.75 body lengths)"
+          },
+          {
+            "name": "sidestep_direction",
+            "passed": true,
+            "observed": 2.7122349739074707,
+            "requirement": "Travel at least 0.25 leg lengths toward requested body-relative side"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "beat_id": "beat-7",
+        "prompt": "A person sidesteps right.",
+        "start": 750,
+        "end": 900,
+        "frames": 150,
+        "seconds": 6.0,
+        "metrics": {
+          "root_path_length_m": 2.062703474587826,
+          "root_net_displacement_m": 1.8971156400381317,
+          "root_vertical_range_m": 0.0354694128036499,
+          "root_mean_planar_speed_mps": 0.3460911870113802,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.4200800539081881,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.6516696882903203,
+          "pose_active_frame_fraction": 0.7449664429530202,
+          "torso_min_dot_up": 0.9058404428928385,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7512339055538177
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.032850154296870944,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.051097443124875894,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "travel_displacement",
+            "passed": true,
+            "observed": 1.8971156400381317,
+            "requirement": "Planar net displacement >= 0.383 m (0.75 body lengths)"
+          },
+          {
+            "name": "sidestep_direction",
+            "passed": false,
+            "observed": -1.7889642715454102,
+            "requirement": "Travel at least 0.25 leg lengths toward requested body-relative side"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "beat_id": "beat-8",
+        "prompt": "A person squats down.",
+        "start": 900,
+        "end": 1000,
+        "frames": 100,
+        "seconds": 4.0,
+        "metrics": {
+          "root_path_length_m": 0.18306596629208619,
+          "root_net_displacement_m": 0.100945071756169,
+          "root_vertical_range_m": 0.27199840545654297,
+          "root_mean_planar_speed_mps": 0.04622877936668843,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.16300580262488504,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.6586413465689623,
+          "pose_active_frame_fraction": 0.18181818181818182,
+          "torso_min_dot_up": 0.6864364947803921,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.46090295910835266
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.005848832148984978,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.009463296870603138,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "beat_id": "beat-9",
+        "prompt": "A person stands upright.",
+        "start": 1000,
+        "end": 1050,
+        "frames": 50,
+        "seconds": 2.0,
+        "metrics": {
+          "root_path_length_m": 0.013517606926969957,
+          "root_net_displacement_m": 0.008863878426990641,
+          "root_vertical_range_m": 0.004886031150817871,
+          "root_mean_planar_speed_mps": 0.006896738228045896,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.022012033623837572,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.034481618644263086,
+          "pose_active_frame_fraction": 0.0,
+          "torso_min_dot_up": 0.6874568422924955,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.4532964825630188
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0026349856422661173,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.0033203041442930194,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "standing_terminal_upright",
+            "passed": false,
+            "observed": false,
+            "requirement": "Final 10 frames satisfy story_recovery upright pose proxy"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "beat_id": "beat-10",
+        "prompt": "A person shadowboxes.",
+        "start": 1050,
+        "end": 1250,
+        "frames": 200,
+        "seconds": 8.0,
+        "metrics": {
+          "root_path_length_m": 2.920513495153508,
+          "root_net_displacement_m": 0.29894089045314715,
+          "root_vertical_range_m": 0.25985240936279297,
+          "root_mean_planar_speed_mps": 0.36689868029566686,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.9044307653035258,
+          "pose_p90_joint_speed_body_lengths_per_second": 1.5010681239973582,
+          "pose_active_frame_fraction": 0.8894472361809045,
+          "torso_min_dot_up": 0.6948707335995848,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.5561201572418213
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0048628916073179115,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.005058513782612472,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "beat_id": "beat-11",
+        "prompt": "A person dances.",
+        "start": 1250,
+        "end": 1500,
+        "frames": 250,
+        "seconds": 10.0,
+        "metrics": {
+          "root_path_length_m": 1.5179197799975461,
+          "root_net_displacement_m": 0.076222191650078,
+          "root_vertical_range_m": 0.2579028606414795,
+          "root_mean_planar_speed_mps": 0.15240158433710302,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.727066614863221,
+          "pose_p90_joint_speed_body_lengths_per_second": 1.082891708424689,
+          "pose_active_frame_fraction": 0.9839357429718876,
+          "torso_min_dot_up": 0.8868971209484007,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.6546986401081085
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.018095965836005097,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.026791135343642046,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "sustained_motion_activity",
+            "passed": true,
+            "observed": 0.9839357429718876,
+            "requirement": "At least half the frames exceed 0.3 leg lengths/second of articulated motion; this does not classify dance style"
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "beat_id": "beat-12",
+        "prompt": "A person bows.",
+        "start": 1500,
+        "end": 1575,
+        "frames": 75,
+        "seconds": 3.0,
+        "metrics": {
+          "root_path_length_m": 0.2209638572936983,
+          "root_net_displacement_m": 0.030846635671328258,
+          "root_vertical_range_m": 0.06677842140197754,
+          "root_mean_planar_speed_mps": 0.07464995178841159,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.17199340695660584,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.4274357105914435,
+          "pose_active_frame_fraction": 0.16216216216216217,
+          "torso_min_dot_up": 0.763238078970338,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7340758144855499
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.03187223133353459,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.04218438801670885,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "beat_id": "beat-13",
+        "prompt": "A person salutes.",
+        "start": 1575,
+        "end": 1650,
+        "frames": 75,
+        "seconds": 3.0,
+        "metrics": {
+          "root_path_length_m": 0.06943304665616357,
+          "root_net_displacement_m": 0.012217732782693488,
+          "root_vertical_range_m": 0.013588488101959229,
+          "root_mean_planar_speed_mps": 0.023457110356812017,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.23508862021479332,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.8407661333491275,
+          "pose_active_frame_fraction": 0.24324324324324326,
+          "torso_min_dot_up": 0.8220949853485648,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7452422678470612
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0009628097375769453,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.0033333137242510026,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "beat_id": "beat-14",
+        "prompt": "A person walks backward.",
+        "start": 1650,
+        "end": 1800,
+        "frames": 150,
+        "seconds": 6.0,
+        "metrics": {
+          "root_path_length_m": 3.542595168559743,
+          "root_net_displacement_m": 3.460325968149312,
+          "root_vertical_range_m": 0.0433540940284729,
+          "root_mean_planar_speed_mps": 0.594395162510024,
+          "pose_mean_joint_speed_body_lengths_per_second": 0.5539578093679778,
+          "pose_p90_joint_speed_body_lengths_per_second": 0.7669342299473119,
+          "pose_active_frame_fraction": 0.8590604026845637,
+          "torso_min_dot_up": 0.9141546895671918,
+          "torso_inverted_fraction": 0.0,
+          "torso_longest_inverted_run_frames": 0,
+          "root_elevation_above_ankles_terminal_m": 0.7010398507118225
+        },
+        "checks": [
+          {
+            "name": "root_seam_continuity",
+            "passed": true,
+            "observed": 0.0009800760688679147,
+            "requirement": "Root jump <= 0.5 body lengths"
+          },
+          {
+            "name": "joint_seam_continuity",
+            "passed": true,
+            "observed": 0.004494531790848355,
+            "requirement": "Mean joint jump <= 0.75 body lengths"
+          },
+          {
+            "name": "travel_displacement",
+            "passed": true,
+            "observed": 3.460325968149312,
+            "requirement": "Planar net displacement >= 0.383 m (0.75 body lengths)"
+          }
+        ]
+      }
+    ],
+    "passed": false,
+    "failed_checks": [
+      {
+        "segment": 6,
+        "name": "sidestep_direction"
+      },
+      {
+        "segment": 8,
+        "name": "standing_terminal_upright"
+      }
+    ],
+    "interpretation": "Geometric proxies only; visual quality and full prompt adherence require review."
+  }
+}

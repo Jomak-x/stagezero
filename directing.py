@@ -7,6 +7,10 @@ import numpy as np
 from live_motion import MotionSession, validate_result
 from takes import Take, encode_project, decode_project, validate_take, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
 from duration_planning import CHUNK_FRAMES, plan_duration
+from story_action_execution import (action_spec, action_prompt, action_completion_frame,
+                                    action_finished, generate_action_chunk, action_attempt_limit,
+                                    action_sample_suitable,
+                                    MAX_ACTION_FRAMES, MAX_ACTION_EXTENSIONS)
 from story_recovery import (EXPLICIT_TIMING, MAX_RECOVERY_BEAT_FRAMES, MAX_RECOVERY_EXTENSIONS,
                             is_recovery_motion, recovered_upright,
                             recovery_completion_frame, recovery_prompt,
@@ -635,9 +639,14 @@ class DirectorSession(MotionSession):
             # The popup and timeline use beat_id to recognize that this take
             # remains a scene even when its first movement is regenerated.
             beat_id = selected.get('beat_id') if operation == 'replace' else None
-            actions = [(prompt, new_frames, beat_id)] + [
-                (s['prompt'], s['end'] - s['start'], s.get('beat_id')) for s in suffix]
-            final_length = stop + sum(frames for _, frames, _ in actions)
+            timing_mode = ('auto' if automatic_timing and seconds is None
+                           and not EXPLICIT_TIMING.search(prompt) else 'fixed')
+            # The edit's timing control applies to the selected movement only.
+            # Existing actions keep their own timing, including after reload.
+            actions = [(prompt, new_frames, beat_id, timing_mode)] + [
+                (s['prompt'], s['end'] - s['start'], s.get('beat_id'),
+                 s.get('timing_mode', 'fixed')) for s in suffix]
+            final_length = stop + sum(frames for _, frames, _, _ in actions)
             total = sum(len(t.positions) for t in self.takes.values()) - len(source.positions) + final_length
             if final_length > MAX_FRAMES or total > MAX_TOTAL_FRAMES:
                 self.status = 'Motion budget reached; shorten an action before continuing.'
@@ -654,7 +663,7 @@ class DirectorSession(MotionSession):
                                 source=source, stop=stop, actions=actions, frame=self.frame,
                                 submitted=submitted, automatic_timing=automatic_timing)
             self.wake.set()
-            chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _ in actions)
+            chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _, _ in actions)
             self.status = f'Regenerating {len(actions)} action' + ('s' if len(actions) != 1 else '') + f' · 0/{chunks} chunks'
             return True
 
@@ -725,7 +734,7 @@ class DirectorSession(MotionSession):
         source, stop = job['source'], job['stop']
         version, request_id = job['version'], job['request_id']
         actions = job['actions']
-        total_chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _ in actions)
+        total_chunks = sum((frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES for _, frames, _, _ in actions)
         completed_chunks = 0
         generated = {key: [] for key in ('positions', 'rotations', 'motion')}
         segments, events = source.prefix(stop)
@@ -734,12 +743,12 @@ class DirectorSession(MotionSession):
         final_meta = None
         failure_context = ''
         automatic_timing = job['automatic_timing']
-        remaining_planned = sum(frames for _, frames, _ in actions)
+        remaining_planned = sum(frames for _, frames, _, _ in actions)
         other_take_frames = sum(len(t.positions) for t in self.takes.values() if t is not source)
-        take_limit = min(MAX_FRAMES, 120 * 25 if automatic_timing else MAX_FRAMES,
+        take_limit = min(MAX_FRAMES, 120 * 25 if any(mode == 'auto' for _, _, _, mode in actions) else MAX_FRAMES,
                          MAX_TOTAL_FRAMES - other_take_frames)
         try:
-            for action_number, (prompt, frames, beat_id) in enumerate(actions, start=len(segments) + 1):
+            for action_number, (prompt, frames, beat_id, timing_mode) in enumerate(actions, start=len(segments) + 1):
                 remaining_planned -= frames
                 action_start = stop + sum(len(part) for part in generated['motion'])
                 action_seconds = 0.0
@@ -747,10 +756,16 @@ class DirectorSession(MotionSession):
                 target_frames = frames
                 extensions = 0
                 recovery = is_recovery_motion(prompt)
-                adaptive_recovery = recovery and automatic_timing and not EXPLICIT_TIMING.search(prompt)
-                backend_prompt = (recovery_prompt(prompt, context=' '.join(
-                    segment['prompt'] for segment in source.segments))
-                    if adaptive_recovery else prompt)
+                adaptive_recovery = recovery and timing_mode == 'auto' and not EXPLICIT_TIMING.search(prompt)
+                previous_prompt = segments[-1]['prompt'] if segments else ''
+                backend_prompt = action_prompt(prompt, previous_prompt)
+                if adaptive_recovery and backend_prompt == prompt:
+                    backend_prompt = recovery_prompt(prompt, context=' '.join(
+                        segment['prompt'] for segment in segments))
+                spec = None if recovery else action_spec(prompt, previous_prompt)
+                adaptive_action = spec is not None and timing_mode == 'auto'
+                prior_positions = (np.concatenate(generated['positions'][-3:])[-52:]
+                                   if generated['positions'] else source.positions[max(0, stop - 52):stop])
                 while sum(len(part) for part in action_parts) < target_frames:
                     with self.lock:
                         if version != self.version or request_id != self.current_id:
@@ -761,17 +776,47 @@ class DirectorSession(MotionSession):
                     chunk_count = (target_frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
                     failure_context = (f'action {action_number} "{prompt[:60]}", '
                                        f'chunk {chunk_number}/{chunk_count} · ')
-                    for attempt in range(3):
+                    attempt_limit = action_attempt_limit(spec)
+                    for attempt in range(attempt_limit):
                         try:
-                            result = self.backend.generate(request_id, backend_prompt, history)
+                            result = generate_action_chunk(
+                                self.backend, request_id, backend_prompt, history, spec,
+                                np.concatenate(action_parts) if action_parts else None, prior_positions)
                             validate_result(result, request_id)
+                            remaining = target_frames - sum(len(part) for part in action_parts)
+                            if not action_sample_suitable(backend_prompt, result['positions'][:min(CHUNK_FRAMES, remaining)]):
+                                if attempt == attempt_limit - 1:
+                                    raise RuntimeError(f'Movement did not sustain the requested activity after {attempt_limit} attempts')
+                                with self.lock:
+                                    if version != self.version or request_id != self.current_id:
+                                        return
+                                    request_id = str(uuid.uuid4())
+                                    self.current_id = request_id
+                                    self.status = f'Retrying action {action_number} to sustain the requested activity'
+                                continue
+                            if remaining <= CHUNK_FRAMES and not (adaptive_action or adaptive_recovery) and (spec is not None or recovery):
+                                candidate = action_parts + [result['positions'][:remaining]]
+                                finished = (action_finished(spec, np.concatenate(candidate), prior_positions)
+                                            if spec is not None else recovered_upright(candidate))
+                                if not finished:
+                                    if attempt == attempt_limit - 1:
+                                        raise RuntimeError(f'Movement did not complete at the requested length after {attempt_limit} attempts'
+                                                           if spec is not None else
+                                                           f'Get-up movement did not finish upright at the requested length after {attempt_limit} attempts')
+                                    with self.lock:
+                                        if version != self.version or request_id != self.current_id:
+                                            return
+                                        request_id = str(uuid.uuid4())
+                                        self.current_id = request_id
+                                        self.status = f'Retrying action {action_number} to complete the requested movement'
+                                    continue
                             break
                         except RuntimeError as exc:
                             if quality_failure_reasons(exc) is None:
                                 raise
-                            if attempt == 2:
+                            if attempt == attempt_limit - 1:
                                 raise RuntimeError(
-                                    f'Motion quality rejected action {action_number} after 3 attempts') from None
+                                    f'Motion quality rejected action {action_number} after {attempt_limit} attempts') from None
                             with self.lock:
                                 if version != self.version or request_id != self.current_id:
                                     return
@@ -785,11 +830,20 @@ class DirectorSession(MotionSession):
                     produced = sum(len(part) for part in action_parts)
                     trim = min(CHUNK_FRAMES, target_frames - produced)
                     completed = None
-                    if adaptive_recovery:
+                    if adaptive_action:
+                        # Use a complete finite movement from the accepted chunk,
+                        # even when its completion follows the original estimate.
+                        extra = min(CHUNK_FRAMES - trim, MAX_ACTION_FRAMES - target_frames,
+                                    take_limit - action_start - target_frames - remaining_planned)
+                        if extra > 0:
+                            target_frames += extra
+                            trim += extra
+                    if adaptive_recovery or adaptive_action:
                         candidate = np.concatenate(action_parts + [result['positions'][:trim]], axis=0)
-                        completed = recovery_completion_frame(candidate)
+                        completed = (action_completion_frame(spec, candidate, prior_positions)
+                                     if adaptive_action else recovery_completion_frame(candidate))
                         if completed is not None:
-                            trim = min(trim, completed - produced)
+                            trim = min(trim, max(4, completed) - produced)
                     for key in generated:
                         generated[key].append(result[key][:trim])
                     action_parts.append(result['positions'][:trim])
@@ -798,26 +852,33 @@ class DirectorSession(MotionSession):
                     with self.lock:
                         if version != self.version or request_id != self.current_id:
                             return
-                        if completed_chunks < total_chunks or (adaptive_recovery and completed is None):
+                        if completed_chunks < total_chunks or ((adaptive_recovery or adaptive_action) and completed is None):
                             request_id = str(uuid.uuid4())
                             self.current_id = request_id
                             self.status = f'Regenerating actions · {completed_chunks}/{total_chunks} chunks received; holding pose'
                     failure_context = ''
                     if completed is not None:
                         break
-                    if sum(len(part) for part in action_parts) == target_frames and adaptive_recovery:
-                        extra = min(CHUNK_FRAMES, MAX_RECOVERY_BEAT_FRAMES - target_frames,
+                    if sum(len(part) for part in action_parts) == target_frames and (adaptive_recovery or adaptive_action):
+                        limit = MAX_ACTION_FRAMES if adaptive_action else MAX_RECOVERY_BEAT_FRAMES
+                        extension_limit = MAX_ACTION_EXTENSIONS if adaptive_action else MAX_RECOVERY_EXTENSIONS
+                        extra = min(CHUNK_FRAMES, limit - target_frames,
                                     take_limit - action_start - target_frames - remaining_planned)
-                        if extensions >= MAX_RECOVERY_EXTENSIONS or extra < 4:
-                            raise RuntimeError('Get-up movement did not finish upright within its recovery limit')
+                        if extensions >= extension_limit or extra < 4:
+                            raise RuntimeError('Movement did not complete within its action duration budget'
+                                               if adaptive_action else
+                                               'Get-up movement did not finish upright within its recovery limit')
                         target_frames += extra
                         extensions += 1
                         total_chunks += 1
                 actual_frames = sum(len(part) for part in action_parts)
                 if recovery and not adaptive_recovery and not recovered_upright(action_parts):
                     raise RuntimeError('Get-up movement did not finish upright at the requested length')
+                if spec is not None and not action_finished(spec, np.concatenate(action_parts), prior_positions):
+                    raise RuntimeError('Movement did not complete at the requested length')
                 segment = dict(start=action_start, end=action_start + actual_frames, prompt=prompt,
-                               request_id=final_meta['request_id'], generation_seconds=action_seconds)
+                               request_id=final_meta['request_id'], generation_seconds=action_seconds,
+                               timing_mode=timing_mode)
                 if beat_id is not None:
                     segment['beat_id'] = beat_id
                 segments.append(segment)
@@ -850,7 +911,7 @@ class DirectorSession(MotionSession):
                 self.status = f'Regenerated {len(actions)} action' + ('s' if len(actions) != 1 else '') + ' · Undo is available'
                 self.metrics = {**final_meta, 'generation_seconds': generation_seconds,
                                 'command_to_received_seconds': time.perf_counter() - job['submitted']}
-                self.needs_ack = (request_id, job['submitted'])
+                self.needs_ack = (final_meta['request_id'], job['submitted'])
                 self.started = time.perf_counter() - self.frame / self.fps
                 self.playing = self.resume_after_generation
                 self.project_revision += 1

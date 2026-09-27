@@ -49,37 +49,106 @@ _QUOTED_DIALOGUE = re.compile(r'\b(?:say|says|saying|speak|speaks|speaking|shout
 # general natural-language parser. Unrecognized actions remain model planned.
 _ACTION_CUES = {
     'run': r'\b(?:sprint\w*|run(?:s|ning)?)\b',
-    'stop': r'\b(?:stop(?:s|ping)?|halts?|comes? to a stop)\b',
+    'stop': r'\b(?:stop(?:s|ping)?|halts?|comes? to (?:a stop|rest)|stand(?:s|ing)? still)\b',
     'fall': r'\b(?:fall(?:s|ing)?|fell|collaps(?:e|es|ing))\b',
     'recover': RECOVERY_PATTERN,
     'dance': r'\b(?:danc(?:e|es|ing))\b',
     'backflip': r'\bback[ -]?flips?\b',
+    'walk': r'\bwalk(?:s|ing)?\b',
+    'jog': r'\bjog(?:s|ging)?\b',
+    'turn': r'\b(?:turn(?:s|ing)?|pivot(?:s|ing)?)\b',
+    'wave': r'\bwav(?:e|es|ing)\b',
+    'sidestep': r'\b(?:side[ -]?step(?:s|ping)?|step(?:s|ping)? (?:sideways|laterally|to the (?:left|right)))\b',
+    'crouch': r'\b(?:squat(?:s|ting)?|crouch(?:es|ing)?)\b',
+    'stand': r'\bstand(?:s|ing)?\b',
+    'shadowbox': r'\b(?:shadow[ -]?box(?:es|ing)?|punch(?:es|ing)? (?:the )?air|throws? (?:alternating |repeated )?punches)\b',
+    'bow': r'\bbow(?:s|ing)?\b',
+    'salute': r'\bsalut(?:e|es|ing)\b',
+    'jump': r'\b(?:jump(?:s|ing)?|hop(?:s|ping)?|leap(?:s|ing)?)\b',
+    'land': r'\bland(?:s|ing)?\b',
 }
-_TIMING_CLAUSE = re.compile(r'\b(?:then|afterward|after that|finally|and)\b|[.!?;,]', re.I)
+# Split choreography clauses without breaking decimal durations. Colons also
+# separate a scene-level preamble from the first action.
+_TIMING_CLAUSE = re.compile(r'\b(?:then|afterward|after that|finally|and)\b|[!?;,:]|(?<!\d)\.|\.(?!\d)', re.I)
 _SCENE_DURATION_CUE = re.compile(
     r'\b(?:scene|story|sequence|performance|overall|total|entire|whole|duration|long)\b', re.I)
+_NUMBER_WORDS = dict(zip(
+    ('zero one two three four five six seven eight nine ten eleven twelve thirteen '
+     'fourteen fifteen sixteen seventeen eighteen nineteen').split(), range(20)))
+_NUMBER_WORDS.update(a=1, twenty=20, thirty=30, forty=40, fifty=50, sixty=60,
+                     seventy=70, eighty=80, ninety=90)
+_SMALL_NUMBERS = '|'.join(word for word, value in _NUMBER_WORDS.items() if value < 20)
+_TENS = '|'.join(word for word, value in _NUMBER_WORDS.items() if value >= 20)
+_DURATION = re.compile(
+    r'(?<![\w.])(?P<number>\d+(?:\.\d+)?|(?:' + _TENS
+    + r')(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?|'
+    + _SMALL_NUMBERS + r')[ -]*(?P<unit>seconds?|secs?|s|minutes?|mins?)\b', re.I)
+
+
+def _duration_frames(clause):
+    """Read only explicit numeric/number-word durations, never infer timing."""
+    durations = []
+    for match in _DURATION.finditer(clause):
+        number = match['number'].lower()
+        words = number.replace('-', ' ').split()
+        value = sum(_NUMBER_WORDS[word] for word in words) if words[0] in _NUMBER_WORDS else float(number)
+        if match['unit'].lower().startswith('m'):
+            value *= 60
+        durations.append(round(value * FPS))
+    return durations
+
+
+def _scene_duration_frames(prompt):
+    durations = [duration for clause in _TIMING_CLAUSE.split(_QUOTED_DIALOGUE.sub('', prompt))
+                 if _SCENE_DURATION_CUE.search(clause)
+                 for duration in _duration_frames(clause)]
+    if len(set(durations)) > 1:
+        raise ValueError('Conflicting explicit scene durations; specify one total')
+    if durations:
+        validate_story_seconds(durations[0] / FPS)
+        return durations[0]
+    return None
 
 
 def explicit_scene_timing(prompt):
     """Recognize a duration assigned to the whole scene rather than an action."""
-    return any(_EXPLICIT_TIMING.search(clause) and _SCENE_DURATION_CUE.search(clause)
-               for clause in _TIMING_CLAUSE.split(prompt))
+    return _scene_duration_frames(prompt) is not None
 
 
 def recovery_timing_flags(prompt):
     """Match user-stated durations to get-up clauses in their original order."""
-    return tuple(bool(_EXPLICIT_TIMING.search(clause))
+    return tuple(bool(_duration_frames(clause))
                  for clause in _TIMING_CLAUSE.split(prompt)
                  if is_recovery_motion(clause))
 
 
 def story_action_cues(text):
-    """Return recognized positive action cues in textual order."""
+    """Return recognized positive action cues in textual order.
+
+    This small motion vocabulary is a coverage guard, not a language parser.
+    Unrecognized movements still use the choreographer's normal planning.
+    """
     if _NEGATION.search(text):
         return []
+    # Stopping a named movement is one action, not a new instance of it.
+    text = re.sub(r'\bstop(?:s|ping)? (?:running|walking|jogging|dancing)\b',
+                  'stops', text, flags=re.I)
     matches = [(match.start(), action) for action, pattern in _ACTION_CUES.items()
                for match in re.finditer(pattern, text, re.I)]
-    return [action for _, action in sorted(matches)]
+    actions = [action for _, action in sorted(matches)]
+    # A floor recovery ends standing; standing still is also a valid stop.
+    if 'recover' in actions or 'stop' in actions:
+        actions = [action for action in actions if action != 'stand']
+    return actions
+
+
+def _requested_actions(prompt):
+    for clause in _TIMING_CLAUSE.split(_QUOTED_DIALOGUE.sub('', prompt)):
+        actions = story_action_cues(clause)
+        durations = _duration_frames(clause)
+        timed = len(actions) == len(durations) == 1 and not _SCENE_DURATION_CUE.search(clause)
+        for action in actions:
+            yield action, durations[0] if timed else None
 
 
 def _standing_motion(text):
@@ -87,20 +156,67 @@ def _standing_motion(text):
             and bool(re.search(r'\bstand(?:s|ing)?\b', text, re.I)))
 
 
+# The generator may describe a jog as running. A stop must retain its stop
+# cue (including standing still); generic standing does not imply settling.
+_ACTION_EQUIVALENTS = {'jog': {'jog', 'run'}}
+
+
 def _check_action_coverage(plan):
-    """Catch missing/collapsed familiar actions even when 'then' is absent."""
-    requested = story_action_cues(_QUOTED_DIALOGUE.sub('', plan['prompt']))
+    """Match requested motions in order, allowing additional transition beats."""
     cursor = 0
-    for action in requested:
+    matches = []
+    for action, frames in _requested_actions(plan['prompt']):
         for index in range(cursor, len(plan['beats'])):
             cues = story_action_cues(plan['beats'][index]['prompt'])
-            if action in cues:
+            if _ACTION_EQUIVALENTS.get(action, {action}).intersection(cues):
                 if len(set(cues)) > 1:
                     raise ValueError(f'Keep {action} and the next action in separate beats')
-                cursor = index + 1
+                indices = [index]
+                # Long continuous actions may require multiple <=30s beats.
+                if frames is not None and frames > round(MAX_BEAT_SECONDS * FPS):
+                    duration = round(plan['beats'][index]['seconds'] * FPS)
+                    while duration < frames and indices[-1] + 1 < len(plan['beats']):
+                        next_index = indices[-1] + 1
+                        next_cues = set(story_action_cues(plan['beats'][next_index]['prompt']))
+                        if not next_cues or not next_cues.issubset(_ACTION_EQUIVALENTS.get(action, {action})):
+                            break
+                        indices.append(next_index)
+                        duration += round(plan['beats'][next_index]['seconds'] * FPS)
+                matches.append((tuple(indices), action, frames))
+                cursor = indices[-1] + 1
                 break
         else:
             raise ValueError(f'Story plan must preserve the requested {action} action in order in a separate beat')
+    return matches
+
+
+def _check_action_timing(plan):
+    if not any(frames is not None for _, frames in _requested_actions(plan['prompt'])):
+        return set()
+    locked = set()
+    for indices, action, frames in _check_action_coverage(plan):
+        if frames is not None:
+            if sum(round(plan['beats'][index]['seconds'] * FPS) for index in indices) != frames:
+                raise ValueError(f'The requested {action} action must last {frames / FPS:g} seconds')
+            locked.update(indices)
+    return locked
+
+
+def story_beat_timing_flags(plan):
+    """Expose timing provenance for queue completion without changing the schema.
+
+    Explicit total durations lock every beat. Otherwise align timed source
+    actions to planned beats, allowing inserted transitions and long actions.
+    """
+    if explicit_scene_timing(plan['prompt']):
+        return (True,) * len(plan['beats'])
+    flags = [bool(_duration_frames(beat['prompt'])) for beat in plan['beats']]
+    if any(frames is not None for _, frames in _requested_actions(plan['prompt'])):
+        for indices, _, frames in _check_action_coverage(plan):
+            if frames is not None:
+                for index in indices:
+                    flags[index] = True
+    return tuple(flags)
 
 
 def _auto_recovery_timing(plan):
@@ -302,6 +418,11 @@ def fit_story_duration(plan, seconds=None, expected_prompt=None):
     """Align estimates to frames; only repair tiny fixed-target rounding drift."""
     frames = validate_story_seconds(seconds) if seconds is not None else None
     source = validate_story_plan(plan, expected_prompt=expected_prompt)
+    prose_frames = _scene_duration_frames(source['prompt'])
+    if frames is not None and prose_frames is not None and frames != prose_frames:
+        raise ValueError('Scene duration field conflicts with the explicit duration in the request')
+    frames = prose_frames if frames is None else frames
+    locked = _check_action_timing(source)
     if frames is None:
         return validate_story_plan(_auto_recovery_timing(source), expected_prompt=source['prompt'])
     beats = source['beats']
@@ -315,7 +436,8 @@ def fit_story_duration(plan, seconds=None, expected_prompt=None):
         raise ValueError('Requested scene duration does not fit natural action timing; use Auto or revise the request')
     direction = 1 if difference > 0 else -1
     candidates = sorted(range(len(beats)), key=lambda i: beats[i]['seconds'], reverse=True)
-    candidates = [i for i in candidates if 4 <= round(beats[i]['seconds'] * FPS) + direction <= 750]
+    candidates = [i for i in candidates if i not in locked
+                  and 4 <= round(beats[i]['seconds'] * FPS) + direction <= 750]
     if len(candidates) < abs(difference):
         raise ValueError('Requested scene duration cannot fit the planned actions; use Auto or revise the request')
     for index in candidates[:abs(difference)]:
@@ -339,6 +461,11 @@ class StoryPlanner:
 
     def plan(self, prompt, context=None, seconds=None):
         prompt = validate_prompt(prompt)
+        prose_frames = _scene_duration_frames(prompt)
+        if prose_frames is not None:
+            if seconds is not None and validate_story_seconds(seconds) != prose_frames:
+                raise ValueError('Scene duration field conflicts with the explicit duration in the request')
+            seconds = prose_frames / FPS
         system = story_system_prompt(context, seconds=seconds)
         document = self.gateway.request_json(system, prompt, max_tokens=4000)
         try:
@@ -347,7 +474,9 @@ class StoryPlanner:
             # Only schema/semantic validation is retried. A transport failure is
             # surfaced immediately and the caller's current take is untouched.
             repair = (system + '\nYour previous plan failed validation: ' + str(error)
-                      + '. Return the entire corrected JSON plan, with the original request unchanged.')
+                      + '. Return the entire corrected JSON plan, with the original request unchanged.'
+                      + '\nPrevious plan (reference data to repair): '
+                      + json.dumps(document, ensure_ascii=False)[:16000])
             document = self.gateway.request_json(repair, prompt, max_tokens=4000)
             return self._checked(document, prompt, seconds)
 
