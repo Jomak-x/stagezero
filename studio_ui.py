@@ -602,6 +602,8 @@ class StudioUI:
             motion = self._active_motion_session()
             if motion is not None:
                 state = motion.snapshot()
+                if not state.get('total_frames') or state.get('busy') or state.get('capturing'):
+                    return
                 if value == 'Play': motion.play()
                 elif value == 'Pause': motion.pause()
                 elif value == 'Start': motion.seek(0)
@@ -1053,9 +1055,15 @@ class StudioUI:
             detail = '' if s.status.startswith(ROUTINE_STATUS_PREFIXES) else s.status
             detail_html = f' <span>· {escape(detail)}</span>' if detail else ''
             self._set(self.status, 'content', f'<div class="sz-status">{state} · {escape(source)}{detail_html}</div>')
-            # Playback and clock live in the bottom timeline toolbar.
+            # G1 uses its bottom timeline toolbar. Native modes reuse this
+            # existing button group because that toolbar routes G1 commands.
+            # Button groups cannot be disabled, so hide while native work or
+            # capture owns the take; callbacks also reject stale clicks.
+            motion_session = self._active_motion_session()
+            motion_state = motion_session.snapshot() if motion_session is not None else {}
             self._set(self.playhead, 'visible', False)
-            self._set(self.transport, 'visible', False)
+            self._set(self.transport, 'visible', bool(motion_state.get('total_frames') and
+                not motion_state.get('busy') and not motion_state.get('capturing')))
             self._set(self.seek_go, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.seek_time, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.mode, 'disabled', s.busy)

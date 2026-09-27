@@ -1,6 +1,6 @@
-# Main UI cast integration — 2026-09-26
+# Main UI cast integration — 2026-09-27
 
-User approved integrating the reviewed multi-person milestone into main through PR #21. Read [MAIN-CAST.md](MAIN-CAST.md). The main studio keeps its layout; **Motion → Direct → AI cast · 1–3 people** adds the prompt workflow using the existing Scene tab, transport, timeline and save/open controls. The standalone prompt studio remains a research tool.
+User approved integrating the reviewed multi-person milestone into main through PR #21. Read [MAIN-CAST.md](MAIN-CAST.md). The main studio keeps its layout; **Motion → Direct → AI cast · 1–3 people** adds the prompt workflow using the existing Scene tab, transport, timeline and save/open controls. The standalone prompt studio remains a research tool. The existing private Tailscale URL on port 2380 now runs the integrated `director_viewer.py`, loading the reviewed recovered three-person Market take. Final main-UI evidence is in `review/main-cast-ui/` (fresh generation, complete video, source archives and commands). Main background stability changes through `14aa422` are included.
 
 Preserve all original worker processes, private runtime files and rejected motion evidence. The authorized total RunPod ceiling is **$3/hour**; ask before exceeding it. Last observed existing running total was **$1.37/hour**, with no new Pod rented for this work. Check actual PR/runtime state before continuing; root owns final merge and deployment.
 

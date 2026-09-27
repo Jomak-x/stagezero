@@ -929,6 +929,44 @@ class StudioUITests(unittest.TestCase):
         self.assertEqual(tuple(self.gui.tab_labels), original_tabs)
 
 
+    def test_native_playback_controls_are_visible_and_hide_for_work_capture_and_g1(self):
+        from cast_performance_session import CastPerformanceSession
+        from test_cast_performance import performance
+        cast = CastPerformanceSession()
+        self.addCleanup(cast.close)
+        self.ui.cast_session = cast
+        cast.activate()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        cast.load_performance(performance(3, frames=12))
+        before = self.session.positions.copy()
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        self.ui.transport.click('Play')
+        self.assertTrue(cast.snapshot()['playing'])
+        self.ui.transport.click('Pause')
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.seek(7)
+        self.ui.transport.click('Start')
+        self.assertEqual(cast.snapshot()['frame'], 0)
+        cast.begin_capture()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.ui.transport.click('Play')  # A stale client click stays harmless.
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.end_capture(0)
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        with patch.object(cast, 'snapshot', return_value=dict(cast.snapshot(), busy=True)):
+            self.ui.update()
+            self.assertFalse(self.ui.transport.visible)
+            self.ui.transport.click('Play')
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.deactivate()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        np.testing.assert_array_equal(self.session.positions, before)
+
     def test_new_take_waits_for_cast_work_then_uses_explicit_mode_handoff(self):
         state = {'active': True, 'busy': True, 'capturing': False,
                  'total_frames': 8, 'frame': 0, 'fps': 30, 'status': 'Generating'}

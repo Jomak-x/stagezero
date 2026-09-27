@@ -1,6 +1,6 @@
 # Multi-person motion in the main studio
 
-The existing main studio layout is preserved. In **Motion → Direct**, choose **AI cast · 1–3 people**. Describe the people and actions, then Generate. Cast size, starting places and duration are automatic. Use the existing **Scene** tab to generate or choose the background, the existing playback bar and bottom timeline to review, and the existing Save project/download and Open controls for the active performance.
+The existing main studio layout is preserved. In **Motion → Direct**, choose **AI cast · 1–3 people**. Describe the people and actions, then Generate. Cast size, starting places and duration are automatic. Use the existing **Scene** tab to generate or choose the background, the Playback buttons and bottom timeline to review, and the existing Save project/download and Open controls for the active performance.
 
 Examples:
 
