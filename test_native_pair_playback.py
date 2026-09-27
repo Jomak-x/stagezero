@@ -2,6 +2,9 @@
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
+import subprocess
+import sys
+import textwrap
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -335,6 +338,43 @@ class NativePairPlaybackTests(unittest.TestCase):
             self.assertEqual(len(notifications), 1)
             self.controller.clear()
             timer.return_value.cancel.assert_called()
+
+    def test_director_registers_native_status_before_the_socket_server_starts(self):
+        # A fresh interpreter matters: this test module itself imports the
+        # protocol, which would hide a late-import startup race in this process.
+        script = textwrap.dedent('''
+            import sys
+            import msgspec
+            from viser import _messages
+            import director_viewer
+
+            class ReachedServerStartup(Exception):
+                pass
+
+            def check_server_start(**kwargs):
+                # First websocket deserialization freezes Viser's cached type
+                # registry. A returning tab can acknowledge immediately here.
+                message = _messages.Message.deserialize(msgspec.msgpack.encode({
+                    'type': 'NativePairStatusMessage', 'revision': 1,
+                    'status': 'loaded', 'error': None,
+                }))
+                assert type(message).__name__ == 'NativePairStatusMessage'
+                assert message.revision == 1 and message.status == 'loaded'
+                raise ReachedServerStartup
+
+            director_viewer.create_studio_server = check_server_start
+            director_viewer.load_recording = lambda path: (None, None, None)
+            sys.argv = ['director_viewer.py']
+            try:
+                director_viewer.main()
+            except ReachedServerStartup:
+                pass
+            else:
+                raise AssertionError('Director did not reach server startup')
+        ''')
+        completed = subprocess.run([sys.executable, '-c', script],
+            cwd=Path(__file__).parent, capture_output=True, text=True, timeout=30)
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
 
 
 if __name__ == '__main__':

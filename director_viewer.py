@@ -28,6 +28,7 @@ from studio_core_renderer import StudioCoreRenderer
 from native_pair_session import NativePairSession
 from native_pair_renderer import NativePairRenderer
 from native_pair_controls import NativePairControls
+from native_pair_playback import NativePairPlaybackController
 
 
 MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
@@ -197,7 +198,6 @@ def main():
     core_document_epoch = None
     paired_document = paired.scene_document
     paired_document_revision = None
-    from native_pair_playback import NativePairPlaybackController
     native_playback = NativePairPlaybackController(server,
         get_state=lambda: dict(paired.snapshot(), enabled=paired_requested))
     paired_renderer.local_playback = native_playback
