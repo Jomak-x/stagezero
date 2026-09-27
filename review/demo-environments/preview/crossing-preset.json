@@ -1,0 +1,266 @@
+{
+  "scene": "crossing",
+  "cameras": [
+    {
+      "id": "avenue",
+      "label": "Along the avenue",
+      "position": [
+        -71,
+        2.2,
+        24
+      ],
+      "target": [
+        23,
+        8,
+        -26
+      ],
+      "fov": 55
+    },
+    {
+      "id": "centre",
+      "label": "In the crossing",
+      "position": [
+        0,
+        1.7,
+        3
+      ],
+      "target": [
+        -33,
+        14,
+        -37
+      ],
+      "fov": 71
+    },
+    {
+      "id": "corner",
+      "label": "Corner shops",
+      "position": [
+        4,
+        1.7,
+        -26
+      ],
+      "target": [
+        -39,
+        4.3,
+        -29
+      ],
+      "fov": 62
+    },
+    {
+      "id": "hero",
+      "label": "Crossing \u00b7 hero",
+      "position": [
+        7,
+        23,
+        61
+      ],
+      "target": [
+        -1,
+        6,
+        -9
+      ],
+      "fov": 57
+    },
+    {
+      "id": "overhead",
+      "label": "Crossing geometry",
+      "position": [
+        1,
+        110,
+        14
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ],
+      "fov": 48
+    },
+    {
+      "id": "street",
+      "label": "Scramble \u00b7 eye level",
+      "position": [
+        22,
+        1.72,
+        25
+      ],
+      "target": [
+        -19,
+        9,
+        -27
+      ],
+      "fov": 66
+    }
+  ],
+  "metadata": {
+    "title": "Koma Crossing",
+    "description": "A broad fictional Tokyo-inspired scramble crossing framed by layered shopfronts, rounded glazing, billboards and continuous city streets.",
+    "units": "metres; Y up; public ground Y=0",
+    "provenance": "Original procedural geometry and original canvas graphics authored in EnvironmentScene.ts. No scanned, generated or third-party geometry. Advertising photographs and upper-floor window detail use original AI-generated raster atlases; other surfaces and signs use original canvas graphics. Upper-floor glazing detail is a baked reflection/interior texture, not simulated rooms. All business names and advertisements are fictional.",
+    "bounds": {
+      "min": [
+        -330,
+        0,
+        -330
+      ],
+      "max": [
+        330,
+        64,
+        330
+      ]
+    },
+    "walkableRects": [
+      {
+        "id": "scramble",
+        "min": [
+          -24,
+          -24
+        ],
+        "max": [
+          24,
+          24
+        ],
+        "y": 0
+      },
+      {
+        "id": "east-west--1",
+        "min": [
+          -125,
+          -30
+        ],
+        "max": [
+          125,
+          -22
+        ],
+        "y": 0
+      },
+      {
+        "id": "north-south--1",
+        "min": [
+          -30,
+          -125
+        ],
+        "max": [
+          -22,
+          125
+        ],
+        "y": 0
+      },
+      {
+        "id": "east-west-1",
+        "min": [
+          -125,
+          22
+        ],
+        "max": [
+          125,
+          30
+        ],
+        "y": 0
+      },
+      {
+        "id": "north-south-1",
+        "min": [
+          22,
+          -125
+        ],
+        "max": [
+          30,
+          125
+        ],
+        "y": 0
+      }
+    ],
+    "spawnExitGates": [
+      {
+        "id": "north",
+        "position": [
+          25,
+          0,
+          -115
+        ],
+        "width": 6,
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "id": "south",
+        "position": [
+          -25,
+          0,
+          115
+        ],
+        "width": 6,
+        "direction": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "id": "east",
+        "position": [
+          115,
+          0,
+          25
+        ],
+        "width": 6,
+        "direction": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "west",
+        "position": [
+          -115,
+          0,
+          -25
+        ],
+        "width": 6,
+        "direction": [
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "interactionAnchors": [
+      {
+        "id": "scramble-centre",
+        "label": "Crossing centre",
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "corner-plaza",
+        "label": "Koma corner",
+        "position": [
+          -26,
+          0,
+          -27
+        ]
+      }
+    ],
+    "clearWidths": {
+      "roadway": 44,
+      "cornerSidewalk": 8,
+      "zebra": 5.3,
+      "diagonalZebra": 4.8
+    },
+    "limitations": [
+      "Fictional architectural study inspired by Japanese urban districts; not a survey or reconstruction of a real place.",
+      "Visual environment only: no actors, traffic, crowd generation, navigation mesh, collision physics or automatic door behavior.",
+      "Walkable rectangles and gates are broad planning regions and do not subtract furniture or building footprints; they are not a baked navigation solution. Public circulation is flat at Y=0; station steps are visual geometry alongside a level bypass."
+    ]
+  },
+  "geometry_source": "studio_client/src/environments/EnvironmentScene.ts",
+  "geometry_seed": 239
+}
