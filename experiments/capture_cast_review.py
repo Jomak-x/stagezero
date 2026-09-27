@@ -3,7 +3,9 @@
 The JSON manifest is a list of {"archive": "...npz", "output_dir": "..."}
 objects. Paths are resolved relative to the manifest. An optional "camera"
 value of "closer" uses --closer-factor for that case; the default is the
-full-take prompt-scene camera. No model or live Studio service is used.
+full-take prompt-scene camera. fixed_camera optionally supplies position,
+look_at and fov_radians for a matched before/after view. No model or live
+Studio service is used.
 
 Example:
     python experiments/capture_cast_review.py --manifest review/cast-cases.json \
@@ -54,6 +56,16 @@ def read_cases(manifest: Path, output_root: Path | None = None) -> list[dict]:
             raise ValueError(f'Case {number} needs archive and output_dir strings')
         if item.get('camera', 'full') not in ('full', 'closer'):
             raise ValueError(f'Case {number} camera must be full or closer')
+        fixed = item.get('fixed_camera')
+        if fixed is not None:
+            if (not isinstance(fixed, dict) or any(
+                    not isinstance(fixed.get(k), list) or len(fixed[k]) != 3
+                    or any(type(v) not in (int, float) or not math.isfinite(v) for v in fixed[k])
+                    for k in ('position', 'look_at'))
+                    or type(fixed.get('fov_radians')) not in (int, float)
+                    or not .05 < fixed['fov_radians'] < 3.
+                    or fixed['position'] == fixed['look_at']):
+                raise ValueError(f'Case {number} fixed_camera needs finite vectors and a valid FOV')
         archive = (manifest.parent / item['archive']).resolve()
         output = (manifest.parent / item['output_dir']).resolve()
         if output_root is not None:
@@ -65,7 +77,7 @@ def read_cases(manifest: Path, output_root: Path | None = None) -> list[dict]:
         if output in outputs or output.exists():
             raise FileExistsError(f'Case {number} output must be new and unique: {output}')
         outputs.add(output)
-        cases.append({'archive': archive, 'output': output, 'camera': item.get('camera', 'full')})
+        cases.append({'archive': archive, 'output': output, 'camera': item.get('camera', 'full'), 'fixed_camera': fixed})
     return cases
 
 
@@ -78,13 +90,15 @@ def scene_states(scene: dict, seconds: float) -> dict:
             'lighting': scene.get('lighting', 'neutral'), 'seconds': seconds}
 
 
-def set_camera(client, clip, scene: dict, mode: str, closer_factor: float) -> dict:
-    position, center, fov = prompt_scene_camera_view(
-        clip, scene, frame=0, aspect=getattr(client.camera, 'aspect', 16 / 9))
-    if mode == 'closer':
-        # An optional detail view. It can crop wide movements by design; the
-        # standard full-take view remains the default and is always available.
-        position = center + (position - center) * closer_factor
+def set_camera(client, clip, scene: dict, mode: str, closer_factor: float, fixed=None) -> dict:
+    if fixed is not None:
+        position, center, fov = fixed['position'], fixed['look_at'], fixed['fov_radians']
+        mode = 'fixed_comparison_view'
+    else:
+        position, center, fov = prompt_scene_camera_view(
+            clip, scene, frame=0, aspect=getattr(client.camera, 'aspect', 16 / 9))
+        if mode == 'closer':
+            position = center + (position - center) * closer_factor
     client.camera.up_direction = (0, 1, 0)
     client.camera.near, client.camera.far = .05, 400.
     client.camera.position = tuple(float(v) for v in position)
@@ -161,7 +175,7 @@ def run(args: argparse.Namespace) -> None:
                 renderer.set_clip(clip)
                 renderer.set_visible(True)
                 playback.update(session.snapshot(), enabled=True)
-                record['camera'] = set_camera(client, clip, scene, case['camera'], args.closer_factor)
+                record['camera'] = set_camera(client, clip, scene, case['camera'], args.closer_factor, case['fixed_camera'])
                 server.flush()
                 # A fresh clip must be acknowledged by this exact browser tab.
                 # capture_pair also checks readiness after acquiring its lease.

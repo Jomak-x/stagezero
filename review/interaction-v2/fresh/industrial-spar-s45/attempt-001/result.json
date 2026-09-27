@@ -1,0 +1,4739 @@
+{
+  "version": 1,
+  "model": "ARDY Core + InterGen",
+  "prompt": "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+  "title": "Controlled Boxing Spar",
+  "fps": 30,
+  "frames": 381,
+  "actor_ids": [
+    "actor_1",
+    "actor_2"
+  ],
+  "plan": {
+    "version": 1,
+    "title": "Controlled Boxing Spar",
+    "prompt": "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": {
+          "x": -3.0,
+          "z": 0.0
+        }
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": {
+          "x": 3.0,
+          "z": 0.0
+        }
+      }
+    ],
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0
+    },
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+        "seconds": 7.0
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -3.0,
+        "z": 0.0
+      },
+      "actor_2": {
+        "x": 3.0,
+        "z": 0.0
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -3.0,
+          0.0
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          3.0,
+          0.0
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false,
+    "initial_source_staging": {
+      "candidate": "outward-0.8-idle-0",
+      "explicit_starts_preserved": [
+        "actor_1",
+        "actor_2"
+      ],
+      "candidate_count": 1,
+      "planning_only": true,
+      "observer_orientation": {},
+      "selection": "shortest approach duration, then total route distance; source-oriented starts win ties"
+    }
+  },
+  "segments": [
+    {
+      "source": "ardy_core",
+      "kind": "approach",
+      "label": "Core approach from independent starts",
+      "start_frame": 0,
+      "end_frame_exclusive": 150,
+      "frames": 150
+    },
+    {
+      "source": "authored_transition",
+      "kind": "transition",
+      "label": "Authored entry transition",
+      "start_frame": 150,
+      "end_frame_exclusive": 171,
+      "frames": 21
+    },
+    {
+      "source": "intergen",
+      "kind": "paired_action",
+      "label": "Native paired interaction",
+      "start_frame": 171,
+      "end_frame_exclusive": 381,
+      "frames": 210
+    }
+  ],
+  "segment_activity": [
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 150,
+      "active_actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "held_actor_ids": [],
+      "contact_actor_ids": [],
+      "inactive_motion": "authored stationary-root observer continuation after composition"
+    },
+    {
+      "start_frame": 150,
+      "end_frame_exclusive": 171,
+      "active_actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "held_actor_ids": [],
+      "contact_actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "inactive_motion": "authored stationary-root observer continuation after composition"
+    },
+    {
+      "start_frame": 171,
+      "end_frame_exclusive": 381,
+      "active_actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "held_actor_ids": [],
+      "contact_actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "inactive_motion": "authored stationary-root observer continuation after composition"
+    }
+  ],
+  "scene_geometry": [
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 150,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.35078468864799,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.679402393776793,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.453781877607457,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.086732639837595,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.9590245168144733,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.92854451964868,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.2375884036458755,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.61729249591056,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.063302877387358,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.61985265664992,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.58597415285231,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.174927065285027,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.690078817105869,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.058431832517448,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.999151829413593,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.5373863215286194,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.410547948282466,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.966449107344857,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.727053802656082,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.47267492050623,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.134464804071965,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.8441623195120496,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.270376207668852,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.514022088747259,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.841676505508542,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.79081307583677,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.149212760621968,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.355013015342518,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.99742338263503,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.132413667281307,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.060022863616014,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.568517825064758,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.985214978138144,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.298235929450746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.543604452068386,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.750784688647993,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.92328285919176,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.285441225667043,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.306987399771758,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.785435713738803,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.40865872308701,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 150,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.41279423489526,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.670044092406052,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.368055256042858,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.156302746217301,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7489910966425093,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.67091126030507,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.923604466890417,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.935601453442111,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.915872363472785,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.242201549995572,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.314424750359947,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.332806655055222,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.648054446130593,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.068740826513167,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.679487192018556,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.922691361027354,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.56559577240178,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.604838540744698,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.673511740839521,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.454758596050342,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.069127982052069,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.9306408634848738,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.885507766930798,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.190197705565746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.361732910700496,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.991167563240646,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.5231304385505,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.103271964527076,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.070095089446292,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.646683574745197,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.735661981456985,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.902843906959504,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.508830141934893,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.112584719619394,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.400309567644529,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.81279423489526,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.683244291690948,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.808495872357462,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.925969458373428,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.955291803463425,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.488389540637716,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_root_separation_m": 0.9855841843353881
+        }
+      ],
+      "intended_contact_pair": [],
+      "physical_contact_verified": false
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 22,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.539092933384232,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.456749219069954,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.215541974318816,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.849372201624135,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.5990070849793394,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.103460148641387,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.346776162555699,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.700220272650824,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.630051358213827,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.001662686612654,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.275184112979412,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.818148231315527,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.966886016012837,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.952554906239138,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.414010866644992,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.699677330639234,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.179930728343537,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.483647589497364,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.657432999081585,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.39993734890047,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.076123284095687,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7697242094821486,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.184386352112798,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.42800632869644,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.819537432811146,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.741295141870655,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.117992182085542,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.364924188030436,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.9112123500970455,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.047401483994415,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.070701715467848,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.526960479753447,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.817830564659404,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.282255199263869,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.552120728624663,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.939092933384234,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.933250751984078,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.820107139824295,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.340001184330766,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.9035632351833,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.533856603985466,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 22,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.866668128967284,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.53057441378145,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.240908878304413,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.007054037449841,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.6113955922843206,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.80833130232029,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.053646740540163,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.265326373790277,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.220667213998652,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.574248518835352,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.730479106903246,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.48830934375933,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.711434301563488,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.456142334839456,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.994919345770489,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.769359768471555,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.747526440305361,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.985214749415322,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.199201995259477,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.900486072069661,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.690684945943418,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.278055317000185,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.455371325907985,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.698815604349024,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.023577954970441,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.95689161811414,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.325749885607458,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.610358336603573,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.158725681654625,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.349983916598024,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.279452230491183,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.7379035634676,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.638175795325222,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.6952043829295,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.882112543771605,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.266668128967286,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.183309519780768,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.239055918069463,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.014228324906559,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.374339459612607,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.93222782243755,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [],
+      "intended_contact_pair": [
+        "actor_1",
+        "actor_2"
+      ],
+      "physical_contact_verified": false
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 211,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.971579391956327,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.241516939698418,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.981119745370918,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.669995044637082,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.3501491071119665,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.706240210302271,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.94953532634242,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.224959128314887,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.17114028807521,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.53155152941777,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.770997435134966,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.403863247957182,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.587984921472022,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.457853280612788,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.947864166453625,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.524514893801055,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.72578753290908,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.011396333985562,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.304481881891988,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.060608395365527,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.683096548846538,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.4320644589191147,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.685676919175,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.9301179617485,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.182059573779237,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.131787261717303,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.489734759681543,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.716736379116146,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.372546733325366,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.598971648400925,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.408120193687834,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.907570165164746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.5095349603515915,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.7084824517897275,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.963829017061695,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.37157939195633,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.286222933523443,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.312082317472683,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.981702479084802,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.36348693904388,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.986281122692382,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 211,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.943516969680786,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.786072448154128,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.439426497789604,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.310917182713747,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 2.885917182713747,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.691024768738004,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.938956283131414,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.159140420144838,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.098901931305013,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.462850889826251,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.725062574237606,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.362090838252989,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.642229854188598,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.401348025628828,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.87698959959038,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.252390684098649,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.863741269003275,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.091044995901656,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.20397445595802,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.973809088313196,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.593363029714791,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 2.38269558321518,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.002014301437237,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.251713380475085,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.392884073917926,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.354415062327433,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.699099131869833,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.78133663452038,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.66818190815378,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.906758713604863,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.528265300843156,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.126439057691778,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.039425257100488,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.115516141318553,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.195313679078696,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.343516969680786,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.351760340016576,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.281094595079356,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.605054776844265,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.558333496399905,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.109248706572307,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [],
+      "intended_contact_pair": [
+        "actor_1",
+        "actor_2"
+      ],
+      "physical_contact_verified": false
+    }
+  ],
+  "transition_boundaries": [],
+  "pre_refinement_scene_geometry": [
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 150,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.35078468864799,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.679402393776793,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.453781877607457,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.086732639837595,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.9590245168144733,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.92854451964868,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.2375884036458755,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.61729249591056,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.063302877387358,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.61985265664992,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.58597415285231,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.174927065285027,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.690078817105869,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.058431832517448,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.999151829413593,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.5373863215286194,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.410547948282466,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.966449107344857,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.727053802656082,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.47267492050623,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.134464804071965,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.8441623195120496,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.270376207668852,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.514022088747259,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.841676505508542,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.79081307583677,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.149212760621968,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.355013015342518,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.99742338263503,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.132413667281307,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.060022863616014,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.568517825064758,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.985214978138144,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.298235929450746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.543604452068386,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.750784688647993,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.92328285919176,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.285441225667043,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.306987399771758,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.785435713738803,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.40865872308701,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 150,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.41279423489526,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.670044092406052,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.368055256042858,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.156302746217301,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7489910966425093,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.67091126030507,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.923604466890417,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.935601453442111,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.915872363472785,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.242201549995572,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.314424750359947,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.332806655055222,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.648054446130593,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.068740826513167,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.679487192018556,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.922691361027354,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.56559577240178,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.604838540744698,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.673511740839521,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.454758596050342,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.069127982052069,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 0.9306408634848738,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.885507766930798,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.190197705565746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.361732910700496,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.991167563240646,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.5231304385505,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.103271964527076,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.070095089446292,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.646683574745197,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.735661981456985,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.902843906959504,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.508830141934893,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.112584719619394,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.400309567644529,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.81279423489526,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.683244291690948,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.808495872357462,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.925969458373428,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.955291803463425,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.488389540637716,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_root_separation_m": 0.9855841843353881
+        }
+      ],
+      "intended_contact_pair": [],
+      "physical_contact_verified": false
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 22,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.539092933384232,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.456749219069954,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.215541974318816,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.849372201624135,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.5990070849793394,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.103460148641387,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.346776162555699,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.700220272650824,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.630051358213827,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.001662686612654,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.275184112979412,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.818148231315527,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.966886016012837,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.952554906239138,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.414010866644992,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.699677330639234,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.179930728343537,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.483647589497364,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.657432999081585,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.39993734890047,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.076123284095687,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7697242094821486,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.184386352112798,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.42800632869644,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.819537432811146,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.741295141870655,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.117992182085542,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.364924188030436,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.9112123500970455,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.047401483994415,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.070701715467848,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.526960479753447,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.817830564659404,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.282255199263869,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.552120728624663,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.939092933384234,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.933250751984078,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.820107139824295,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.340001184330766,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.9035632351833,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.533856603985466,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 22,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.866668128967284,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.53057441378145,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.240908878304413,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.007054037449841,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.6113955922843206,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.80833130232029,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.053646740540163,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.265326373790277,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.220667213998652,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.574248518835352,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.730479106903246,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.48830934375933,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.711434301563488,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.456142334839456,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.994919345770489,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.769359768471555,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.747526440305361,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.985214749415322,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.199201995259477,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.900486072069661,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.690684945943418,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.278055317000185,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.455371325907985,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.698815604349024,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.023577954970441,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.95689161811414,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.325749885607458,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.610358336603573,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.158725681654625,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.349983916598024,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.279452230491183,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.7379035634676,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.638175795325222,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.6952043829295,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.882112543771605,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.266668128967286,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.183309519780768,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.239055918069463,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.014228324906559,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.374339459612607,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.93222782243755,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [],
+      "intended_contact_pair": [
+        "actor_1",
+        "actor_2"
+      ],
+      "physical_contact_verified": false
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 211,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.971579391956327,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.241516939698418,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.981119745370918,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.669995044637082,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.3501491071119665,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.706240210302271,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.94953532634242,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.224959128314887,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.17114028807521,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.53155152941777,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.770997435134966,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.403863247957182,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.587984921472022,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.457853280612788,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.947864166453625,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.524514893801055,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.72578753290908,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.011396333985562,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.304481881891988,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.060608395365527,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.683096548846538,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.4320644589191147,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.685676919175,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.9301179617485,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.182059573779237,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.131787261717303,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.489734759681543,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.716736379116146,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.372546733325366,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.598971648400925,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.408120193687834,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.907570165164746,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.5095349603515915,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.7084824517897275,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.963829017061695,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.37157939195633,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.286222933523443,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.312082317472683,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.981702479084802,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.36348693904388,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.986281122692382,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "set-0"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              -0.010000000000000009,
+              -0.010000000000000009
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 211,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "set-1",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.943516969680786,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.786072448154128,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.439426497789604,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.310917182713747,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 2.885917182713747,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.691024768738004,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.938956283131414,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.159140420144838,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.098901931305013,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.462850889826251,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.725062574237606,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.362090838252989,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.642229854188598,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.401348025628828,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.87698959959038,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.252390684098649,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.863741269003275,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.091044995901656,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.20397445595802,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.973809088313196,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.593363029714791,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 2.38269558321518,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.002014301437237,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.251713380475085,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.392884073917926,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.354415062327433,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.699099131869833,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.78133663452038,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.66818190815378,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.906758713604863,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.528265300843156,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.126439057691778,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.039425257100488,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.115516141318553,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.195313679078696,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.343516969680786,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.351760340016576,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.281094595079356,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.605054776844265,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.558333496399905,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "set-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.109248706572307,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ],
+      "unpaired_clearance": [],
+      "intended_contact_pair": [
+        "actor_1",
+        "actor_2"
+      ],
+      "physical_contact_verified": false
+    }
+  ],
+  "motion_refinement": {
+    "version": 1,
+    "observer_motion": {
+      "source": "authored bounded observer continuation",
+      "model_generated": false,
+      "version": 1,
+      "seed": 45,
+      "fps": 30,
+      "spans": [],
+      "method": "whole inactive span easing; length-preserving torso/arm rotations; attention to active roots",
+      "active_frames_modified": false,
+      "lower_body_modified": false,
+      "source_pair_frames_modified": false,
+      "physical_contact_verified": false,
+      "visual_acceptance": "unverified",
+      "applied_actor_frames": 0,
+      "maximum_joint_correction_m": 0.0,
+      "maximum_bone_length_error_m": 0.0,
+      "limits": {
+        "upright_correction_degrees": 12,
+        "attention_yaw_degrees": 12,
+        "arm_rotation_degrees_per_joint": 92,
+        "preserved_boundary_frames": 2
+      },
+      "limitations": [
+        "Authored observation, not generated contextual acting or a learned idle model.",
+        "No stepping or lower-body weight transfer; existing foot positions remain exact.",
+        "No finger, eye or palm contact solve; positional head motion is not eye gaze.",
+        "Arm relaxation can change body clearance; caller must check final scene and cast geometry.",
+        "Exact reentry endpoints can require anticipatory return toward the incoming pose."
+      ]
+    },
+    "foot_planting": [],
+    "body_clearance": [
+      {
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "unintended_frames": 150,
+        "baseline_overlap_frames": 0,
+        "refined_overlap_frames": 0,
+        "worsened_overlap_frames": 0,
+        "minimum_baseline_clearance_m": 0.09644629047281646,
+        "minimum_refined_clearance_m": 0.09644629047281646
+      }
+    ],
+    "body_clearance_proxy": "named joint and limb midpoint spheres, all frames; intended contact excluded",
+    "source_pair_frames_modified": false,
+    "root_positions_modified": false,
+    "physical_contact_verified": false,
+    "visual_acceptance": "unverified"
+  },
+  "observer_continuations": [],
+  "unrefined_composition": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/unrefined-cast.npz",
+  "source_manifest": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/manifest.json",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/pair-00.npz",
+      "seconds": 2.0480947499745525,
+      "beat_index": 0,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "planned_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "faad153a3a00b3478312c24dbfa94591784227e517ca4a7ad18393ea00e1f024",
+      "used_in_performance": true
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-000.npz",
+      "seconds": 0.8525234999833629,
+      "sha256": "0777c169494e1929475058ccff4156b201458caba0d22e43ae21be7294dec778"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-001.npz",
+      "seconds": 0.9008055409649387,
+      "sha256": "4340c3c3193fdf12f2319b05d9c5851307c25a057e30b3918adc3f53999f28af"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-002.npz",
+      "seconds": 0.9261944169993512,
+      "sha256": "57bb5809af1305e61ac0973870e07ac3252b8f19ca13324cb28601a5ec3add6e"
+    }
+  ],
+  "stage_timings": [
+    {
+      "stage": "planning",
+      "seconds": 1.7919810488820076e-06
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.015353124996181577
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 2.0480947499745525
+    },
+    {
+      "stage": "native_initial_staging",
+      "seconds": 0.06620829203166068
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-7780769b394b4bb2a45ed57fc67b9c39",
+      "seconds": 0.8525234999833629
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-9419ca31d91f4bab8323570e09d675da",
+      "seconds": 0.9008055409649387
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-08f9caea18304d1a8e33a1788a2e643a",
+      "seconds": 0.9261944169993512
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.023306709015741944
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.006196292000822723
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.03148624999448657
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-1",
+      "seconds": 5.12258575001033
+    },
+    {
+      "stage": "observer_core_continuation",
+      "seconds": 0.00013408297672867775
+    },
+    {
+      "stage": "authored_cast_refinement_and_validation",
+      "seconds": 0.0884744169889018
+    }
+  ],
+  "wall_seconds": 5.245961916982196,
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 1,
+    "core_horizons": "sequential native330 history"
+  },
+  "source_pair_frames_modified": false,
+  "visual_acceptance": "unverified",
+  "core_display_sampling": "20 fps source resampled to 30 fps by timestamp interpolation; complete 40-frame solo horizons preserved in raw archives",
+  "physical_contact_verified": false,
+  "animation_accepted": false,
+  "features": "Separate real source archives only; no cross-model features or joint three-person model."
+}

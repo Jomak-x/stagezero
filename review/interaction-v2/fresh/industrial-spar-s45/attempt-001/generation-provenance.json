@@ -1,0 +1,99 @@
+{
+  "case": "industrial-spar-s45",
+  "seed": 45,
+  "plan": "review/interaction-quality/plans/industrial-spar.json",
+  "plan_sha256": "f3db54f0e49fbb1f8b71704d93c92cf64fb52783d8dfc5029151df6442f05b32",
+  "scene": "review/prompt-scenes/backgrounds/industrial.json",
+  "scene_sha256": "cfdc63d4185ba2c7240ed271059debbc9b10bf2eec56d18fc1ff12d4d0e1114f",
+  "code_commit": "4ccc87b8b69de1c5cb8ff7b33da160ba35d99c7f",
+  "git_dirty_at_launch": true,
+  "code_file_sha256_at_launch": {
+    "experiments/trial_prompt_scene.py": "acb0a17b999d6f5b2fdf0273c0ed5e57bd045d8032c78ac42813d2a5a5345fda",
+    "experiments/review_interaction_v2.py": "114eec0d6fb7d788ef0e9fc878bcca19c73733a7ee669cf7e0dd1182027f8bb9",
+    "prompt_scene_builder.py": "52618cc1040b0958c04fec9ea34c366466ce0b8f4c7d32b187cf2c142b388891",
+    "prompt_scene_plan.py": "01b44a4cd38827e36ac1328f5171575007d5ec7f4956956b71a104e37ac71313",
+    "cast_motion_refinement.py": "08a8704989a7ec039a0866b5b8f167226051a0757cbda180ff00460ca836a5a1",
+    "cast_observer_motion.py": "f9fcf75e893a79007b2c976894a6cdd09b5a2d0f0eb470d8c9f775dd68cf1320",
+    "paired_meetup.py": "dc0ddc119f44c6a5277e8c5e754b7f5a81093f9e25cd9e9c98d402ab00786743",
+    "native_pair_transition.py": "d4e46a3cb325dc780e5e32b8e4daa25089e2a5c660d6522421419f4c3a4c960e",
+    "interaction_scene_collision.py": "e3e2eb269fbaf70cee96060f3d3b3923ba252b9899b8de86c6050966f08a426c",
+    "cast_performance.py": "bdb2d8e205aa05a82b01ff5d425f5a7ac55e8d8a4f02d6e6170c0e0de483db31",
+    "native_wait_pose.py": "438e13ce0e093c415965c0fcf524c0d2c3b17b468ad84311246508c28118cc20",
+    "cast_observer_turn.py": "f6d08182c8574652643cd804e4a0c8b60462e4b9d6771db7d1fa37c7de94592d",
+    "cast_observer_continuation.py": "6c4a54fca4c287f7c93691069922e92d3617bf44a9aa55ea2b5962cfaa33f524"
+  },
+  "held_out": false,
+  "comparison_type": "fresh_Core_and_InterGen_same_saved_plan_seed",
+  "planning": "reviewed saved PR26 plan; no external AI planning",
+  "provider_config_path": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/.runtime/prompt-native-provider.json",
+  "provider_secret_contents_recorded": false,
+  "runner_wall_seconds": 5.431275583978277,
+  "exit_code": 0,
+  "source_archives": [
+    {
+      "manifest": "review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/manifest.json",
+      "sha256": "b06233c0213f3bdf36736c863daa176709c21043521adfb04b7c33d59741c915",
+      "status": "complete",
+      "sources": [
+        {
+          "name": "pair-00.npz",
+          "kind": "intergen",
+          "recorded_sha256": "faad153a3a00b3478312c24dbfa94591784227e517ca4a7ad18393ea00e1f024",
+          "actual_sha256": "faad153a3a00b3478312c24dbfa94591784227e517ca4a7ad18393ea00e1f024",
+          "hash_matches": true
+        },
+        {
+          "name": "core-000.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "0777c169494e1929475058ccff4156b201458caba0d22e43ae21be7294dec778",
+          "actual_sha256": "0777c169494e1929475058ccff4156b201458caba0d22e43ae21be7294dec778",
+          "hash_matches": true
+        },
+        {
+          "name": "core-001.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "4340c3c3193fdf12f2319b05d9c5851307c25a057e30b3918adc3f53999f28af",
+          "actual_sha256": "4340c3c3193fdf12f2319b05d9c5851307c25a057e30b3918adc3f53999f28af",
+          "hash_matches": true
+        },
+        {
+          "name": "core-002.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "57bb5809af1305e61ac0973870e07ac3252b8f19ca13324cb28601a5ec3add6e",
+          "actual_sha256": "57bb5809af1305e61ac0973870e07ac3252b8f19ca13324cb28601a5ec3add6e",
+          "hash_matches": true
+        }
+      ],
+      "all_archived_files": {
+        "core-000.npz": "0777c169494e1929475058ccff4156b201458caba0d22e43ae21be7294dec778",
+        "core-001.npz": "4340c3c3193fdf12f2319b05d9c5851307c25a057e30b3918adc3f53999f28af",
+        "core-002.npz": "57bb5809af1305e61ac0973870e07ac3252b8f19ca13324cb28601a5ec3add6e",
+        "pair-00.json": "ae40ef8bb632ffe615c38fff0009e542cc4eba8650754787b1a2406997882f6c",
+        "pair-00.npz": "faad153a3a00b3478312c24dbfa94591784227e517ca4a7ad18393ea00e1f024",
+        "refined-cast-candidate.npz": "6caf29e1c618d39781e0ec1ab8eaf6dcfb85f01a9de7a2655197b0858a530c44",
+        "unrefined-cast.npz": "6caf29e1c618d39781e0ec1ab8eaf6dcfb85f01a9de7a2655197b0858a530c44"
+      }
+    }
+  ],
+  "archive_sha256": "218c54c41c5446a851d9bc9c454cb13a5e7a6acc3093bdc5937a91e37052e965",
+  "command": [
+    "<python>",
+    "experiments/trial_prompt_scene.py",
+    "--prompt",
+    "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+    "--scene",
+    "review/prompt-scenes/backgrounds/industrial.json",
+    "--plan",
+    "review/interaction-quality/plans/industrial-spar.json",
+    "--config",
+    "<private-config>",
+    "--token",
+    "<private-token>",
+    "--core-url",
+    "http://127.0.0.1:8769",
+    "--seed",
+    "45",
+    "--output",
+    "review/interaction-v2/fresh/industrial-spar-s45/attempt-001"
+  ]
+}

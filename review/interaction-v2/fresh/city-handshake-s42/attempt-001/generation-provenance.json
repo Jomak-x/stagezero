@@ -1,0 +1,91 @@
+{
+  "case": "city-handshake-s42",
+  "seed": 42,
+  "plan": "review/interaction-quality/plans/city-handshake.json",
+  "plan_sha256": "ffea92933b0cd3b7c9cf337b88ebf348a61af0bb8cbd9a93241812da0f7cae68",
+  "scene": "review/prompt-scenes/backgrounds/city.json",
+  "scene_sha256": "0c520fdc5cf2d790468c6662d6ad2b8fcf5b209990a3bc3cc7c181330a7462ae",
+  "code_commit": "4ccc87b8b69de1c5cb8ff7b33da160ba35d99c7f",
+  "git_dirty_at_launch": true,
+  "code_file_sha256_at_launch": {
+    "experiments/trial_prompt_scene.py": "acb0a17b999d6f5b2fdf0273c0ed5e57bd045d8032c78ac42813d2a5a5345fda",
+    "experiments/review_interaction_v2.py": "114eec0d6fb7d788ef0e9fc878bcca19c73733a7ee669cf7e0dd1182027f8bb9",
+    "prompt_scene_builder.py": "52618cc1040b0958c04fec9ea34c366466ce0b8f4c7d32b187cf2c142b388891",
+    "prompt_scene_plan.py": "01b44a4cd38827e36ac1328f5171575007d5ec7f4956956b71a104e37ac71313",
+    "cast_motion_refinement.py": "08a8704989a7ec039a0866b5b8f167226051a0757cbda180ff00460ca836a5a1",
+    "cast_observer_motion.py": "f9fcf75e893a79007b2c976894a6cdd09b5a2d0f0eb470d8c9f775dd68cf1320",
+    "paired_meetup.py": "dc0ddc119f44c6a5277e8c5e754b7f5a81093f9e25cd9e9c98d402ab00786743",
+    "native_pair_transition.py": "d4e46a3cb325dc780e5e32b8e4daa25089e2a5c660d6522421419f4c3a4c960e",
+    "interaction_scene_collision.py": "e3e2eb269fbaf70cee96060f3d3b3923ba252b9899b8de86c6050966f08a426c",
+    "cast_performance.py": "bdb2d8e205aa05a82b01ff5d425f5a7ac55e8d8a4f02d6e6170c0e0de483db31",
+    "native_wait_pose.py": "438e13ce0e093c415965c0fcf524c0d2c3b17b468ad84311246508c28118cc20",
+    "cast_observer_turn.py": "f6d08182c8574652643cd804e4a0c8b60462e4b9d6771db7d1fa37c7de94592d",
+    "cast_observer_continuation.py": "6c4a54fca4c287f7c93691069922e92d3617bf44a9aa55ea2b5962cfaa33f524"
+  },
+  "held_out": false,
+  "comparison_type": "fresh_Core_and_InterGen_same_saved_plan_seed",
+  "planning": "reviewed saved PR26 plan; no external AI planning",
+  "provider_config_path": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/.runtime/prompt-native-provider.json",
+  "provider_secret_contents_recorded": false,
+  "runner_wall_seconds": 4.46248516702326,
+  "exit_code": 0,
+  "source_archives": [
+    {
+      "manifest": "review/interaction-v2/fresh/city-handshake-s42/attempt-001/sources/scene-1b1e7d52e17346f28cecb9eb35cf3590/manifest.json",
+      "sha256": "cf4c870586132a5ba661c8bc37b9715927236a19c89dd5afdcd23e1fee17efb0",
+      "status": "complete",
+      "sources": [
+        {
+          "name": "pair-00.npz",
+          "kind": "intergen",
+          "recorded_sha256": "f58d9aef011da5f60a81eb58b9dac58e3b18743820dc410dd264a4047bc759b1",
+          "actual_sha256": "f58d9aef011da5f60a81eb58b9dac58e3b18743820dc410dd264a4047bc759b1",
+          "hash_matches": true
+        },
+        {
+          "name": "core-000.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "55704a55c9c9c3f7d3d4681b60f907ce7206dd3b98f4ff5616172d0acc685e88",
+          "actual_sha256": "55704a55c9c9c3f7d3d4681b60f907ce7206dd3b98f4ff5616172d0acc685e88",
+          "hash_matches": true
+        },
+        {
+          "name": "core-001.npz",
+          "kind": "ardy_core",
+          "recorded_sha256": "08f1784777d34d6a27f6e58ad69516d1050e0f2708a2ab67a4b5311692196795",
+          "actual_sha256": "08f1784777d34d6a27f6e58ad69516d1050e0f2708a2ab67a4b5311692196795",
+          "hash_matches": true
+        }
+      ],
+      "all_archived_files": {
+        "core-000.npz": "55704a55c9c9c3f7d3d4681b60f907ce7206dd3b98f4ff5616172d0acc685e88",
+        "core-001.npz": "08f1784777d34d6a27f6e58ad69516d1050e0f2708a2ab67a4b5311692196795",
+        "pair-00.json": "7ce7f38ecd0a813f138424dadca2ffb2625b1fd7df19a257067a109ace4446d5",
+        "pair-00.npz": "f58d9aef011da5f60a81eb58b9dac58e3b18743820dc410dd264a4047bc759b1",
+        "refined-cast-candidate.npz": "14d2e287153c211c1eb280ea407790077728fe83f51c87404dc24e190332ffb3",
+        "unrefined-cast.npz": "14d2e287153c211c1eb280ea407790077728fe83f51c87404dc24e190332ffb3"
+      }
+    }
+  ],
+  "archive_sha256": "345a99b67f3c10a143419b0d81740af2acd9423c988b25b002d0a9cd6af95708",
+  "command": [
+    "<python>",
+    "experiments/trial_prompt_scene.py",
+    "--prompt",
+    "Two people shake hands.",
+    "--scene",
+    "review/prompt-scenes/backgrounds/city.json",
+    "--plan",
+    "review/interaction-quality/plans/city-handshake.json",
+    "--config",
+    "<private-config>",
+    "--token",
+    "<private-token>",
+    "--core-url",
+    "http://127.0.0.1:8769",
+    "--seed",
+    "42",
+    "--output",
+    "review/interaction-v2/fresh/city-handshake-s42/attempt-001"
+  ]
+}

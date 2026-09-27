@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "observer_motion": {
+    "source": "authored bounded observer continuation",
+    "model_generated": false,
+    "version": 1,
+    "seed": 48,
+    "fps": 30,
+    "spans": [
+      {
+        "actor_id": "actor_1",
+        "start_frame": 222,
+        "end_frame_exclusive": 480,
+        "reenters_active_motion": false,
+        "applied_frames": 0,
+        "skipped": "inactive track already contains motion; preserve its controller"
+      },
+      {
+        "actor_id": "actor_3",
+        "start_frame": 0,
+        "end_frame_exclusive": 222,
+        "reenters_active_motion": true,
+        "applied_frames": 0,
+        "skipped": "inactive track already contains motion; preserve its controller"
+      }
+    ],
+    "method": "whole inactive span easing; length-preserving torso/arm rotations; attention to active roots",
+    "active_frames_modified": false,
+    "lower_body_modified": false,
+    "source_pair_frames_modified": false,
+    "physical_contact_verified": false,
+    "visual_acceptance": "unverified",
+    "applied_actor_frames": 0,
+    "maximum_joint_correction_m": 0.0,
+    "maximum_bone_length_error_m": 0.0,
+    "limits": {
+      "upright_correction_degrees": 12,
+      "attention_yaw_degrees": 12,
+      "arm_rotation_degrees_per_joint": 92,
+      "preserved_boundary_frames": 2
+    },
+    "limitations": [
+      "Authored observation, not generated contextual acting or a learned idle model.",
+      "No stepping or lower-body weight transfer; existing foot positions remain exact.",
+      "No finger, eye or palm contact solve; positional head motion is not eye gaze.",
+      "Arm relaxation can change body clearance; caller must check final scene and cast geometry.",
+      "Exact reentry endpoints can require anticipatory return toward the incoming pose."
+    ]
+  },
+  "foot_planting": [],
+  "body_clearance": [
+    {
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "unintended_frames": 348,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 0.056987184038369054,
+      "minimum_refined_clearance_m": 0.056987184038369054
+    },
+    {
+      "actor_ids": [
+        "actor_1",
+        "actor_3"
+      ],
+      "unintended_frames": 480,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 1.2780075091039296,
+      "minimum_refined_clearance_m": 1.2780075091039296
+    },
+    {
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "unintended_frames": 348,
+      "baseline_overlap_frames": 0,
+      "refined_overlap_frames": 0,
+      "worsened_overlap_frames": 0,
+      "minimum_baseline_clearance_m": 0.775211554527945,
+      "minimum_refined_clearance_m": 0.775211554527945
+    }
+  ],
+  "body_clearance_proxy": "named joint and limb midpoint spheres, all frames; intended contact excluded",
+  "source_pair_frames_modified": false,
+  "root_positions_modified": false,
+  "physical_contact_verified": false,
+  "visual_acceptance": "unverified"
+}

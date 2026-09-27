@@ -1,0 +1,2716 @@
+{
+  "version": 1,
+  "prompt": "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+  "seed": 45,
+  "status": "complete",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/pair-00.npz",
+      "seconds": 2.0480947499745525,
+      "beat_index": 0,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "planned_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "faad153a3a00b3478312c24dbfa94591784227e517ca4a7ad18393ea00e1f024",
+      "used_in_performance": true
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-000.npz",
+      "seconds": 0.8525234999833629,
+      "sha256": "0777c169494e1929475058ccff4156b201458caba0d22e43ae21be7294dec778"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-001.npz",
+      "seconds": 0.9008055409649387,
+      "sha256": "4340c3c3193fdf12f2319b05d9c5851307c25a057e30b3918adc3f53999f28af"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/core-002.npz",
+      "seconds": 0.9261944169993512,
+      "sha256": "57bb5809af1305e61ac0973870e07ac3252b8f19ca13324cb28601a5ec3add6e"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 1.7919810488820076e-06
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.015353124996181577
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 2.0480947499745525
+    },
+    {
+      "stage": "native_initial_staging",
+      "seconds": 0.06620829203166068
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-7780769b394b4bb2a45ed57fc67b9c39",
+      "seconds": 0.8525234999833629
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-9419ca31d91f4bab8323570e09d675da",
+      "seconds": 0.9008055409649387
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-08f9caea18304d1a8e33a1788a2e643a",
+      "seconds": 0.9261944169993512
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.023306709015741944
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.006196292000822723
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.03148624999448657
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-1",
+      "seconds": 5.12258575001033
+    },
+    {
+      "stage": "observer_core_continuation",
+      "seconds": 0.00013408297672867775
+    },
+    {
+      "stage": "authored_cast_refinement_and_validation",
+      "seconds": 0.0884744169889018
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "beat-1",
+      "meeting": {
+        "model": "ARDY Core + InterGen",
+        "fps": 30,
+        "frames": 381,
+        "segments": [
+          {
+            "source": "ardy_core",
+            "kind": "approach",
+            "label": "Core approach from independent starts",
+            "start_frame": 0,
+            "end_frame_exclusive": 150,
+            "frames": 150
+          },
+          {
+            "source": "authored_transition",
+            "kind": "transition",
+            "label": "Authored entry transition",
+            "start_frame": 150,
+            "end_frame_exclusive": 171,
+            "frames": 21
+          },
+          {
+            "source": "intergen",
+            "kind": "paired_action",
+            "label": "Native paired interaction",
+            "start_frame": 171,
+            "end_frame_exclusive": 381,
+            "frames": 210
+          }
+        ],
+        "prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+        "render_hand_pose": "relaxed",
+        "meeting_plan": {
+          "version": 1,
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "starts": [
+            {
+              "x": -3.0,
+              "z": 0.0
+            },
+            {
+              "x": 3.0,
+              "z": 0.0
+            }
+          ],
+          "meeting": {
+            "x": 0.0,
+            "z": 0.0,
+            "yaw_degrees": 0.0
+          },
+          "placement": {
+            "x": 0.10598807409405708,
+            "z": -0.459311842918396,
+            "yaw_degrees": 0.0
+          },
+          "routes": [
+            {
+              "actor_id": "actor_1",
+              "points": [
+                [
+                  -3.0,
+                  0.0
+                ],
+                [
+                  -0.3683438772010811,
+                  0.9491712185792239
+                ],
+                [
+                  -0.324202909142428,
+                  0.9619503636300063
+                ],
+                [
+                  -0.2858485087529315,
+                  0.9663596895604087
+                ],
+                [
+                  -0.25328067603259175,
+                  0.9623991963704311
+                ],
+                [
+                  -0.2264994109814086,
+                  0.9500688840600735
+                ],
+                [
+                  -0.20550471359938213,
+                  0.9293687526293359
+                ],
+                [
+                  -0.19029658388651235,
+                  0.9002988020782183
+                ],
+                [
+                  -0.18087502184279922,
+                  0.8628590324067208
+                ],
+                [
+                  -0.17724002746824277,
+                  0.8170494436148432
+                ],
+                [
+                  -0.172789764228374,
+                  0.5170824535024379
+                ]
+              ],
+              "distance_m": 3.3912989817706842,
+              "initial_yaw": 1.224643773261007,
+              "arrival_yaw": 3.126757898682248,
+              "ground": {
+                "authored_floor": true,
+                "continuous_support_verified": true,
+                "floor_ids": [
+                  "set-0"
+                ],
+                "actor_footprint_margin_m": 0.28,
+                "floor_height_range_m": [
+                  -0.010000000000000009,
+                  -0.010000000000000009
+                ]
+              },
+              "idle_departure": [],
+              "entry_policy": "continuous"
+            },
+            {
+              "actor_id": "actor_2",
+              "points": [
+                [
+                  3.0,
+                  0.0
+                ],
+                [
+                  0.3970358460078087,
+                  -0.9473610868406134
+                ],
+                [
+                  0.3527606183851744,
+                  -0.9602759270308331
+                ],
+                [
+                  0.31390466617264207,
+                  -0.9648197207004878
+                ],
+                [
+                  0.2804679893702118,
+                  -0.9609924678495775
+                ],
+                [
+                  0.25245058797788344,
+                  -0.9487941684781018
+                ],
+                [
+                  0.2298524619956571,
+                  -0.9282248225860612
+                ],
+                [
+                  0.21267361142353275,
+                  -0.8992844301734556
+                ],
+                [
+                  0.20091403626151041,
+                  -0.8619729912402848
+                ],
+                [
+                  0.19457373650959006,
+                  -0.8162905057865488
+                ],
+                [
+                  0.172789764228374,
+                  -0.5170824535024379
+                ]
+              ],
+              "distance_m": 3.3689103934270017,
+              "initial_yaw": -1.9198484766674007,
+              "arrival_yaw": -0.07267720391660243,
+              "ground": {
+                "authored_floor": true,
+                "continuous_support_verified": true,
+                "floor_ids": [
+                  "set-0"
+                ],
+                "actor_footprint_margin_m": 0.28,
+                "floor_height_range_m": [
+                  -0.010000000000000009,
+                  -0.010000000000000009
+                ]
+              },
+              "idle_departure": [],
+              "entry_policy": "continuous"
+            }
+          ],
+          "horizons": [
+            {
+              "root_targets": {
+                "actor_1": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      -2.9601231973615345,
+                      0.014382545282223222
+                    ],
+                    "heading": 1.224643773261007
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      -2.6809855788922765,
+                      0.11506036225778578
+                    ],
+                    "heading": 1.224643773261007
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      -2.361971157784553,
+                      0.23012072451557156
+                    ],
+                    "heading": 1.224643773261007
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      -2.0429567366768295,
+                      0.3451810867733573
+                    ],
+                    "heading": 1.224643773261007
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      -1.723942315569106,
+                      0.4602414490311431
+                    ],
+                    "heading": 1.224643773261007
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      -1.4049278944613826,
+                      0.5753018112889288
+                    ],
+                    "heading": 1.224643773261007
+                  }
+                ],
+                "actor_2": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      2.960428049715948,
+                      -0.014402398039944133
+                    ],
+                    "heading": -1.9198484766674007
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      2.683424397727586,
+                      -0.11521918431955307
+                    ],
+                    "heading": -1.9198484766674007
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      2.366848795455172,
+                      -0.23043836863910613
+                    ],
+                    "heading": -1.9198484766674007
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      2.0502731931827585,
+                      -0.3456575529586592
+                    ],
+                    "heading": -1.9198484766674007
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      1.7336975909103443,
+                      -0.46087673727821227
+                    ],
+                    "heading": -1.9198484766674007
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      1.4171219886379303,
+                      -0.5760959215977653
+                    ],
+                    "heading": -1.9198484766674007
+                  }
+                ]
+              },
+              "actor_prompts": {
+                "actor_1": "A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard.",
+                "actor_2": "A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard."
+              }
+            },
+            {
+              "root_targets": {
+                "actor_1": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      -1.3650510918229175,
+                      0.589684356571152
+                    ],
+                    "heading": 1.228736925486362
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      -1.0859134733536593,
+                      0.6903621735467146
+                    ],
+                    "heading": 1.4529590533542125
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      -0.766899052245936,
+                      0.8054225358045002
+                    ],
+                    "heading": 1.9840924944131433
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      -0.4478846311382121,
+                      0.9204828980622862
+                    ],
+                    "heading": 2.5873254976067717
+                  },
+                  {
+                    "frame": 25,
+                    "position_xz": [
+                      -0.3681265297031891,
+                      0.9492341423283881
+                    ],
+                    "heading": 2.7223619691882126
+                  },
+                  {
+                    "frame": 26,
+                    "position_xz": [
+                      -0.3274073907699826,
+                      0.9610226418936666
+                    ],
+                    "heading": 2.7850360156480094
+                  },
+                  {
+                    "frame": 27,
+                    "position_xz": [
+                      -0.28540364237256843,
+                      0.9663055904656054
+                    ],
+                    "heading": 2.8438797728694
+                  },
+                  {
+                    "frame": 28,
+                    "position_xz": [
+                      -0.2441684582501304,
+                      0.958203857170322
+                    ],
+                    "heading": 2.8984426185890424
+                  },
+                  {
+                    "frame": 29,
+                    "position_xz": [
+                      -0.2101646003997984,
+                      0.9339632589213654
+                    ],
+                    "heading": 2.9482739305435954
+                  },
+                  {
+                    "frame": 30,
+                    "position_xz": [
+                      -0.1895548396383597,
+                      0.8973512299370865
+                    ],
+                    "heading": 2.992923086469718
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      -0.18033525871172337,
+                      0.8560567310736911
+                    ],
+                    "heading": 3.0319394641040667
+                  },
+                  {
+                    "frame": 32,
+                    "position_xz": [
+                      -0.17719164807661772,
+                      0.8137884633745684
+                    ],
+                    "heading": 3.0648724411833
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  }
+                ],
+                "actor_2": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      1.3775500383538786,
+                      -0.5904983196377094
+                    ],
+                    "heading": -1.9158735557598565
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      1.1005463863655165,
+                      -0.6913151059173184
+                    ],
+                    "heading": -1.6981281177878704
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      0.783970784093103,
+                      -0.8065342902368713
+                    ],
+                    "heading": -1.1823365460786475
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      0.4673951818206885,
+                      -0.9217534745564245
+                    ],
+                    "heading": -0.5965280189337823
+                  },
+                  {
+                    "frame": 25,
+                    "position_xz": [
+                      0.3880615528815947,
+                      -0.9499788387476864
+                    ],
+                    "heading": -0.4653920961491131
+                  },
+                  {
+                    "frame": 26,
+                    "position_xz": [
+                      0.3474574571209144,
+                      -0.9608960757907941
+                    ],
+                    "heading": -0.40452839895011006
+                  },
+                  {
+                    "frame": 27,
+                    "position_xz": [
+                      0.305628750573329,
+                      -0.9638724369211064
+                    ],
+                    "heading": -0.347384352508626
+                  },
+                  {
+                    "frame": 28,
+                    "position_xz": [
+                      0.26507712895512614,
+                      -0.9542915493632822
+                    ],
+                    "heading": -0.29439756279613283
+                  },
+                  {
+                    "frame": 29,
+                    "position_xz": [
+                      0.2314925007539174,
+                      -0.9297176244458942
+                    ],
+                    "heading": -0.24600563578410387
+                  },
+                  {
+                    "frame": 30,
+                    "position_xz": [
+                      0.2107982827945364,
+                      -0.8933342824294795
+                    ],
+                    "heading": -0.20264617744401137
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      0.1996452532470108,
+                      -0.8528312844012239
+                    ],
+                    "heading": -0.1647567937473282
+                  },
+                  {
+                    "frame": 32,
+                    "position_xz": [
+                      0.19419467066163237,
+                      -0.8110839460007268
+                    ],
+                    "heading": -0.13277509066552784
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  }
+                ]
+              },
+              "actor_prompts": {
+                "actor_1": "A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard.",
+                "actor_2": "A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard."
+              }
+            },
+            {
+              "root_targets": {
+                "actor_1": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      -0.172789764228374,
+                      0.5170824535024386
+                    ],
+                    "heading": 3.126757898682248
+                  }
+                ],
+                "actor_2": [
+                  {
+                    "frame": 0,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  },
+                  {
+                    "frame": 7,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  },
+                  {
+                    "frame": 15,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  },
+                  {
+                    "frame": 23,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  },
+                  {
+                    "frame": 31,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  },
+                  {
+                    "frame": 39,
+                    "position_xz": [
+                      0.172789764228374,
+                      -0.5170824535024379
+                    ],
+                    "heading": -0.07267720391660243
+                  }
+                ]
+              },
+              "actor_prompts": {
+                "actor_1": "A person faces their partner, feet planted with hands up in a boxing guard.",
+                "actor_2": "A person faces their partner, feet planted with hands up in a boxing guard."
+              }
+            }
+          ],
+          "arrival_seconds": 4.0,
+          "approach_seconds": 5.0,
+          "entry_policy": "continuous",
+          "entry_posture": "guard",
+          "total_frames": 381,
+          "blend_frames": 21,
+          "minimum_planned_root_separation_m": 1.0903771207104418,
+          "native_geometry": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 210,
+            "scene_conditioned": false,
+            "physical_contact_verified": false,
+            "actors": [
+              {
+                "actor_id": "actor_1",
+                "ground": {
+                  "authored_floor": true,
+                  "continuous_support_verified": true,
+                  "floor_ids": [
+                    "set-0"
+                  ],
+                  "actor_footprint_margin_m": 0.28,
+                  "floor_height_range_m": [
+                    -0.010000000000000009,
+                    -0.010000000000000009
+                  ]
+                },
+                "collision": {
+                  "version": 1,
+                  "skeleton": "native22",
+                  "frames": 210,
+                  "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+                  "sampled_body_points_per_frame": 31,
+                  "total_collision_frames": 0,
+                  "per_object": [
+                    {
+                      "object_id": "set-1",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.971579391956327,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-2",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.241516939698418,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-3",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.981119745370918,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-4",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.669995044637082,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-5",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 3.3501491071119665,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-6",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.706240210302271,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-7",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.94953532634242,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-8",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.224959128314887,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-9",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 16.17114028807521,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-10",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 13.53155152941777,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-11",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.770997435134966,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-12",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 5.403863247957182,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-13",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.587984921472022,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-14",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.457853280612788,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-15",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.947864166453625,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-16",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.524514893801055,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-17",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.72578753290908,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-18",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 13.011396333985562,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-19",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.304481881891988,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-20",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.060608395365527,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-21",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.683096548846538,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-22",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 3.4320644589191147,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-23",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.685676919175,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-24",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.9301179617485,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-25",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.182059573779237,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-26",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 16.131787261717303,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-27",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 13.489734759681543,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-28",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.716736379116146,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-29",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 5.372546733325366,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-30",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.598971648400925,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-31",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.408120193687834,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-32",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.907570165164746,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-33",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.5095349603515915,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-34",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.7084824517897275,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-35",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.963829017061695,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-36",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.37157939195633,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-37",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.286222933523443,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-38",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.312082317472683,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-39",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.981702479084802,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-40",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.36348693904388,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-41",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.986281122692382,
+                      "worst_penetration_m": 0.0
+                    }
+                  ],
+                  "assumptions": {
+                    "units": "metres",
+                    "up_axis": "+Y",
+                    "scene_source": "object_metadata",
+                    "object_geometry": "conservative boxes with explicit passage cutouts",
+                    "mesh_or_physics_collision_verified": false
+                  }
+                }
+              },
+              {
+                "actor_id": "actor_2",
+                "ground": {
+                  "authored_floor": true,
+                  "continuous_support_verified": true,
+                  "floor_ids": [
+                    "set-0"
+                  ],
+                  "actor_footprint_margin_m": 0.28,
+                  "floor_height_range_m": [
+                    -0.010000000000000009,
+                    -0.010000000000000009
+                  ]
+                },
+                "collision": {
+                  "version": 1,
+                  "skeleton": "native22",
+                  "frames": 210,
+                  "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+                  "sampled_body_points_per_frame": 31,
+                  "total_collision_frames": 0,
+                  "per_object": [
+                    {
+                      "object_id": "set-1",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 14.943516969680786,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-2",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.786072448154128,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-3",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.439426497789604,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-4",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.310917182713747,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-5",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 2.885917182713747,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-6",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.691024768738004,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-7",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.938956283131414,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-8",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.159140420144838,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-9",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.098901931305013,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-10",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.462850889826251,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-11",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.725062574237606,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-12",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.362090838252989,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-13",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.642229854188598,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-14",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.401348025628828,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-15",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.87698959959038,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-16",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.252390684098649,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-17",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.863741269003275,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-18",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.091044995901656,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-19",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.20397445595802,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-20",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.973809088313196,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-21",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 5.593363029714791,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-22",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 2.38269558321518,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-23",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.002014301437237,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-24",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 8.251713380475085,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-25",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.392884073917926,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-26",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.354415062327433,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-27",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.699099131869833,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-28",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.78133663452038,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-29",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.66818190815378,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-30",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.906758713604863,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-31",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.528265300843156,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-32",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 11.126439057691778,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-33",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.039425257100488,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-34",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 7.115516141318553,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-35",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 12.195313679078696,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-36",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 10.343516969680786,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-37",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 6.351760340016576,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-38",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 14.281094595079356,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-39",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 4.605054776844265,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-40",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 9.558333496399905,
+                      "worst_penetration_m": 0.0
+                    },
+                    {
+                      "object_id": "set-41",
+                      "kind": "custom",
+                      "collision_frames": 0,
+                      "first_collision_frame": null,
+                      "minimum_clearance_m": 15.109248706572307,
+                      "worst_penetration_m": 0.0
+                    }
+                  ],
+                  "assumptions": {
+                    "units": "metres",
+                    "up_axis": "+Y",
+                    "scene_source": "object_metadata",
+                    "object_geometry": "conservative boxes with explicit passage cutouts",
+                    "mesh_or_physics_collision_verified": false
+                  }
+                }
+              }
+            ]
+          },
+          "approach_rerouted": false,
+          "arrival_standoff": {
+            "requested_minimum_separation_m": 0.6,
+            "additive_margin_per_actor_m": 0.08,
+            "native_entry_root_separation_m": 0.930377120710441,
+            "core_arrival_root_separation_m": 1.090377120710441,
+            "native_entry_roots_xz": [
+              [
+                -0.14743490144610405,
+                0.441206693649292
+              ],
+              [
+                0.14743490144610405,
+                -0.441206693649292
+              ]
+            ],
+            "core_arrival_targets_xz": [
+              [
+                -0.172789764228374,
+                0.5170824535024379
+              ],
+              [
+                0.172789764228374,
+                -0.5170824535024379
+              ]
+            ],
+            "target_offsets_xz": [
+              [
+                -0.02535486278226995,
+                0.07587575985314587
+              ],
+              [
+                0.02535486278226995,
+                -0.07587575985314587
+              ]
+            ],
+            "maximum_target_offset_m": 0.08,
+            "source_pair_frames_modified": false
+          },
+          "arrival_margin_m": 0.08,
+          "idle_route_padding_m": 0.25,
+          "initial_heading_ramp_seconds": 0.0,
+          "source_sha256": "131767a90be2744cac8882656d356b75a59d5a31045e12a3f06e2f346d433b34",
+          "planned_only": true,
+          "limits": {
+            "max_target_error_m": 0.8,
+            "max_arrival_error_m": 0.4,
+            "minimum_route_root_separation_m": 0.55,
+            "max_entry_root_height_gap_m": 0.3
+          }
+        },
+        "scene_geometry": {
+          "version": 1,
+          "skeleton": "native22",
+          "frames": 381,
+          "scene_conditioned": false,
+          "physical_contact_verified": false,
+          "actors": [
+            {
+              "actor_id": "actor_1",
+              "ground": {
+                "authored_floor": true,
+                "continuous_support_verified": true,
+                "floor_ids": [
+                  "set-0"
+                ],
+                "actor_footprint_margin_m": 0.28,
+                "floor_height_range_m": [
+                  -0.010000000000000009,
+                  -0.010000000000000009
+                ]
+              },
+              "collision": {
+                "version": 1,
+                "skeleton": "native22",
+                "frames": 381,
+                "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+                "sampled_body_points_per_frame": 31,
+                "total_collision_frames": 0,
+                "per_object": [
+                  {
+                    "object_id": "set-1",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.971579391956327,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-2",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.679402393776793,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-3",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.453781877607457,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-4",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.086732639837595,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-5",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 0.9590245168144733,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-6",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.92854451964868,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-7",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.2375884036458755,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-8",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.61729249591056,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-9",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.063302877387358,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-10",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.61985265664992,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-11",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.58597415285231,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-12",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.174927065285027,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-13",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 5.690078817105869,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-14",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.058431832517448,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-15",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.999151829413593,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-16",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 3.5373863215286194,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-17",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.410547948282466,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-18",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.966449107344857,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-19",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.304481881891988,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-20",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.060608395365527,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-21",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.683096548846538,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-22",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 3.4320644589191147,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-23",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 11.685676919175,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-24",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 8.9301179617485,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-25",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.182059573779237,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-26",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 16.131787261717303,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-27",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 13.489734759681543,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-28",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.716736379116146,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-29",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 5.372546733325366,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-30",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.598971648400925,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-31",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.408120193687834,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-32",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 11.907570165164746,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-33",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.5095349603515915,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-34",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.7084824517897275,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-35",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.963829017061695,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-36",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 11.37157939195633,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-37",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.286222933523443,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-38",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.285441225667043,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-39",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.981702479084802,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-40",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.36348693904388,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-41",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.986281122692382,
+                    "worst_penetration_m": 0.0
+                  }
+                ],
+                "assumptions": {
+                  "units": "metres",
+                  "up_axis": "+Y",
+                  "scene_source": "object_metadata",
+                  "object_geometry": "conservative boxes with explicit passage cutouts",
+                  "mesh_or_physics_collision_verified": false
+                }
+              }
+            },
+            {
+              "actor_id": "actor_2",
+              "ground": {
+                "authored_floor": true,
+                "continuous_support_verified": true,
+                "floor_ids": [
+                  "set-0"
+                ],
+                "actor_footprint_margin_m": 0.28,
+                "floor_height_range_m": [
+                  -0.010000000000000009,
+                  -0.010000000000000009
+                ]
+              },
+              "collision": {
+                "version": 1,
+                "skeleton": "native22",
+                "frames": 381,
+                "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+                "sampled_body_points_per_frame": 31,
+                "total_collision_frames": 0,
+                "per_object": [
+                  {
+                    "object_id": "set-1",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 14.943516969680786,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-2",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 8.786072448154128,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-3",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 8.439426497789604,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-4",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.310917182713747,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-5",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 2.885917182713747,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-6",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.691024768738004,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-7",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.938956283131414,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-8",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.159140420144838,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-9",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.098901931305013,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-10",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.462850889826251,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-11",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 11.725062574237606,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-12",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.362090838252989,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-13",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.642229854188598,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-14",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.401348025628828,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-15",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.87698959959038,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-16",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.252390684098649,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-17",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.863741269003275,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-18",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.091044995901656,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-19",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.673511740839521,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-20",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.454758596050342,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-21",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.069127982052069,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-22",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 0.9306408634848738,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-23",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.885507766930798,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-24",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.190197705565746,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-25",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.361732910700496,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-26",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 14.991167563240646,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-27",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.5231304385505,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-28",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 11.78133663452038,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-29",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.070095089446292,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-30",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 5.646683574745197,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-31",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.528265300843156,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-32",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.902843906959504,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-33",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 3.508830141934893,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-34",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 7.112584719619394,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-35",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 12.195313679078696,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-36",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 10.343516969680786,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-37",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 6.351760340016576,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-38",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 14.281094595079356,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-39",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 4.605054776844265,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-40",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 9.558333496399905,
+                    "worst_penetration_m": 0.0
+                  },
+                  {
+                    "object_id": "set-41",
+                    "kind": "custom",
+                    "collision_frames": 0,
+                    "first_collision_frame": null,
+                    "minimum_clearance_m": 15.109248706572307,
+                    "worst_penetration_m": 0.0
+                  }
+                ],
+                "assumptions": {
+                  "units": "metres",
+                  "up_axis": "+Y",
+                  "scene_source": "object_metadata",
+                  "object_geometry": "conservative boxes with explicit passage cutouts",
+                  "mesh_or_physics_collision_verified": false
+                }
+              }
+            }
+          ]
+        },
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "source_pair_preserved_exactly_after_shared_placement": true,
+        "transition_provenance": {
+          "source_pair_frames_modified": false,
+          "all_mechanical_gates_passed": true,
+          "boundaries": {
+            "entry": {
+              "source": "authored direction transition",
+              "model_generated": false,
+              "method": "normalized Hermite bone directions, endpoint lengths, and root Hermite",
+              "frames": 21,
+              "fps": 30.0,
+              "source_pair_frames_modified": false,
+              "input_boundary": {
+                "position_gap_m": {
+                  "mean": 0.2271139872571798,
+                  "max": 0.3803366753292557,
+                  "per_actor_max": [
+                    0.3803366753292557,
+                    0.2850428364081241
+                  ]
+                },
+                "root_gap_m": [
+                  0.19777912704102887,
+                  0.1675232595798423
+                ],
+                "root_relative_pose_gap_m": {
+                  "mean": 0.16039890495631262,
+                  "max": 0.3465032894353078,
+                  "per_actor_max": [
+                    0.31176082784333453,
+                    0.3465032894353078
+                  ]
+                },
+                "velocity_gap_m_s": {
+                  "mean": 0.27364715495679276,
+                  "max": 0.693547765341512,
+                  "per_actor_max": [
+                    0.693547765341512,
+                    0.27676819732870706
+                  ]
+                },
+                "left_endpoint_speed_m_s": {
+                  "mean": 0.03315552421378705,
+                  "max": 0.08724777187973747,
+                  "per_actor_max": [
+                    0.051843235051012584,
+                    0.08724777187973747
+                  ]
+                },
+                "right_endpoint_speed_m_s": {
+                  "mean": 0.2725775979695644,
+                  "max": 0.6818835235909182,
+                  "per_actor_max": [
+                    0.6818835235909182,
+                    0.3255235128458627
+                  ]
+                },
+                "left_fps": 30.0,
+                "right_fps": 30.0,
+                "seamless_verified": false,
+                "interpretation": "Geometric boundary diagnostics only; skin, feet, obstacles and contact require review."
+              },
+              "max_joint_speed_m_s": 0.7903964989989857,
+              "max_endpoint_velocity_error_m_s": 0.12416807889001114,
+              "max_source_endpoint_length_change_fraction": 0.03372809936349108,
+              "max_bone_length_interpolation_error_m": 1.1102230246251565e-16,
+              "min_ankle_toe_height_m": -0.015641536888236704,
+              "max_ankle_toe_xz_travel_m": 0.288688440770957,
+              "thresholds": {
+                "max_speed_m_s": 5.0,
+                "max_endpoint_velocity_error_m_s": 0.35,
+                "max_bone_length_change_fraction": 0.2
+              },
+              "mechanical_gate_passed": true,
+              "rejection_reasons": [],
+              "foot_lock": false,
+              "contact_preserved_in_bridge": false,
+              "visual_acceptance": "unverified",
+              "limitations": [
+                "Authored motion, not jointly generated with Core.",
+                "Bone directions and lengths are interpolated; no limb shortening from position blending.",
+                "Endpoint velocity is measured at sampled frames; continuous derivatives alone are not proof.",
+                "No foot locking, floor, partner-contact or obstacle solve."
+              ]
+            }
+          },
+          "refinement": {
+            "approach": {
+              "source": "ARDY Core",
+              "method": "Core world bone directions with native actor median segment lengths",
+              "reference_frames": 210,
+              "median_lengths_m": [
+                [
+                  0.11861192982334273,
+                  0.11638413617535298,
+                  0.10613423743860104,
+                  0.3488722109115062,
+                  0.3509012048760439,
+                  0.11444757883102014,
+                  0.37002139578231485,
+                  0.37275974468651263,
+                  0.05455328332109004,
+                  0.11995989224699163,
+                  0.12491353665403118,
+                  0.209383981295404,
+                  0.14668975682609933,
+                  0.14590340168517293,
+                  0.0721902214294678,
+                  0.09156405241309355,
+                  0.09463982719952332,
+                  0.2409316413216368,
+                  0.23684637863733587,
+                  0.22794957637007818,
+                  0.22951604772451112
+                ],
+                [
+                  0.11838044336232281,
+                  0.11547357636589141,
+                  0.10571710442713839,
+                  0.34893142063342986,
+                  0.35148486735084905,
+                  0.11393132376003143,
+                  0.3654274384609075,
+                  0.36646390654548994,
+                  0.05580399910609724,
+                  0.12383452445397936,
+                  0.12372049134661336,
+                  0.20865683431156035,
+                  0.14644471217997457,
+                  0.1457257743892562,
+                  0.07179962888549016,
+                  0.09111936685271899,
+                  0.09572270199819456,
+                  0.23939701693264764,
+                  0.23526859036896758,
+                  0.22423977263634182,
+                  0.23294071224088153
+                ]
+              ],
+              "core_endpoint_displacement_m": {
+                "mean": 0.18670724599747535,
+                "max": 0.3431160072716678,
+                "per_actor_max": [
+                  0.33811831563264505,
+                  0.3431160072716678
+                ]
+              },
+              "root_xz_modified": false,
+              "native_pair_modified": false,
+              "root_y_correction_range_m": [
+                -0.16073853111292288,
+                -0.14159955741589156
+              ],
+              "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+              "foot_lock": false,
+              "limitations": [
+                "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+                "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+                "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+                "Native source lengths vary while Core display lengths use actor-specific medians."
+              ]
+            }
+          },
+          "gpu_jobs": 3,
+          "visual_acceptance": "unverified"
+        },
+        "approach_measurements": [
+          {
+            "window": 0,
+            "maximum_target_error_m": 0.04319526393629805
+          },
+          {
+            "window": 1,
+            "maximum_target_error_m": 0.043027278876098474
+          },
+          {
+            "window": 2,
+            "maximum_target_error_m": 0.04194718887859745
+          }
+        ],
+        "arrival_errors_m": [
+          0.07252969319250416,
+          0.10138306221563087
+        ],
+        "approach_body_clearance": {
+          "checked": true,
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "frames": 150,
+          "fps": 30,
+          "stage": "displayed_core_approach",
+          "contact_allowed": false,
+          "proxy": "named joint and limb midpoint spheres; all displayed frames",
+          "minimum_clearance_m": 0.09644629047281646,
+          "required_minimum_clearance_m": 0.0,
+          "minimum_clearance_frame": 126,
+          "minimum_clearance_proxy_indices": [
+            11,
+            11
+          ],
+          "overlap_frames": 0,
+          "overlap_frame_indices": [],
+          "passed": true,
+          "physical_contact_verified": false
+        },
+        "arrival_standoff": {
+          "requested_minimum_separation_m": 0.6,
+          "additive_margin_per_actor_m": 0.08,
+          "native_entry_root_separation_m": 0.930377120710441,
+          "core_arrival_root_separation_m": 1.090377120710441,
+          "native_entry_roots_xz": [
+            [
+              -0.14743490144610405,
+              0.441206693649292
+            ],
+            [
+              0.14743490144610405,
+              -0.441206693649292
+            ]
+          ],
+          "core_arrival_targets_xz": [
+            [
+              -0.172789764228374,
+              0.5170824535024379
+            ],
+            [
+              0.172789764228374,
+              -0.5170824535024379
+            ]
+          ],
+          "target_offsets_xz": [
+            [
+              -0.02535486278226995,
+              0.07587575985314587
+            ],
+            [
+              0.02535486278226995,
+              -0.07587575985314587
+            ]
+          ],
+          "maximum_target_offset_m": 0.08,
+          "source_pair_frames_modified": false
+        },
+        "arrival_target_errors_m": [
+          0.008646021708877877,
+          0.023495909088314674
+        ],
+        "actual_arrival_native_offsets_xz": [
+          [
+            -0.02687918022274971,
+            0.06736516952514648
+          ],
+          [
+            0.04232584312558174,
+            -0.09212517738342285
+          ]
+        ],
+        "core_playback_selection": {
+          "generated_frames": 120,
+          "retained_frames": 100,
+          "source_fps": 20,
+          "selection": "contiguous prefix; raw horizons archived separately"
+        },
+        "entry_root_height_gaps_m": [
+          0.18400007255029183,
+          0.13336235299377686
+        ],
+        "max_entry_root_height_gap_m": 0.3,
+        "animation_accepted": false,
+        "physical_contact_verified": false,
+        "features": "No unified model features; preserve source archives separately."
+      },
+      "idle_navigation_proxies": []
+    }
+  ],
+  "plan": {
+    "version": 1,
+    "title": "Controlled Boxing Spar",
+    "prompt": "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": {
+          "x": -3.0,
+          "z": 0.0
+        }
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": {
+          "x": 3.0,
+          "z": 0.0
+        }
+      }
+    ],
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0
+    },
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+        "seconds": 7.0
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -3.0,
+        "z": 0.0
+      },
+      "actor_2": {
+        "x": 3.0,
+        "z": 0.0
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -3.0,
+          0.0
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          3.0,
+          0.0
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false,
+    "initial_source_staging": {
+      "candidate": "outward-0.8-idle-0",
+      "explicit_starts_preserved": [
+        "actor_1",
+        "actor_2"
+      ],
+      "candidate_count": 1,
+      "planning_only": true,
+      "observer_orientation": {},
+      "selection": "shortest approach duration, then total route distance; source-oriented starts win ties"
+    }
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 1,
+    "core_horizons": "sequential native330 history"
+  },
+  "initial_staging_candidates": [
+    {
+      "candidate": "outward-0.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -3.0,
+          "z": 0.0
+        },
+        "actor_2": {
+          "x": 3.0,
+          "z": 0.0
+        }
+      },
+      "accepted": true,
+      "approach_seconds": 5.0,
+      "minimum_planned_root_separation_m": 1.0903771207104418,
+      "total_route_distance_m": 6.760209375197686,
+      "selected": true
+    }
+  ],
+  "unrefined_composition": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/unrefined-cast.npz",
+  "motion_refinement": {
+    "version": 1,
+    "observer_motion": {
+      "source": "authored bounded observer continuation",
+      "model_generated": false,
+      "version": 1,
+      "seed": 45,
+      "fps": 30,
+      "spans": [],
+      "method": "whole inactive span easing; length-preserving torso/arm rotations; attention to active roots",
+      "active_frames_modified": false,
+      "lower_body_modified": false,
+      "source_pair_frames_modified": false,
+      "physical_contact_verified": false,
+      "visual_acceptance": "unverified",
+      "applied_actor_frames": 0,
+      "maximum_joint_correction_m": 0.0,
+      "maximum_bone_length_error_m": 0.0,
+      "limits": {
+        "upright_correction_degrees": 12,
+        "attention_yaw_degrees": 12,
+        "arm_rotation_degrees_per_joint": 92,
+        "preserved_boundary_frames": 2
+      },
+      "limitations": [
+        "Authored observation, not generated contextual acting or a learned idle model.",
+        "No stepping or lower-body weight transfer; existing foot positions remain exact.",
+        "No finger, eye or palm contact solve; positional head motion is not eye gaze.",
+        "Arm relaxation can change body clearance; caller must check final scene and cast geometry.",
+        "Exact reentry endpoints can require anticipatory return toward the incoming pose."
+      ]
+    },
+    "foot_planting": [],
+    "body_clearance": [
+      {
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "unintended_frames": 150,
+        "baseline_overlap_frames": 0,
+        "refined_overlap_frames": 0,
+        "worsened_overlap_frames": 0,
+        "minimum_baseline_clearance_m": 0.09644629047281646,
+        "minimum_refined_clearance_m": 0.09644629047281646
+      }
+    ],
+    "body_clearance_proxy": "named joint and limb midpoint spheres, all frames; intended contact excluded",
+    "source_pair_frames_modified": false,
+    "root_positions_modified": false,
+    "physical_contact_verified": false,
+    "visual_acceptance": "unverified"
+  },
+  "refined_composition": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-v2/fresh/industrial-spar-s45/attempt-001/sources/scene-8dafdfb6a9d94a7a9a8de0a83cf25e69/refined-cast-candidate.npz",
+  "frames": 381,
+  "duration_seconds": 12.7,
+  "wall_seconds": 5.245961916982196
+}
