@@ -78,14 +78,19 @@ def resolve_target(adapted, text):
     return matches[0]
 
 
-def recommend_placements(scene_document, count):
+def recommend_placements(scene_document, count, *, minimum_separation_m=1.5):
     """Find one or two clear ground anchors inside the Core worker bounds.
 
     Placement uses conservative rotated obstacle footprints. An authored floor
     limits the search to its usable footprint; no height or stepping is faked.
+    A caller may request a wider pair gap without changing the default layout.
     """
     if type(count) is not int or not 1 <= count <= 2:
         raise ValueError("Placement supports one or two actors")
+    if (type(minimum_separation_m) not in (int, float)
+            or not math.isfinite(minimum_separation_m)
+            or not .65 <= minimum_separation_m <= 5):
+        raise ValueError("Minimum actor separation must be finite and between 0.65 and 5 m")
     from interaction_planner import _obstacles, _inside
     from interaction_scene import local_axes
     objects = scene_objects(validate_scene(scene_document))
@@ -106,7 +111,7 @@ def recommend_placements(scene_document, count):
     chosen = []
     for point in candidates:
         if (not on_floor(point) or any(_inside(point, obstacle, .4) for obstacle in obstacles)
-                or any(math.dist(point, prior) < 1.5 for prior in chosen)):
+                or any(math.dist(point, prior) < minimum_separation_m for prior in chosen)):
             continue
         chosen.append(point)
         if len(chosen) == count:

@@ -888,6 +888,135 @@ class StudioUITests(unittest.TestCase):
         self.ui.update()
         self.assertEqual(self.ui.takes.value, second)
 
+    def test_paired_research_status_and_transport_take_priority_without_g1_changes(self):
+        class Motion:
+            def __init__(self, active, status):
+                self.active = active
+                self.status = status
+                self.calls = []
+
+            def snapshot(self):
+                return {'active': self.active, 'status': self.status,
+                        'total_frames': 120, 'frame': 7}
+
+            def play(self): self.calls.append(('play',))
+            def pause(self): self.calls.append(('pause',))
+            def seek(self, frame): self.calls.append(('seek', frame))
+
+        core = Motion(False, 'Native Core saved')
+        paired = Motion(True, 'Joint pair ready')
+        before = self.session.positions.copy()
+        self.ui.core_session = core
+        self.ui.paired_session = paired
+        self.ui.transport.click('Play')
+        self.assertEqual(paired.calls, [('play',)])
+        self.assertEqual(core.calls, [])
+        self.ui.update()
+        self.assertIn('Cast performance', self.ui.status.content)
+        self.assertTrue(np.array_equal(self.session.positions, before))
+
+        paired.active = False
+        core.active = True
+        self.ui.transport.click('Pause')
+        self.assertEqual(core.calls, [('pause',)])
+        self.ui.update()
+        self.assertIn('Scene direction', self.ui.status.content)
+
+    def test_cast_uses_existing_transport_save_and_open_without_changing_g1(self):
+        from cast_performance_session import CastPerformanceSession
+        from cast_performance import encode_project, decode_project, cast_from_performance
+        from test_cast_performance import performance
+        from paired_scene import EMPTY_SCENE
+        cast = CastPerformanceSession()
+        clip = performance(3, frames=12)
+        archive = encode_project(clip, cast_from_performance(clip), dict(EMPTY_SCENE, name='Cast background'))
+        cast.load(archive)
+        self.ui.cast_session = cast
+        self.ui.on_native_open = cast.load
+        before = self.session.positions.copy()
+        original_tabs = tuple(self.gui.tab_labels)
+        self.ui.transport.click('Play')
+        self.assertTrue(cast.snapshot()['playing'])
+        self.ui.transport.click('End')
+        self.assertEqual(cast.snapshot()['frame'], 11)
+        self.ui.folder = Path(self.temp.name) / 'projects'
+        self.ui.folder.mkdir()
+        self.ui.update()
+        self.assertIn('Cast performance', self.ui.status.content)
+        self.ui.save.callbacks['click'](SimpleNamespace(client=None))
+        paths = list((Path(self.temp.name)/'cast-projects').glob('*.cast.stagezero.npz'))
+        self.assertEqual(len(paths), 1)
+        saved, _, scene, frame = decode_project(paths[0].read_bytes())
+        self.assertEqual(saved.joints.tobytes(), clip.joints.tobytes())
+        self.assertEqual(frame, 11)
+        self.assertEqual(scene['name'], 'Cast background')
+        self.assertIn(paths[0].name, self.ui.saved_map)
+        cast.deactivate()
+        self.ui.open_data(paths[0].read_bytes())
+        self.assertTrue(cast.active)
+        self.assertEqual(cast.timeline_clip().actor_ids, clip.actor_ids)
+        self.assertTrue(np.array_equal(self.session.positions, before))
+        self.assertEqual(tuple(self.gui.tab_labels), original_tabs)
+
+
+    def test_native_playback_controls_are_visible_and_hide_for_work_capture_and_g1(self):
+        from cast_performance_session import CastPerformanceSession
+        from test_cast_performance import performance
+        cast = CastPerformanceSession()
+        self.addCleanup(cast.close)
+        self.ui.cast_session = cast
+        cast.activate()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        cast.load_performance(performance(3, frames=12))
+        before = self.session.positions.copy()
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        self.ui.transport.click('Play')
+        self.assertTrue(cast.snapshot()['playing'])
+        self.ui.transport.click('Pause')
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.seek(7)
+        self.ui.transport.click('Start')
+        self.assertEqual(cast.snapshot()['frame'], 0)
+        cast.begin_capture()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        self.ui.transport.click('Play')  # A stale client click stays harmless.
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.end_capture(0)
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        with patch.object(cast, 'snapshot', return_value=dict(cast.snapshot(), busy=True)):
+            self.ui.update()
+            self.assertFalse(self.ui.transport.visible)
+            self.ui.transport.click('Play')
+        self.assertFalse(cast.snapshot()['playing'])
+        cast.deactivate()
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+        np.testing.assert_array_equal(self.session.positions, before)
+
+    def test_new_take_waits_for_cast_work_then_uses_explicit_mode_handoff(self):
+        state = {'active': True, 'busy': True, 'capturing': False,
+                 'total_frames': 8, 'frame': 0, 'fps': 30, 'status': 'Generating'}
+        self.ui.cast_session = SimpleNamespace(snapshot=lambda: dict(state))
+        before = self.session.active_take
+        calls = []
+        def handoff():
+            calls.append('g1')
+            state['active'] = False
+        self.ui.on_story_activate = handoff
+        self.ui.quick_actions.click('New take')
+        self.assertEqual(calls, [])
+        self.assertEqual(self.session.active_take, before)
+        self.assertIn('Finish generation', self.session.project_status)
+        state['busy'] = False
+        self.ui.quick_actions.click('New take')
+        self.assertEqual(calls, ['g1'])
+        self.assertFalse(state['active'])
+
+
 
 if __name__ == '__main__':
     unittest.main()

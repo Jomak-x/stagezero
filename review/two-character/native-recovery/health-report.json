@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "status": "complete",
+  "purpose": "Bounded native 30 fps InterGen research recovery on existing Pod; original output and existing workers preserved.",
+  "source_model": "Published InterGen research checkpoint",
+  "source_revision": "b1750df4a859443b8a69329f759ce3a7503ae179",
+  "checkpoint_bytes": 2701617525,
+  "license": "CC BY-NC-SA 4.0; noncommercial research preview only",
+  "probe": "/workspace/stagezero/intergen-lab/intergen_probe.py",
+  "remote_output_dir": "/workspace/stagezero/intergen-lab/results-native-recovery-20260926",
+  "sample_command_pattern": "PYTHONPATH=/workspace/stagezero/intergen-lab/deps:/workspace/stagezero/intergen-lab/CLIP /workspace/stagezero/.venv/bin/python /workspace/stagezero/intergen-lab/intergen_probe.py sample --repo /workspace/stagezero/intergen-lab/InterGen --checkpoint /workspace/stagezero/intergen-lab/intergen.ckpt --clip-cache /workspace/stagezero/intergen-lab/CLIP --text-only-clip --prompt <prompt> --seed <seed> --frames 210 --cuda-memory-fraction 0.08 --output <new-file.npz>",
+  "guardrails": {
+    "serial_processes": true,
+    "new_output_only": true,
+    "min_free_gpu_before_each_mib": 6144,
+    "cuda_memory_fraction": 0.08,
+    "max_nominal_allocator_gib": 3.84,
+    "no_worker_restart": true,
+    "no_new_pod": true
+  },
+  "health_before": {
+    "g1_8765": {
+      "ready": true,
+      "model": "ARDY-G1-RP-25FPS-Horizon52"
+    },
+    "core_8769": {
+      "ready": true,
+      "queue_depth": 0,
+      "model": "ARDY-Core-RP-20FPS-Horizon40"
+    },
+    "gpu": {
+      "name": "NVIDIA RTX 6000 Ada Generation",
+      "total_mib": 49140,
+      "used_mib": 34448,
+      "free_mib": 14064,
+      "utilization_percent": 0,
+      "compute_process_used_mib": {
+        "11186": 15882,
+        "23565": 17092,
+        "40094": 1454
+      }
+    }
+  },
+  "health_after": {
+    "g1_8765": {
+      "ready": true,
+      "model": "ARDY-G1-RP-25FPS-Horizon52"
+    },
+    "core_8769": {
+      "ready": true,
+      "queue_depth": 0,
+      "model": "ARDY-Core-RP-20FPS-Horizon40"
+    },
+    "gpu": {
+      "name": "NVIDIA RTX 6000 Ada Generation",
+      "used_mib": 34448,
+      "free_mib": 14064,
+      "utilization_percent": 0,
+      "compute_process_used_mib": {
+        "11186": 15882,
+        "23565": 17092,
+        "40094": 1454
+      }
+    }
+  },
+  "samples": [
+    {
+      "name": "assist42",
+      "prompt": "One person helps another person stand up.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.9518873658962548,
+      "wall_seconds": 9.631,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/assist42.npz",
+      "sha256": "e8a78bbb12a5a5f1cc83817c231e9b9d1bb4ef2a389b0f2ddd1da6f46aa4520f",
+      "bytes": 607555
+    },
+    {
+      "name": "dodge42",
+      "prompt": "One person throws a punch while the other person ducks and dodges.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.8978994558565319,
+      "wall_seconds": 8.364,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/dodge42.npz",
+      "sha256": "348ec8002b98539d32be2a14481dec630fb36af14c9b03e95c39bd4476d7076e",
+      "bytes": 608871
+    },
+    {
+      "name": "highfive42",
+      "prompt": "Two people give each other a high five.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.8797615580260754,
+      "wall_seconds": 8.257,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/highfive42.npz",
+      "sha256": "362705b45f49e01d5ea07f0abfa3257db63bb024c6033e8011a462b1505030c7",
+      "bytes": 609947
+    },
+    {
+      "name": "originalembrace37",
+      "prompt": "Two people embrace each other.",
+      "seed": 37,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.8837828999385238,
+      "wall_seconds": 8.247,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/originalembrace37.npz",
+      "sha256": "17de174556a31f60253fc08c406ea857ce423cb08537983d7ad49d96dd99ed1a",
+      "bytes": 611879
+    },
+    {
+      "name": "originalhandshake42",
+      "prompt": "Two people shake hands and step apart.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.8748696520924568,
+      "wall_seconds": 7.995,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/originalhandshake42.npz",
+      "sha256": "de2ec70ed87d0a443ee249e9a743838c32f9e7ece1d6c6e987b2a39a3b5d3a5c",
+      "bytes": 608496
+    },
+    {
+      "name": "waltz42",
+      "prompt": "Two people dance a waltz together.",
+      "seed": 42,
+      "frames": 210,
+      "fps": 30,
+      "duration_seconds": 7.0,
+      "generation_seconds": 0.867745968978852,
+      "wall_seconds": 8.113,
+      "peak_cuda_allocated_bytes": 1280301056,
+      "peak_cuda_reserved_bytes": 1356857344,
+      "free_gpu_before_mib": 14064,
+      "local_file": "review/two-character/native-recovery/raw/waltz42.npz",
+      "sha256": "1f0a39a11293d9115ea58a55eeeb61b3bccdf825de3e891d70056bffd98eec5b",
+      "bytes": 609905
+    }
+  ],
+  "validation": {
+    "remote_local_sha256_match_for_all_six": true,
+    "all_finite": true,
+    "features_shape": [
+      210,
+      2,
+      262
+    ],
+    "joints_shape": [
+      210,
+      2,
+      22,
+      3
+    ],
+    "smoothed_joints_shape": [
+      210,
+      2,
+      22,
+      3
+    ],
+    "originalembrace37_arrays_exact_match_to_prior_local_sample": true,
+    "native_fps": 30,
+    "native_features_preserved": true,
+    "archive_count": 6
+  },
+  "limitations": [
+    "Raw 30 fps InterGen outputs are research-only and are not Core27 native archives or Studio playback captures.",
+    "No visual-quality claim follows from successful generation or array checks; each candidate requires full rendered review.",
+    "The existing Core service retargets InterGen to 20 fps and discards raw 30 fps features; these samples use the separate original probe.",
+    "Larger GPU memory would allow more concurrent models or a different model, but current semantic/partner-contact quality is not shown to be GPU-memory limited."
+  ]
+}

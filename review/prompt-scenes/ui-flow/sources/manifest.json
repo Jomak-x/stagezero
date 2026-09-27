@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "prompt": "One person waves hello.",
+  "seed": 42,
+  "status": "complete",
+  "sources": [
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/.runtime/prompt-scenes/generations/scene-25481fb039ba448daea66fc927b147bc/core-000.npz",
+      "seconds": 0.8558301249868236,
+      "sha256": "df4a3ab501c34e8a53564adbb1a1993549ee39d1e9b8c63e7ecfbe2019a91139"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 3.0950275830109604
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.007826416986063123
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-546761f4fe4d4058850485b158f1d831",
+      "seconds": 0.8558301249868236
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.01245762500911951
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-1",
+      "seconds": 0.8762348329764791
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "beat-1",
+      "requested_seconds": 2,
+      "source_seconds": 2.0,
+      "duration_policy": "complete sequential 40-frame Core horizons at 20 fps",
+      "refinement": null
+    }
+  ],
+  "plan": {
+    "version": 1,
+    "title": "A Friendly Wave",
+    "prompt": "One person waves hello.",
+    "actor_count": 1,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "Wave hello with one hand.",
+        "seconds": 2
+      }
+    ],
+    "warnings": [],
+    "raw_plan": {
+      "version": 1,
+      "title": "A Friendly Wave",
+      "prompt": "One person waves hello.",
+      "actor_count": 1,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "prompt": "Wave hello with one hand.",
+          "seconds": 2
+        }
+      ],
+      "warnings": []
+    },
+    "planning_seconds": 3.09258941601729,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol",
+    "planner_cache_hit": false
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": 0.0,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          0.0,
+          -1.5
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 0,
+    "core_horizons": "sequential native330 history"
+  },
+  "frames": 60,
+  "duration_seconds": 2.0,
+  "wall_seconds": 3.987152249959763
+}

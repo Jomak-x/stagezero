@@ -15,10 +15,12 @@ _CURRENT = 'Current scene'
 
 
 class StoryControls:
-    def __init__(self, gui, session, *, core_session=None, on_story_activate=None):
+    def __init__(self, gui, session, *, core_session=None, paired_session=None, cast_session=None, on_story_activate=None):
         self.gui = gui
         self.session = session
         self.core_session = core_session
+        self.paired_session = paired_session
+        self.cast_session = cast_session
         self.on_story_activate = on_story_activate
         self.workflow = StoryWorkflow(session)
         self.ids = {}
@@ -153,11 +155,10 @@ class StoryControls:
                 if not 1 <= len(view.prompt.value.strip()) <= 2000:
                     raise ValueError('Describe what happens in the scene.')
                 with self.session.lock:
-                    core_active = (self.core_session is not None and
-                                   self.core_session.snapshot()['active'])
+                    native_active = self._native_active()
                     if self.session.busy:
                         raise ValueError('Wait for the current motion generation to finish.')
-                    if not core_active and not self.session.character_motion_enabled:
+                    if not native_active and not self.session.character_motion_enabled:
                         raise ValueError('Select a motion-ready character before generating a scene.')
                 if view.length.value == 'Auto':
                     seconds = None
@@ -246,6 +247,8 @@ class StoryControls:
                         view.error = 'The scene take changed. Select it again before reviewing.'
                     elif self.session.busy:
                         view.error = 'Wait for the current motion to finish before reviewing.'
+                    elif self._paired_activation_error():
+                        view.error = self._paired_activation_error()
                     else:
                         self._activate_g1()
                         self.session.set_mode('Live ARDY')
@@ -438,21 +441,46 @@ class StoryControls:
         navigate_tab(view.tabs, 1, client)
         return True
 
+    def _native_active(self):
+        return any(native is not None and native.snapshot().get('active', False)
+                   for native in (self.core_session, self.paired_session, self.cast_session))
+
+    def _paired_activation_error(self):
+        for label, native in (('paired', self.paired_session), ('cast', self.cast_session)):
+            state = native.snapshot() if native is not None else {}
+            if state.get('capturing'):
+                return f'Wait for {label} playback export to finish before loading this scene.'
+            if state.get('busy'):
+                return f'Finish or cancel {label} generation before loading this scene.'
+        return None
+
     def _activate_g1(self):
+        error = self._paired_activation_error()
+        if error:
+            raise ValueError(error)
         if self.core_session is not None and self.core_session.snapshot()['active']:
             self.core_session.deactivate()
-            if self.on_story_activate is not None:
-                self.on_story_activate()
+        # The viewer also owns paired visibility and motion enablement. Its
+        # explicit handoff is needed even when Native Core was never active.
+        if self.on_story_activate is not None:
+            self.on_story_activate()
 
     def _load(self, view, identifier, *, automatic=False):
         try:
+            error = self._paired_activation_error()
+            if error:
+                if automatic:
+                    return False
+                raise ValueError(error)
+            if automatic and self._native_active():
+                return False
             loaded = self.workflow.load(identifier, automatic=automatic)
             if not loaded:
                 if automatic:
                     return False
                 raise ValueError('This scene is not ready to load yet.')
             # Explicit Load means the user wants to see the G1 result. An
-            # automatic load only runs if Native Core is already inactive.
+            # automatic load only runs if both native modes are inactive.
             if not automatic:
                 self._activate_g1()
             view.current_take_id = None
@@ -575,9 +603,9 @@ class StoryControls:
         self._set(view.load, 'visible', ready)
         self._set(view.jobs, 'visible', len(options) > 1)
         self._set(view.seconds, 'visible', view.length.value == 'Custom')
-        core_active = self.core_session is not None and self.core_session.snapshot()['active']
+        native_active = self._native_active()
         self._set(view.generate, 'disabled', self.session.busy or
-                  (not core_active and not self.session.character_motion_enabled))
+                  (not native_active and not self.session.character_motion_enabled))
         plan = data.get('plan') if data else None
         beats = (plan.get('beats') or []) if plan else []
         if take is not None and take.segments:
@@ -677,12 +705,12 @@ class StoryControls:
         if self._closed:
             return
         # Jobs advance independently of any open modal. Automatic loading
-        # preserves the simple one-prompt flow when Native Core is inactive.
+        # preserves the one-prompt flow without replacing either native mode.
         for identifier in tuple(self.ids.values()):
             data = self.workflow.snapshot(identifier)
             if (data and data['status'] == 'completed' and not data.get('loaded')
                     and not self.session.busy and
-                    (self.core_session is None or not self.core_session.snapshot()['active'])):
+                    not self._native_active() and not self._paired_activation_error()):
                 attempt = (identifier, self.session.project_revision)
                 if attempt not in self._automatic_attempts:
                     self._automatic_attempts.add(attempt)

@@ -1,0 +1,54 @@
+{
+  "status": "rejected_by_user",
+  "production_animation_ready": false,
+  "prior_duet": "rejected by user; preserved",
+  "approach": "one jointly generated InterGen sample, no clip splicing",
+  "source": "intergen",
+  "license": "CC BY-NC-SA 4.0",
+  "fresh_gpu_jobs": 7,
+  "new_pods": 0,
+  "frames": 120,
+  "fps": 20,
+  "duration_seconds": 6.0,
+  "scene_objects": 50,
+  "ui_verified": [
+    "generate default Close exchange",
+    "restart playback",
+    "save + download",
+    "return to G1",
+    "open saved paired archive restores scene and playhead"
+  ],
+  "exact_archive_roundtrip": true,
+  "root_gap_min_m": 0.6361583471298218,
+  "root_gap_median_m": 0.8369420170783997,
+  "torso_proxy_min_m": 0.5927891135215759,
+  "joint_step_max_m": 0.27042585611343384,
+  "joint_step_p95_m": 0.10238578356802464,
+  "tests": {
+    "python_unittest": 828,
+    "passed": true,
+    "log": "python-tests.txt"
+  },
+  "video": "ui-close-exchange-capture/performance.mp4",
+  "video_sha256": "f065a0e4ec8948880ad96bdd0741f727570fd12a9b2e7a8e1e1065efa1b2a589",
+  "archive": "ui-close-exchange.paired.stagezero.npz",
+  "visual_review": {
+    "method": "normal-speed browser playback screenshots plus 24-frame contact sheet across full scene",
+    "result": "closer coordinated forearm/shove exchange; modest research improvement, not polished combat",
+    "limitations": [
+      "rigid fingers",
+      "awkward arm poses at setup and exit",
+      "approximate hand contact and foot grounding",
+      "no mesh/contact physics",
+      "fixed reviewed prompt/seed; arbitrary prompts unreliable"
+    ]
+  },
+  "rejected_trials": {
+    "high-five-7301": "does not read as clear high five",
+    "boxing-7303": "torso intersection near end; whole scene rejected",
+    "boxing-7304": "weak legibility in second half despite numerical clearance",
+    "push-37": "unclear push/stumble, crouched overlap-looking pose"
+  },
+  "secondary_preset": "dance-7302: modest paired turn with static setup",
+  "user_review": "Awful motion and malformed joints; original native handshake/hug was better. Not an accepted milestone."
+}

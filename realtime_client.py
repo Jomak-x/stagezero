@@ -236,4 +236,7 @@ def request_body(request, *, seed=33):
     if request.history is None and len(request.actor_ids) == 2 and 'initial_placements' not in body:
         body['initial_placements'] = {actor_id: {'position_xz': [x, 0.0]}
                                       for actor_id, x in zip(request.actor_ids, (-1.2, 1.2))}
+    if "pose_cue_profile" in request.metadata:
+        from core_pose_cues import apply_profile
+        body = apply_profile(body, request.history, request.metadata["pose_cue_profile"])
     return body

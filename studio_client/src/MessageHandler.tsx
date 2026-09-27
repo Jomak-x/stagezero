@@ -25,6 +25,7 @@ import { IconCheck, IconDownload } from "@tabler/icons-react";
 import { applyRootPoseImmediately, computeT_threeworld_world } from "./WorldTransformUtils";
 import { rootNodeTemplate } from "./SceneTreeState";
 import { GaussianSplatsContext } from "./Splatting/GaussianSplatsHelpers";
+import { nativePairPlayback, advanceNativePairPlayback, renderNativePairNow } from "./mesh/NativePairPlayback";
 import { publishActorGlbControl } from "./mesh/ActorGlbProtocol";
 import { applyCameraState } from "./cameraStore";
 import { setServerCameraTarget } from "./serverCamera";
@@ -141,6 +142,23 @@ function useMessageHandler() {
     }
 
     switch (message.type) {
+      case "NativePairClipMessage": {
+        try {
+          const loaded = nativePairPlayback.load(message);
+          if (loaded || nativePairPlayback.clip?.revision === message.revision)
+            viewerMutable.sendMessage({ type: "NativePairStatusMessage", revision: message.revision, status: "loaded" });
+        } catch (error) {
+          viewerMutable.sendMessage({ type: "NativePairStatusMessage", revision: message.revision, status: "error", error: String(error) });
+        }
+        return;
+      }
+      case "NativePairTransportMessage": {
+        try { nativePairPlayback.command(message); }
+        catch (error) {
+          viewerMutable.sendMessage({ type: "NativePairStatusMessage", revision: message.revision, status: "error", error: String(error) });
+        }
+        return;
+      }
       case "ActorGlbCommandMessage":
       case "ActorGlbPoseMessage": {
         publishActorGlbControl(message);
@@ -474,6 +492,7 @@ function useMessageHandler() {
       }
       // Remove a scene node and its children by name.
       case "RemoveSceneNodeMessage": {
+        nativePairPlayback.remove(message.name);
         console.log("Removing scene node:", message.name);
         const sceneState = viewer.useSceneTree.getState();
         if (!(message.name in sceneState)) {
@@ -686,6 +705,8 @@ export function FrameSynchronizedMessageHandler() {
 
   useFrame(
     () => {
+      // All actors sample one local clock before individual mesh callbacks.
+      advanceNativePairPlayback();
       // Send a render along if it was requested!
       if (viewerMutable.getRenderRequestState === "triggered") {
         viewerMutable.getRenderRequestState = "pause";
@@ -757,6 +778,7 @@ export function FrameSynchronizedMessageHandler() {
         );
 
         // Render the scene.
+        renderNativePairNow();
         gl.render(viewerMutable.scene!, camera);
 
         // Temporary canvas for saving the rendered image. This is needed to

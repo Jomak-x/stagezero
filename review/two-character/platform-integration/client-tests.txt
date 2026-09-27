@@ -1,0 +1,85 @@
+
+> viser@0.1.0 test
+> node --experimental-strip-types --test src/*.test.mjs tests/*.test.mjs src/mesh/*.test.mjs
+
+(node:21591) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/WorldTransformUtils.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ root +Y pose is available to camera commands in the same socket batch (1.405542ms)
+(node:21592) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/cameraNavigation.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a click and tiny pointer jitter never begin a camera drag (0.307083ms)
+✔ pan moves the camera and target together in the screen plane (0.514791ms)
+✔ look keeps the camera fixed, target distance constant, and pitch upright (0.321125ms)
+✔ walk forward stays level even when looking down (0.130333ms)
+✔ dolly has bounded, monotonic sensitivity (0.062791ms)
+(node:21593) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/cameraStore.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ camera state and command envelopes are isolated per viewer (1.024208ms)
+✔ older same-project states cannot roll back a camera edit (0.085333ms)
+(node:21594) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/cameraTimelineMath.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ camera cuts form hard-cut durations ending at the take length (1.146917ms)
+✔ a dragged cut replaces an occupied frame in either direction (0.166583ms)
+✔ the final one-frame cut keeps a clickable block at the edge (0.115667ms)
+✔ dragging snaps to whole frames and stays within the take (0.186875ms)
+(node:21595) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/mesh/ActorGlbLifecycle.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a failed replacement retries an interrupted committed load (0.573584ms)
+✔ rejecting B leaves an in-flight retry of committed A intact (0.106416ms)
+(node:21596) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/mesh/ActorGlbRendering.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ ground offset uses world units while model scale remains local (2.157333ms)
+✔ placement defaults legacy loads to zero and stays isolated per actor (0.238625ms)
+✔ controlled skinned GLB is not culled against stale bind bounds (0.367708ms)
+(node:21597) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/mesh/SkinnedMeshTexture.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ skinned human PNG maps retain glTF material channels and release on replacement (1.096833ms)
+(node:21598) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/serverCamera.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a cut from Y-up to a straight-down shot preserves the exact target (2.260667ms)
+✔ successive rolled and up-vector cuts preserve both endpoints (1.269917ms)
+(node:21599) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/MessageThrottle.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ different GUI controls are not lost within one throttle interval (1.086958ms)
+✔ trailing seek is sent, intermediate values coalesce, dispose cancels pending work (0.205875ms)
+(node:21600) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/timeline/studioActions.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ studio action identifiers carry the take, index, and command address (1.163625ms)
+✔ each timeline command uses the button update protocol (0.195459ms)
+✔ transport commands use action zero and the same update protocol (0.110667ms)
+(node:21601) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/src/timeline/normalize.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/jakob/.codex/worktrees/motion-performance/Shellhacks/studio_client/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ playhead-only update reuses all static timeline arrays (0.799875ms)
+✔ a changed entry invalidates only its array and keeps the new value (0.211292ms)
+✔ entry order, prompt constraints, and changed scalar fields survive reuse (0.138291ms)
+✔ layout and configuration changes invalidate every static array even if input arrays are reused (0.172625ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.684041

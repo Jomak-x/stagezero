@@ -400,6 +400,112 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(self.core.deactivations, 1)
         self.assertEqual(self.handoffs, [True])
 
+    def test_paired_active_can_generate_without_interrupting_pair_until_explicit_load(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        self.session.character_motion_enabled = False
+
+        def handoff():
+            self.handoffs.append(True)
+            paired['active'] = False
+            self.session.character_motion_enabled = True
+
+        self.controls.on_story_activate = handoff
+        view = self.controls.open(self.client)
+        self.assertFalse(view.generate.disabled)
+        identifier = self.create_scene(view)
+        self.assertTrue(paired['active'])
+        self.assertEqual(self.handoffs, [])
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        self.controls.update()
+        self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertIsNone(self.session.active_take)
+        view.load.click(self.client)
+        self.assertTrue(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertFalse(paired['active'])
+        self.assertTrue(self.session.character_motion_enabled)
+        self.assertEqual(self.core.deactivations, 0)
+        self.assertEqual(self.handoffs, [True])
+        self.assertFalse(view.edit.disabled)
+
+    def test_paired_busy_or_export_blocks_load_before_g1_take_changes(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag, error in (('busy', 'Finish or cancel paired generation'),
+                            ('capturing', 'Wait for paired playback export')):
+            with self.subTest(flag=flag):
+                paired[flag] = True
+                self.controls.update()
+                view.load.click(self.client)
+                self.assertIn(error, view.error)
+                self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+                self.assertEqual(self.session.takes, {})
+                self.assertIsNone(self.session.active_take)
+                self.assertEqual(self.session.project_revision, 0)
+                self.assertEqual(self.handoffs, [])
+                paired[flag] = False
+
+    def test_cast_busy_or_export_blocks_load_before_g1_take_changes(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.cast_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag, error in (('busy', 'Finish or cancel cast generation'),
+                            ('capturing', 'Wait for cast playback export')):
+            with self.subTest(flag=flag):
+                paired[flag] = True
+                self.controls.update()
+                view.load.click(self.client)
+                self.assertIn(error, view.error)
+                self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+                self.assertEqual(self.session.takes, {})
+                self.assertIsNone(self.session.active_take)
+                self.assertEqual(self.session.project_revision, 0)
+                self.assertEqual(self.handoffs, [])
+                paired[flag] = False
+
+    def test_inactive_pair_with_pending_work_still_blocks_automatic_load(self):
+        self.core.active = False
+        paired = {'active': False, 'busy': True, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag in ('busy', 'capturing'):
+            paired.update(busy=flag == 'busy', capturing=flag == 'capturing')
+            self.controls.update()
+            self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+            self.assertIsNone(self.session.active_take)
+        paired.update(busy=False, capturing=False)
+        self.controls.update()
+        self.assertTrue(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertEqual(self.handoffs, [])  # Automatic completion never switches modes.
+
+    def test_explicit_activation_callback_runs_without_core_session(self):
+        self.controls.core_session = None
+        self.controls._activate_g1()
+        self.assertEqual(self.handoffs, [True])
+        self.assertEqual(self.core.deactivations, 0)
+
+    def test_cancel_full_scene_does_not_cancel_or_switch_paired_generation(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': True, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        self.session.character_motion_enabled = False
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        view.cancel.click(self.client)
+        self.assertEqual(self.controls.workflow.jobs[identifier]['status'], 'cancelled')
+        self.assertEqual(paired, {'active': True, 'busy': True, 'capturing': False})
+        self.assertEqual(self.handoffs, [])
+
     def test_stale_movement_cannot_edit_replacement_take(self):
         view = self.controls.open(self.client)
         identifier = self.create_scene(view)
