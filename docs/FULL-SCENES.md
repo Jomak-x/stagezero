@@ -4,7 +4,7 @@ Open **Full scene** in the Studio to describe a complete performance in its own 
 
 You can close the popup while a job runs and reopen it to check progress. Multiple scene requests queue without replacing the current take. Configured independent backend lanes can process separate scenes in parallel; movements within a scene always run in order.
 
-Load a completed scene to review it in the viewer. Select a movement, change its direction or length, and regenerate. Earlier movements remain unchanged; the selected movement and following movements are regenerated together to maintain continuity. Undo restores the previous take after a completed edit. After reopening a saved project, choose **Refine → Use current take** to continue editing it in the popup. Save the project using the normal Studio save control to retain the result.
+Load a completed scene to review it in the viewer. Open **Refine**, choose a movement, describe the change, and select **Update movement**. Optional length changes live under **Timing**; **Preview movement** closes the popup and plays it in the viewer. Earlier movements remain unchanged; the selected movement and following movements are regenerated together to maintain continuity. Undo restores the previous take after a completed edit. After reopening a saved project, **Refine** automatically uses the current take. Save the project using the normal Studio save control to retain the result.
 
 The popup uses the current background and the G1 motion workflow. It does not independently stage a second actor or create background geometry. Spoken lines are retained in the plan with a warning; this workflow does not render speech audio. Requested stunts and object contact still depend on the motion engine.
 

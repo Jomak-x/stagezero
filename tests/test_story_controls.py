@@ -43,6 +43,7 @@ class Handle:
 class Gui:
     def __init__(self):
         self.modals = []
+        self.controls = []
 
     def add_modal(self, title, **kwargs):
         modal = Handle(title=title, **kwargs)
@@ -56,19 +57,30 @@ class Gui:
         return Handle()
 
     def add_folder(self, _name, **_kwargs):
-        return Handle()
+        folder = Handle(label=_name)
+        self.controls.append(folder)
+        return folder
 
     def add_button(self, label, **_kwargs):
-        return Handle(label=label)
+        handle = Handle(label=label)
+        self.controls.append(handle)
+        return handle
 
     def add_text(self, label, initial_value='', **_kwargs):
-        return Handle(label=label, value=initial_value)
+        handle = Handle(label=label, value=initial_value, **_kwargs)
+        self.controls.append(handle)
+        return handle
 
-    def add_dropdown(self, label, options):
-        return Handle(label=label, options=options, value=options[0])
+    def add_dropdown(self, label, options, initial_value=None, **_kwargs):
+        handle = Handle(label=label, options=options,
+                        value=initial_value if initial_value is not None else options[0])
+        self.controls.append(handle)
+        return handle
 
     def add_html(self, content):
-        return Handle(content=content)
+        handle = Handle(content=content)
+        self.controls.append(handle)
+        return handle
 
 
 class Workflow:
@@ -185,12 +197,52 @@ class StoryControlsTests(unittest.TestCase):
         self.controls = StoryControls(self.gui, self.session, core_session=self.core,
                                       on_story_activate=lambda: self.handoffs.append(True))
 
+    def create_scene(self, view):
+        view.prompt.value = 'Walk forward, then wave.'
+        view.generate.click(self.client)
+        return next(iter(self.controls.ids.values()))
+
+    def test_create_starts_with_only_essential_controls(self):
+        view = self.controls.open(self.client)
+        self.assertEqual(view.modal.title, 'Full scene')
+        self.assertEqual(view.prompt.value, '')
+        self.assertIn('Walk forward', view.prompt.hint)
+        self.assertEqual(view.length.value, '30 seconds')
+        self.assertFalse(view.seconds.visible)
+        self.assertFalse(view.jobs.visible)
+        self.assertFalse(view.cancel.visible)
+        self.assertFalse(view.load.visible)
+        self.assertFalse(view.details.visible)
+        self.assertFalse(view.actions.visible)
+        self.assertFalse(view.timing.visible)
+        self.assertFalse(view.undo.visible)
+        self.assertFalse(view.cancel_edit.visible)
+        self.assertEqual(view.status.content, '')
+        view.generate.click(self.client)
+        self.assertFalse(self.controls.ids)
+        self.assertIn('Describe what happens', view.status.content)
+
+    def test_movement_change_populates_fields_and_poll_preserves_draft(self):
+        self.session.takes['scene-take'] = self.session.scene_take
+        self.session.active_take = 'scene-take'
+        view = self.controls.open(self.client)
+        self.assertEqual(view.action_prompt.value, 'Walk ahead')
+        self.assertEqual(view.action_seconds.value, '4.00')
+        view.actions.edit(view.actions.options[1], self.client)
+        self.assertEqual(view.action_prompt.value, 'Wave')
+        view.action_prompt.value = 'Wave with the left hand'
+        self.controls.update()
+        self.assertEqual(view.action_prompt.value, 'Wave with the left hand')
+        view.edit.click(self.client)
+        self.assertIn(('edit', 'Wave with the left hand', 1, 'replace', 4.0),
+                      self.session.calls)
+
     def test_client_local_modal_and_close_preserve_running_job(self):
         view = self.controls.open(self.client)
         self.assertEqual(len(self.client_gui.modals), 1)
-        self.assertEqual(self.client_gui.modals[0].size, 'xl')
+        self.assertEqual(self.client_gui.modals[0].size, 'md')
         self.assertEqual(len(self.gui.modals), 0)
-        view.generate.click(self.client)
+        self.create_scene(view)
         self.assertEqual(len(self.controls.ids), 1)
         view.close.click(self.client)
         self.assertTrue(view.modal.closed)
@@ -199,15 +251,14 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(len(self.controls.workflow.jobs), 1)
         reopened = self.controls.open(self.client)
         self.assertEqual(reopened.jobs.options[0], next(iter(self.controls.ids)))
-        self.assertIn('Running', reopened.status.content)
+        self.assertIn('Creating scene', reopened.status.content)
 
     def test_core_active_scene_can_submit_but_load_hands_off(self):
         self.session.character_motion_enabled = False
         view = self.controls.open(self.client)
         self.controls.update()
         self.assertFalse(view.generate.disabled)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         self.controls.update()
         self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
@@ -219,12 +270,10 @@ class StoryControlsTests(unittest.TestCase):
 
     def test_stale_movement_cannot_edit_replacement_take(self):
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
         self.session.character_motion_enabled = True
-        view.select_action.click(self.client)
         self.assertFalse(view.edit.disabled)
         self.session.takes['scene-take'] = SimpleNamespace(id='scene-take', name='Changed performance', segments=[
             {'prompt': 'Jump ahead', 'start': 0, 'end': 100}])
@@ -233,10 +282,15 @@ class StoryControlsTests(unittest.TestCase):
         self.assertIn('changed', view.error)
         self.controls.update()
         self.assertTrue(view.edit.disabled)
+        self.assertTrue(view.refresh_action.visible)
+        view.refresh_action.click(self.client)
+        self.assertFalse(view.edit.disabled)
 
     def test_duration_validation_and_selected_movement_edit(self):
         view = self.controls.open(self.client)
+        view.length.edit('Custom', self.client)
         view.seconds.value = '121'
+        view.prompt.value = 'Walk forward, then wave.'
         view.generate.click(self.client)
         self.assertFalse(self.controls.ids)
         self.assertIn('120', view.error)
@@ -246,7 +300,6 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(self.controls.workflow.jobs[identifier]['seconds'], 60)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
-        view.select_action.click(self.client)
         view.action_prompt.value = 'Walk slowly'
         view.action_seconds.value = '3.20'
         view.edit.click(self.client)
@@ -254,8 +307,7 @@ class StoryControlsTests(unittest.TestCase):
 
     def test_popup_undo_does_not_touch_another_take(self):
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
         self.session._undo_action_edit = (SimpleNamespace(id='other-take'), object())
@@ -265,19 +317,16 @@ class StoryControlsTests(unittest.TestCase):
         view.undo.click(self.client)
         self.assertNotIn(('undo',), self.session.calls)
 
-    def test_reopened_project_take_requires_explicit_selection_then_refines(self):
+    def test_reopened_project_take_is_ready_to_refine(self):
         # Simulate a fresh studio process after the project file was reopened:
         # take data exists, but the transient scene-job history is empty.
         self.session.takes['scene-take'] = self.session.scene_take
         self.session.active_take = 'scene-take'
         view = self.controls.open(self.client)
         self.assertEqual(self.controls.ids, {})
-        self.assertEqual(view.actions.options, ('No movements yet',))
-        self.assertTrue(view.edit.disabled)
-        view.use_current.click(self.client)
-        self.assertIn('Project take: Saved performance', view.source.content)
+        self.assertIn('Saved performance', view.source.content)
         self.assertEqual(len(view.action_map), 2)
-        view.select_action.click(self.client)
+        self.assertFalse(view.edit.disabled)
         view.action_prompt.value = 'Walk toward the door'
         view.edit.click(self.client)
         self.assertIn(('edit', 'Walk toward the door', 0, 'replace', 4.0),
@@ -287,26 +336,22 @@ class StoryControlsTests(unittest.TestCase):
         self.session.takes['scene-take'] = self.session.scene_take
         self.session.active_take = 'scene-take'
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
+        self.create_scene(view)
         self.assertEqual(view.actions.options, ('No movements yet',))
-        view.select_action.click(self.client)
-        self.assertIn('Load a scene', view.error)
-        view.use_current.click(self.client)
-        self.assertIn('Project take: Saved performance', view.source.content)
+        self.assertTrue(view.edit.disabled)
 
     def test_popup_movement_progress_and_failure_replace_completed_job_status(self):
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
-        view.select_action.click(self.client)
+        view.action_prompt.value = 'Walk sideways'
         view.edit.click(self.client)
-        self.assertIn('Regenerating 2 actions', view.status.content)
+        self.assertIn('Updating movement', view.status.content)
         self.assertTrue(view.cancel_edit.disabled is False)
         self.session.status = 'Regenerating actions · 2/3 chunks received; holding pose'
         self.controls.update()
-        self.assertIn('2/3 chunks', view.status.content)
+        self.assertIn('Updating movement', view.status.content)
         self.session.busy = False
         self.session.status = 'Action edit failed · backend unavailable. Original take preserved; retry.'
         self.controls.update()
@@ -318,22 +363,21 @@ class StoryControlsTests(unittest.TestCase):
         self.session.status = 'Regenerated 2 actions · Undo is available'
         self.session.takes['scene-take'] = SimpleNamespace(
             id='scene-take', name='Saved performance',
-            segments=[{'prompt': 'Walk ahead', 'start': 0, 'end': 100},
+            segments=[{'prompt': 'Walk sideways', 'start': 0, 'end': 100},
                       {'prompt': 'Wave', 'start': 100, 'end': 200}])
         self.controls.update()
-        self.assertIn('Regenerated 2 actions', view.status.content)
+        self.assertIn('Movement updated', view.status.content)
         self.controls.update()
-        self.assertIn('Regenerated 2 actions', view.status.content)
+        self.assertIn('Movement updated', view.status.content)
         self.assertEqual(view.selected_index, 0)
-        self.assertTrue(view.edit.disabled)  # The replacement take requires Select movement again.
+        self.assertFalse(view.edit.disabled)  # Our completed edit rebinds its movement.
+        self.assertEqual(view.action_prompt.value, 'Walk sideways')
 
     def test_cancel_movement_update_is_scoped_to_popup_owner_and_version(self):
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
-        view.select_action.click(self.client)
         view.edit.click(self.client)
         other = self.controls.open(SimpleNamespace(client_id='viewer-2', gui=Gui()))
         self.assertTrue(other.cancel_edit.disabled)
@@ -351,15 +395,13 @@ class StoryControlsTests(unittest.TestCase):
 
     def test_cancel_own_movement_update_preserves_take(self):
         view = self.controls.open(self.client)
-        view.generate.click(self.client)
-        identifier = next(iter(self.controls.ids.values()))
+        identifier = self.create_scene(view)
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
-        view.select_action.click(self.client)
         view.edit.click(self.client)
         view.cancel_edit.click(self.client)
         self.assertFalse(self.session.busy)
-        self.assertIn('Movement update cancelled', view.status.content)
+        self.assertIn('Update cancelled', view.status.content)
         self.assertIs(self.session.takes['scene-take'], self.session.scene_take)
 
 
