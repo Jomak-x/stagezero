@@ -13,7 +13,7 @@ import time
 from urllib.parse import urlparse
 
 from live_motion import Backend
-from object_generation import GatewayGenerator, gateway_config
+from object_generation import GatewayGenerator, gateway_config, validate_prompt
 from scene_composition import validate_scene
 from story_jobs import StoryJobQueue
 from story_planning import StoryPlanner
@@ -38,8 +38,8 @@ def build_parser():
     parser.add_argument('--token-file', type=Path, default=DEFAULT_TOKEN,
                         help='Pod bearer token file (default: .runtime/api-token)')
     parser.add_argument('--model', help='Override the gateway model used for story planning')
-    parser.add_argument('--seconds', type=float, default=60,
-                        help='Total scene duration per prompt, 0.16–120 seconds (default: 60)')
+    parser.add_argument('--seconds', type=float, default=None,
+                        help='Exact scene duration per prompt, 0.16–120 seconds (default: Auto)')
     parser.add_argument('--timeout', type=float, default=1800,
                         help='Maximum seconds to wait for all motion jobs (default: 1800)')
     return parser
@@ -117,9 +117,11 @@ def _atomic_write(path, payload):
 def run(args, planner=None, backend_factory=Backend, queue_factory=StoryJobQueue):
     """Run a bounded batch; injected factories keep CLI tests offline."""
     from story_planning import fit_story_duration, validate_story_seconds
-    validate_story_seconds(args.seconds)
+    if args.seconds is not None:
+        validate_story_seconds(args.seconds)
     if not 1 <= len(args.prompts) <= MAX_BATCH:
         raise ValueError(f'Provide 1–{MAX_BATCH} story prompts')
+    prompts = [validate_prompt(prompt) for prompt in args.prompts]
     if not 0 < args.timeout < float('inf'):
         raise ValueError('Timeout must be a positive finite number')
     if len(args.prompts) > 1:
@@ -145,8 +147,9 @@ def run(args, planner=None, backend_factory=Backend, queue_factory=StoryJobQueue
                 raise ValueError('Planner does not support model override')
             planner.gateway.model = args.model
     context = _planning_context(scene) if args.scene else None
-    plans = [fit_story_duration(planner.plan(prompt, context=context, seconds=args.seconds), args.seconds)
-             for prompt in args.prompts]
+    plans = [fit_story_duration(planner.plan(prompt, context=context, seconds=args.seconds),
+                                args.seconds, expected_prompt=prompt)
+             for prompt in prompts]
     paths = [_paths(args.output, len(plans), index, args.plan_only)
              for index in range(len(plans))]
     for plan, (plan_path, _) in zip(plans, paths):

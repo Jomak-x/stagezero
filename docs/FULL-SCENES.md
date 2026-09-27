@@ -1,6 +1,8 @@
 # Full scenes from one prompt
 
-Open **Full scene** in the Studio to describe a complete performance in its own popup. Choose the total length (including 60 seconds), then generate. The planner turns the description into ordered movements; the motion worker generates each movement using the preceding motion as context.
+Open **Full scene** in the Studio to describe a complete performance in its own popup. Leave **Length** on **Auto** to give each movement the time it needs, then generate. The planner estimates each action from its pace, distance, repetitions, and transitions; the total is the sum of those estimates. The popup shows the estimated scene length after planning and each movement’s duration in **Refine**. Estimates describe playback length, not generation wait time. The motion worker generates each movement using the preceding motion as context.
+
+You can still choose a fixed length, including 60 seconds. The planner budgets different amounts of time for different actions instead of evenly dividing the scene. If the requested actions cannot fit the target, choose Auto or adjust the request; the app does not stretch a short plan or speed up a long one to force a fit. Timing is rounded to 25 fps. A scene supports up to 120 seconds and 16 movements, with up to 30 seconds per movement.
 
 You can close the popup while a job runs and reopen it to check progress. Multiple scene requests queue without replacing the current take. Configured independent backend lanes can process separate scenes in parallel; movements within a scene always run in order.
 
@@ -14,4 +16,4 @@ Planning uses the existing private gateway configuration in `.runtime/objects.en
 
 `STAGEZERO_STORY_BACKENDS` can list comma-separated existing HTTP loopback backend URLs for independent queue lanes. Repeated URLs share one lane. Only list compatible G1 services; this setting does not provision Pods or establish tunnels.
 
-The planner and queue enforce bounded durations, action counts, and pending jobs. Motion-quality rejections receive up to three attempts per chunk; connection and authentication errors are not retried as quality failures. Cancelled or failed jobs do not publish a partial take. Loading checks the original project/background to avoid attaching a result to an unrelated scene.
+The CLI also uses Auto by default; pass `--seconds 60` for a fixed target. The planner and queue enforce bounded durations, action counts, and pending jobs. Motion-quality rejections receive up to three attempts per chunk; connection and authentication errors are not retried as quality failures. Cancelled or failed jobs do not publish a partial take. Loading checks the original project/background to avoid attaching a result to an unrelated scene.

@@ -127,17 +127,29 @@ class StoryQueueTests(unittest.TestCase):
         finally:
             queue.close()
 
-    def test_exact_minute_has_editable_actions_and_continuous_history(self):
+    def test_exact_minute_with_varied_travel_actions_has_continuous_history(self):
         backend = FakeBackend()
         queue = StoryJobQueue([backend])
         try:
-            identifier = queue.submit(plan(60))
+            source = {
+                'version': 1, 'title': 'Long plaza walk',
+                'prompt': 'Walk across the plaza, then walk back, then wave several times.',
+                'beats': [
+                    {'id': 'beat-1', 'prompt': 'Walk across the plaza.', 'seconds': 25},
+                    {'id': 'beat-2', 'prompt': 'Walk back to the entrance.', 'seconds': 29},
+                    {'id': 'beat-3', 'prompt': 'Wave several times.', 'seconds': 6},
+                ], 'warnings': [],
+            }
+            identifier = queue.submit(fit_story_duration(source, 60))
             until(lambda: queue.snapshot(identifier)['status'] == 'completed')
             take = queue.result(identifier)
             self.assertEqual(len(take.motion), 1500)
             self.assertEqual(list(dict.fromkeys(item['prompt'] for item in take.segments)),
-                             ['Walk forward.', 'Wave a hand.'])
-            self.assertTrue(all(item['end'] - item['start'] <= 150 for item in take.segments))
+                             ['Walk across the plaza.', 'Walk back to the entrance.',
+                              'Wave several times.'])
+            self.assertEqual([item['end'] - item['start'] for item in take.segments],
+                             [625, 725, 150])
+            self.assertGreater(len(backend.calls), len(source['beats']))
             self.assertEqual(take.segments[-1]['end'], 1500)
             self.assertEqual(queue.snapshot(identifier)['progress']['fraction'], 1)
             self.assertIsNone(backend.calls[0][2])

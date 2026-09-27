@@ -80,7 +80,7 @@ class StoryControls:
         gui = getattr(client, 'gui', None) or self.gui
         modal = gui.add_modal('Full scene', size='md', show_close_button=False)
         prompt_draft, length_draft, seconds_draft, selected_job = self._drafts.get(
-            key, ('', '30 seconds', '30', next(iter(self.ids), 'No scenes yet')))
+            key, ('', 'Auto', '30', next(iter(self.ids), 'No scenes yet')))
         view = SimpleNamespace(key=key, modal=modal, error='', action_map={},
                                action_token=None, selected_index=None,
                                current_take_id=None, bound_take=None,
@@ -92,12 +92,13 @@ class StoryControls:
         self._views[key] = view
         with modal:
             view.status = gui.add_html('')
+            view.estimate = gui.add_html('')
             tabs = gui.add_tab_group()
             with tabs.add_tab('Create'):
                 view.prompt = gui.add_text('What happens?', initial_value=prompt_draft,
                                            multiline=True,
                                            hint='Example: Walk forward, wave, then turn and sit.')
-                view.length = gui.add_dropdown('Length', tuple(_LENGTHS) + ('Custom',),
+                view.length = gui.add_dropdown('Length', ('Auto',) + tuple(_LENGTHS) + ('Custom',),
                                                initial_value=length_draft)
                 view.seconds = gui.add_text('Seconds', initial_value=seconds_draft,
                                              hint='0.16–120')
@@ -145,10 +146,13 @@ class StoryControls:
                         raise ValueError('Wait for the current motion generation to finish.')
                     if not core_active and not self.session.character_motion_enabled:
                         raise ValueError('Select a motion-ready character before generating a scene.')
-                seconds = (_LENGTHS[view.length.value] if view.length.value in _LENGTHS
-                           else float(view.seconds.value))
-                if not math.isfinite(seconds) or not 0.16 <= seconds <= 120:
-                    raise ValueError('Enter a scene length from 0.16 to 120 seconds.')
+                if view.length.value == 'Auto':
+                    seconds = None
+                else:
+                    seconds = (_LENGTHS[view.length.value] if view.length.value in _LENGTHS
+                               else float(view.seconds.value))
+                    if not math.isfinite(seconds) or not 0.16 <= seconds <= 120:
+                        raise ValueError('Enter a scene length from 0.16 to 120 seconds.')
                 identifier = self.workflow.submit(view.prompt.value, seconds=seconds)
                 label = f'{len(self.ids) + 1:02d} · {view.prompt.value.strip()[:52]}'
                 self.ids[label] = identifier
@@ -460,9 +464,26 @@ class StoryControls:
         self._set(view.generate, 'disabled', self.session.busy or
                   (not core_active and not self.session.character_motion_enabled))
         plan = data.get('plan') if data else None
+        beats = (plan.get('beats') or []) if plan else []
+        if take is not None and take.segments:
+            frames = sum(segment['end'] - segment['start'] for segment in take.segments)
+            count = len(take.segments)
+            label = 'Current scene:'
+        elif beats:
+            frames = sum(round(beat['seconds'] * 25) for beat in beats)
+            count = len(beats)
+            label = 'Estimated'
+        else:
+            frames = 0
+        if frames:
+            duration = f'{frames / 25:.2f}'.rstrip('0').rstrip('.')
+            self._set(view.estimate, 'content',
+                      f'<div class="sz-note">{label} {duration}s · {count} '
+                      f'{"movement" if count == 1 else "movements"}</div>')
+        else:
+            self._set(view.estimate, 'content', '')
         html = ''
         if plan:
-            beats = plan.get('beats') or []
             html = '<div class="sz-note">Planned movements</div><ol>' + ''.join(
                 f'<li>{escape(beat["prompt"])} · {beat["seconds"]:g}s</li>' for beat in beats) + '</ol>'
         self._set(view.plan, 'content', html)
@@ -490,7 +511,7 @@ class StoryControls:
             view.selected_index = None
             self._set(view.actions, 'options', ('No movements yet',))
         else:
-            choices = {f'{index + 1:02d} · {segment["start"]/25:.2f}s · {segment["prompt"][:60]}': index
+            choices = {f'{index + 1:02d} · {(segment["end"] - segment["start"])/25:.2f}s long · {segment["prompt"][:60]}': index
                        for index, segment in enumerate(take.segments)}
             view.action_map = choices
             options = tuple(choices) or ('No movements yet',)

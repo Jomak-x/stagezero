@@ -20,8 +20,10 @@ class Planner:
 
     def plan(self, prompt, context=None, seconds=None):
         self.calls.append((prompt, copy.deepcopy(context), seconds))
-        result = plan(seconds)
+        result = plan()
         result['prompt'] = prompt
+        result['beats'][0]['seconds'] = 2.4
+        result['beats'][1]['seconds'] = 5.92
         return result
 
 
@@ -56,18 +58,20 @@ class StoryWorkflowTests(unittest.TestCase):
     def tearDown(self):
         self.workflow.close()
 
-    def completed(self, seconds=8.32):
+    def completed(self, seconds=None):
         identifier = self.workflow.submit('  Walk, then wave.  ', seconds=seconds)
         until(lambda: self.workflow.snapshot(identifier)['status'] == 'completed')
         return identifier
 
     def test_load_adds_editable_take_and_round_trips_archive(self):
-        identifier = self.completed(60)
+        identifier = self.completed()
         self.assertEqual(self.planner.calls[0][0], 'Walk, then wave.')
-        self.assertEqual(self.planner.calls[0][2], 60)
+        self.assertIsNone(self.planner.calls[0][2])
         self.assertTrue(self.workflow.load(identifier))
         take = self.session.takes[self.session.active_take]
-        self.assertEqual(len(take.motion), 1500)
+        self.assertEqual(len(take.motion), 208)
+        self.assertEqual([round(beat['seconds'] * 25) for beat in
+                          self.workflow.snapshot(identifier)['plan']['beats']], [60, 148])
         self.assertEqual(list(dict.fromkeys(segment['prompt'] for segment in take.segments)),
                          ['Walk forward.', 'Wave a hand.'])
         self.assertEqual(self.workflow.snapshot(identifier)['take_id'], take.id)
@@ -76,6 +80,12 @@ class StoryWorkflowTests(unittest.TestCase):
         archive = encode_project(self.session.takes, take.id, 0, self.session.scene)
         decoded, active, _, _ = decode_project(archive)
         self.assertEqual(decoded[active].segments, take.segments)
+
+    def test_custom_planner_fixed_duration_requires_its_own_feasible_timing(self):
+        identifier = self.workflow.submit('Walk, then wave.', seconds=20)
+        until(lambda: self.workflow.snapshot(identifier)['status'] == 'failed')
+        self.assertIn('use Auto', self.workflow.snapshot(identifier)['error'])
+        self.assertIsNone(self.workflow.snapshot(identifier)['queue_id'])
 
     def test_manual_load_accepts_second_result_after_first_changes_revision(self):
         first = self.completed()
