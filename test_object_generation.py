@@ -172,7 +172,9 @@ class ObjectDirectorIntegrationTests(unittest.TestCase):
         self.session.set_mode('Live ARDY')
 
     def generate_take(self):
-        self.session.submit('walk')
+        # The persistence fixture uses a synthetic zero-pose backend; a
+        # non-locomotion prompt keeps grounded walking out of this test.
+        self.session.submit('turn')
         wait_until(lambda: not self.session.busy)
         self.session.pause()
         return self.session.takes[self.session.active_take]
