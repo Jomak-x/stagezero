@@ -21,7 +21,7 @@ import {
   IconSun,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import { useContext } from "react";
+import { useContext, useId } from "react";
 
 // Type helpers.
 type ArrayElement<ArrayType extends readonly unknown[]> =
@@ -138,6 +138,7 @@ export function Titlebar() {
   const theme = useMantineTheme();
 
   const [burgerOpen, burgerHandlers] = useDisclosure(false);
+  const mobileNavigationId = useId();
 
   const onDarkModeChange = (checked: boolean) => {
     viewer.useGui.setState({
@@ -168,33 +169,32 @@ export function Titlebar() {
 
   return (
     <Box
+      className="sz-titlebar"
+      data-theme={darkMode ? "dark" : "light"}
       style={{
-        height: "3.2em",
         margin: 0,
         border: "0",
         zIndex: 10,
       }}
     >
-      <Paper shadow="0 0 0.8em 0 rgba(0,0,0,0.1)" style={{ height: "100%" }}>
+      <Paper className="sz-titlebar-surface" shadow="0 0 0.8em 0 rgba(0,0,0,0.1)" style={{ height: "100%" }}>
         <Container
           fluid
+          className="sz-titlebar-content"
           style={() => ({
             height: "100%",
             display: "flex",
             alignItems: "center",
           })}
         >
-          <Group style={() => ({ marginRight: "auto" })}>
+          <Group className="sz-titlebar-brand" style={() => ({ marginRight: "auto" })}>
             {imageData !== null ? TitlebarImage(imageData, colorScheme) : null}
             {content.title_text != null && content.title_text !== "" ? (
               <Box
                 component="span"
+                className="sz-titlebar-name"
                 style={{
                   fontFamily: theme.fontFamily,
-                  fontSize: "1.60rem",
-                  fontWeight: 650,
-                  marginLeft: "0.25em",
-                  marginTop: "0.10em",
                   color: colorScheme === "dark" ? "#ffffff" : undefined,
                 }}
               >
@@ -203,12 +203,10 @@ export function Titlebar() {
             ) : null}
           </Group>
           <Group
-            display={{ base: "none", xs: "flex" }}
+            className="sz-titlebar-actions"
+            display={{ base: "none", sm: "flex" }}
             style={() => ({
               flexWrap: "nowrap",
-              overflowX: "scroll",
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
             })}
           >
             {buttons?.map((btn, index) => (
@@ -242,24 +240,21 @@ export function Titlebar() {
             opened={burgerOpen}
             onClick={burgerHandlers.toggle}
             title={!burgerOpen ? "Open navigation" : "Close navigation"}
-            display={{ base: "block", xs: "none" }}
+            aria-label={!burgerOpen ? "Open navigation" : "Close navigation"}
+            aria-expanded={burgerOpen}
+            aria-controls={mobileNavigationId}
+            display={{ base: "block", sm: "none" }}
           ></Burger>
         </Container>
         <Portal>
-          <Paper
-            display={{ base: "flex", xs: "none" }}
+          {burgerOpen && <Paper
+            id={mobileNavigationId}
+            className="sz-titlebar-menu"
+            data-theme={darkMode ? "dark" : "light"}
+            component="nav"
+            aria-label="Studio navigation"
+            display={{ base: "flex", sm: "none" }}
             radius="0"
-            style={{
-              flexDirection: "column",
-              position: "absolute",
-              top: "3.2em",
-              zIndex: 2000,
-              height: burgerOpen ? "calc(100vh - 2.375em)" : "0",
-              width: "100vw",
-              transition: "all 0.5s",
-              overflow: burgerOpen ? "scroll" : "hidden",
-              padding: burgerOpen ? "1rem" : "0",
-            }}
           >
             {buttons?.map((btn, index) => (
               <MobileTitlebarButton {...btn} key={index} />
@@ -282,7 +277,7 @@ export function Titlebar() {
                 />
               </Box>
             ) : null}
-          </Paper>
+          </Paper>}
         </Portal>
       </Paper>
     </Box>
