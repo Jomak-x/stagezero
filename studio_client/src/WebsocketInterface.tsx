@@ -7,6 +7,7 @@ import { syncSearchParamServer } from "./SearchParamsUtils";
 import { WsWorkerIncoming, WsWorkerOutgoing } from "./WebsocketServerWorker";
 import { resetActorGlbProtocol } from "./mesh/ActorGlbProtocol";
 import { resetCameraState } from "./cameraStore";
+import { resetVoiceCommands } from "./VoiceCommands";
 
 /** Component for handling websocket connections. */
 export function WebsocketMessageProducer() {
@@ -24,6 +25,7 @@ export function WebsocketMessageProducer() {
     worker.onmessage = (event) => {
       const data: WsWorkerOutgoing = event.data;
       if (data.type === "connected") {
+        resetVoiceCommands();
         resetCameraState(viewer);
         resetActorGlbProtocol();
         resetGui();
@@ -33,6 +35,7 @@ export function WebsocketMessageProducer() {
           postToWorker({ type: "send", message: message });
         };
       } else if (data.type === "closed") {
+        resetVoiceCommands();
         resetCameraState(viewer);
         resetGui();
         viewer.useGui.setState({ websocketConnected: false });
@@ -62,6 +65,7 @@ export function WebsocketMessageProducer() {
     }
     postToWorker({ type: "set_server", server: server });
     return () => {
+      resetVoiceCommands();
       resetCameraState(viewer);
       postToWorker({ type: "close" });
       viewerMutable.sendMessage = (message) =>

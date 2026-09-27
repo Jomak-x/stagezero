@@ -25,6 +25,7 @@ from realtime_client import RealtimeClient
 from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
 from studio_core_renderer import StudioCoreRenderer
+from voice_directing import VoiceDirecting
 
 
 MAX_STARTUP_GLB_BYTES = 32 * 1024 * 1024
@@ -247,6 +248,17 @@ def main():
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core)
 
+    def activate_voice_motion():
+        if core.snapshot()['active']:
+            core.deactivate()
+        if core_requested:
+            activate_core(False)
+
+    voice = VoiceDirecting(server, session, workflow=ui.story_controls.workflow,
+                           on_single_action_submitted=ui.sync_voice_action,
+                           on_story_submitted=ui.story_controls.register_voice_job,
+                           on_motion_activate=activate_voice_motion)
+
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
         if event.event_type != 'keydown' or event.ctrl_key or event.meta_key or event.alt_key:
@@ -391,11 +403,13 @@ def main():
                     if ui_due:
                         ui.update()
                         core_ui.tick()
+                        voice.update()
                     timeline.update()
                 if ui_due:
                     last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
+        voice.close()
         ui.story_controls.close()
         session.reset()
         core.close()
