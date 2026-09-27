@@ -55,6 +55,7 @@ import { CsmDirectionalLight } from "./CsmDirectionalLight";
 import { VISER_VERSION, GITHUB_CONTRIBUTORS, Contributor } from "./VersionInfo";
 import { ArrowKeyOverlay } from "./ArrowKeyOverlay";
 import { BatchedLabelManager } from "./BatchedLabelManager";
+import { VoiceCaptions } from "./VoiceCaptions";
 import { Timeline } from "./Timeline";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { CameraScene } from "./CameraScene";
@@ -400,6 +401,7 @@ function ViewerContents({ children }: { children: React.ReactNode }) {
                 })}
               >
                 {canvases}
+                {!welcomeVisible && <VoiceCaptions />}
                 {!welcomeVisible && showLogo && messageSource === "websocket" && <ViserLogo />}
                 {messageSource === "websocket" && (
                   <ControlPanel control_layout={controlLayout} />

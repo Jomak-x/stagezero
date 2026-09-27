@@ -4,6 +4,8 @@ Scene-aware Core direction is now available inside the existing studio Motion pa
 
 Use **Full scene** to generate a complete performance from one prompt in a dedicated popup, then refine its individual movements. See [full-scene generation](docs/FULL-SCENES.md).
 
+Activate **Voice tools** to queue spoken or typed commands for full scenes, short actions, and edits to named takes. See [voice commands and transcription setup](docs/VOICE-COMMANDS.md).
+
 Create a person from a prompt in **Character → Create from description**. See [character generation](docs/CHARACTERS.md) for the private backend setup and current motion limits.
 The **Scene** tab supports one-prompt backgrounds with custom geometry and a
 separate **Add one object** flow that preserves the current set. Reusable city,

@@ -38,6 +38,7 @@ import BottomPanel from "./BottomPanel";
 import FloatingPanel from "./FloatingPanel";
 import { ThemeConfigurationMessage } from "../WebsocketMessages";
 import SidebarPanel from "./SidebarPanel";
+import { VoiceDirector } from "./VoiceDirector";
 
 // Must match constant in Python.
 const ROOT_CONTAINER_ID = "root";
@@ -52,6 +53,7 @@ export default function ControlPanel(props: {
 
   // TODO: will result in unnecessary re-renders.
   const viewer = React.useContext(ViewerContext)!;
+  const studioLabel = viewer.useGui((state) => state.label);
   const showGenerated = viewer.useGui(
     (state) =>
       Object.keys(state.guiUuidSetFromContainerUuid["root"] ?? {}).length > 0,
@@ -98,6 +100,7 @@ export default function ControlPanel(props: {
 
   const panelContents = (
     <>
+      {studioLabel.startsWith("StageZero") && !showSettings && <VoiceDirector />}
       <Collapse in={!showGenerated || showSettings}>
         <Box p="xs" pt="0.375em">
           <ServerControls />
