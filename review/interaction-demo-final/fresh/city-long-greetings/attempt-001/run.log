@@ -1,0 +1,15 @@
+{"phase": "planning"}
+Traceback (most recent call last):
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/experiments/trial_prompt_scene.py", line 106, in <module>
+    main()
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/experiments/trial_prompt_scene.py", line 97, in main
+    result = builder(scene, on_progress=lambda value: print(json.dumps(value), flush=True))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/prompt_scene_builder.py", line 858, in __call__
+    raise exc
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/prompt_scene_builder.py", line 572, in __call__
+    placement = auto_place(plan, scene, cancelled=cancelled)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/prompt_scene_plan.py", line 271, in auto_place
+    raise ValueError(f'Desired start for {identifier} overlaps geometry or unsupported ground')
+ValueError: Desired start for actor_1 overlaps geometry or unsupported ground

@@ -1,0 +1,1014 @@
+{
+  "version": 1,
+  "prompt": "Three people greet each other in turn: person 1 shakes hands with person 2 and releases; person 2 shakes hands with person 3 and releases; finally person 1 shakes hands with person 3.",
+  "seed": 61,
+  "status": "rejected",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/pair-01.npz",
+      "seconds": 1.5787530829547904,
+      "beat_index": 1,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 2 and person 3 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_2"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_3"
+        }
+      ],
+      "sha256": "445f531b56aafef2b54049523a50dc8bec637f13ee18d8c6905403277e73f8ae",
+      "used_in_performance": true
+    },
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/pair-00.npz",
+      "seconds": 1.7279333340120502,
+      "beat_index": 0,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 1 and person 2 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "1e54c69f18b6cf9234fda68986c56c7b8395e05b92a4fe61533d578b3ed946ec",
+      "used_in_performance": true
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/core-000.npz",
+      "seconds": 0.7788387500331737,
+      "sha256": "2e53e7e0f0e039f81e27526da85a08c990edef507b0d5b11260a1a3f1ddfb64f"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/core-001.npz",
+      "seconds": 0.9047385830199346,
+      "sha256": "84e74a1cca470f3ad6c55bc844f32e107a4fddb63480baf371ba6dfb06629884"
+    },
+    {
+      "source": "intergen",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/market-round-robin/attempt-001/sources/scene-1884b6165b394aa0b77fc7205c6dcff6/pair-02.npz",
+      "seconds": 1.3647633750224486,
+      "beat_index": 2,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_3"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 1 and person 3 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_3"
+        }
+      ],
+      "sha256": "752aeff25438547b974ec2aa742e178bb9ab69ae4a8b271f44f0a793261ac0e3",
+      "used_in_performance": false
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 5.84055669605732e-07
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.010901250003371388
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 1,
+      "seconds": 1.5787530829547904
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 1.7279333340120502
+    },
+    {
+      "stage": "native_initial_staging",
+      "seconds": 0.9498745420132764
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-5000c09955cc4d149293d3d17af6cb6b",
+      "seconds": 0.7788387500331737
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-af606e1d1b0e4e41ba81af0c8fff353a",
+      "seconds": 0.9047385830199346
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 2,
+      "seconds": 1.3647633750224486
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Three-way greeting rotation",
+    "prompt": "Three people greet each other in turn: person 1 shakes hands with person 2 and releases; person 2 shakes hands with person 3 and releases; finally person 1 shakes hands with person 3.",
+    "actor_count": 3,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      },
+      {
+        "id": "actor_3",
+        "name": "Person 3",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 1 and person 2 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_2",
+          "actor_3"
+        ],
+        "prompt": "Person 2 and person 3 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_1",
+          "actor_3"
+        ],
+        "prompt": "Person 1 and person 3 shake hands, then release.",
+        "seconds": 4.0
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.050628945393413165,
+        "z": -1.103375220194788,
+        "yaw_degrees": -0.27693250395836133
+      },
+      "actor_2": {
+        "x": 0.061596670034906216,
+        "z": 1.103353048782087,
+        "yaw_degrees": -179.49141933113447
+      },
+      "actor_3": {
+        "x": 0.0,
+        "z": -3.3
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ],
+      "actor_3": [
+        [
+          0.0,
+          -3.3
+        ],
+        [
+          0.0,
+          -1.8
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false,
+    "initial_source_staging": {
+      "candidate": "backward-0.8-idle-0",
+      "explicit_starts_preserved": [],
+      "candidate_count": 19,
+      "planning_only": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "selection": "shortest approach duration, then total route distance; source-oriented starts win ties"
+    }
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 3,
+    "core_horizons": "sequential native330 history"
+  },
+  "idle_initializations": [
+    {
+      "actor_ids": [
+        "actor_3"
+      ],
+      "source": "intergen",
+      "source_beat_index": 1,
+      "source_actor_index": 1,
+      "source_frame": 0,
+      "waiting_pose_selection": {
+        "criterion": "bilateral toe support, ankle/toe symmetry, upright standing and locally stable feet; hands have secondary weight without an eligibility veto",
+        "source_frame": 0,
+        "baseline_frame": 0,
+        "changed_from_first_frame": false,
+        "eligible_frame_count": 90,
+        "minimum_score_improvement": 0.1,
+        "baseline_metrics": {
+          "score": 0.3952628755941987,
+          "torso_tilt_degrees": 2.6284995079040527,
+          "mean_hand_height_above_hips_m": 0.09544295072555542,
+          "mean_hand_horizontal_reach_m": 0.2170487940311432,
+          "local_max_foot_xz_speed_mean_m_s": 0.05401085689663887,
+          "highest_support_above_native_floor_m": 0.01222519762814045,
+          "standing_leg_extension_ratio": 1.1292279958724976,
+          "highest_toe_above_native_floor_proxy_m": 0.01222519762814045,
+          "toe_height_asymmetry_m": 0.008999358862638474,
+          "ankle_height_asymmetry_m": 0.004392482340335846,
+          "maximum_ankle_height_excess_m": 0.008365791290998459,
+          "toe_heights_native_m": [
+            -0.00470232218503952,
+            0.004297036677598953
+          ],
+          "ankle_heights_native_m": [
+            0.024760574102401733,
+            0.020368091762065887
+          ],
+          "eligible": true,
+          "failed_gates": []
+        },
+        "selected_metrics": {
+          "score": 0.3952628755941987,
+          "torso_tilt_degrees": 2.6284995079040527,
+          "mean_hand_height_above_hips_m": 0.09544295072555542,
+          "mean_hand_horizontal_reach_m": 0.2170487940311432,
+          "local_max_foot_xz_speed_mean_m_s": 0.05401085689663887,
+          "highest_support_above_native_floor_m": 0.01222519762814045,
+          "standing_leg_extension_ratio": 1.1292279958724976,
+          "highest_toe_above_native_floor_proxy_m": 0.01222519762814045,
+          "toe_height_asymmetry_m": 0.008999358862638474,
+          "ankle_height_asymmetry_m": 0.004392482340335846,
+          "maximum_ankle_height_excess_m": 0.008365791290998459,
+          "toe_heights_native_m": [
+            -0.00470232218503952,
+            0.004297036677598953
+          ],
+          "ankle_heights_native_m": [
+            0.024760574102401733,
+            0.020368091762065887
+          ],
+          "eligible": true,
+          "failed_gates": []
+        },
+        "selection_reason": "eligible first frame retained; improvement below threshold",
+        "ineligible_frame_counts": {
+          "strong_torso_lean": 0,
+          "feet_moving_in_source": 30,
+          "support_high_above_native_floor_proxy": 0,
+          "crouched_or_degenerate_legs": 0
+        },
+        "thresholds": {
+          "maximum_torso_tilt_degrees": 20,
+          "maximum_local_foot_speed_m_s": 0.35,
+          "maximum_support_above_native_floor_m": 0.1,
+          "minimum_standing_leg_extension_ratio": 0.7
+        },
+        "score_weights": {
+          "torso_tilt_degrees": 0.05,
+          "toe_height_m": 6,
+          "toe_asymmetry_m": 8,
+          "ankle_asymmetry_m": 8,
+          "ankle_height_excess_m": 3,
+          "local_foot_speed_m_s": 0.5,
+          "hand_height_m": 0.1,
+          "hand_reach_m": 0.1
+        },
+        "support_reference": {
+          "method": "shared native pair toe-height fifth percentile",
+          "native_floor_proxy_y_m": -0.007928160578012466,
+          "scene_floor_known": false,
+          "rendered_sole_contact_known": false
+        },
+        "joint_pose_modified": false,
+        "physical_contact_verified": false,
+        "display_policy": "one exact generated pose held stationary; upper-body continuation is separately authored",
+        "limitations": [
+          "Support markers and native height reference do not establish rendered sole contact with the scene.",
+          "Whole-source suspension cannot be detected without an external scene floor.",
+          "Selection does not repair source motion, post-action waiting, or foot glide."
+        ]
+      },
+      "yaw_radians": 0.0,
+      "translation": [
+        -0.19581109285354614,
+        0.0,
+        -3.493837523460388
+      ],
+      "display_policy": "explicit stationary hold of a real incoming native pose at the assigned start",
+      "automatic_hold_placement_adjustments_xz": {
+        "actor_3": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "initial_staging_candidates": [
+    {
+      "candidate": "outward-0.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.19593248454911968,
+          "z": -1.090782569835715,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.19593248454911968,
+          "z": 1.090782569835715,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 1.4782973477230275
+    },
+    {
+      "candidate": "outward-0.8-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.19593248454911968,
+          "z": -1.090782569835715,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.19593248454911968,
+          "z": 1.090782569835715,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 1.4782973477230275
+    },
+    {
+      "candidate": "outward-0.8-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.19593248454911968,
+          "z": -1.090782569835715,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.19593248454911968,
+          "z": 1.090782569835715,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 1.4782973477230275
+    },
+    {
+      "candidate": "outward-1.2-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.2666509080547237,
+          "z": -1.4844815723450964,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.2666509080547237,
+          "z": 1.4844815723450964,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 2.2609342069246687
+    },
+    {
+      "candidate": "outward-1.2-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.2666509080547237,
+          "z": -1.4844815723450964,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.2666509080547237,
+          "z": 1.4844815723450964,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 2.2609342069246687
+    },
+    {
+      "candidate": "outward-1.2-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.2666509080547237,
+          "z": -1.4844815723450964,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.2666509080547237,
+          "z": 1.4844815723450964,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 2.2609342069246687
+    },
+    {
+      "candidate": "outward-1.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.3727285433131298,
+          "z": -2.0750300761091687,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.3727285433131298,
+          "z": 2.0750300761091687,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 3.457554139695061
+    },
+    {
+      "candidate": "outward-1.8-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.3727285433131298,
+          "z": -2.0750300761091687,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.3727285433131298,
+          "z": 2.0750300761091687,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 3.457554139695061
+    },
+    {
+      "candidate": "outward-1.8-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.3727285433131298,
+          "z": -2.0750300761091687,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.3727285433131298,
+          "z": 2.0750300761091687,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 3.457554139695061
+    },
+    {
+      "candidate": "backward-0.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.050628945393413165,
+          "z": -1.103375220194788,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.061596670034906216,
+          "z": 1.103353048782087,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 1.4432327188755316,
+      "selected": true
+    },
+    {
+      "candidate": "backward-0.8-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.050628945393413165,
+          "z": -1.103375220194788,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.061596670034906216,
+          "z": 1.103353048782087,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 1.4432327188755316
+    },
+    {
+      "candidate": "backward-0.8-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.050628945393413165,
+          "z": -1.103375220194788,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.061596670034906216,
+          "z": 1.103353048782087,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989535,
+      "total_route_distance_m": 1.4432327188755316
+    },
+    {
+      "candidate": "backward-1.2-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.04869559932116398,
+          "z": -1.5033705478837058,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.06514718628340355,
+          "z": 1.5033372907646545,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 2.2427483690573746
+    },
+    {
+      "candidate": "backward-1.2-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.04869559932116398,
+          "z": -1.5033705478837058,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.06514718628340355,
+          "z": 1.5033372907646545,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 2.2427483690573746
+    },
+    {
+      "candidate": "backward-1.2-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.04869559932116398,
+          "z": -1.5033705478837058,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.06514718628340355,
+          "z": 1.5033372907646545,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.0,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 2.2427483690573746
+    },
+    {
+      "candidate": "backward-1.8-idle-0",
+      "starts": {
+        "actor_1": {
+          "x": -0.045795580212790205,
+          "z": -2.1033635394170833,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.07047296065614957,
+          "z": 2.103313653738506,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989537,
+      "total_route_distance_m": 3.4426187796822045
+    },
+    {
+      "candidate": "backward-1.8-idle--1",
+      "starts": {
+        "actor_1": {
+          "x": -0.045795580212790205,
+          "z": -2.1033635394170833,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.07047296065614957,
+          "z": 2.103313653738506,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": 2.3621940150562892,
+          "z": -0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": -1.144877761971976,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989537,
+      "total_route_distance_m": 3.4426187796822045
+    },
+    {
+      "candidate": "backward-1.8-idle-1",
+      "starts": {
+        "actor_1": {
+          "x": -0.045795580212790205,
+          "z": -2.1033635394170833,
+          "yaw_degrees": -0.27693250395836133
+        },
+        "actor_2": {
+          "x": 0.07047296065614957,
+          "z": 2.103313653738506,
+          "yaw_degrees": -179.49141933113447
+        },
+        "actor_3": {
+          "x": -2.3621940150562892,
+          "z": 0.42431054103362437
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 1.9967148916178172,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 3.05,
+      "minimum_planned_root_separation_m": 0.7764802305989537,
+      "total_route_distance_m": 3.4426187796822045
+    },
+    {
+      "candidate": "original",
+      "starts": {
+        "actor_1": {
+          "x": -0.9,
+          "z": -1.5
+        },
+        "actor_2": {
+          "x": 0.9,
+          "z": -1.5
+        },
+        "actor_3": {
+          "x": 0.0,
+          "z": -3.3
+        }
+      },
+      "accepted": true,
+      "observer_orientation": {
+        "actor_3": {
+          "yaw_radians": 0.24818829064052572,
+          "target_xz": [
+            0.0,
+            0.0
+          ],
+          "method": "initial rigid source-pose staging toward meeting; root preserved"
+        }
+      },
+      "approach_seconds": 4.35,
+      "minimum_planned_root_separation_m": 0.7764802305989533,
+      "total_route_distance_m": 4.344191487118382
+    }
+  ],
+  "error": "Meeting entry transition rejected: sampled endpoint velocity exceeds tolerance",
+  "wall_seconds": 6.073105583025608
+}

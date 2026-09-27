@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "prompt": "One person walks forward a few steps, turns to the side, waves with one hand, and comes to a relaxed stop.",
+  "seed": 65,
+  "status": "complete",
+  "sources": [
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/core-000.npz",
+      "seconds": 0.7958141670096666,
+      "sha256": "886e9da5fd3ac31db511075bf916115cffe19c832a1d15baee4bfa0d5c30410f"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/core-001.npz",
+      "seconds": 0.8971290829940699,
+      "sha256": "719429b0cb2efccef982a2de7f73ff161edd46472ac0fd3085caaaf2cd384158"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/core-002.npz",
+      "seconds": 0.7594801250379533,
+      "sha256": "03d962a529e362b3cf5a7d429692e954156f7e4c0b912deeba4a453c4153795a"
+    },
+    {
+      "source": "ardy_core",
+      "path": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/core-003.npz",
+      "seconds": 0.8676852079806849,
+      "sha256": "71443a1894b6688bb7319ff182abf6c1a39044fb59f7463f0837df60e3a0e256"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 5.41971530765295e-07
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.006104375002905726
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-0ed242ff316146659d436dfa587ee416",
+      "seconds": 0.7958141670096666
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-edfe842ea0fc4133a00b878e6bd555d5",
+      "seconds": 0.8971290829940699
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-b1bc807d923647bdb8fa6f91a3975421",
+      "seconds": 0.7594801250379533
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "scene-535bfea700c541c0805bf54aa52eb5cb",
+      "seconds": 0.8676852079806849
+    },
+    {
+      "stage": "geometry",
+      "seconds": 0.022855082992464304
+    },
+    {
+      "stage": "beat_total",
+      "beat_id": "beat-1",
+      "seconds": 3.4450577500392683
+    },
+    {
+      "stage": "observer_core_continuation",
+      "seconds": 0.00010679196566343307
+    },
+    {
+      "stage": "authored_cast_refinement_and_validation",
+      "seconds": 0.027544957993086427
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "beat-1",
+      "requested_seconds": 8,
+      "source_seconds": 8.0,
+      "duration_policy": "complete sequential 40-frame Core horizons at 20 fps",
+      "refinement": null
+    }
+  ],
+  "plan": {
+    "version": 1,
+    "title": "Solo walking greeting",
+    "prompt": "One person walks forward a few steps, turns to the side, waves with one hand, and comes to a relaxed stop.",
+    "actor_count": 1,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1"
+        ],
+        "prompt": "A person walks forward a few steps, turns to the side, waves with one hand and comes to a relaxed stop.",
+        "seconds": 8
+      }
+    ],
+    "warnings": []
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": 0.0,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          0.0,
+          -1.5
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 0,
+    "core_horizons": "sequential native330 history"
+  },
+  "unrefined_composition": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/unrefined-cast.npz",
+  "motion_refinement": {
+    "version": 1,
+    "observer_motion": {
+      "source": "authored bounded observer continuation",
+      "model_generated": false,
+      "version": 1,
+      "seed": 65,
+      "fps": 30,
+      "spans": [],
+      "method": "whole inactive span easing; length-preserving torso/arm rotations; attention to active roots",
+      "active_frames_modified": false,
+      "lower_body_modified": false,
+      "source_pair_frames_modified": false,
+      "physical_contact_verified": false,
+      "visual_acceptance": "unverified",
+      "applied_actor_frames": 0,
+      "maximum_joint_correction_m": 0.0,
+      "maximum_bone_length_error_m": 0.0,
+      "limits": {
+        "upright_correction_degrees": 12,
+        "attention_yaw_degrees": 12,
+        "arm_rotation_degrees_per_joint": 92,
+        "preserved_boundary_frames": 2
+      },
+      "limitations": [
+        "Authored observation, not generated contextual acting or a learned idle model.",
+        "No stepping or lower-body weight transfer; existing foot positions remain exact.",
+        "No finger, eye or palm contact solve; positional head motion is not eye gaze.",
+        "Arm relaxation can change body clearance; caller must check final scene and cast geometry.",
+        "Exact reentry endpoints can require anticipatory return toward the incoming pose."
+      ]
+    },
+    "foot_planting": [],
+    "body_clearance": [],
+    "body_clearance_proxy": "named joint and limb midpoint spheres, all frames; intended contact excluded",
+    "source_pair_frames_modified": false,
+    "root_positions_modified": false,
+    "physical_contact_verified": false,
+    "visual_acceptance": "unverified"
+  },
+  "refined_composition": "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/review/interaction-demo-final/fresh/city-solo-wave/attempt-001/sources/scene-b27aaf674fb34e14a26897e30f2ba41e/refined-cast-candidate.npz",
+  "frames": 240,
+  "duration_seconds": 8.0,
+  "wall_seconds": 3.4848735409905203
+}

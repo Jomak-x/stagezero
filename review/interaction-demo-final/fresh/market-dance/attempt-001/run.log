@@ -1,0 +1,19 @@
+{"phase": "planning"}
+{"phase": "beat", "beat_index": 0, "total_beats": 1, "actor_ids": ["actor_1", "actor_2"], "prompt": "Two people dance together with small coordinated steps and a gentle partner turn."}
+{"phase": "pair_generation", "beat_index": 0, "actor_ids": ["actor_1", "actor_2"]}
+{"phase": "approach", "completed_windows": 0, "total_windows": 2}
+{"phase": "approach", "completed_windows": 1, "total_windows": 2}
+Traceback (most recent call last):
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/experiments/trial_prompt_scene.py", line 106, in <module>
+    main()
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/experiments/trial_prompt_scene.py", line 97, in main
+    result = builder(scene, on_progress=lambda value: print(json.dumps(value), flush=True))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/prompt_scene_builder.py", line 858, in __call__
+    raise exc
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/prompt_scene_builder.py", line 726, in __call__
+    result = build_meetup(pair, client, planning_scene, actor_ids=active,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jakob/.codex/worktrees/interaction-quality/Shellhacks/paired_meetup.py", line 528, in build_meetup
+    raise exc
+ValueError: Core approach has unintended body-proxy overlap; meeting rejected

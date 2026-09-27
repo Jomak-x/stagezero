@@ -9,7 +9,7 @@ Open [the before/after review page](index.html).
 
 The released observer now uses genuine Core continuation: one archived **unplayed neutral warmup**, a small-step turn with relaxed arms, and at most one further settling continuation only for tail-motion failures. Playback excludes the warmup. Strict heading, spatial, limb speed, wrist-height, scene and moving-cast overlap gates remain enforced. Unsafe optional motion preserves the original observer; cancellation and worker/transport errors fail the job with diagnostics. This applies only to terminal inactive spans of at least five seconds, not actors who reenter later.
 
-Core arrival targets have 8cm additional radial margin per actor, and all displayed noncontact approach frames must pass the body-sphere clearance check. Authored entry blends prefer21frames (0.7s). Waiting-pose selection gives bilateral toe/ankle support priority without changing any source joint pose; it cannot manufacture floor contact absent from the source.
+Core arrival targets first try 8cm additional radial margin per actor with an all-frame body-sphere clearance check. The final stress pass adds one same-seed fallback to main's original arrival targets only when that new gate rejects; original gates remain enforced and both attempts are archived. See [final stress review](../interaction-demo-final/README.md). The six selected cases below use the enhanced policy. Authored entry blends prefer21frames (0.7s). Waiting-pose selection gives bilateral toe/ankle support priority without changing any source joint pose; it cannot manufacture floor contact absent from the source.
 
 | Case | Selected attempt | Model/composition seconds¹ | Unintended overlap frames | Visual finding |
 |---|---:|---:|---:|---|

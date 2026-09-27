@@ -37,6 +37,45 @@ INITIAL_HEADING_RAMP_SECONDS = 1.
 
 
 
+def build_compatible_meetup(*args, source_paths=lambda: (), **kwargs):
+    """Try improved arrival clearance, then main's original arrival policy once.
+
+    Only the new body-sphere gate permits this retry. Existing geometry,
+    continuity, cancellation and worker failures keep their original behavior.
+    The caller archives every raw Core result before either policy is checked.
+    """
+    before = set(source_paths())
+    try:
+        return build_meetup(*args, **kwargs)
+    except ValueError as exc:
+        clearance = getattr(exc, 'approach_body_clearance_report', None)
+        if not clearance or kwargs.get('arrival_margin_m', 0.) <= 0:
+            raise
+        recovery = {'reason': str(exc), 'enhanced_clearance': clearance,
+                    'enhanced_arrival_margin_m': kwargs['arrival_margin_m'],
+                    'fallback_arrival_margin_m': 0.,
+                    'policy': 'one same-seed retry with original arrival targets and original acceptance gates',
+                    'seed_changed': False, 'native_pair_frames_modified': False,
+                    'enhanced_source_archives': [p for p in source_paths() if p not in before],
+                    'status': 'retrying_original_arrival_policy'}
+        fallback_before = set(source_paths())
+        fallback = dict(kwargs, arrival_margin_m=0.)
+        try:
+            if kwargs.get('cancelled', lambda: False)():
+                raise RuntimeError('Meeting generation cancelled before compatibility retry')
+            result = build_meetup(*args, **fallback)
+        except Exception as retry_error:
+            recovery.update(status='original_arrival_policy_rejected', error=str(retry_error))
+            retry_error.arrival_margin_recovery = recovery
+            raise
+        else:
+            recovery['status'] = 'accepted_original_arrival_policy'
+            result['metadata']['arrival_margin_recovery'] = recovery
+            return result
+        finally:
+            recovery['fallback_source_archives'] = [p for p in source_paths() if p not in fallback_before]
+
+
 def pair_source_prompt(prompt, actor_ids, actors):
     """Translate explicit cast names/indices into this two-person source's roles."""
     aliases = {}
@@ -321,11 +360,11 @@ def generate_later_approach(pair, client, scene, plan, placement, poses, active,
             on_progress({'phase': 'pair_approach_attempt', 'attempt': attempt, 'maximum_attempts': 3,
                          'actor_ids': list(active), 'idle_route_padding_m': padding})
         try:
-            result = build_meetup(pair, client, selected['planning_scene'], actor_ids=active,
+            result = build_compatible_meetup(pair, client, selected['planning_scene'], actor_ids=active,
                 starts=selected['starts'], meeting=selected['meeting'], entry_policy='continuous', speed_mps=.85,
                 arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M, idle_route_padding_m=padding,
                 initial_heading_ramp_seconds=INITIAL_HEADING_RAMP_SECONDS,
-                seed=seed, cancelled=cancelled, on_progress=on_progress)
+                source_paths=source_paths, seed=seed, cancelled=cancelled, on_progress=on_progress)
             entry, report = _bridge(prior, result['joints'][:2], maximum_frames=30)
             _checked_generated_geometry(entry, selected['planning_scene'], active,
                                         context={'stage': 'prior_to_core_entry', 'fps': 30})
@@ -723,11 +762,12 @@ class PromptSceneBuilder:
                                 aid: (poses[aid][0, [0, 2]]-original_idle_roots[aid]).tolist() for aid in entry['actor_ids']}
                         manifest['placement'] = placement
                         save()
-                        result = build_meetup(pair, client, planning_scene, actor_ids=active,
+                        result = build_compatible_meetup(pair, client, planning_scene, actor_ids=active,
                             starts=[placement['starts'][aid] for aid in active], meeting=placement['meeting'],
                             entry_policy='continuous', speed_mps=.85, seed=self.seed, cancelled=cancelled,
                             arrival_standoff_m=ARRIVAL_STANDOFF_M, arrival_margin_m=ARRIVAL_MARGIN_M,
                             idle_route_padding_m=IDLE_ROUTE_PADDING_M,
+                            source_paths=lambda: [item['path'] for item in manifest['sources'] if item['source'] == 'ardy_core'],
                             on_progress=on_progress)
                         for segment in result['metadata']['segments']:
                             chunk = result['joints'][segment['start_frame']:segment['end_frame_exclusive']]
@@ -853,6 +893,8 @@ class PromptSceneBuilder:
                     exc = pair_errors[0]
             if hasattr(exc, 'approach_body_clearance_report'):
                 manifest['failure_diagnostics'] = {'approach_body_clearance': exc.approach_body_clearance_report}
+            if hasattr(exc, 'arrival_margin_recovery'):
+                manifest.setdefault('failure_diagnostics', {})['arrival_margin_recovery'] = exc.arrival_margin_recovery
             manifest.update(status='cancelled' if external_cancelled() else 'rejected', error=str(exc), wall_seconds=time.monotonic()-started)
             save()
             raise exc
