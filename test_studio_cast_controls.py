@@ -58,6 +58,20 @@ def clip(prompt='Saved direction'):
 
 
 class StudioCastControlsTests(unittest.TestCase):
+    def test_concurrent_actions_are_visible_and_escaped(self):
+        take = clip()
+        take.metadata['plan']['beats'][0]['concurrent_solos'] = {'actor_3': '<wave>'}
+        output = StudioCastControls._plan_html(take)
+        self.assertIn('At the same time · actor_3: &lt;wave&gt;', output)
+
+    def test_concurrency_fallback_is_visible_outside_plan_folder(self):
+        self.session.clip = clip()
+        self.session.clip.metadata['concurrency_fallback'] = 'Bridge rejected'
+        self.session.state['total_frames'] = 90
+        self.controls.tick()
+        self.assertIn('Requested simultaneous action was not achieved', self.controls.status.content)
+        self.assertIn('Bridge rejected', self.controls.status.content)
+
     def setUp(self):
         self.gui = Gui()
         self.session = Session()

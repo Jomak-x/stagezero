@@ -227,12 +227,11 @@ export function VoiceDirector() {
     setText("");
   };
 
-  return <Box px="xs" pt="xs" pb="sm" style={{ borderBottom: "1px solid #ffffff24" }}>
-    <Group justify="space-between" mb={6}>
-      <Text fw={700} size="sm">Voice control</Text>
-      <Switch size="xs" label="Activate voice tools" checked={enabled} onChange={(event) => setEnabled(event.currentTarget.checked)} />
+  return <Box className="sz-voice-director">
+    <Group justify="space-between" gap="xs" wrap="nowrap" mb={enabled ? 8 : 0}>
+      <Text fw={650} size="sm">Voice control</Text>
+      <Switch size="xs" label="Enable" checked={enabled} onChange={(event) => setEnabled(event.currentTarget.checked)} />
     </Group>
-    {!enabled && <Text size="xs" c="dimmed">Turn on for spoken motion directions and character dialogue. Queued requests keep running.</Text>}
     {enabled && <>
     <SegmentedControl
       fullWidth size="xs" mb="xs" aria-label="Voice control section"
@@ -281,10 +280,10 @@ export function VoiceDirector() {
     </Group>
     <Text size="xs" c="dimmed" mt={4}>
       {target === "auto"
-        ? 'Examples: Generate a full scene of a market chase. Generate a short wave. Edit scene "Market Chase" so the character slows down. Hold to speak; release to queue.'
+        ? 'Hold to speak, then release to queue. You can also type a direction below.'
         : target === "single_action"
-          ? "Generate one short motion, such as a wave or a step. Hold to speak; release to queue."
-          : "Generate a sequence of actions for a full scene. Hold to speak; release to queue. Recording stops after 30 seconds."}
+          ? "Describe one short motion, such as a wave or a step."
+          : "Describe a sequence of actions. Recording stops after 30 seconds."}
     </Text>
     <Textarea
       mt="xs" minRows={2} maxRows={4} autosize value={text}

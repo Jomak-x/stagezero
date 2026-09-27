@@ -13,12 +13,13 @@ class StudioCastControls:
     """Present the validated one-to-three-person pipeline without owning playback."""
 
     def __init__(self, gui, cast_session, *, on_generate, on_frame, on_export,
-                 on_open, provider_available, output_root):
+                 on_open, provider_available, output_root, generation_readiness=None):
         self.session = cast_session
         self.on_generate = on_generate
         self.on_frame = on_frame
         self.on_export = on_export
         self.on_open = on_open
+        self.generation_readiness = generation_readiness
         self.provider_available = provider_available
         self.output_root = Path(output_root)
         self._lock = threading.RLock()
@@ -27,7 +28,7 @@ class StudioCastControls:
         self._last_clip = None
         self._sync_prompt_from_archive = True
 
-        gui.add_markdown('Describe what happens with one, two, or three people. Cast and duration are planned automatically.')
+        gui.add_markdown('Describe what happens with one, two, or three people. Cast and duration are planned automatically. Try “Three people celebrate together in place.”')
         self.prompt = gui.add_text('What happens?', initial_value=DEFAULT_PROMPT, multiline=True)
         self.generate = gui.add_button('Generate', color='green')
         self.cancel = gui.add_button('Cancel', color='gray')
@@ -122,6 +123,11 @@ class StudioCastControls:
         return bool(self.provider_available() if callable(self.provider_available)
                     else self.provider_available)
 
+    def _provider_error(self):
+        if self.generation_readiness is not None:
+            return self.generation_readiness() or "Motion providers are ready."
+        return "AI cast needs both motion providers configured."
+
     def _require_idle(self, *, allow_generation=False, require_clip=False,
                       require_provider=False, require_active=False):
         state = self.session.snapshot()
@@ -130,7 +136,7 @@ class StudioCastControls:
         if state.get('busy') and not allow_generation:
             raise RuntimeError('Finish or cancel generation before changing the performance.')
         if require_provider and not self._provider_ready():
-            raise RuntimeError('AI cast needs both motion providers configured.')
+            raise RuntimeError(self._provider_error())
         if require_active and not state.get('active'):
             raise RuntimeError('Select AI cast in Motion first.')
         if require_clip and not state.get('total_frames'):
@@ -187,6 +193,8 @@ class StudioCastControls:
             seconds = beat.get('seconds')
             suffix = f' ({seconds:g}s)' if isinstance(seconds, (float, int)) else ''
             lines.append(escape(f'{people}: {prompt}{suffix}'))
+            for actor, action in beat.get('concurrent_solos', {}).items():
+                lines.append(escape(f'At the same time · {actor}: {action}'))
         for warning in plan.get('warnings', []):
             lines.append(escape(str(warning)))
         if metadata.get('wall_seconds') is not None:
@@ -226,8 +234,12 @@ class StudioCastControls:
 
             message = (self._notice or state.get('failure') or
                        (state.get('progress') if state.get('busy') else None) or
-                       (None if available else 'AI cast needs both motion providers configured.') or
+                       (None if available else self._provider_error()) or
                        state.get('status') or 'Ready. Duration is automatic.')
+            clip = self.session.timeline_clip()
+            fallback = (clip.metadata or {}).get('concurrency_fallback') if clip else None
+            if fallback and not busy and not state.get('failure') and not self._notice:
+                message = 'Requested simultaneous action was not achieved; preserved the original performance. ' + str(fallback)
             self._set(self.status, 'content', '<p>' +
                       escape(self._progress_message(message)) + '</p>')
 

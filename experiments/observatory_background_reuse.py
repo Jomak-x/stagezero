@@ -12,6 +12,8 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
+
 from core_scene_reactions import evaluated_scene, object_states
 from core_spatial_commands import measure_completion, parse_commands, plan_command
 from studio_interaction_scene import adapt_studio_scene
@@ -50,6 +52,7 @@ def revalidate_observatory_background(source: NativeTerrainResult) -> NativeTerr
                                                TEMPLE_START_ROOT_XYZ[2]],
                                "yaw": math.pi}}
     routes, measurements = [], []
+    planning_heading = None
     for action, (start, end) in zip(actions, source.action_spans):
         if not (0 <= start < end <= native.frames):
             raise ValueError("Saved native action span is outside the clip")
@@ -57,6 +60,8 @@ def revalidate_observatory_background(source: NativeTerrainResult) -> NativeTerr
         evaluated = evaluated_scene(scene, prefix, enabled=True, terrain=True)
         adapted = adapt_studio_scene(evaluated)
         adapted.update(original_scene=scene, terrain_active=True)
+        if planning_heading is not None:
+            adapted["terrain_planning_heading"] = planning_heading
         stages, route = plan_command(action, adapted, native.actor_ids,
                                      "actor_1", prefix, placements)
         if (not stages or route.get("terrain_navigation_version") != 1 or
@@ -76,6 +81,14 @@ def revalidate_observatory_background(source: NativeTerrainResult) -> NativeTerr
             raise ValueError(f"Saved native take fails the alternate {action['verb']} geometry: {measurement}")
         routes.append(deepcopy(route))
         measurements.append(measurement)
+        # Match the relative-heading state used when the native take was made.
+        # It is derived from this alternate route, so later plans still test
+        # the authored observatory geometry against the saved action spans.
+        path = np.asarray(route["support_xyz"], dtype=float)
+        for segment in np.diff(path[:, [0, 2]], axis=0)[::-1]:
+            if np.linalg.norm(segment) > .05:
+                planning_heading = math.atan2(float(segment[0]), float(segment[1]))
+                break
     reactions = object_states(scene, native, enabled=True, terrain=True)
     gate = next(row for row in reactions if row["id"] == "observatory-gate")
     if gate["opening_fraction"] < .99 or not measurements[-1]["crossing_verified"]:

@@ -20,21 +20,22 @@ def add_object_controls(gui, session):
         default_source = 'AI gateway · Neon'
     except ValueError:
         default_source = 'Recipes · offline'
-    with gui.add_folder('Scene generator', expand_by_default=True):
+    with gui.add_folder('Create a background', expand_by_default=True):
         prompt = gui.add_text('Describe a scene', initial_value='A detailed city boulevard with varied storefronts, sidewalks and a layered skyline', multiline=True)
         source = gui.add_dropdown('Generation source', ('Recipes · offline', 'AI gateway · Neon', 'Local AI · Ollama'), initial_value=default_source)
         generate = gui.add_button('Generate background + scene · replace')
         with gui.add_folder('Advanced · reusable props', expand_by_default=False):
             prepare = gui.add_button('Prepare custom props · AI')
             reuse = gui.add_checkbox('Reuse saved prop library', initial_value=False)
-        preset = gui.add_dropdown('Starter set', PRESETS)
-        build = gui.add_button('Build starter set')
-        scene_view = gui.add_button('Scene camera')
-        frame_scene = gui.add_button('Frame whole scene')
-        seed = gui.add_number('Variation seed', initial_value=0, min=0, max=1000000, step=1)
-        status = gui.add_markdown('One click designs, checks, saves and places custom props, then builds the scene. Prepare custom props separately when you want to review or reuse them. Generation replaces the current set only after the new scene is ready.')
-        gui.add_markdown('Effects animate with playback and freeze when paused. Props react to motion; physical contact is not guaranteed.')
-    with gui.add_folder('Add one object', expand_by_default=True):
+        with gui.add_folder('Or start from a preset', expand_by_default=False):
+            preset = gui.add_dropdown('Starter set', PRESETS)
+            build = gui.add_button('Build starter set')
+        with gui.add_folder('Camera and variation', expand_by_default=False):
+            scene_view = gui.add_button('Scene camera')
+            frame_scene = gui.add_button('Frame whole scene')
+            seed = gui.add_number('Variation seed', initial_value=0, min=0, max=1000000, step=1)
+        status = gui.add_markdown('Your new scene replaces the current background when it is ready.')
+    with gui.add_folder('Add one object', expand_by_default=False):
         object_prompt = gui.add_text('Describe an object',
                                      initial_value='A brass telescope on a wooden tripod' if default_source == 'AI gateway · Neon' else 'A lamp',
                                      multiline=True)

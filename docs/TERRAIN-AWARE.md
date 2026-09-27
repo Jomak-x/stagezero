@@ -2,6 +2,8 @@
 
 Terrain-aware movement is an explicit one-actor option in the normal app. It uses rendered scene geometry to plan supported routes and a separate Human17 foot-contact solver to display them. Ordinary ARDY Core direction and G1 takes keep their existing generation and rendering paths.
 
+**Off by default.** New sessions use ordinary ARDY. Uncheck **Terrain-aware movement** at any time to restore the separate ordinary take; re-enable it to resume the terrain take. Explicitly opening a saved terrain project restores that project's terrain mode.
+
 ## Use it
 
 1. In **Scene → Scene generator**, build the **Traversable temple** or **Industrial switchback** starter set. The offline recipe generator also recognizes those names. Other authored Scene3 backgrounds can use the same geometry pipeline; a picture or decorative backdrop does not provide walkable support.

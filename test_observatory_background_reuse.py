@@ -42,6 +42,8 @@ class ObservatoryBackgroundTests(unittest.TestCase):
         self.assertEqual([route["target_id"] for route in result.routes],
                          ["observatory-stairs", "observatory-bridge",
                           "observatory-gate", "observatory-gate"])
+        self.assertEqual(tuple(route["schedule"]["frames"] for route in result.routes),
+                         tuple(end-start for start, end in self.source.action_spans))
         self.assertTrue(all(row["completed"] for row in result.measurements))
         self.assertTrue(result.measurements[-1]["crossing_verified"])
         self.assertEqual(next(row for row in result.reaction_states

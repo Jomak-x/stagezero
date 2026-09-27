@@ -1,0 +1,100 @@
+## Recommendation
+
+Implement this as an **opt-in experimental module**, not a planner/UI change. Existing primitives support independently generated tracks and composition; they do **not** establish coordinated three-person interaction.
+
+Do not route either experiment through `PromptSceneBuilder.__call__`: its beat handling, observer continuation, and whole-cast refinement introduce unnecessary behavior and preservation risks.
+
+### Smallest API
+
+Proposed signatures—not existing functions:
+
+```python
+generate_independent_cast(
+    client, scene, *, actors, seconds, seed, output_root,
+    cancelled=lambda: False,
+) -> CastPerformance
+
+overlay_third_track(
+    client, source_project_bytes, *, prompt,
+    start_frame, end_frame, seed, output_root,
+    cancelled=lambda: False,
+) -> CastPerformance
+```
+
+- `actors`: exactly three records containing bounded `id`, `prompt`, and finite world `x`, `z`, `yaw_degrees`.
+- First API: finite duration from 6–8 seconds; generate `ceil(seconds / 2)` horizons per actor, trim **display only** to `round(seconds * 30)`.
+- Overlay v1: require an existing **three-track cast project** containing the saved exact pair in tracks 0–1. Decode its scene and track order unchanged. A two-track/native-pair archive needs a separately reviewed adapter; its loader is not supplied here.
+- Overlay interval: half-open, 180–240 frames, within the saved timeline. Preserve everything outside track 2’s interval.
+- Both produce new artifacts; never overwrite their source.
+
+## Core generation and continuation
+
+Extract a small, single-actor horizon helper following `core_windows`, rather than extending the scene planner:
+
+1. Request one actor, 40 frames at 20 fps, with `stage_kind="approach"` and an initial world placement.
+2. Require exactly one returned clip, matching actor ID, timing, finite `(1,40,27,3)` positions and `(1,40,330)` native features.
+3. Subsequent requests use `stage_kind="continuation"` and a copy of that actor’s immediately preceding native330 output.
+4. Keep each actor’s history private. Never derive history from native22 display joints, fitted anatomy, or InterGen native262.
+5. Concatenate source horizons before timestamp interpolation to 30 fps; convert with `core27_to_native22`.
+
+Use sequential calls initially: independence means separate generation histories, not concurrent execution. This avoids assuming client thread safety. Three actors require at most **12 calls**; overlay at most four, with no automatic regeneration.
+
+Place using the first request’s world placement; do not additionally translate already-world-placed output. If a display-only rigid adjustment is needed, apply one consistent XZ/yaw transform after generation, preserve Y, and archive it. Never feed transformed display coordinates back as native history.
+
+## Placement and validation
+
+For the independent cast, require starting roots with pairwise distances of 2–3 m; an equilateral layout is suitable. This is initial staging, not a guarantee that dancing actors remain separated.
+
+Run `check_cast_geometry(..., contact_pair=())` on the complete composition. Preserve its scene/floor checks and continuous `.55 m` unpaired-root gate.
+
+For overlay, check against both **moving saved tracks**, not stationary root proxies. Retain the source’s validated pair-contact schedule segment by segment; exempt only that original pair where authorized, never the third actor.
+
+Important limitation: this checker measures inter-actor **root clearance**, not limb/body collisions. Separated roots and passing scene checks do not certify collision-free dancing or physical contact.
+
+## Exact-pair overlay
+
+Start with:
+
+```python
+candidate = source.joints.copy()
+candidate[start_frame:end_frame, 2] = replacement
+```
+
+Generate fresh Core motion from the third actor’s saved root and heading. Optional `core_to_pair_anatomy` fitting must affect only this replacement, with explicit display-processing provenance.
+
+For internal intervals, use the existing measured bridge helper at both entry and exit. Reserve bridge frames **inside** the selected interval; they shorten the played Core action rather than extend the take. Restrict bridge search to the existing bounded choices, reject excessive root-height gaps, and validate both seams and the final composed motion. At timeline endpoints, omit the absent seam.
+
+Do not reuse `generate_observer_turn`: its relaxed-arm, wrist-height, settling, and small-excursion policies conflict with wave/dance/celebrate.
+
+Do not run whole-cast observer continuation or refinement. Preserve dtype and byte order; cast only replacement values to the source dtype. Require:
+
+```python
+candidate[:, :2].tobytes() == source.joints[:, :2].tobytes()
+```
+
+Also check track 2 outside the interval. Repeat preservation checks after encode/decode. “Byte-for-byte” applies to track payloads; a new compressed project is not byte-identical to its source archive.
+
+## Archives, bounds, fallback
+
+Copy source project bytes verbatim and record SHA-256. Archive every Core result—including rejected results—before validation: requests, positions, rotations if present, native features, actor identity, timing, and hashes. Keep failed candidates and rejection reports. The supplied client interface exposes clips, not necessarily original transport bytes; distinguish array preservation from transport-byte preservation.
+
+Retain `MAX_ACTORS=3`, 1000 frames, 64 MiB, and metadata limits. Bound prompts to 500 readable characters, validate uint32 seeds, and check cancellation between calls. Transport deadline behavior requires review of the unsupplied client.
+
+On geometric/mechanical rejection, publish no replacement; return/report the unchanged saved take as fallback, without claiming action success. Cancellation and transport failures terminate the job.
+
+Keep metadata honest: per-track provenance, display trimming/bridges, `physical_contact_verified=False`, visual acceptance unverified. Use legal contiguous global segments; store detailed per-track spans separately.
+
+For ten actors, use a separate research archive/schema and renderer, explicitly capped at ten actors and eight seconds—not production cast encoding.
+
+## Focused tests
+
+- Native330 history isolation and exact continuation payloads.
+- Wrong IDs/shapes/fps, missing features, NaNs, cancellation, call caps.
+- 6/7/8-second sampling, horizon seams, final-sample endpoint hold.
+- Full-motion scene collisions and third-track crossings.
+- Entry/exit bridge rejection and interval budgeting.
+- Pair bytes, outside-interval bytes, dtype, and source hash preserved after round-trip.
+- Rejected sources retained; no failed candidate published.
+- Production decoder still rejects ten actors.
+
+This is a review draft based only on the supplied files; no changes were applied or verified.

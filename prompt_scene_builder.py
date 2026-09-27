@@ -594,6 +594,37 @@ class PromptSceneBuilder:
             beats = plan['beats']
             if not 1 <= len(beats) <= 4:
                 raise ValueError('Scene plan requires one to four beats')
+            concurrent = any('concurrent_solos' in beat for beat in beats)
+            if concurrent:
+                # The ordinary planner already validates these plans. Repeat the
+                # check at the builder boundary for injected/replayed planners.
+                from prompt_scene_plan import validate_plan
+                plan = validate_plan(plan, scene, expected_prompt=self.prompt)
+                beats = plan['beats']
+                manifest['plan'] = plan
+                if len(beats[0]['actor_ids']) == 1:
+                    from prompt_group_adapter import build_independent_solos
+                    progress('concurrent_core', actor_ids=list(ids))
+                    if self.core_client is None:
+                        raise RuntimeError('Configure ARDY Core before generating a scene')
+                    concurrent_started = time.monotonic()
+                    result, generated = build_independent_solos(
+                        self.core_client, scene, plan, seed=self.seed, output_root=folder,
+                        cancelled=cancelled)
+                    manifest['timings'].append({'stage': 'independent_concurrent_core',
+                                                'seconds': time.monotonic()-concurrent_started})
+                    metadata = result.metadata
+                    metadata['wall_seconds'] = time.monotonic()-started
+                    metadata['stage_timings'] = manifest['timings']
+                    result = CastPerformance(result.actor_ids, result.joints, metadata=metadata)
+                    manifest.update(status='complete', frames=result.frames,
+                        duration_seconds=result.frames/30,
+                        concurrency_status=result.metadata['concurrency_status'],
+                        group_manifest=str(generated['manifest']),
+                        wall_seconds=metadata['wall_seconds'])
+                    save()
+                    progress('complete', frames=result.frames, duration_seconds=result.frames/30)
+                    return result
             minimum_frames = 0
             for beat in beats:
                 active = beat['actor_ids']
@@ -883,6 +914,27 @@ class PromptSceneBuilder:
                         'physical_contact_verified': False, 'animation_accepted': False,
                         'features': 'Separate real source archives only; no cross-model features or joint three-person model.'}
             result = CastPerformance(actor_ids=ids, joints=joints, fps=30, metadata=metadata)
+            if concurrent:
+                from prompt_group_adapter import overlay_concurrent_third
+                progress('concurrent_core', actor_ids=['actor_3'])
+                concurrent_started = time.monotonic()
+                result, generated = overlay_concurrent_third(
+                    self.core_client, result, scene, plan, seed=self.seed, output_root=folder,
+                    cancelled=cancelled)
+                manifest['timings'].append({'stage': 'pair_concurrent_third_core',
+                                            'seconds': time.monotonic()-concurrent_started})
+                updated = result.metadata
+                updated['wall_seconds'] = time.monotonic()-started
+                updated['stage_timings'] = manifest['timings']
+                result = CastPerformance(result.actor_ids, result.joints, metadata=updated)
+                manifest['group_manifest'] = str(generated['manifest'])
+                manifest['concurrency_status'] = result.metadata['concurrency_status']
+                if generated['fallback']:
+                    manifest['status'] = 'complete_with_concurrency_fallback'
+                    manifest['concurrency_fallback'] = result.metadata['concurrency_fallback']
+                    manifest['plan'] = result.metadata['plan']
+                manifest['wall_seconds'] = updated['wall_seconds']
+                save()
             progress('complete', frames=len(joints), duration_seconds=len(joints)/30)
             return result
         except Exception as exc:

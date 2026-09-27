@@ -48,6 +48,7 @@ function GeneratedModal({
   index: number;
 }) {
   const viewer = useContext(ViewerContext)!;
+  const isStudioSceneModal = conf.title === "Full scene";
 
   const requestClose = conf.show_close_button
     ? () => {
@@ -62,7 +63,14 @@ function GeneratedModal({
     <Modal
       opened={true}
       title={conf.title}
-      size={conf.size ?? "md"}
+      size={isStudioSceneModal ? "min(640px, calc(100vw - 28px))" : conf.size ?? "md"}
+      classNames={isStudioSceneModal ? {
+        overlay: "sz-studio-modal-overlay",
+        content: "sz-studio-modal",
+        header: "sz-studio-modal-header",
+        title: "sz-studio-modal-title",
+        body: "sz-studio-modal-body",
+      } : undefined}
       onClose={() => {
         if (requestClose) {
           requestClose();

@@ -66,6 +66,11 @@ class TerrainModeTests(unittest.TestCase):
         self.session.start(1, EMPTY_SCENE)
         self.addCleanup(self.session.close)
 
+    def test_new_session_defaults_to_ordinary_mode(self):
+        self.assertFalse(self.session.snapshot()["terrain_aware"])
+        self.assertIsNone(self.session.terrain_presentation())
+        self.assertIsNone(self.session.terrain_result())
+
     def test_toggle_is_separate_and_commits_complete_paired_stream(self):
         ordinary = self.session._director
         self.session.set_terrain_aware(True)

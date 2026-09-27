@@ -80,13 +80,14 @@ class PromptAssistantUI:
         self._mutex = Lock()
         self._rows = []
 
-        self.folder = gui.add_folder('Prompt assistant', expand_by_default=True)
+        self.folder = gui.add_folder('Prompt assistant', expand_by_default=False)
         with self.folder:
             self.improve = (gui.add_button('Improve prompt', color='gray')
                             if self.generate is None else None)
             self.status = gui.add_html('')
             self.generation_prompts = gui.add_html('')
             self.retry_button = gui.add_button('Retry improvement', color='gray')
+            self.generate_original_button = gui.add_button('Generate original direction', color='green')
             self.cancel_button = gui.add_button('Cancel clarification', color='gray')
             self.questions_folder = gui.add_folder('Clarify your direction', expand_by_default=True)
             self.continue_button = gui.add_button('Continue and refine', color='gray')
@@ -107,6 +108,10 @@ class PromptAssistantUI:
         @self.retry_button.on_click
         def _retry(_event):
             self._retry()
+
+        @self.generate_original_button.on_click
+        def _generate_original(_event):
+            self._generate_original()
 
         @self.cancel_button.on_click
         def _cancel(_event):
@@ -423,6 +428,43 @@ class PromptAssistantUI:
                                          dismissed_prompt_only=dismissed_prompt_only)
         if not handoff_cancelled:
             self._set(self.preview, 'value', '')
+        self._render()
+
+    def _generate_original(self):
+        """Let an explicit user choice bypass a failed rewrite, with the usual context checks."""
+        if (self.generate is None or not self.auto_apply or not self._valid_source() or
+                self._request_pending or self._applying or self._generation_submitting or
+                not self._source_matches()):
+            return
+        with self._mutex:
+            if (not self._error or not self._generation_requested or
+                    self._source_context is None or self._reservation_token is not None):
+                return
+            context = self._source_context
+            scene_context = deepcopy(self._source_scene_context)
+            original = self._source_prompt
+            self._generation_submitting = True
+            self._generation_committed = False
+            self._generation_cancelled = False
+            self._clear_state_locked()
+            self._generation_original = original
+            self._generation_used = original
+            self._generation_status = 'generating'
+        self._set(self.preview, 'value', '')
+        self._render()
+        try:
+            outcome = self.generate(original, context, scene_context, original,
+                                    self._submission_guard)
+            submitted, message = outcome if isinstance(outcome, tuple) else (bool(outcome), '')
+        except Exception as exc:
+            submitted, message = False, str(exc) or type(exc).__name__
+        with self._mutex:
+            self._generation_submitting = False
+            self._generation_committed = False
+            if not submitted:
+                self._generation_status = ''
+                self._error = ('Pending generation cancelled.' if self._generation_cancelled else
+                               message or 'Generation was not started. Check the direction and try again.')
         self._render()
 
     @contextmanager
@@ -797,8 +839,15 @@ class PromptAssistantUI:
                    (self._generation_submitting and not self._generation_committed)))
         self._set(self.cancel_button, 'disabled', self._busy)
         questions = self._result.questions if self._result is not None else ()
+        recovery = bool(self.generate is not None and self._generation_requested and
+                        self._error and self._source_context is not None and
+                        self._valid_source() and self._source_matches())
         self._set(self.folder, 'label',
+                  'Prompt assistant · action needed' if recovery else
                   'Prompt assistant · answer needed' if questions else 'Prompt assistant')
+        self._set(self.generate_original_button, 'visible', self._visible and recovery)
+        self._set(self.generate_original_button, 'disabled', self._busy or self._request_pending or
+                  self._reservation_token is not None or self._generation_submitting)
         self._set(self.questions_folder, 'visible', self._visible and bool(questions))
         for index, (label, choice, freeform) in enumerate(self._rows):
             show = self._visible and index < len(questions)
