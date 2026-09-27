@@ -1,0 +1,228 @@
+{
+  "reviewed_by": "main integration agent",
+  "date": "2026-09-26",
+  "results": [
+    {
+      "case": "solo-city",
+      "verdict": "research_demo_accepted",
+      "review": "Actual browser playback and complete exported timeline inspected, including approach, interaction and exit. Exact moment inspection uses range-enabled local video playback.",
+      "notes": "Wave then more expansive celebration gestures; no contact task.",
+      "frames": 240,
+      "fps": 30,
+      "generation_wall_seconds": 6.900469415995758,
+      "sampled_segment_boundary_steps": [
+        {
+          "frame": 120,
+          "into": "solo_action",
+          "max_joint_step_m": 0.0020409954336486286,
+          "max_root_step_m": 0.0008172827260485023
+        }
+      ],
+      "physical_contact_verified": false,
+      "seamless_verified": false
+    },
+    {
+      "case": "repeated-intent/2",
+      "verdict": "research_demo_accepted_with_limits",
+      "review": "Actual browser playback and complete exported timeline inspected, including approach, interaction and exit. Exact moment inspection uses range-enabled local video playback.",
+      "notes": "Straight role-aligned approach and readable handshake/release. Slight foot glide and cross-model pose transition remain; no palm/finger solver.",
+      "frames": 222,
+      "fps": 30,
+      "generation_wall_seconds": 3.7877184999524616,
+      "sampled_segment_boundary_steps": [
+        {
+          "frame": 90,
+          "into": "transition",
+          "max_joint_step_m": 0.010636357235134097,
+          "max_root_step_m": 0.003139252153901549
+        },
+        {
+          "frame": 102,
+          "into": "paired_action",
+          "max_joint_step_m": 0.018696181200462705,
+          "max_root_step_m": 0.006624514174414291
+        }
+      ],
+      "physical_contact_verified": false,
+      "seamless_verified": false
+    },
+    {
+      "case": "market-dance",
+      "verdict": "motion_demo_accepted_camera_superseded",
+      "review": "Actual browser playback and complete exported timeline inspected, including approach, interaction and exit. Exact moment inspection uses range-enabled local video playback.",
+      "notes": "Readable partnered turn and separation; original camera hides an actor at entry. Updated camera is verified separately, not a motion change.",
+      "frames": 357,
+      "fps": 30,
+      "generation_wall_seconds": 7.6257497079786845,
+      "sampled_segment_boundary_steps": [
+        {
+          "frame": 135,
+          "into": "transition",
+          "max_joint_step_m": 0.00907143703623101,
+          "max_root_step_m": 0.0031651679719257027
+        },
+        {
+          "frame": 147,
+          "into": "paired_action",
+          "max_joint_step_m": 0.019919197984763444,
+          "max_root_step_m": 0.005579215788618537
+        }
+      ],
+      "physical_contact_verified": false,
+      "seamless_verified": false
+    },
+    {
+      "case": "industrial-explicit-spar",
+      "verdict": "research_demo_accepted_with_limits",
+      "review": "Actual browser playback and complete exported timeline inspected, including approach, interaction and exit. Exact moment inspection uses range-enabled local video playback.",
+      "notes": "Readable guards, measured strikes and movement from requested separate starts. Controlled sparring only, no physical impact validation.",
+      "frames": 378,
+      "fps": 30,
+      "generation_wall_seconds": 11.69909904099768,
+      "sampled_segment_boundary_steps": [
+        {
+          "frame": 150,
+          "into": "transition",
+          "max_joint_step_m": 0.004593158787923793,
+          "max_root_step_m": 0.0017442572917777347
+        },
+        {
+          "frame": 168,
+          "into": "paired_action",
+          "max_joint_step_m": 0.022038916544558713,
+          "max_root_step_m": 0.008418451451880775
+        }
+      ],
+      "physical_contact_verified": false,
+      "seamless_verified": false
+    },
+    {
+      "case": "market-three-fresh",
+      "verdict": "workflow_demo_accepted_with_limits",
+      "review": "Actual browser playback and complete exported timeline inspected, including approach, interaction and exit. Exact moment inspection uses range-enabled local video playback.",
+      "notes": "Complete first greeting, real partner-change walk, second greeting; clearer neutral third-actor hold and unobstructed feet. First greeting has brief wrist proximity; inactive actors remain stationary and camera can overlap silhouettes. Not generalized three-body contact.",
+      "frames": 463,
+      "fps": 30,
+      "generation_wall_seconds": 9.329690208018292,
+      "sampled_segment_boundary_steps": [
+        {
+          "frame": 90,
+          "into": "transition",
+          "max_joint_step_m": 0.007085496854689495,
+          "max_root_step_m": 0.002954294816926734
+        },
+        {
+          "frame": 102,
+          "into": "paired_action",
+          "max_joint_step_m": 0.011362943418936285,
+          "max_root_step_m": 0.003421675871580251
+        },
+        {
+          "frame": 222,
+          "into": "transition",
+          "max_joint_step_m": 0.022784812228671746,
+          "max_root_step_m": 0.0032386285548008827
+        },
+        {
+          "frame": 234,
+          "into": "approach",
+          "max_joint_step_m": 0.04812375136681764,
+          "max_root_step_m": 0.030846358610507076
+        },
+        {
+          "frame": 331,
+          "into": "transition",
+          "max_joint_step_m": 0.019095574047842897,
+          "max_root_step_m": 0.0026511006011523263
+        },
+        {
+          "frame": 343,
+          "into": "paired_action",
+          "max_joint_step_m": 0.04019093907428703,
+          "max_root_step_m": 0.0039627025538077985
+        }
+      ],
+      "physical_contact_verified": false,
+      "seamless_verified": false
+    }
+  ],
+  "validation": {
+    "python_tests_passed": 1149,
+    "client_code_changed": false,
+    "browser_ui": [
+      "actual prompt generated one-person Core scene in Market",
+      "upload native cast archive restores cast, prompt and saved background",
+      "3-to-1 actor-count change does not stop viewer",
+      "cancellation ignores late result and retains previous complete scene",
+      "save/export preserves full cast archive",
+      "complete one-render-per-frame captures"
+    ],
+    "camera_tests_passed": 9
+  },
+  "failures": [
+    "Complex dance/fall/help/hug compositions rejected; more duration does not guarantee semantic success.",
+    "Three-person seed48 rejected actual Core approach overlap with idle actor despite route preflight; no output published."
+  ],
+  "limits": [
+    "Source joints preserved does not prove palm contact, foot planting, exact mesh collisions or animation quality.",
+    "All comparison videos retain labeled authored transitions; no claim of one continuously conditioned joint model."
+  ],
+  "deployed_url": "http://jakobs-mac-mini.tail5a8376.ts.net:2380/",
+  "final_capture": "ui-three-recovered-capture/playback.mp4",
+  "final_capture_transport": "browser-local capture at loopback2382, same tested code deployed on existing private2380",
+  "camera_refinement": {
+    "bounded_orbit_angles": 36,
+    "maximum_sampled_frames": 24,
+    "all_frame_prop_and_foot_blockers": 0,
+    "hand_proxy_blocked_rays_12_to_14_seconds_before": 127,
+    "hand_proxy_blocked_rays_12_to_14_seconds_after": 12,
+    "not_exact_mesh_visibility": true
+  },
+  "idle_clearance_recovery": {
+    "route_padding_m": [
+      0.25,
+      0.4,
+      0.55
+    ],
+    "maximum_attempts": 3,
+    "physical_collision_gates_unchanged": true,
+    "explicit_anchors_preserved": true,
+    "native_frames_preserved": true,
+    "review": "Independent read-only review; 54 focused tests passed",
+    "actual_replays": {
+      "ui-three-heading-recovery": {
+        "frames": 486,
+        "seconds": 16.2,
+        "core_fresh": true,
+        "native_replayed": true,
+        "attempts": 1
+      },
+      "market-three-heading48-recovery": {
+        "frames": 480,
+        "seconds": 16.0,
+        "core_fresh": true,
+        "native_replayed": true,
+        "attempts": 1
+      }
+    },
+    "initial_heading_ramp_seconds": 1.0,
+    "prior_to_core_bridge_max_seconds": 1.0,
+    "final_review": "55 focused tests and independent read-only review passed; 1149 full suite passed"
+  },
+  "fresh_ui_generation": {
+    "wall_seconds": 16.651365333003923,
+    "frames": 477,
+    "playback_seconds": 15.9,
+    "planning_seconds": 5.318375916976947,
+    "all_model_output_fresh": true,
+    "first_attempt_passed": true,
+    "capture": "ui-three-fresh-capture/playback.mp4",
+    "visual_review": "Full playback and specific first handshake, turn, second handshake inspected. Functional pass; waiting actor lean and raised-arm hold are visibly weaker. Not preferred demo."
+  },
+  "recovered_visual_review": "Full playback plus8/10/13second entry/walk/contact inspected. Readable two handshakes with clear partner travel; some foot travel and static waiting remain. Research workflow milestone only.",
+  "resources": {
+    "existing_pods_total_hourly_usd": 1.37,
+    "authorized_total_hourly_usd": 3,
+    "additional_pods_started": 0
+  }
+}

@@ -4,7 +4,8 @@ import unittest
 
 import numpy as np
 
-from interaction_scene_collision import CORE27_JOINT_NAMES, scene_collision
+from interaction_scene_collision import CORE27_JOINT_NAMES, NATIVE22_JOINT_NAMES, scene_collision
+from experiments.native_pair_rig import NAMES as RIG_NATIVE22_NAMES
 from motion_quality import G1_JOINT_NAMES
 from scene_objects import make_object
 
@@ -28,6 +29,19 @@ def _poses(skeleton, roots):
 
 
 class SceneCollisionTests(unittest.TestCase):
+    def test_native22_hand_proxy_detects_solid_without_retargeting(self):
+        self.assertEqual(NATIVE22_JOINT_NAMES, RIG_NATIVE22_NAMES)
+        wall = make_object('wall', 0)
+        wall['position'] = [0, 1, 2]
+        wall['size'] = [3, 2, .3]
+        poses = np.zeros((4, 22, 3), np.float32)
+        poses[:] = [0, 1, 0]
+        poses[2, NATIVE22_JOINT_NAMES.index('RightHand')] = [0, 1, 2]
+        result = scene_collision(poses, 'native22', _scene(wall))
+        self.assertEqual(result['total_collision_frames'], 1)
+        self.assertEqual(result['per_object'][0]['first_collision_frame'], 2)
+        self.assertEqual(result['skeleton'], 'native22')
+
     def test_walk_past_wall_then_through_wall(self):
         wall = make_object("wall", 0)
         wall["position"] = [0, 1, 2]

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "title": "Three-Person Sequential Greeting",
+  "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+  "actor_count": 3,
+  "actors": [
+    {
+      "id": "actor_1",
+      "name": "Person 1",
+      "start": null
+    },
+    {
+      "id": "actor_2",
+      "name": "Person 2",
+      "start": null
+    },
+    {
+      "id": "actor_3",
+      "name": "Person 3",
+      "start": null
+    }
+  ],
+  "meeting": null,
+  "beats": [
+    {
+      "id": "beat-1",
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "prompt": "Person 1 and Person 2 shake hands, then release.",
+      "seconds": 4.0
+    },
+    {
+      "id": "beat-2",
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "prompt": "Person 2 and Person 3 shake hands.",
+      "seconds": 4.0
+    }
+  ],
+  "warnings": []
+}

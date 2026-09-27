@@ -4,6 +4,7 @@ The pinned Viser version does not expose a custom HTTP asset directory. We adapt
 only WebsockServer construction, restoring the module immediately afterward;
 no installed dependency files are modified. Preview/live viewers keep upstream UI.
 """
+import os
 from pathlib import Path
 from threading import RLock
 from unittest.mock import patch
@@ -15,13 +16,14 @@ _CONSTRUCTION_LOCK = RLock()
 
 
 def create_studio_server(**kwargs):
-    if not (_BUILD / 'index.html').is_file():
+    build = Path(os.environ.get('STAGEZERO_CLIENT_BUILD', str(_BUILD)))
+    if not (build / 'index.html').is_file():
         raise RuntimeError('Build the studio client first: cd studio_client && npm ci && npm run build')
     with _CONSTRUCTION_LOCK:
         upstream = infra.WebsockServer
 
         def studio_socket(*args, **socket_kwargs):
-            socket_kwargs['http_server_root'] = _BUILD
+            socket_kwargs['http_server_root'] = build
             return upstream(*args, **socket_kwargs)
 
         with patch.object(infra, 'WebsockServer', studio_socket):

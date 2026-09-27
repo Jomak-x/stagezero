@@ -52,7 +52,7 @@ def _building(identifier, name, wall, trim, glass, accent, *, columns=3, rows=4,
                   repeat=((3, 1, 1), (.29, 0, 0))),
             _part("box", (0, -.18, .418), (.87, .018, .026), trim,
                   repeat=((1, 4, 1), (0, .17, 0))),
-            _part("box", (-.36, -.16, .427), (.1, .05, .008), (124, 180, 193),
+            _part("box", (-.36, -.16, .434), (.1, .05, .008), (124, 180, 193),
                   repeat=((4, 3, 1), (.21, .18, 0))),
             _part("box", (.25, .485, -.05), (.24, .03, .32), (58, 68, 75)),
         ])
@@ -80,7 +80,7 @@ def _street_assets(palette):
         _part("box", (0, -.015, 0), (1, .94, 1), (49, 54, 60)),
         _part("box", (0, .49, -.32), (.018, .012, .13), (217, 185, 106),
               repeat=((1, 1, 5), (0, 0, .16))),
-        _part("box", (-.30, .49, -.42), (.008, .012, .14), (174, 177, 171),
+        _part("box", (-.30, .475, -.42), (.008, .012, .14), (174, 177, 171),
               repeat=((2, 1, 6), (.60, 0, .14))),
         _part("box", (-.28, .49, -.12), (.073, .012, .034), (231, 226, 207),
               repeat=((6, 1, 1), (.11, 0, 0))),
@@ -109,7 +109,7 @@ def _street_assets(palette):
     ])
     bench = _asset("city-bench", "Timber and iron bench", [
         _part("box", (0, -.03, 0), (.82, .11, .35), (120, 82, 53)),
-        _part("box", (0, .18, -.16), (.82, .35, .07), (130, 91, 60)),
+        _part("box", (0, .18, -.16), (.84, .35, .07), (130, 91, 60)),
         _part("box", (-.34, -.29, 0), (.05, .34, .30), (56, 62, 62),
               repeat=((2, 1, 1), (.68, 0, 0))),
         _part("box", (0, .30, -.11), (.86, .035, .07), (81, 61, 45)),
@@ -196,9 +196,9 @@ def _house(identifier, name, siding, roof, trim):
         _part("box", (-.39, -.145, .365), (.035, .61, .035), trim,
               repeat=((2, 1, 1), (.78, 0, 0))),
         _part("box", (0, -.105, .369), (.72, .022, .035), trim),
-        _part("box", (0, -.385, .369), (.82, .035, .06), trim),
+        _part("box", (0, -.385, .369), (.84, .035, .06), trim),
         _part("box", (0, -.32, .386), (.16, .31, .014), (67, 86, 90)),
-        _part("box", (0, -.32, .398), (.022, .31, .016), trim),
+        _part("box", (0, -.32, .398), (.022, .32, .016), trim),
         _part("sphere", (.05, -.32, .409), (.024, .024, .024), (215, 182, 95)),
         _part("box", (-.255, -.215, .38), (.20, .24, .022), trim,
               repeat=((2, 1, 1), (.51, 0, 0))),
@@ -242,7 +242,7 @@ def _residential_assets(palette):
         _asset("residential-fence", "Picket fence with gate opening", [
             _part("box", (-.305, -.14, 0), (.32, .04, .055), (227, 224, 202),
                   repeat=((2, 2, 1), (.61, .25, 0))),
-            _part("box", (-.44, -.12, 0), (.045, .74, .09), (231, 226, 208),
+            _part("box", (-.44, -.12, 0), (.055, .74, .09), (231, 226, 208),
                   repeat=((2, 1, 1), (.88, 0, 0))),
             _part("box", (-.445, -.15, 0), (.035, .60, .05), (239, 236, 219),
                   repeat=((4, 1, 1), (.095, 0, 0))),
@@ -305,9 +305,11 @@ def make_residential(seed=0):
 
 def _room_assets(palette):
     wall, wood, fabric, trim, leaf = palette
+    # Crossing inlays occupy separate depths so their colors remain stable
+    # while the camera moves; the same rule applies to layered wall trim.
     floor = _asset("floorboards", "Herringbone wood floor", [
         _part("box", (0, -.015, 0), (1, .94, 1), wood),
-        _part("box", (-.45, .49, 0), (.012, .012, .96), (92, 66, 48),
+        _part("box", (-.45, .475, 0), (.012, .012, .96), (92, 66, 48),
               repeat=((10, 1, 1), (.1, 0, 0))),
         _part("box", (-.45, .49, -.45), (.1, .012, .008), (169, 125, 82),
               repeat=((10, 1, 10), (.1, 0, .1))),
@@ -316,7 +318,7 @@ def _room_assets(palette):
         _part("box", (0, 0, 0), (1, 1, .82), wall),
         _part("box", (0, -.43, .44), (1, .11, .045), trim),
         _part("box", (0, -.20, .43), (1, .018, .035), trim),
-        _part("box", (0, .45, .43), (1, .07, .055), trim),
+        _part("box", (0, .45, .43), (.99, .07, .055), trim),
         _part("box", (-.315, .14, .425), (.275, .48, .015), (45, 76, 94),
               repeat=((3, 1, 1), (.315, 0, 0))),
         _part("box", (-.315, -.105, .445), (.29, .018, .035), trim,
@@ -332,7 +334,7 @@ def _room_assets(palette):
     ])
     side = _asset("side-wall", "Wall with timber wainscot", [
         _part("box", (0, 0, -.015), (1, 1, .94), wall),
-        _part("box", (0, -.39, .49), (1, .20, .012), (171, 151, 127)),
+        _part("box", (0, -.39, .476), (1, .20, .012), (171, 151, 127)),
         _part("box", (0, -.24, .49), (1, .024, .012), trim),
         _part("box", (-.42, -.38, .49), (.012, .16, .012), trim,
               repeat=((6, 1, 1), (.17, 0, 0))),
@@ -343,7 +345,7 @@ def _room_assets(palette):
         _part("box", (0, .09, 0), (.86, .025, .86), fabric),
         _part("box", (0, .11, 0), (.72, .01, .72), (203, 164, 123)),
         _part("box", (0, .12, 0), (.56, .01, .56), fabric),
-        _part("box", (-.44, .04, -.43), (.02, .06, .07), (228, 202, 162),
+        _part("box", (-.44, .05, -.43), (.02, .06, .07), (228, 202, 162),
               repeat=((9, 1, 2), (.11, 0, .86))),
     ])
     couch = _asset("sofa", "Upholstered sofa with cushions", [
@@ -366,7 +368,7 @@ def _room_assets(palette):
         _part("sphere", (.20, .365, -.08), (.08, .06, .08), (164, 113, 72)),
     ])
     shelf = _asset("bookshelf", "Bookcase full of varied books", [
-        _part("box", (0, 0, -.30), (.92, .95, .16), wood),
+        _part("box", (0, 0, -.30), (.90, .93, .14), wood),
         _part("box", (-.42, 0, 0), (.09, .95, .76), trim,
               repeat=((2, 1, 1), (.84, 0, 0))),
         _part("box", (0, -.44, 0), (.92, .075, .77), trim,

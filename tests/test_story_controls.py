@@ -147,8 +147,9 @@ class Session:
         self.active_take = identifier
         self.calls.append(('select', identifier))
 
-    def submit_action_edit(self, prompt, index, operation, seconds=None):
-        self.calls.append(('edit', prompt, index, operation, seconds))
+    def submit_action_edit(self, prompt, index, operation, seconds=None,
+                           automatic_timing=False):
+        self.calls.append(('edit', prompt, index, operation, seconds, automatic_timing))
         self.version += 1
         self.busy = True
         self.status = 'Regenerating 2 actions · 0/3 chunks'
@@ -236,7 +237,7 @@ class StoryControlsTests(unittest.TestCase):
         self.controls.update()
         self.assertEqual(view.action_prompt.value, 'Wave with the left hand')
         view.edit.click(self.client)
-        self.assertIn(('edit', 'Wave with the left hand', 1, 'replace', 4.0),
+        self.assertIn(('edit', 'Wave with the left hand', 1, 'replace', None, True),
                       self.session.calls)
 
     def test_client_local_modal_and_close_preserve_running_job(self):
@@ -256,6 +257,106 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(reopened.jobs.options[0], next(iter(self.controls.ids)))
         self.assertEqual(reopened.length.value, 'Auto')
         self.assertIn('Creating scene', reopened.status.content)
+
+    def test_popup_shows_whole_scene_retry_attempt_and_reset_progress(self):
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        job = self.controls.workflow.jobs[identifier]
+        job.update(attempt=2, max_attempts=3)
+        job['progress']['completed_beats'] = 0
+        self.controls.update()
+        self.assertIn('Retrying scene', view.status.content)
+        self.assertIn('attempt 2/3', view.status.content)
+        self.assertIn('0/4 movements', view.status.content)
+        self.assertFalse(view.cancel.disabled)
+
+    def test_open_modal_receives_other_clients_scenes_and_current_take(self):
+        self.session.takes['scene-take'] = self.session.scene_take
+        self.session.active_take = 'scene-take'
+        first = self.controls.open(self.client)
+        self.assertEqual(first.jobs.value, 'Current scene')
+        self.assertIn('Saved performance', first.source.content)
+        first.prompt.value = 'Keep this draft'
+        second_client = SimpleNamespace(client_id='viewer-2', gui=Gui())
+        second = self.controls.open(second_client)
+        identifier = self.create_scene(second)
+        self.controls.update()
+        label = next(label for label, value in self.controls.ids.items()
+                     if value == identifier)
+        self.assertIn(label, first.jobs.options)
+        self.assertEqual(first.jobs.value, 'Current scene')
+        self.assertEqual(first.prompt.value, 'Keep this draft')
+        first.jobs.edit(label, self.client)
+        self.assertEqual(first.actions.options, ('No movements yet',))
+        self.assertTrue(first.edit.disabled)
+        first.jobs.edit('Current scene', self.client)
+        self.assertEqual(len(first.action_map), 2)
+        self.assertIn('Saved performance', first.source.content)
+
+    def test_current_scene_switch_requires_fresh_movement_binding(self):
+        self.session.takes['scene-take'] = self.session.scene_take
+        self.session.active_take = 'scene-take'
+        view = self.controls.open(self.client)
+        self.assertFalse(view.edit.disabled)
+        new_take = SimpleNamespace(id='new-scene', name='New scene', segments=[
+            {'prompt': 'Jump', 'start': 0, 'end': 75}])
+        self.session.takes['new-scene'] = new_take
+        self.session.active_take = 'new-scene'
+        view.edit.click(self.client)
+        self.assertFalse(any(call[0] == 'edit' for call in self.session.calls))
+        self.assertTrue(view.edit.disabled)
+        self.assertTrue(view.refresh_action.visible)
+        self.assertIn('Current scene changed', view.status.content)
+        view.refresh_action.click(self.client)
+        self.assertEqual(view.action_prompt.value, 'Jump')
+        self.assertFalse(view.edit.disabled)
+
+    def test_ready_actions_review_or_navigate_directly_to_refine(self):
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        self.controls.update()
+        self.assertTrue(view.review.visible)
+        self.assertTrue(view.load.visible)
+        with patch('story_controls.navigate_tab') as navigate:
+            view.load.click(self.client)
+        navigate.assert_called_once_with(view.tabs, 1, self.client)
+        self.assertTrue(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertEqual(view.actions.options[0].split(' · ')[0], '01')
+        self.assertFalse(view.modal.closed)
+        view.review.click(self.client)
+        self.assertTrue(view.modal.closed)
+        self.assertIn(('select', 'scene-take'), self.session.calls)
+
+    def test_timeline_opens_owned_exact_scene_movement_without_seek(self):
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        view.load.click(self.client)
+        self.assertTrue(self.controls.owns_take('scene-take'))
+        with patch('story_controls.navigate_tab') as navigate:
+            self.assertTrue(self.controls.open_for_movement(self.client, 'scene-take', 1))
+        opened = self.controls._views[self.client.client_id]
+        self.assertTrue(view.modal.closed)
+        self.assertEqual(opened.selected_index, 1)
+        self.assertEqual(opened.action_prompt.value, 'Wave')
+        self.assertFalse(any(call[0] == 'seek' for call in self.session.calls))
+        navigate.assert_called_once_with(opened.tabs, 1, self.client)
+        self.assertFalse(self.controls.open_for_movement(self.client, 'scene-take', 9))
+        self.session.active_take = None
+        self.assertFalse(self.controls.open_for_movement(self.client, 'scene-take', 0))
+
+    def test_timeline_does_not_claim_unmarked_ordinary_take(self):
+        self.session.takes['ordinary'] = SimpleNamespace(
+            id='ordinary', name='Ordinary',
+            segments=[{'prompt': 'Walk', 'start': 0, 'end': 50}])
+        self.session.active_take = 'ordinary'
+        self.assertFalse(self.controls.owns_take('ordinary'))
+        self.assertFalse(self.controls.open_for_movement(self.client, 'ordinary', 0))
+        self.assertEqual(self.client_gui.modals, [])
+        self.session.takes['ordinary'].segments[0]['beat_id'] = 'beat-1'
+        with patch('story_controls.navigate_tab'):
+            self.assertTrue(self.controls.open_for_movement(self.client, 'ordinary', 0))
 
     def test_auto_plan_estimate_and_refine_durations(self):
         view = self.controls.open(self.client)
@@ -299,6 +400,112 @@ class StoryControlsTests(unittest.TestCase):
         self.assertEqual(self.core.deactivations, 1)
         self.assertEqual(self.handoffs, [True])
 
+    def test_paired_active_can_generate_without_interrupting_pair_until_explicit_load(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        self.session.character_motion_enabled = False
+
+        def handoff():
+            self.handoffs.append(True)
+            paired['active'] = False
+            self.session.character_motion_enabled = True
+
+        self.controls.on_story_activate = handoff
+        view = self.controls.open(self.client)
+        self.assertFalse(view.generate.disabled)
+        identifier = self.create_scene(view)
+        self.assertTrue(paired['active'])
+        self.assertEqual(self.handoffs, [])
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        self.controls.update()
+        self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertIsNone(self.session.active_take)
+        view.load.click(self.client)
+        self.assertTrue(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertFalse(paired['active'])
+        self.assertTrue(self.session.character_motion_enabled)
+        self.assertEqual(self.core.deactivations, 0)
+        self.assertEqual(self.handoffs, [True])
+        self.assertFalse(view.edit.disabled)
+
+    def test_paired_busy_or_export_blocks_load_before_g1_take_changes(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag, error in (('busy', 'Finish or cancel paired generation'),
+                            ('capturing', 'Wait for paired playback export')):
+            with self.subTest(flag=flag):
+                paired[flag] = True
+                self.controls.update()
+                view.load.click(self.client)
+                self.assertIn(error, view.error)
+                self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+                self.assertEqual(self.session.takes, {})
+                self.assertIsNone(self.session.active_take)
+                self.assertEqual(self.session.project_revision, 0)
+                self.assertEqual(self.handoffs, [])
+                paired[flag] = False
+
+    def test_cast_busy_or_export_blocks_load_before_g1_take_changes(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': False, 'capturing': False}
+        self.controls.cast_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag, error in (('busy', 'Finish or cancel cast generation'),
+                            ('capturing', 'Wait for cast playback export')):
+            with self.subTest(flag=flag):
+                paired[flag] = True
+                self.controls.update()
+                view.load.click(self.client)
+                self.assertIn(error, view.error)
+                self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+                self.assertEqual(self.session.takes, {})
+                self.assertIsNone(self.session.active_take)
+                self.assertEqual(self.session.project_revision, 0)
+                self.assertEqual(self.handoffs, [])
+                paired[flag] = False
+
+    def test_inactive_pair_with_pending_work_still_blocks_automatic_load(self):
+        self.core.active = False
+        paired = {'active': False, 'busy': True, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        self.controls.workflow.jobs[identifier]['status'] = 'completed'
+        for flag in ('busy', 'capturing'):
+            paired.update(busy=flag == 'busy', capturing=flag == 'capturing')
+            self.controls.update()
+            self.assertFalse(self.controls.workflow.jobs[identifier]['loaded'])
+            self.assertIsNone(self.session.active_take)
+        paired.update(busy=False, capturing=False)
+        self.controls.update()
+        self.assertTrue(self.controls.workflow.jobs[identifier]['loaded'])
+        self.assertEqual(self.handoffs, [])  # Automatic completion never switches modes.
+
+    def test_explicit_activation_callback_runs_without_core_session(self):
+        self.controls.core_session = None
+        self.controls._activate_g1()
+        self.assertEqual(self.handoffs, [True])
+        self.assertEqual(self.core.deactivations, 0)
+
+    def test_cancel_full_scene_does_not_cancel_or_switch_paired_generation(self):
+        self.core.active = False
+        paired = {'active': True, 'busy': True, 'capturing': False}
+        self.controls.paired_session = SimpleNamespace(snapshot=lambda: dict(paired))
+        self.session.character_motion_enabled = False
+        view = self.controls.open(self.client)
+        identifier = self.create_scene(view)
+        view.cancel.click(self.client)
+        self.assertEqual(self.controls.workflow.jobs[identifier]['status'], 'cancelled')
+        self.assertEqual(paired, {'active': True, 'busy': True, 'capturing': False})
+        self.assertEqual(self.handoffs, [])
+
     def test_stale_movement_cannot_edit_replacement_take(self):
         view = self.controls.open(self.client)
         identifier = self.create_scene(view)
@@ -337,9 +544,11 @@ class StoryControlsTests(unittest.TestCase):
         self.controls.workflow.jobs[identifier]['status'] = 'completed'
         view.load.click(self.client)
         view.action_prompt.value = 'Walk slowly'
+        view.action_length.edit('Custom', self.client)
+        self.assertTrue(view.action_seconds.visible)
         view.action_seconds.value = '3.20'
         view.edit.click(self.client)
-        self.assertIn(('edit', 'Walk slowly', 0, 'replace', 3.2), self.session.calls)
+        self.assertIn(('edit', 'Walk slowly', 0, 'replace', 3.2, False), self.session.calls)
 
     def test_popup_undo_does_not_touch_another_take(self):
         view = self.controls.open(self.client)
@@ -366,7 +575,7 @@ class StoryControlsTests(unittest.TestCase):
         self.assertFalse(view.edit.disabled)
         view.action_prompt.value = 'Walk toward the door'
         view.edit.click(self.client)
-        self.assertIn(('edit', 'Walk toward the door', 0, 'replace', 4.0),
+        self.assertIn(('edit', 'Walk toward the door', 0, 'replace', None, True),
                       self.session.calls)
 
     def test_current_take_is_not_implicit_fallback_for_unloaded_job(self):

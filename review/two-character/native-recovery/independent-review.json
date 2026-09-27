@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "scope": "Independent visual review of all three 12-image full-duration contact sheets and first/last frames, plus all 210 unsmoothed source-joint frames per clip. Full MP4s were not watched in this review; the main agent owns final playback verification.",
+  "overall_decision": "Handshake is an accepted research diagnostic for close paired semantics. Embrace and waltz are retained as research evidence but rejected as convincing finished hug and waltz. None is production grade or a ready Studio feature.",
+  "capture_provenance": {
+    "fps": 30,
+    "frames_per_clip": 210,
+    "duration_seconds": 7,
+    "source": "Original InterGen paired 22-joint unsmoothed source arrays",
+    "display": "Authored Xbot mannequin mesh fitted to source joints, not textured human characters",
+    "scene": "Generated city street used as rendering backdrop only; generation was not scene-conditioned",
+    "retargeted_to_core27": false,
+    "added_pair_offsets": false,
+    "physical_contact_verified": false,
+    "license": "CC BY-NC-SA 4.0 research checkpoint"
+  },
+  "clips": {
+    "handshake": {
+      "source_archive": "review/two-character/native-recovery/originals/handshake_seed42.npz",
+      "source_sha256": "c552070badd291c349917aa704ef285cf67ff70c8762c3d7149647bfb8a0907d",
+      "capture": "review/two-character/native-recovery/handshake-direct-rig/native-pair.mp4",
+      "contact_sheet": "review/two-character/native-recovery/handshake-direct-rig/contact-sheet.png",
+      "decision": "Accept as a semantic paired-motion experiment only; reject as a natural or physically verified handshake.",
+      "visual": "They approach, meet hands by roughly 1.3 s, remain in an extended handhold through about 4.4 s, release by around 5.1 s, and step apart by the 7 s end. This has clear joint timing and a beginning, middle, and ending. The mannequin palms remain visibly open rather than clasped; finger articulation and palm normals are absent. The hold lasts unusually long and the straightened forearm/elbow posture looks staged. Feet lift and shift during the hold; no planted-foot guarantee exists.",
+      "measurements": {
+        "root_planar_gap_m": {"min": 0.671, "median": 0.892, "end": 1.938},
+        "torso_joint_center_gap_m": {"min": 0.604, "frames_under_0_35m": 0},
+        "closest_wrist_gap_m": {"min": 0.013, "source_joint_pair": [20, 20], "source_joint_side": "left-left in standard SMPL22 ordering", "continuous_frames_under_0_15m": 96, "continuous_duration_s": 3.2, "interval_frames": [40, 136]},
+        "max_joint_step_m_per_frame": {"p95": 0.089, "max": 0.112}
+      },
+      "qualification": "The 20/20 close-wrist pair is left-left in standard SMPL22 ordering, not right-right. Wrist proximity proves neither a palm grasp nor physical contact. The long near-wrist interval is visible as a held pose, not a natural short handshake."
+    },
+    "embrace": {
+      "source_archive": "review/two-character/native-recovery/originals/embrace_seed37.npz",
+      "source_sha256": "0e25f234806133cddcd145df0b17e2bea0d7726fc8d8bf5d55faf287ef9cfc0d",
+      "capture": "review/two-character/native-recovery/embrace-direct-rig/native-pair.mp4",
+      "contact_sheet": "review/two-character/native-recovery/embrace-direct-rig/contact-sheet.png",
+      "decision": "Reject as a complete convincing hug; preserve as close-contact failure evidence.",
+      "visual": "The approach is slow. Around 2.5–4.4 s, one actor reaches toward the other's shoulder/chest without a clear mutual arm wrap. They move into a tight embrace only late, around 5.1 s, and the clip ends still compressed together instead of releasing. The last frame shows overlapping head/chest silhouettes and awkward leg placement; it is not a resolved full scene. Open mannequin hands do not show a secure hold.",
+      "measurements": {
+        "root_planar_gap_m": {"min": 0.316, "median": 0.54, "end": 0.33},
+        "torso_joint_center_gap_m": {"min": 0.226, "frames_under_0_35m": 62},
+        "closest_wrist_gap_m": {"min": 0.069, "frames_under_0_15m": 3},
+        "max_joint_step_m_per_frame": {"p95": 0.084, "max": 0.144}
+      },
+      "qualification": "The small torso gap and visible body overlap warn of interpenetration; this is a joint-center screen, not a mesh collision calculation. Sparse close-wrist frames do not rule out a torso hug, but they do not prove arm contact."
+    },
+    "waltz": {
+      "source_archive": "review/two-character/native-recovery/raw/waltz42.npz",
+      "source_sha256": "1f0a39a11293d9115ea58a55eeeb61b3bccdf825de3e891d70056bffd98eec5b",
+      "capture": "review/two-character/native-recovery/waltz-direct-rig/native-pair.mp4",
+      "contact_sheet": "review/two-character/native-recovery/waltz-direct-rig/contact-sheet.png",
+      "decision": "Retain as a partnered-turn research candidate; reject as a convincing waltz or ready performance.",
+      "visual": "Partners face and turn together for much of the clip, which reads more clearly as shared dance than the earlier textured small-turn trial. The feet frequently cross and appear to bounce or hover; the raised/open arms and shoulder-hand contacts do not form a clean waltz hold. The late sequence loosens into a side-by-side/back-facing finish instead of a controlled close. The last-frame display mesh records a sole about 3 cm below the road, and no foot locking is present.",
+      "measurements": {
+        "root_planar_gap_m": {"min": 0.308, "median": 0.506, "max": 0.71},
+        "torso_joint_center_gap_m": {"min": 0.297, "frames_under_0_35m": 18},
+        "closest_wrist_gap_m": {"min": 0.029, "frames_under_0_15m": 168},
+        "max_joint_step_m_per_frame": {"p95": 0.077, "max": 0.145},
+        "last_frame_display_mesh_min_y_m": -0.03
+      },
+      "qualification": "Persistent wrist proximity does not establish a held hand or constrained partner frame. The mesh floor figure applies to the sampled last frame, not every frame."
+    }
+  },
+  "comparison_with_previous_textured_trials": "Earlier InterGen-to-Core27/20 fps textured trials showed better human appearance but weaker or less reliable partner semantics, including the rejected high-five and boxing body-overlap failure. These direct 30 fps captures better expose the original paired choreography, especially handshake timing and waltz turn, but use a mannequin display and different source samples. They are not an apples-to-apples proof of model improvement or a replacement for the Studio's native Core archive.",
+  "required_before_promotion": "Watch all 210 rendered frames in playback; add hand orientation/finger contact, body collision and foot support validation; fit textured characters without losing the native pair spacing/timing; preserve 30 fps research provenance rather than relabeling it as Core27/20 fps."
+}

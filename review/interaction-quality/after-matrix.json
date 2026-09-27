@@ -1,0 +1,297 @@
+{
+  "planning": "All cases reuse previously generated plans; auto-review rejected external AI planning for sensitive scene payload.",
+  "motion": "Fresh live Core and InterGen requests in both baseline and after. Pair numeric source arrays match exactly at same seeds; Core source arrays differ.",
+  "limitations": [
+    "Wrist proximity does not prove hand contact.",
+    "Low/slow ankle support speed is only a foot sliding proxy; results are mixed across feet.",
+    "Held joint motion can be visible yet unnatural; complete-video visual review is required.",
+    "Only offline ablations use exactly identical full source motion."
+  ],
+  "cases": [
+    {
+      "case": "city-handshake-s42",
+      "baseline_archive": "review/interaction-quality/baseline/city-handshake-s42-fixed-plan/scene.cast.stagezero.npz",
+      "after_archive": "review/interaction-quality/after/city-handshake-s42-fixed-plan/scene.cast.stagezero.npz",
+      "same_source_ablation": "review/interaction-quality/ablation/city-handshake-s42",
+      "baseline_frames": 222,
+      "after_frames": 222,
+      "baseline_generation_wall_seconds": 4.270579333999194,
+      "after_generation_wall_seconds": 4.203423250000924,
+      "pair_sources": [
+        {
+          "source": "pair-00.npz",
+          "numeric_arrays_equal": true
+        }
+      ],
+      "held_actor_motion_fraction_over_0p1mm_before_after": [
+        {
+          "actor_id": "actor_1",
+          "before": null,
+          "after": null
+        },
+        {
+          "actor_id": "actor_2",
+          "before": null,
+          "after": null
+        }
+      ],
+      "handshake_wrist_min_m_before_after": [
+        {
+          "before": 0.18393311777763574,
+          "after": 0.18393311777763574
+        }
+      ],
+      "foot_support_proxy_before_after": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "transition_p95_before_m_s": 0.4953637763619889,
+          "transition_p95_after_m_s": 0.4879136050768087
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "transition_p95_before_m_s": 0.5603201808845484,
+          "transition_p95_after_m_s": 0.6060715071396534
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "left",
+          "transition_p95_before_m_s": 0.5051250930683223,
+          "transition_p95_after_m_s": 0.5025650676862061
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "right",
+          "transition_p95_before_m_s": 0.10508831488346286,
+          "transition_p95_after_m_s": null
+        }
+      ]
+    },
+    {
+      "case": "industrial-spar-s45",
+      "baseline_archive": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/scene.cast.stagezero.npz",
+      "after_archive": "review/interaction-quality/after/industrial-spar-s45-fixed-plan/scene.cast.stagezero.npz",
+      "same_source_ablation": "review/interaction-quality/ablation/industrial-spar-s45",
+      "baseline_frames": 378,
+      "after_frames": 372,
+      "baseline_generation_wall_seconds": 5.131713875045534,
+      "after_generation_wall_seconds": 4.949019041960128,
+      "pair_sources": [
+        {
+          "source": "pair-00.npz",
+          "numeric_arrays_equal": true
+        }
+      ],
+      "held_actor_motion_fraction_over_0p1mm_before_after": [
+        {
+          "actor_id": "actor_1",
+          "before": null,
+          "after": null
+        },
+        {
+          "actor_id": "actor_2",
+          "before": null,
+          "after": null
+        }
+      ],
+      "handshake_wrist_min_m_before_after": [],
+      "foot_support_proxy_before_after": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "transition_p95_before_m_s": 0.6958375505627593,
+          "transition_p95_after_m_s": 0.5138898571109043
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "transition_p95_before_m_s": 0.367747024268059,
+          "transition_p95_after_m_s": 0.06683416379492546
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "left",
+          "transition_p95_before_m_s": 1.0392562447475857,
+          "transition_p95_after_m_s": 0.9944114345587804
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "right",
+          "transition_p95_before_m_s": 0.6631995422988752,
+          "transition_p95_after_m_s": 1.0716967437693987
+        }
+      ]
+    },
+    {
+      "case": "market-three-s42",
+      "baseline_archive": "review/interaction-quality/baseline/market-three-s42-fixed-plan/scene.cast.stagezero.npz",
+      "after_archive": "review/interaction-quality/after/market-three-s42-fixed-plan/scene.cast.stagezero.npz",
+      "same_source_ablation": "review/interaction-quality/ablation/market-three-s42",
+      "baseline_frames": 478,
+      "after_frames": 478,
+      "baseline_generation_wall_seconds": 12.278821292042267,
+      "after_generation_wall_seconds": 11.980531416949816,
+      "pair_sources": [
+        {
+          "source": "pair-00.npz",
+          "numeric_arrays_equal": true
+        },
+        {
+          "source": "pair-01.npz",
+          "numeric_arrays_equal": true
+        }
+      ],
+      "held_actor_motion_fraction_over_0p1mm_before_after": [
+        {
+          "actor_id": "actor_1",
+          "before": 0.0,
+          "after": 0.8492063492063492
+        },
+        {
+          "actor_id": "actor_2",
+          "before": null,
+          "after": null
+        },
+        {
+          "actor_id": "actor_3",
+          "before": 0.0,
+          "after": 0.9041095890410958
+        }
+      ],
+      "handshake_wrist_min_m_before_after": [
+        {
+          "before": 0.09122761894370066,
+          "after": 0.09122761894370066
+        },
+        {
+          "before": 0.02127618665255145,
+          "after": 0.02127618665255145
+        }
+      ],
+      "foot_support_proxy_before_after": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "transition_p95_before_m_s": 0.4634346718699474,
+          "transition_p95_after_m_s": 0.7358358833501732
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "transition_p95_before_m_s": 0.2026884224278374,
+          "transition_p95_after_m_s": 0.28785529526651693
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "left",
+          "transition_p95_before_m_s": 0.8906979209396991,
+          "transition_p95_after_m_s": 0.9436196501462196
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "right",
+          "transition_p95_before_m_s": 0.8904679439359623,
+          "transition_p95_after_m_s": 0.7897676032758101
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "left",
+          "transition_p95_before_m_s": 0.4590204489239243,
+          "transition_p95_after_m_s": 0.6630325388905685
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "right",
+          "transition_p95_before_m_s": 1.0292071176559292,
+          "transition_p95_after_m_s": 0.9466508987379092
+        }
+      ]
+    },
+    {
+      "case": "market-three-s48",
+      "baseline_archive": "review/interaction-quality/baseline/market-three-s48-fixed-plan/scene.cast.stagezero.npz",
+      "after_archive": "review/interaction-quality/after/market-three-s48-fixed-plan/scene.cast.stagezero.npz",
+      "same_source_ablation": "review/interaction-quality/ablation/market-three-s48",
+      "baseline_frames": 480,
+      "after_frames": 480,
+      "baseline_generation_wall_seconds": 12.419239458977245,
+      "after_generation_wall_seconds": 13.54140433401335,
+      "pair_sources": [
+        {
+          "source": "pair-00.npz",
+          "numeric_arrays_equal": true
+        },
+        {
+          "source": "pair-01.npz",
+          "numeric_arrays_equal": true
+        }
+      ],
+      "held_actor_motion_fraction_over_0p1mm_before_after": [
+        {
+          "actor_id": "actor_1",
+          "before": 0.0,
+          "after": 0.7440944881889764
+        },
+        {
+          "actor_id": "actor_2",
+          "before": null,
+          "after": null
+        },
+        {
+          "actor_id": "actor_3",
+          "before": 0.0,
+          "after": 0.8082191780821918
+        }
+      ],
+      "handshake_wrist_min_m_before_after": [
+        {
+          "before": 0.010468028229853266,
+          "after": 0.010468028229853266
+        },
+        {
+          "before": 0.026604248859159716,
+          "after": 0.026604248859159716
+        }
+      ],
+      "foot_support_proxy_before_after": [
+        {
+          "actor_id": "actor_1",
+          "side": "left",
+          "transition_p95_before_m_s": 0.2274350752291067,
+          "transition_p95_after_m_s": 0.6460478752750072
+        },
+        {
+          "actor_id": "actor_1",
+          "side": "right",
+          "transition_p95_before_m_s": 0.3538852636548323,
+          "transition_p95_after_m_s": 0.370468946775344
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "left",
+          "transition_p95_before_m_s": 0.6878100872854958,
+          "transition_p95_after_m_s": 0.6834001428891663
+        },
+        {
+          "actor_id": "actor_2",
+          "side": "right",
+          "transition_p95_before_m_s": 1.0539947593613355,
+          "transition_p95_after_m_s": 1.049823369200503
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "left",
+          "transition_p95_before_m_s": 0.35192311283056743,
+          "transition_p95_after_m_s": 0.38654397201524526
+        },
+        {
+          "actor_id": "actor_3",
+          "side": "right",
+          "transition_p95_before_m_s": 0.480179052041507,
+          "transition_p95_after_m_s": 0.4646954113616264
+        }
+      ]
+    }
+  ]
+}

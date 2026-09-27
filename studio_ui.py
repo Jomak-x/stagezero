@@ -69,10 +69,15 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, core_controls=None, on_story_activate=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, cast_session=None, core_controls=None, on_native_open=None, on_g1_open=None, on_story_activate=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.core_session = core_session
+        self.paired_session = paired_session
+        self.cast_session = cast_session
+        self.on_native_open = on_native_open
+        self.on_g1_open = on_g1_open
+        self.on_story_activate = on_story_activate
         self._core_visibility = []
         self._legacy_motion_controls = []
         self.folder = project_folder
@@ -94,7 +99,7 @@ class StudioUI:
         gui.add_html(STYLE)
         self.status = gui.add_html('')
         from story_controls import StoryControls
-        self.story_controls = StoryControls(gui, session, core_session=core_session,
+        self.story_controls = StoryControls(gui, session, core_session=core_session, paired_session=paired_session, cast_session=cast_session,
                                             on_story_activate=on_story_activate)
         self.playhead = gui.add_html('')
         self.transport = gui.add_button_group('Playback', ('Start', 'Play', 'Pause'))
@@ -206,10 +211,15 @@ class StudioUI:
         self.bind()
         self.update()
 
+    def _active_motion_session(self):
+        for candidate in (self.cast_session, self.paired_session, self.core_session):
+            if candidate is not None and candidate.snapshot()['active']:
+                return candidate
+        return None
+
     def _set(self, handle, property_name, value):
         """Viser setters broadcast to clients, so publish changed properties only."""
-        if (property_name == 'visible' and self.core_session is not None
-                and self.core_session.snapshot()['active']
+        if (property_name == 'visible' and self._active_motion_session() is not None
                 and any(handle is item for item in self._legacy_motion_controls)):
             self._core_visibility = [(h, v) for h, v in self._core_visibility if h is not handle]
             self._core_visibility.append((handle, value))
@@ -525,7 +535,12 @@ class StudioUI:
                   'Retry generation' if retry else 'Generate motion')
 
     def refresh_saved(self):
-        self.saved_map = {p.name: p for p in sorted(self.folder.glob('*.stagezero.npz'), key=lambda p: p.stat().st_mtime, reverse=True)}
+        candidates = []
+        for folder in (self.folder, self.folder.parent / 'native-pair-projects', self.folder.parent / 'cast-projects'):
+            for path in folder.glob('*.stagezero.npz'):
+                if path.is_file() and not path.is_symlink():
+                    candidates.append(path)
+        self.saved_map = {p.name: p for p in sorted(candidates, key=lambda p: p.stat().st_mtime, reverse=True)}
         self._set(self.saved, 'options', tuple(self.saved_map) or ('No saved projects',))
         if self.saved.value not in self.saved.options:
             self._set(self.saved, 'value', self.saved.options[0])
@@ -537,6 +552,21 @@ class StudioUI:
         def begin_new_take(client):
             with s.lock:
                 if s.busy: return
+                native = self._active_motion_session()
+                if native is not None:
+                    state = native.snapshot()
+                    if state.get('busy') or state.get('capturing'):
+                        s.project_status = 'Finish generation or video export before starting a new take.'
+                        self.update()
+                        return
+                    try:
+                        if self.on_story_activate is None:
+                            raise ValueError('Choose One character in Motion before starting a new take.')
+                        self.on_story_activate()
+                    except (ValueError, RuntimeError) as exc:
+                        s.project_status = str(exc)
+                        self.update()
+                        return
                 if s.mode != 'Live ARDY': s.set_mode('Live ARDY')
                 if s.new_take() is False: return
                 self._clear_action_edit()
@@ -577,15 +607,17 @@ class StudioUI:
             transport_command(self.frames.value)
 
         def transport_command(value):
-            if self.core_session is not None and self.core_session.snapshot()['active']:
-                core = self.core_session
-                state = core.snapshot()
-                if value == 'Play': core.play()
-                elif value == 'Pause': core.pause()
-                elif value == 'Start': core.seek(0)
-                elif value == 'End': core.seek(max(0, state['total_frames']-1))
-                elif value == '−1 frame': core.seek(max(0, state['frame']-1))
-                elif value == '+1 frame': core.seek(state['frame']+1)
+            motion = self._active_motion_session()
+            if motion is not None:
+                state = motion.snapshot()
+                if not state.get('total_frames') or state.get('busy') or state.get('capturing'):
+                    return
+                if value == 'Play': motion.play()
+                elif value == 'Pause': motion.pause()
+                elif value == 'Start': motion.seek(0)
+                elif value == 'End': motion.seek(max(0, state['total_frames']-1))
+                elif value == '−1 frame': motion.seek(max(0, state['frame']-1))
+                elif value == '+1 frame': motion.seek(min(max(0, state['total_frames']-1), state['frame']+1))
                 return
             with s.lock:
                 if not s.character_motion_enabled and value != 'Pause':
@@ -659,6 +691,23 @@ class StudioUI:
                     self.update()
                     return
                 if s.busy:
+                    return
+                # Full-scene movements use the scene popup's Refine editor.
+                # Check under the session lock, then open the client-local
+                # popup outside it to avoid reversing the workflow lock order.
+                story_movement = (operation == 'replace' and
+                                  'beat_id' in take.segments[index])
+            owns_story = (operation == 'replace' and
+                          (story_movement or self.story_controls.owns_take(take_id)))
+            if owns_story and self.story_controls.open_for_movement(e.client, take_id, index):
+                self._last_timeline_nonce = nonce
+                self._clear_action_edit()
+                self.update()
+                return
+            with s.lock:
+                take = s.takes.get(s.active_take)
+                if (take is None or take.id != take_id or not 0 <= index < len(take.segments)
+                        or s.busy or not s.character_motion_enabled):
                     return
                 self._last_timeline_nonce = nonce
                 self._begin_action_edit(take, index, operation)
@@ -919,6 +968,22 @@ class StudioUI:
             try:
                 with s.lock:
                     if s.busy: return
+                motion = self._active_motion_session()
+                if motion is not None and motion in (self.cast_session, self.paired_session) and motion.snapshot().get('fps') == 30:
+                    data = motion.save()
+                    is_cast = motion is self.cast_session
+                    native_folder = self.folder.parent / ('cast-projects' if is_cast else 'native-pair-projects')
+                    native_folder.mkdir(parents=True, exist_ok=True)
+                    extension = 'cast.stagezero.npz' if is_cast else 'native-pair.stagezero.npz'
+                    path = native_folder / f'performance-{time.time_ns()}.{extension}'
+                    path.write_bytes(data)
+                    s.project_status = f'Saved native performance: {path.name}'
+                    self.refresh_saved()
+                    self._set(self.saved, 'value', path.name)
+                    if e.client is not None:
+                        e.client.send_file_download(path.name, data)
+                    self.update()
+                    return
                 path, data = s.save_project(self.folder, self.project_name.value)
             except Exception as exc:
                 s.project_status = f'Save failed: {exc}'
@@ -957,10 +1022,29 @@ class StudioUI:
 
     def open_data(self, data):
         try:
+            # Inspect member names only; native decoder validates bounded contents
+            # before any state is changed. Never coerce native motion into G1.
+            import io
+            from zipfile import ZipFile
+            if isinstance(data, bytes) and len(data) <= 64 * 1024 * 1024:
+                with ZipFile(io.BytesIO(data)) as archive:
+                    native = 'joints.npy' in archive.namelist()
+                if native:
+                    callback = getattr(self, 'on_native_open', None)
+                    if callback is None:
+                        raise ValueError('Native cast playback is unavailable in this viewer.')
+                    callback(data)
+                    self.session.project_status = 'Opened performance with its saved cast and background.'
+                    self.update()
+                    return
             with self.session.lock:
                 if self.session.busy: return
                 self.session.save_project(self.folder, 'before-open-backup')
-                self.session.load_project(data)
+                callback = getattr(self, 'on_g1_open', None)
+                if callback is None:
+                    self.session.load_project(data)
+                else:
+                    callback(data)
                 self._clear_action_edit()
                 self._set(self.mode, 'value', self.session.mode)
                 self._set(self.edit_action, 'value', EXTEND if self.session.active_take else CREATE)
@@ -975,7 +1059,7 @@ class StudioUI:
         """Synchronize the sidebar after the viewer advances the session clock."""
         self.story_controls.update()
         s = self.session
-        if self.core_session is None or not self.core_session.snapshot()['active']:
+        if self._active_motion_session() is None:
             for handle, visible in self._core_visibility:
                 self._set(handle, 'visible', visible)
             self._core_visibility = []
@@ -996,9 +1080,15 @@ class StudioUI:
             detail = '' if s.status.startswith(ROUTINE_STATUS_PREFIXES) else s.status
             detail_html = f' <span>· {escape(detail)}</span>' if detail else ''
             self._set(self.status, 'content', f'<div class="sz-status">{state} · {escape(source)}{detail_html}</div>')
-            # Playback and clock live in the bottom timeline toolbar.
+            # G1 uses its bottom timeline toolbar. Native modes reuse this
+            # existing button group because that toolbar routes G1 commands.
+            # Button groups cannot be disabled, so hide while native work or
+            # capture owns the take; callbacks also reject stale clicks.
+            motion_session = self._active_motion_session()
+            motion_state = motion_session.snapshot() if motion_session is not None else {}
             self._set(self.playhead, 'visible', False)
-            self._set(self.transport, 'visible', False)
+            self._set(self.transport, 'visible', bool(motion_state.get('total_frames') and
+                not motion_state.get('busy') and not motion_state.get('capturing')))
             self._set(self.seek_go, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.seek_time, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.mode, 'disabled', s.busy)
@@ -1077,7 +1167,11 @@ class StudioUI:
             for control in (self.prepare_extend, self.prepare_replace):
                 self._set(control, 'disabled', take is None or s.busy)
             self._set(self.trim, 'disabled', not live or take is None or s.busy or s.frame < 3 or s.frame >= last_frame)
-            self._set(self.save, 'disabled', s.busy)
+            active_motion = self._active_motion_session()
+            native_save = active_motion is not None and active_motion in (self.cast_session, self.paired_session) and active_motion.snapshot().get('fps') == 30
+            native_state = active_motion.snapshot() if native_save else {}
+            self._set(self.save, 'label', 'Save native performance + download' if native_save else 'Save project + download')
+            self._set(self.save, 'disabled', s.busy or (native_save and (not native_state.get('total_frames') or native_state.get('busy') or native_state.get('capturing'))))
             self._set(self.open, 'disabled', not self.saved_map or s.busy)
             self._set(self.upload, 'disabled', s.busy)
             self._set(self.clear, 'disabled', s.busy)
@@ -1094,14 +1188,17 @@ class StudioUI:
             if s.metrics:
                 self._set(self.performance, 'content', f'GPU generation: **{s.metrics["generation_seconds"]:.2f} s** · Received: **{s.metrics["command_to_received_seconds"]:.2f} s**')
 
-            if self.core_session is not None:
-                core = self.core_session.snapshot()
-                if core['active']:
+            motion_session = self._active_motion_session()
+            if motion_session is not None:
+                motion = motion_session.snapshot()
+                if motion['active']:
                     remembered = {id(h) for h, _ in self._core_visibility}
                     for handle in self._legacy_motion_controls:
                         if id(handle) not in remembered:
                             self._core_visibility.append((handle, handle.visible))
                         if handle.visible:
                             handle.visible = False
-                    self._set(self.status, 'content', '<div class="sz-status">Scene direction · '
-                              + escape(str(core['status'])) + '</div>')
+                    label = ('Cast performance · ' if motion_session in (self.cast_session, self.paired_session)
+                             else 'Scene direction · ')
+                    self._set(self.status, 'content', '<div class="sz-status">' + label
+                              + escape(str(motion['status'])) + '</div>')

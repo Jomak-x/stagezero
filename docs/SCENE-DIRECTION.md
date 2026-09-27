@@ -11,6 +11,10 @@ not a G1 take, and switching modes does not convert either skeleton. Core mode
 renders its own two supplied human character assets; selecting or generating a
 G1/GLB character does not change the native Core cast.
 
+For prompt-driven one-to-three-person scenes in the existing studio, use **Motion → Direct → AI cast · 1–3 people**; see [Main studio cast integration](MAIN-CAST.md).
+
+For paired acting with separate starts and a shared meeting, use **Motion → Direct → Two characters**; see [Paired direction](PAIRED-DIRECTION.md). The existing native Core panel below is now inside **Advanced scene motion**. Core and paired native projects remain separate.
+
 ## Use the current UI
 
 1. In **Scene**, load or create a layout. Start with a spacious set and a clear
@@ -212,3 +216,36 @@ Open Motion → Scene direction · Core → Play included motion example.
 `--reference-only` starts G1 on a static reference pose; it does not pretend that
 pose is generated animation. Live Core direction additionally needs the existing
 service URL and token described above.
+
+## Two-character choreography update
+
+The integrated **Together · experimental** controls now include a reviewed
+`pose_duet_v1` recipe and separate AI candidate planning. See the
+[two-character review](TWO-CHARACTER-REVIEW.md) for the complete selected video,
+UI steps, reproduction commands, 730-test verification, measured timing and
+clearance, preserved rejected trials, and remaining transition/foot-slide limits.
+
+
+## Separate joint-pair research workflow
+
+The independent Core duet was rejected in user review for spacing and timing. A separate opt-in joint-model workflow now sits under Together, with separate paired archives and playback; it does not change the native Core contract above. See [Joint two-character performance review](TWO-CHARACTER-PAIRED.md) for the replacement, videos, rejected trials and reproduction commands.
+
+
+### Native paired recovery review
+
+The retargeted paired preview was rejected by the user. See [NATIVE-PAIR-RECOVERY.md](NATIVE-PAIR-RECOVERY.md) for the measured conversion defects, restored original InterGen preview, direct authored-rig experiment, actual InterMask trials, full captures and candid rejections. This research has not been promoted into the ready Core/G1 workflow.
+
+## Native cast integration review
+
+See [NATIVE-CAST.md](NATIVE-CAST.md) for native InterGen cast selection, exact archives, studio video export and optional ARDY approach/exit. The approved native character rendering is retained. Sparring is a research preview; physical strikes, foot locking and multi-party joint generation are not solved. ARDY composition explicitly labels its model sources and authored transitions. All earlier rejected arch/platform and paired-rendering evidence remains preserved.
+
+## Prompt-scene speed and cast review
+
+The separate `prompt_scene_viewer.py` preview accepts one prompt for 1–3 performers
+and automatic action durations. It combines exact native paired sources with real
+Core travel, explicit authored transitions, and stationary inactive performers.
+It uses the existing generated city/market/industrial backgrounds. Warm inference
+and intent caching improve measured latency without reusing generated motion.
+See [prompt-scene evidence](../review/prompt-scenes/README.md) for complete videos,
+measurements, reproduction commands, and preserved failures. This does not replace
+main's current UI or promote arbitrary contact/falls/three-body motion as solved.

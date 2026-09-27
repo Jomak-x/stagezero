@@ -1,0 +1,639 @@
+{
+  "selected_final": "observer continuation with contextual initial facing; ankle solver disabled",
+  "historical_experiment": "review/interaction-quality/after/ is observer+ankle v1 and is not selected final",
+  "model_provenance": "Fresh live Core and InterGen in every final case; saved plans reused due external planner approval rejection.",
+  "geometry_scope": "Body clearance uses named joint and limb midpoint spheres, not exact mesh collision; intended paired contact excluded.",
+  "contact_scope": "Wrist distance is a proximity proxy, not palm/finger contact.",
+  "visual_status": "Numerical comparison only; complete-video review controls acceptance.",
+  "cases": [
+    {
+      "case": "city-handshake-s42",
+      "held_out": false,
+      "prompt": "Two people shake hands.",
+      "background": "city",
+      "seed": 42,
+      "frames": 222,
+      "duration_seconds": 7.4,
+      "generation_wall_seconds": 4.084356874984223,
+      "archive": "review/interaction-quality/final/city-handshake-s42-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "ed822fb399a22660bb20ae3a84be9197ef06f50aadfa6f6caddd8c83a25f6f93",
+      "unrefined_composition": "review/interaction-quality/final/city-handshake-s42-fixed-plan/sources/scene-ef91ab00ec0c417b81619aca83356799/unrefined-cast.npz",
+      "unrefined_sha256": "dd052c9478b572bd440d399c05bec7bc24bff433bfea8cdc7652b65af2afe60c",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 240,
+      "held_actor_frames_modified": 0,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        }
+      ],
+      "intended_hand_wrist_proximity": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_m": 0.18393311777763574,
+          "median_m": 0.24341290913003574,
+          "frames_under_15cm": 0,
+          "longest_under_15cm_seconds": 0.0
+        }
+      ],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 90,
+          "minimum_unrefined_clearance_m": 0.8738051760904086,
+          "minimum_final_clearance_m": 0.8738051760904086,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": [
+        {
+          "name": "pair-00.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "2ee634a6080d450518d0d41346cb9caf038ee758cbd230c98c0e021e86b292ce",
+          "final_archive_sha256": "1d287d9f9e6674ba0e868b40bdcc6ffb97d84ca80de8b6c0e1ff1e42e0745f9f"
+        }
+      ],
+      "baseline": {
+        "archive": "review/interaction-quality/baseline/city-handshake-s42-fixed-plan/scene.cast.stagezero.npz",
+        "frames": 222,
+        "generation_wall_seconds": 4.270579333999194,
+        "idle_activity": [
+          {
+            "actor_id": "actor_1",
+            "held_motion_fraction_over_0p1mm": null
+          },
+          {
+            "actor_id": "actor_2",
+            "held_motion_fraction_over_0p1mm": null
+          }
+        ],
+        "intended_hand_wrist_proximity": [
+          {
+            "beat_id": "beat-1",
+            "minimum_m": 0.18393311777763574,
+            "longest_under_15cm_seconds": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "case": "city-handshake-s43",
+      "held_out": true,
+      "prompt": "Two people shake hands.",
+      "background": "city",
+      "seed": 43,
+      "frames": 225,
+      "duration_seconds": 7.5,
+      "generation_wall_seconds": 4.227131208986975,
+      "archive": "review/interaction-quality/final/city-handshake-s43-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "c02345240c7e3bf02ac1db035159ee4c330260723eb8e07d43088073d677168f",
+      "unrefined_composition": "review/interaction-quality/final/city-handshake-s43-fixed-plan/sources/scene-1d1c4305a7334242ae6a6b6a03460d98/unrefined-cast.npz",
+      "unrefined_sha256": "08a2bae6cf1e5f5b32b44165ae8e4a3990eec9bcc279e3aafd686b86391496e9",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 240,
+      "held_actor_frames_modified": 0,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        }
+      ],
+      "intended_hand_wrist_proximity": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_m": 0.19725127461169475,
+          "median_m": 0.2965784910483815,
+          "frames_under_15cm": 0,
+          "longest_under_15cm_seconds": 0.0
+        }
+      ],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 90,
+          "minimum_unrefined_clearance_m": 0.8962184502511904,
+          "minimum_final_clearance_m": 0.8962184502511904,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": []
+    },
+    {
+      "case": "industrial-spar-s45",
+      "held_out": false,
+      "prompt": "Two people start at x -3 z 0 and x 3 z 0, meet at x 0 z 0, then perform a controlled boxing spar with dodges.",
+      "background": "industrial",
+      "seed": 45,
+      "frames": 372,
+      "duration_seconds": 12.4,
+      "generation_wall_seconds": 4.47202299995115,
+      "archive": "review/interaction-quality/final/industrial-spar-s45-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "57f593672561942bf6f03685a5b1033b35ad18c5523b5f46991a318f6df8ab48",
+      "unrefined_composition": "review/interaction-quality/final/industrial-spar-s45-fixed-plan/sources/scene-62e0b2e79911471093c1f579e246ad4b/unrefined-cast.npz",
+      "unrefined_sha256": "6516e23d31421c6f78ad9b7a373064663d4d66ff4978f9b2c5b29b634f628b03",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 420,
+      "held_actor_frames_modified": 0,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        }
+      ],
+      "intended_hand_wrist_proximity": [],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 150,
+          "minimum_unrefined_clearance_m": -0.038398797799138545,
+          "minimum_final_clearance_m": -0.038398797799138545,
+          "unintended_overlap_frames_unrefined": 8,
+          "unintended_overlap_frames_final": 8,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": [
+        {
+          "name": "pair-00.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "d3dca530701d0a480ba670cc61740af5f20f2814f573d8fed69e1b9ebc03c886",
+          "final_archive_sha256": "142d88ef1cff32832418125e57071ca7e01acb7d7a85a788aca819b40d7a7275"
+        }
+      ],
+      "baseline": {
+        "archive": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/scene.cast.stagezero.npz",
+        "frames": 378,
+        "generation_wall_seconds": 5.131713875045534,
+        "idle_activity": [
+          {
+            "actor_id": "actor_1",
+            "held_motion_fraction_over_0p1mm": null
+          },
+          {
+            "actor_id": "actor_2",
+            "held_motion_fraction_over_0p1mm": null
+          }
+        ],
+        "intended_hand_wrist_proximity": []
+      }
+    },
+    {
+      "case": "market-three-s42",
+      "held_out": false,
+      "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+      "background": "market",
+      "seed": 42,
+      "frames": 478,
+      "duration_seconds": 15.933333333333334,
+      "generation_wall_seconds": 12.31524475000333,
+      "archive": "review/interaction-quality/final/market-three-s42-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "32f29ea1ac58d0a85896fd0a13197701209b929ce858d10c8924598d562f70ef",
+      "unrefined_composition": "review/interaction-quality/final/market-three-s42-fixed-plan/sources/scene-c6e0135b402d4447a343a6463d0eb78a/unrefined-cast.npz",
+      "unrefined_sha256": "40d2b4f651b5ca3bea0a1687e7330ca20b0e024fb7a4748eb2e33c822fd75936",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 480,
+      "held_actor_frames_modified": 472,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": 0.8492063492063492,
+          "held_joint_step_p95_m": 0.0035363404045263224,
+          "longest_held_still_seconds_under_1mm": 3.966666666666667
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_3",
+          "held_motion_fraction_over_0p1mm": 0.9406392694063926,
+          "held_joint_step_p95_m": 0.0038765610242446936,
+          "longest_held_still_seconds_under_1mm": 3.2
+        }
+      ],
+      "intended_hand_wrist_proximity": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_m": 0.09122761894370066,
+          "median_m": 0.27420116300931985,
+          "frames_under_15cm": 11,
+          "longest_under_15cm_seconds": 0.3
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "minimum_m": 0.02127618665255145,
+          "median_m": 0.08846788027245098,
+          "frames_under_15cm": 91,
+          "longest_under_15cm_seconds": 2.8
+        }
+      ],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 346,
+          "minimum_unrefined_clearance_m": 0.08654885154110875,
+          "minimum_final_clearance_m": 0.08654885154110875,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_3"
+          ],
+          "unintended_frames": 478,
+          "minimum_unrefined_clearance_m": 1.343213397379421,
+          "minimum_final_clearance_m": 1.3294210437526504,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "unintended_frames": 346,
+          "minimum_unrefined_clearance_m": 0.5594141961906312,
+          "minimum_final_clearance_m": 0.5594141961906312,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": [
+        {
+          "name": "pair-00.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "94d18edc064ca8e74ffec22b2e42613fb550c4e6525b98772e3c9aad50cfa3eb",
+          "final_archive_sha256": "f9841fbf19fe55b08293f68b0902df060f12a68f15da236958a3dffb382b99f8"
+        },
+        {
+          "name": "pair-01.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "285f33ca4d92f0746c5a1c4248c4d37e87809ed0c49c86f228886ec977e023b9",
+          "final_archive_sha256": "e1ba8c87ae30388a1e13aec8a5921e18f9c7d1a44e0110b7ee5ec4ed91557f56"
+        }
+      ],
+      "baseline": {
+        "archive": "review/interaction-quality/baseline/market-three-s42-fixed-plan/scene.cast.stagezero.npz",
+        "frames": 478,
+        "generation_wall_seconds": 12.278821292042267,
+        "idle_activity": [
+          {
+            "actor_id": "actor_1",
+            "held_motion_fraction_over_0p1mm": 0.0
+          },
+          {
+            "actor_id": "actor_2",
+            "held_motion_fraction_over_0p1mm": null
+          },
+          {
+            "actor_id": "actor_3",
+            "held_motion_fraction_over_0p1mm": 0.0
+          }
+        ],
+        "intended_hand_wrist_proximity": [
+          {
+            "beat_id": "beat-1",
+            "minimum_m": 0.09122761894370066,
+            "longest_under_15cm_seconds": 0.3
+          },
+          {
+            "beat_id": "beat-2",
+            "minimum_m": 0.02127618665255145,
+            "longest_under_15cm_seconds": 2.8
+          }
+        ]
+      }
+    },
+    {
+      "case": "market-three-s48",
+      "held_out": false,
+      "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+      "background": "market",
+      "seed": 48,
+      "frames": 480,
+      "duration_seconds": 16.0,
+      "generation_wall_seconds": 13.28355258301599,
+      "archive": "review/interaction-quality/final/market-three-s48-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "575971ae4feb3ce40dced36f7b40721edc2a0f34cf9d4e4ba9fd35c0b215ddde",
+      "unrefined_composition": "review/interaction-quality/final/market-three-s48-fixed-plan/sources/scene-d1ae29fcc98f4e8a99e89d08b13ec7f8/unrefined-cast.npz",
+      "unrefined_sha256": "0cb77dfad2291d24383f8474f14598bf8d10ba04136267cbac14bb74a006d94f",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 480,
+      "held_actor_frames_modified": 474,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": 0.7440944881889764,
+          "held_joint_step_p95_m": 0.0034336231422433684,
+          "longest_held_still_seconds_under_1mm": 3.966666666666667
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_3",
+          "held_motion_fraction_over_0p1mm": 0.9452054794520548,
+          "held_joint_step_p95_m": 0.003520995044202353,
+          "longest_held_still_seconds_under_1mm": 3.2
+        }
+      ],
+      "intended_hand_wrist_proximity": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_m": 0.010468028229853266,
+          "median_m": 0.19423256136438255,
+          "frames_under_15cm": 34,
+          "longest_under_15cm_seconds": 0.5
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "minimum_m": 0.026604248859159716,
+          "median_m": 0.1005534181094881,
+          "frames_under_15cm": 103,
+          "longest_under_15cm_seconds": 2.4
+        }
+      ],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 348,
+          "minimum_unrefined_clearance_m": 0.056987184038369054,
+          "minimum_final_clearance_m": 0.056987184038369054,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_3"
+          ],
+          "unintended_frames": 480,
+          "minimum_unrefined_clearance_m": 1.2978584329726572,
+          "minimum_final_clearance_m": 1.2780075091039296,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "unintended_frames": 348,
+          "minimum_unrefined_clearance_m": 0.775211554527945,
+          "minimum_final_clearance_m": 0.775211554527945,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": [
+        {
+          "name": "pair-00.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "554a8f9cfbc0e95b1ff58d5073d49c1eb7cfde98417fa3b80ca42672c2880a45",
+          "final_archive_sha256": "1dd61b211ba97af286330a57b564893c20c673b938949e022e778f1477d3dd39"
+        },
+        {
+          "name": "pair-01.npz",
+          "numeric_array_equal_to_baseline": {
+            "features": true,
+            "joints": true,
+            "smoothed_joints": true
+          },
+          "baseline_archive_sha256": "dcb47cf2c3b00e1ab5c76fbe7a840be0b384773e8b70fb0bf5dc747b8dc2230f",
+          "final_archive_sha256": "3287c6f2c6b664141240a8bd37613711267534b492926af702c3015cdafb3601"
+        }
+      ],
+      "baseline": {
+        "archive": "review/interaction-quality/baseline/market-three-s48-fixed-plan/scene.cast.stagezero.npz",
+        "frames": 480,
+        "generation_wall_seconds": 12.419239458977245,
+        "idle_activity": [
+          {
+            "actor_id": "actor_1",
+            "held_motion_fraction_over_0p1mm": 0.0
+          },
+          {
+            "actor_id": "actor_2",
+            "held_motion_fraction_over_0p1mm": null
+          },
+          {
+            "actor_id": "actor_3",
+            "held_motion_fraction_over_0p1mm": 0.0
+          }
+        ],
+        "intended_hand_wrist_proximity": [
+          {
+            "beat_id": "beat-1",
+            "minimum_m": 0.010468028229853266,
+            "longest_under_15cm_seconds": 0.5
+          },
+          {
+            "beat_id": "beat-2",
+            "minimum_m": 0.026604248859159716,
+            "longest_under_15cm_seconds": 2.4
+          }
+        ]
+      }
+    },
+    {
+      "case": "market-three-s49",
+      "held_out": true,
+      "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+      "background": "market",
+      "seed": 49,
+      "frames": 456,
+      "duration_seconds": 15.2,
+      "generation_wall_seconds": 12.561656042002141,
+      "archive": "review/interaction-quality/final/market-three-s49-fixed-plan/scene.cast.stagezero.npz",
+      "archive_sha256": "ef7bf01985c8f3c1801efdb55e6320a1e9e989373579bd63c13673b7acc17fea",
+      "unrefined_composition": "review/interaction-quality/final/market-three-s49-fixed-plan/sources/scene-cdc71a4a18004499bdaa659cf1b0747e/unrefined-cast.npz",
+      "unrefined_sha256": "084031b5b091efaaebbf11faada4529078303054bc4984154c6b69258bf27513",
+      "root_positions_exact_from_unrefined": true,
+      "active_native_actor_frames_exact_from_unrefined": 480,
+      "held_actor_frames_modified": 450,
+      "idle_activity": [
+        {
+          "actor_id": "actor_1",
+          "held_motion_fraction_over_0p1mm": 0.7043478260869566,
+          "held_joint_step_p95_m": 0.011656571536221287,
+          "longest_held_still_seconds_under_1mm": 3.966666666666667
+        },
+        {
+          "actor_id": "actor_2",
+          "held_motion_fraction_over_0p1mm": null,
+          "held_joint_step_p95_m": null,
+          "longest_held_still_seconds_under_1mm": 0.0
+        },
+        {
+          "actor_id": "actor_3",
+          "held_motion_fraction_over_0p1mm": 0.8401826484018264,
+          "held_joint_step_p95_m": 0.005998449945514213,
+          "longest_held_still_seconds_under_1mm": 3.1333333333333333
+        }
+      ],
+      "intended_hand_wrist_proximity": [
+        {
+          "beat_id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "minimum_m": 0.0640479442578642,
+          "median_m": 0.2215288864158103,
+          "frames_under_15cm": 25,
+          "longest_under_15cm_seconds": 0.36666666666666664
+        },
+        {
+          "beat_id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "minimum_m": 0.013814575296317484,
+          "median_m": 0.11621904042350895,
+          "frames_under_15cm": 69,
+          "longest_under_15cm_seconds": 2.0
+        }
+      ],
+      "body_clearance_proxy": [
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "unintended_frames": 324,
+          "minimum_unrefined_clearance_m": -0.009359758214462763,
+          "minimum_final_clearance_m": -0.009359758214462763,
+          "unintended_overlap_frames_unrefined": 10,
+          "unintended_overlap_frames_final": 10,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_1",
+            "actor_3"
+          ],
+          "unintended_frames": 456,
+          "minimum_unrefined_clearance_m": 0.9461538981672873,
+          "minimum_final_clearance_m": 0.9461538981672873,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        },
+        {
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "unintended_frames": 324,
+          "minimum_unrefined_clearance_m": 0.440497474769486,
+          "minimum_final_clearance_m": 0.440497474769486,
+          "unintended_overlap_frames_unrefined": 0,
+          "unintended_overlap_frames_final": 0,
+          "worsened_overlap_frames": 0
+        }
+      ],
+      "pair_source_parity_with_baseline": []
+    }
+  ]
+}

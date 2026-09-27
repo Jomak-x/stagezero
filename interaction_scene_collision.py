@@ -24,7 +24,37 @@ CORE27_JOINT_NAMES = (
     "RightToeBase", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase",
 )
 
+# Exact InterGen/SMPL22 order used by experiments.native_pair_rig.NAMES.  Keep
+# this local so the scene-measurement module does not load the GLB rig stack.
+NATIVE22_JOINT_NAMES = (
+    "Hips", "LeftUpLeg", "RightUpLeg", "Spine", "LeftLeg", "RightLeg",
+    "Spine1", "LeftFoot", "RightFoot", "Spine2", "LeftToeBase", "RightToeBase",
+    "Neck", "LeftShoulder", "RightShoulder", "Head", "LeftArm", "RightArm",
+    "LeftForeArm", "RightForeArm", "LeftHand", "RightHand",
+)
+
 _SPECS = {
+    "native22": {
+        "names": NATIVE22_JOINT_NAMES,
+        "spheres": {"Hips": .20, "Spine1": .18, "Spine2": .17,
+                    "Head": .14, "LeftShoulder": .12, "RightShoulder": .12,
+                    "LeftArm": .11, "RightArm": .11,
+                    "LeftForeArm": .10, "RightForeArm": .10,
+                    "LeftHand": .08, "RightHand": .08,
+                    "LeftUpLeg": .14, "RightUpLeg": .14,
+                    "LeftLeg": .12, "RightLeg": .12,
+                    "LeftFoot": .10, "RightFoot": .10,
+                    "LeftToeBase": .08, "RightToeBase": .08},
+        "midpoints": (("Hips", "Spine1", .18), ("Spine1", "Spine2", .16),
+                      ("Spine2", "Head", .14),
+                      ("LeftShoulder", "LeftForeArm", .10),
+                      ("RightShoulder", "RightForeArm", .10),
+                      ("LeftForeArm", "LeftHand", .08),
+                      ("RightForeArm", "RightHand", .08),
+                      ("Hips", "LeftLeg", .13), ("Hips", "RightLeg", .13),
+                      ("LeftLeg", "LeftFoot", .10),
+                      ("RightLeg", "RightFoot", .10)),
+    },
     "core27": {
         "names": CORE27_JOINT_NAMES,
         "spheres": {"Hips": .22, "Spine2": .18, "Spine3": .17, "Head": .14,
@@ -156,7 +186,7 @@ def _scene_boxes(scene: Mapping, affordances: Mapping | None) -> tuple[list[Scen
 def _body_proxies(positions: np.ndarray, skeleton: str) -> tuple[np.ndarray, np.ndarray]:
     spec = _SPECS.get(skeleton)
     if spec is None:
-        raise ValueError("skeleton must be 'core27' or 'g1'")
+        raise ValueError("skeleton must be 'native22', 'core27' or 'g1'")
     p = np.asarray(positions)
     if p.ndim != 3 or p.shape[1:] != (len(spec["names"]), 3) or len(p) == 0:
         raise ValueError(f"positions must be (frames, {len(spec['names'])}, 3)")

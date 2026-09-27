@@ -1,3 +1,37 @@
+/** Completed native pair: float32 little-endian arrays except uint16 bones. */
+export interface NativePairClipMessage {
+  type: "NativePairClipMessage";
+  revision: number;
+  fps: number;
+  frames: number;
+  actors: Array<{
+    rest: Uint8Array<ArrayBuffer>;
+    linear: Uint8Array<ArrayBuffer>;
+    targets: Uint8Array<ArrayBuffer>;
+    parts: Array<{
+      name: string;
+      bind_world: Uint8Array<ArrayBuffer>;
+      bones: Uint8Array<ArrayBuffer>;
+      weights: Uint8Array<ArrayBuffer>;
+    }>;
+  }>;
+}
+export interface NativePairTransportMessage {
+  type: "NativePairTransportMessage";
+  revision: number;
+  sequence: number;
+  frame: number;
+  playing: boolean;
+  enabled: boolean;
+  capturing?: boolean;
+}
+export interface NativePairStatusMessage {
+  type: "NativePairStatusMessage";
+  revision: number;
+  status: "loaded" | "error";
+  error?: string;
+}
+
 // AUTOMATICALLY GENERATED message interfaces, from Python dataclass definitions.
 // This file should not be manually modified.
 /** Variant of CameraMessage used for visualizing camera frustums.
@@ -1204,6 +1238,9 @@ export interface VoiceQueueMessage {
 }
 
 export type Message = 
+  | NativePairClipMessage
+  | NativePairTransportMessage
+  | NativePairStatusMessage
   | CameraStudioStateMessage
   | CameraStudioCommandMessage
   | VoiceRecordingMessage

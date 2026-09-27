@@ -13,6 +13,8 @@ MODEL = "ARDY-G1-RP-25FPS-Horizon52"
 
 
 class Backend:
+    supports_motion_target = True
+    supports_generation_options = True
     def __init__(self, token_path, url="http://127.0.0.1:8765"):
         self.url = url
         self.token = Path(token_path).read_text().strip()
@@ -39,9 +41,14 @@ class Backend:
         except Exception:
             pass  # Local version checks remain authoritative even without the tunnel.
 
-    def generate(self, request_id, prompt, history):
-        response = self.call("/generate", {"request_id": request_id, "prompt": prompt,
-                                          "history": None if history is None else history.tolist()})
+    def generate(self, request_id, prompt, history, *, motion_target=None, generation_options=None):
+        body = {"request_id": request_id, "prompt": prompt,
+                "history": None if history is None else history.tolist()}
+        if motion_target is not None:
+            body["motion_target"] = motion_target
+        if generation_options is not None:
+            body["generation_options"] = generation_options
+        response = self.call("/generate", body)
         with np.load(io.BytesIO(response.content), allow_pickle=False) as data:
             result = {name: data[name].copy() for name in ("positions", "rotations", "motion")}
             result["metadata"] = json.loads(str(data["metadata"]))

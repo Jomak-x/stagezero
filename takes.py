@@ -51,6 +51,8 @@ def validate_take(take):
             raise ValueError('Invalid segment timeline')
         if not isinstance(s.get('prompt'), str) or len(s['prompt']) > 500:
             raise ValueError('Invalid segment instruction')
+        if 'timing_mode' in s and s['timing_mode'] not in ('auto', 'fixed'):
+            raise ValueError('Invalid segment timing mode')
         end = s['end']
     if end != n:
         raise ValueError('Segments do not cover the take')

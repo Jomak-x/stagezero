@@ -1,4 +1,6 @@
 import React from "react";
+import { useFrame } from "@react-three/fiber";
+import { NativePairGeometry, nativePairPlayback, registerNativePairRenderer, recordNativePairRenderCost } from "./NativePairPlayback";
 import * as THREE from "three";
 import { createStandardMaterial } from "./MeshUtils";
 import { MeshMessage } from "../WebsocketMessages";
@@ -57,6 +59,19 @@ export const BasicMesh = React.forwardRef<
     geometry.computeBoundingSphere();
     return geometry;
   }, [message.props.vertices.buffer, message.props.faces.buffer]);
+
+  const nativeGeometry = React.useMemo(() => new NativePairGeometry(geometry), [geometry]);
+  const updateNative = React.useCallback(() => {
+    const sample = nativePairPlayback.sample;
+    const part = nativePairPlayback.clip?.parts.get(message.name);
+    if (!sample || !part) return;
+    const started = performance.now();
+    nativeGeometry.update(part, sample);
+    recordNativePairRenderCost(performance.now() - started);
+  }, [message.name, nativeGeometry]);
+  useFrame(updateNative);
+  React.useEffect(() => registerNativePairRenderer(updateNative), [updateNative]);
+  React.useEffect(() => () => nativeGeometry.dispose(), [nativeGeometry]);
 
   // Clean up geometry when it changes.
   React.useEffect(() => {
