@@ -239,13 +239,15 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
                     last_clip: CanonicalClip | None = None,
                     initial_placements: Mapping | None = None,
                     affordances: Mapping | None = None,
-                    speed_mps: float = .65) -> tuple[list[StageSpec], dict]:
+                    speed_mps: float = .65, turn_before_travel: bool = False) -> tuple[list[StageSpec], dict]:
     """Plan a target by ID and sample root goals per 40-frame model window.
 
     Each stage contains five local-frame root targets per actor, including
     frame 39. The last horizon holds the terminal position and heading. A
     second actor receives stationary root targets throughout the route.
     """
+    if type(turn_before_travel) is not bool:
+        raise ValueError("turn_before_travel must be a boolean")
     ids = tuple(actor_ids)
     if not 1 <= len(ids) <= 2 or any(not isinstance(x, str) or not 1 <= len(x) <= 64 for x in ids) or len(set(ids)) != len(ids):
         raise ValueError("actor_ids must be one or two unique stable IDs")
@@ -296,7 +298,7 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
             break
     difference = departure - yaws[actor_id]
     turn_delta = math.atan2(math.sin(difference), math.cos(difference))
-    turn_windows = int(verb == "move" and abs(turn_delta) > math.radians(30))
+    turn_windows = int((verb == "move" or turn_before_travel) and abs(turn_delta) > math.radians(30))
     total_frames = (turn_windows + moving_windows + 1) * HORIZON
     if total_frames > MAX_SECONDS * FPS:
         raise ValueError("Route plus terminal hold exceeds the 30-second generation cap")
@@ -355,7 +357,7 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
             metadata["initial_placements"] = {
                 aid: {"position_xz": positions[aid], "yaw": yaws[aid]} for aid in ids}
         prompt = active_prompt
-        if verb == "move":
+        if verb == "move" or turning:
             phase = "turn" if turning else "hold" if motion_stage == moving_windows else "walk"
             metadata["navigation"]["phase"] = phase
             if turning:
@@ -385,7 +387,7 @@ def plan_navigation(scene: Mapping, actor_ids: tuple[str, ...] | list[str], *,
                                     **({"initial_turn_frames": turn_windows * HORIZON,
                                         "movement_start_frame": turn_windows * HORIZON,
                                         "initial_turn_radians": turn_delta if turn_windows else 0.}
-                                       if verb == "move" else {}),
+                                       if verb == "move" or turn_before_travel else {}),
                                     "terminal_hold_frames": HOLD_FRAMES,
                                     "horizons": len(stages),
                                     "dense_root_targets_per_actor_per_horizon": len(SAMPLE_FRAMES),

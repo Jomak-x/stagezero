@@ -25,7 +25,7 @@ ARDY Core still generates every character frame at its native 20 fps. A large
 initial direction change receives a two-second native stationary turn before
 walking. Each route retains a terminal hold. No pose warping, foot IK, G1
 retargeting experiments, replacement controller, or terrain runtime is added.
-Normal object navigation retains its existing target schedule.
+The existing Navigate to object button retains its target schedule; the new spatial-command workflow also inserts a native turn before object travel when needed.
 
 The controller checks collision proxies and continuous authored floor support
 before committing each horizon. It measures terminal arrival (at most 0.30 m,

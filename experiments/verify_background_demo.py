@@ -85,6 +85,8 @@ def run(args):
             return stages, route
         core_spatial_commands.plan_navigation = comparison_plan
     scene,placement,prompt=cases()[args.case]
+    if args.start_yaw is not None:
+        placement = {**placement, "yaw": args.start_yaw}
     scene=validate_scene(scene)
     out=args.output.resolve();out.mkdir(parents=True,exist_ok=False)
     (out/'scene.json').write_text(json.dumps(scene,indent=2))
@@ -136,6 +138,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--case',choices=tuple(cases()),required=True)
     p.add_argument('--seed',type=int,default=33)
+    p.add_argument('--start-yaw',type=float,help='Explicit initial heading for opposite-facing tests')
     p.add_argument('--sparse-walk',action='store_true',help='Diagnostic only: endpoint walking with dense turns/stops')
     p.add_argument('--sparse-targets',action='store_true',help='Diagnostic only: compare one endpoint constraint per window')
     p.add_argument('--url',default='http://127.0.0.1:8769')

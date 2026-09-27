@@ -31,9 +31,11 @@ interpolation or retiming. Every capture lists all native frame indices.
 | Attempt | Result |
 | --- | --- |
 | `door-seed33` | Approach → automatic opening → passage; 240 frames, completed |
+| `door-opposite-heading-seed33` | Final controller, starts facing away: native 180-degree turn → approach → open → cross; completed280 frames /14 s in9.86 s wall time |
 | `door-seed42` | Independent seed, same route completed; 12 s motion / 7.62 s wall time |
 | `open-door-seed33` | Explicit open → passage, both measured, exact old video arrays |
 | `grove-seed33` | First move completed; next endpoint overlapped a prop, stopped explicitly with 80-frame prefix intact |
+| `grove-final-seed42` | Final controller, independent seed: both commands completed; 200 frames /10 s in5.67 s wall time |
 | `grove-clear-seed33` | Clear starting point in unchanged grove, two commands completed (pre-turn-polish controller), 160 frames |
 | `temple-courtyard-seed33` | Completed mechanically; rejected abrupt turn, 27.2° maximum hip-to-head lean |
 | `temple-turn-seed33` | Selected native turn prefix; maximum hip-to-head lean 21.7°, final14.0°; still visually imperfect |
@@ -47,6 +49,10 @@ they do not establish natural motion by themselves. No new models, Pods or
 physics runtime were installed for this finish. Existing services remain intact.
 
 ## Verification
+
+After rebasing onto latest main `bbc6c9d` (including merged PR #29), the complete
+combined suite passed **1,392 Python tests** after the final opposite-facing object-route regression. No conflicts or main-service changes.
+
 
 Before updating to latest main: 1,345 Python tests passed,45 client tests passed,
 TypeScript and production client build passed. Initial full-suite errors were

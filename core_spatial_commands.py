@@ -74,7 +74,7 @@ def parse_commands(text, adapted):
 
 def plan_command(action, adapted, actor_ids, actor_id, last_clip, initial_placements):
     args = dict(actor_id=actor_id, verb="approach" if action["verb"] == "open" else action["verb"], last_clip=last_clip,
-                initial_placements=initial_placements, affordances=adapted["affordances"])
+                initial_placements=initial_placements, affordances=adapted["affordances"], turn_before_travel=True)
     if action["verb"] == "move":
         positions, yaws = _placements(tuple(actor_ids), last_clip, initial_placements)
         offsets = {"forward": 0., "forwards": 0., "back": math.pi, "backward": math.pi,

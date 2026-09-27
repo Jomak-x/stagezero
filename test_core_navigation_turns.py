@@ -91,5 +91,19 @@ class RelativeTurnTests(unittest.TestCase):
         self.assertEqual(first, {"frame": 7, "position_xz": [0., .26], "heading": 0.})
 
 
+    def test_spatial_object_route_can_opt_into_turn_without_changing_walk_targets(self):
+        box = make_object("crate", 0)
+        box.update(id="box", name="Box", position=[0., .4, 3.], size=[.4, .8, .4])
+        kw = dict(actor_id="walker", target_id="box", verb="approach",
+                  initial_placements={"walker":{"position_xz":[0.,0.],"yaw":math.pi/2}})
+        normal, _ = plan_navigation(scene(box), ("walker",), **kw)
+        turned, route = plan_navigation(scene(box), ("walker",), turn_before_travel=True, **kw)
+        self.assertEqual(route["schedule"]["initial_turn_frames"], 40)
+        self.assertIn("turns left", turned[0].prompt)
+        for baseline, suffix in zip(normal, turned[1:]):
+            self.assertEqual(baseline.prompt, suffix.prompt)
+            self.assertEqual(baseline.metadata["root_targets"], suffix.metadata["root_targets"])
+
+
 if __name__ == "__main__":
     unittest.main()

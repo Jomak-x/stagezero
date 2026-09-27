@@ -1,0 +1,1184 @@
+{
+  "case": "grove",
+  "seed": 42,
+  "sparse_targets": false,
+  "sparse_walk": false,
+  "prompt": "walk 1 metre forward then walk 1 metre left",
+  "source": "ARDY-Core-RP-20FPS-Horizon40",
+  "post_pose_edits": false,
+  "temple_scope": "ground courtyard only; stairs and raised bridge unsupported",
+  "state": {
+    "phase": "playing",
+    "status": "Spatial commands: 2/2 verified; completed. Every command reached its measured destination Playing generated motion.",
+    "frame": 96,
+    "total_frames": 200,
+    "buffer_frames": 104,
+    "playing": true,
+    "generated": true,
+    "inflight_request_id": null,
+    "queued_stages": 0,
+    "contact_open": false,
+    "failure": null,
+    "revision": 5,
+    "mode": "production",
+    "actor_ids": [
+      "actor_1"
+    ],
+    "active": true,
+    "epoch": 2,
+    "initialized": true,
+    "scene_changed_since_motion": false,
+    "available": true,
+    "schema": "Native Core27 / 20 fps (separate from G1)",
+    "example_available": true,
+    "route": {
+      "version": 1,
+      "actor_id": "actor_1",
+      "verb": "move",
+      "target_id": null,
+      "waypoints": [
+        {
+          "time_seconds": 0.0,
+          "position_xz": [
+            -0.00791,
+            1.99721
+          ],
+          "role": "start"
+        },
+        {
+          "time_seconds": 1.5385,
+          "position_xz": [
+            -1.00778,
+            2.01371
+          ],
+          "role": "arrival"
+        }
+      ],
+      "geometry": {
+        "target_xz": [
+          -1.0077769948078499,
+          2.013711038442615
+        ]
+      },
+      "assumptions": {
+        "motion_following_verified": false,
+        "actor_radius_m": 0.28,
+        "obstacle_margin_m": 0.06,
+        "speed_mps": 0.65
+      },
+      "ground_support": {
+        "authored_floor": false,
+        "continuous_support_verified": false
+      },
+      "schedule": {
+        "frames": 120,
+        "fps": 20,
+        "seconds": 6.0,
+        "travel_seconds": 1.5385,
+        "initial_turn_frames": 40,
+        "movement_start_frame": 40,
+        "initial_turn_radians": -1.570793625586224,
+        "terminal_hold_frames": 40,
+        "horizons": 3,
+        "dense_root_targets_per_actor_per_horizon": 5,
+        "held_actor_id": null,
+        "sampled_route_clearance_m": null
+      }
+    },
+    "spatial_commands": {
+      "version": 1,
+      "text": "walk 1 metre forward then walk 1 metre left",
+      "actor_id": "actor_1",
+      "actions": [
+        {
+          "verb": "move",
+          "direction": "forward",
+          "distance_m": 1.0
+        },
+        {
+          "verb": "move",
+          "direction": "left",
+          "distance_m": 1.0
+        }
+      ],
+      "status": "completed",
+      "action_index": 2,
+      "completed_actions": 2,
+      "legs": [
+        {
+          "action_index": 0,
+          "start_frame": 0,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "move",
+            "target_id": null,
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  0.0,
+                  1.0
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.5385,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "role": "arrival"
+              }
+            ],
+            "geometry": {
+              "target_xz": [
+                0.0,
+                2.0
+              ]
+            },
+            "assumptions": {
+              "motion_following_verified": false,
+              "actor_radius_m": 0.28,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65
+            },
+            "ground_support": {
+              "authored_floor": false,
+              "continuous_support_verified": false
+            },
+            "schedule": {
+              "frames": 80,
+              "fps": 20,
+              "seconds": 4.0,
+              "travel_seconds": 1.5385,
+              "initial_turn_frames": 0,
+              "movement_start_frame": 0,
+              "initial_turn_radians": 0.0,
+              "terminal_hold_frames": 40,
+              "horizons": 2,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -0.007913082838058472,
+              1.9972138404846191
+            ],
+            "target_xz": [
+              0.0,
+              2.0
+            ],
+            "arrival_error_m": 0.008389252937367118,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true
+          },
+          "end_frame": 80
+        },
+        {
+          "action_index": 1,
+          "start_frame": 80,
+          "route": {
+            "version": 1,
+            "actor_id": "actor_1",
+            "verb": "move",
+            "target_id": null,
+            "waypoints": [
+              {
+                "time_seconds": 0.0,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "role": "start"
+              },
+              {
+                "time_seconds": 1.5385,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "role": "arrival"
+              }
+            ],
+            "geometry": {
+              "target_xz": [
+                -1.0077769948078499,
+                2.013711038442615
+              ]
+            },
+            "assumptions": {
+              "motion_following_verified": false,
+              "actor_radius_m": 0.28,
+              "obstacle_margin_m": 0.06,
+              "speed_mps": 0.65
+            },
+            "ground_support": {
+              "authored_floor": false,
+              "continuous_support_verified": false
+            },
+            "schedule": {
+              "frames": 120,
+              "fps": 20,
+              "seconds": 6.0,
+              "travel_seconds": 1.5385,
+              "initial_turn_frames": 40,
+              "movement_start_frame": 40,
+              "initial_turn_radians": -1.570793625586224,
+              "terminal_hold_frames": 40,
+              "horizons": 3,
+              "dense_root_targets_per_actor_per_horizon": 5,
+              "held_actor_id": null,
+              "sampled_route_clearance_m": null
+            }
+          },
+          "measurement": {
+            "terminal_xz": [
+              -1.0074795484542847,
+              2.0089564323425293
+            ],
+            "target_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "arrival_error_m": 0.0047630532860209775,
+            "arrival_tolerance_m": 0.3,
+            "arrival_verified": true,
+            "crossing_verified": null,
+            "completed": true
+          },
+          "end_frame": 200
+        }
+      ],
+      "submitted_after_committed_frame": 0,
+      "detail": "Every command reached its measured destination"
+    },
+    "scene_reactions_enabled": true,
+    "scene_reactions_start_frame": 0,
+    "fps": 20,
+    "segments": [
+      {
+        "start": 0,
+        "end": 40,
+        "stage_id": "555417b73e3e4b67aec894d96c5e0cc8",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally.",
+        "source": "ardy_core",
+        "request_id": "5b215241139041af954e102cf63b3c7e",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  1.25999
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  1.51999
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  1.77998
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 0,
+            "planned_only": true,
+            "phase": "walk"
+          },
+          "initial_placements": {
+            "actor_1": {
+              "position_xz": [
+                0.0,
+                1.0
+              ],
+              "yaw": 0.0
+            }
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "5b215241139041af954e102cf63b3c7e",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "approach",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 42
+        }
+      },
+      {
+        "start": 40,
+        "end": 80,
+        "stage_id": "eabdd9a06ada4fdc9d31b21a84ca48e2",
+        "kind": "approach",
+        "prompt": "A person stands upright and relaxed.",
+        "source": "ardy_core",
+        "request_id": "137f5c6e167d454f91ddcf522ec978f0",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  0.0,
+                  2.0
+                ],
+                "heading": 0.0
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 1,
+            "planned_only": true,
+            "phase": "hold"
+          },
+          "spatial_command": {
+            "action_index": 0,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "137f5c6e167d454f91ddcf522ec978f0",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 42
+        }
+      },
+      {
+        "start": 80,
+        "end": 120,
+        "stage_id": "a006f0a2563542ff9de8c2a379afedbb",
+        "kind": "approach",
+        "prompt": "A person turns left in place, keeping an upright posture.",
+        "source": "ardy_core",
+        "request_id": "3f07e393c61e473694c7d0e8fb19bd8c",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 0,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": 0.016498
+              },
+              {
+                "frame": 7,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": -0.117149
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": -0.501857
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": -0.978081
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": -1.383126
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  -0.00791,
+                  1.99721
+                ],
+                "heading": -1.554296
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 0,
+            "planned_only": true,
+            "phase": "turn"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "3f07e393c61e473694c7d0e8fb19bd8c",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 42
+        }
+      },
+      {
+        "start": 120,
+        "end": 160,
+        "stage_id": "faa6ecb4f5ed4be2965d9de91417fbab",
+        "kind": "approach",
+        "prompt": "A person walks forward naturally.",
+        "source": "ardy_core",
+        "request_id": "58c49c2b063e4d8186b1d3e573fc598e",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  -0.26787,
+                  2.0015
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  -0.52783,
+                  2.00579
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  -0.78779,
+                  2.01008
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 1,
+            "planned_only": true,
+            "phase": "walk"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "58c49c2b063e4d8186b1d3e573fc598e",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 42
+        }
+      },
+      {
+        "start": 160,
+        "end": 200,
+        "stage_id": "ed6e0f271a774b869c4b3c20d94cea37",
+        "kind": "approach",
+        "prompt": "A person stands upright and relaxed.",
+        "source": "ardy_core",
+        "request_id": "27f248d079ca462ab0ecf137c62a282f",
+        "stage_complete": true,
+        "metadata": {
+          "root_targets": {
+            "actor_1": [
+              {
+                "frame": 7,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 15,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 23,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 31,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              },
+              {
+                "frame": 39,
+                "position_xz": [
+                  -1.00778,
+                  2.01371
+                ],
+                "heading": -1.554296
+              }
+            ]
+          },
+          "navigation": {
+            "verb": "move",
+            "actor_id": "actor_1",
+            "target_id": null,
+            "stage": 2,
+            "planned_only": true,
+            "phase": "hold"
+          },
+          "spatial_command": {
+            "action_index": 1,
+            "text": "walk 1 metre forward then walk 1 metre left"
+          }
+        },
+        "clip_metadata": {
+          "request_id": "27f248d079ca462ab0ecf137c62a282f",
+          "chunk_index": 0,
+          "start_frame": 0,
+          "frames": 40,
+          "fps": 20,
+          "stage_kind": "continuation",
+          "actor_ids": [
+            "actor_1"
+          ],
+          "source": "ARDY Core",
+          "seed": 42
+        }
+      }
+    ],
+    "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+  },
+  "wall_seconds": 5.6653778750333,
+  "calls": [
+    {
+      "index": 1,
+      "seed": 42,
+      "prompt": "A person walks forward naturally.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              1.25999
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              1.51999
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              1.77998
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          }
+        ]
+      },
+      "seconds": 0.8397397500229999
+    },
+    {
+      "index": 2,
+      "seed": 42,
+      "prompt": "A person stands upright and relaxed.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              0.0,
+              2.0
+            ],
+            "heading": 0.0
+          }
+        ]
+      },
+      "seconds": 0.8393910829909146
+    },
+    {
+      "index": 3,
+      "seed": 42,
+      "prompt": "A person turns left in place, keeping an upright posture.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 0,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": 0.016498
+          },
+          {
+            "frame": 7,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": -0.117149
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": -0.501857
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": -0.978081
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": -1.383126
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              -0.00791,
+              1.99721
+            ],
+            "heading": -1.554296
+          }
+        ]
+      },
+      "seconds": 0.899134083010722
+    },
+    {
+      "index": 4,
+      "seed": 42,
+      "prompt": "A person walks forward naturally.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              -0.26787,
+              2.0015
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              -0.52783,
+              2.00579
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              -0.78779,
+              2.01008
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          }
+        ]
+      },
+      "seconds": 0.8369968329789117
+    },
+    {
+      "index": 5,
+      "seed": 42,
+      "prompt": "A person stands upright and relaxed.",
+      "root_targets": {
+        "actor_1": [
+          {
+            "frame": 7,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 15,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 23,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 31,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          },
+          {
+            "frame": 39,
+            "position_xz": [
+              -1.00778,
+              2.01371
+            ],
+            "heading": -1.554296
+          }
+        ]
+      },
+      "seconds": 0.7637418750091456
+    }
+  ],
+  "inference_wait_seconds": 4.179003624012694,
+  "frames": 200,
+  "duration_seconds": 10.0,
+  "max_root_step_m": 0.05282575637102127,
+  "native_positions_exact": true,
+  "native_rotations_exact": true,
+  "native_features_exact": true,
+  "final_objects": [
+    {
+      "id": "tree-0",
+      "position": [
+        -3.0,
+        1.75,
+        1.0
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-1",
+      "position": [
+        -2.8,
+        1.75,
+        -2.4
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-2",
+      "position": [
+        2.8,
+        1.75,
+        -2.4
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-3",
+      "position": [
+        3.0,
+        1.75,
+        1.0
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "tree-4",
+      "position": [
+        0.0,
+        1.75,
+        -3.8
+      ],
+      "color": [
+        52,
+        110,
+        93
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-5",
+      "position": [
+        -1.8,
+        0.25,
+        -0.4
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-6",
+      "position": [
+        -1.3,
+        0.4,
+        0.09999999999999998
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-7",
+      "position": [
+        1.9,
+        0.25,
+        0.6
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-8",
+      "position": [
+        2.4,
+        0.4,
+        1.1
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-9",
+      "position": [
+        -1.0,
+        0.25,
+        -2.7
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-10",
+      "position": [
+        -0.5,
+        0.4,
+        -2.2
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "rock-11",
+      "position": [
+        1.5,
+        0.25,
+        -2.9
+      ],
+      "color": [
+        100,
+        115,
+        127
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "plant-12",
+      "position": [
+        2.0,
+        0.4,
+        -2.4
+      ],
+      "color": [
+        70,
+        165,
+        124
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    },
+    {
+      "id": "arch-13",
+      "position": [
+        0.0,
+        1.4,
+        -2.8
+      ],
+      "color": [
+        107,
+        113,
+        130
+      ],
+      "active": false,
+      "opening_fraction": 0.0,
+      "trigger_frame": null
+    }
+  ],
+  "exact_save_load": true
+}

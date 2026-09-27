@@ -134,7 +134,7 @@ class CoreStudioControls:
                 self.verb = gui.add_dropdown("Action", ("approach", "go_through"), initial_value="approach")
                 self.navigate = gui.add_button("Navigate to object")
                 self.spatial_text = gui.add_text("Spatial commands", initial_value="walk two metres forward then walk one metre left", multiline=True)
-                gui.add_markdown("Use up to four actions: walk 2 metres forward, approach an exact object name or ID, open a configured automatic door, then go through it. Directions turn and walk from the actor's current heading. Stairs and opening doors by hand are unsupported.")
+                gui.add_markdown("Use up to four actions: walk 2 metres forward, approach an exact object name or ID, or 'open Door then go through Door' for a configured automatic door. Directions turn and walk from the actor's current heading. Stairs and opening doors by hand are unsupported.")
                 self.spatial_run = gui.add_button("Run spatial commands")
             self.retry = gui.add_button("Retry failed generation", color="gray")
             self.cancel = gui.add_button("Cancel pending motion", color="gray")

@@ -582,6 +582,7 @@ def main():
         open_native_project(args.native_project.read_bytes())
     if args.core_project:
         core.load_project(args.core_project.read_bytes())
+        session.load_scene_document(core.scene_document)
         core.pause()
         core.seek(0)
         activate_core(True)
