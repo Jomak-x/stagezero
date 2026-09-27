@@ -27,6 +27,8 @@ class NativePairSession:
         self._active = self._closed = self._busy = self._playing = self._capturing = False
         self._clip = self._pending = self._failure = self._thread = self._last_request = None
         self._last_context = None
+        self._last_performance = None
+        self._progress = None
         self._context_source = None
         self._scene = scene_copy(EMPTY_SCENE)
         self._frame = self._revision = self._epoch = 0
@@ -43,9 +45,28 @@ class NativePairSession:
         if not self._active:
             raise RuntimeError('Activate native paired interaction first')
 
-    def _invalidate(self):
+    def _invalidate(self, *, clear_retry=True):
         self._epoch += 1
         self._pending = None
+        self._progress = None
+        if clear_retry:
+            self._last_request = self._last_context = self._last_performance = None
+            self._failure = None
+
+    def _idle_edit(self):
+        self._open()
+        if self._busy:
+            raise RuntimeError('Finish or cancel generation before editing the cast')
+
+    @staticmethod
+    def _check_geometry(clip, scene, placement, pair):
+        if clip is None:
+            return
+        from native_pair_geometry import check_native_pair_geometry
+        from native_pair_transition import shared_place_pair
+        world = shared_place_pair(clip.joints, yaw=math.radians(placement['yaw_degrees']),
+                                  translation=(placement['x'], 0., placement['z']))
+        check_native_pair_geometry(world, scene, actor_ids=pair)
 
     @property
     def active(self):
@@ -98,7 +119,7 @@ class NativePairSession:
 
     def add_actor(self, name=None, color=None):
         with self._lock:
-            self._open()
+            self._idle_edit()
             if len(self._cast) >= MAX_CAST:
                 raise ValueError('The native cast supports at most 8 actors')
             identifier = 'actor_' + uuid.uuid4().hex[:12]
@@ -106,29 +127,32 @@ class NativePairSession:
                      'color': list(color if color is not None else COLORS[len(self._cast)])}
             cast, _ = validate_cast(self._cast + [actor], self._pair)
             self._cast = cast
+            self._invalidate()
             self._revision += 1
             return identifier
 
     def rename_actor(self, identifier, name):
         with self._lock:
-            self._open()
+            self._idle_edit()
             cast = json_copy(self._cast)
             actor = next((a for a in cast if a['id'] == identifier), None)
             if actor is None:
                 raise ValueError('Unknown cast actor')
             actor['name'] = name
             self._cast, _ = validate_cast(cast, self._pair)
+            self._invalidate()
             self._revision += 1
         return self.snapshot()
 
     def remove_actor(self, identifier):
         with self._lock:
-            self._open()
+            self._idle_edit()
             if identifier not in [a['id'] for a in self._cast]:
                 raise ValueError('Unknown cast actor')
             if identifier in self._pair:
                 raise ValueError('Choose another interaction pair before removing a selected actor')
             self._cast = [a for a in self._cast if a['id'] != identifier]
+            self._invalidate()
             self._revision += 1
         return self.snapshot()
 
@@ -156,6 +180,7 @@ class NativePairSession:
             if self._clip is None:
                 raise ValueError('Load an interaction before choosing its hand pose')
             if self._clip.metadata.get('render_hand_pose', 'relaxed') != hand_pose:
+                self._invalidate()
                 self._clip = NativePairClip(self._clip.joints, self._clip.features,
                     dict(self._clip.metadata, render_hand_pose=hand_pose))
                 self._revision += 1
@@ -168,6 +193,8 @@ class NativePairSession:
             if self._busy:
                 raise RuntimeError('Finish or cancel generation before changing pair placement')
             if placement != self._placement:
+                self._check_geometry(self._clip, self._scene, placement, self._pair)
+                self._invalidate()
                 self._placement = placement
                 self._revision += 1
         return self.snapshot()
@@ -177,6 +204,7 @@ class NativePairSession:
         with self._lock:
             self._open()
             if scene != self._scene:
+                self._check_geometry(self._clip, scene, self._placement, self._pair)
                 self._invalidate()
                 self._scene = scene
                 self._revision += 1
@@ -187,7 +215,9 @@ class NativePairSession:
         with self._lock:
             self._open()
             scene = scene_copy(self._scene if scene_document is None else scene_document)
+            self._check_geometry(clip, scene, self._placement, self._pair)
             self._invalidate()
+            self._context_source = None
             self._clip, self._scene = clip, scene
             self._frame = 0
             self._active = True
@@ -259,6 +289,69 @@ class NativePairSession:
             self._thread.start()
         return self.snapshot()
 
+    def build_performance(self, builder, scene_document=None, *, request=None):
+        """Build a complete performance atomically, preserving the last good take.
+
+        The captured builder owns generation and planning. It receives an isolated
+        scene, cancellation predicate, and a progress callback. Retry reuses that
+        builder and request only until the scene, cast, placement or source changes.
+        """
+        if not callable(builder):
+            raise ValueError('Performance builder must be callable')
+        captured_request = json_copy(request)
+        with self._lock:
+            self._require_active()
+            if self._busy:
+                raise RuntimeError('A native paired request is still running or cancelling')
+            scene = scene_copy(self._scene if scene_document is None else scene_document)
+            self._invalidate()
+            epoch = self._epoch
+            self._last_performance = (builder, scene, captured_request)
+            self._pending = {'operation': 'performance', 'request_id': 'performance-' + uuid.uuid4().hex,
+                             'request': captured_request, 'frames': 0}
+            self._busy, self._failure = True, None
+            self._thread = threading.Thread(target=self._performance_worker,
+                args=(builder, scene, epoch), daemon=True, name='native-paired-performance')
+            self._thread.start()
+        return self.snapshot()
+
+    def _performance_worker(self, builder, scene, epoch):
+        def progress(value):
+            value = json_copy(value, limit=8192)
+            with self._lock:
+                if not self._cancelled(epoch):
+                    self._progress = value
+        try:
+            result = builder(json_copy(scene), cancelled=lambda: self._cancelled(epoch),
+                             on_progress=progress)
+            if not isinstance(result, dict) or not isinstance(result.get('clip'), NativePairClip):
+                raise ValueError('Performance builder must return a complete native pair clip and placement')
+            clip = result['clip']
+            placement = validate_placement(result.get('placement'))
+            with self._lock:
+                if not self._cancelled(epoch):
+                    self._check_geometry(clip, scene, placement, self._pair)
+                    self._clip, self._scene, self._placement = clip, scene, placement
+                    self._context_source = None
+                    self._frame = 0
+                    self._playing = True
+                    self._play_started = self._clock()
+                    self._revision += 1
+        except Exception as exc:
+            detail = str(exc)
+            token = getattr(builder, 'token', None)
+            if isinstance(token, str) and token:
+                detail = detail.replace(token, '[redacted]')
+            with self._lock:
+                if self._epoch == epoch and not self._closed:
+                    self._failure = detail[:500]
+        finally:
+            with self._lock:
+                if self._epoch == epoch:
+                    self._pending = None
+                    self._progress = None
+                self._busy = False
+
     def _context_worker(self, builder, base, scene, epoch, original):
         try:
             clip = builder(base, json_copy(scene), cancelled=lambda: self._cancelled(epoch))
@@ -266,6 +359,7 @@ class NativePairSession:
                 raise ValueError('ARDY context builder must return a complete clip with disclosed source segments')
             with self._lock:
                 if not self._cancelled(epoch):
+                    self._check_geometry(clip, scene, self._placement, self._pair)
                     self._context_source = original
                     self._clip, self._scene = clip, scene
                     self._frame = 0
@@ -297,6 +391,8 @@ class NativePairSession:
                 raise ValueError('Provider must return a complete exact native pair at the requested length')
             with self._lock:
                 if not self._cancelled(epoch):
+                    self._check_geometry(clip, scene, self._placement, self._pair)
+                    self._context_source = None
                     self._clip, self._scene = clip, scene
                     self._frame = 0
                     self._playing = True
@@ -325,6 +421,10 @@ class NativePairSession:
 
     def retry(self):
         with self._lock:
+            performance = self._last_performance
+            if performance is not None:
+                builder, scene, request = performance
+                return self.build_performance(builder, scene_document=scene, request=request)
             context = self._last_context
             if context is not None:
                 builder, scene = context
@@ -332,7 +432,7 @@ class NativePairSession:
             if self._last_request is None:
                 raise ValueError('No generation request to retry')
             request, scene = self._last_request
-        return self.generate(**request, scene_document=scene)
+            return self.generate(**request, scene_document=scene)
 
     def original_pair_clip(self):
         """Last context source retained in memory; source files remain separately archived."""
@@ -414,6 +514,8 @@ class NativePairSession:
                         'playing': 'Playing native paired motion at 30 fps.', 'paused': 'Native paired motion paused.',
                         'ready': 'Choose two actors and play the reviewed handshake or generate an interaction.'}
             pending = self._pending or {}
+            if phase == 'generating' and pending.get('operation') == 'performance':
+                messages[phase] = 'Building the complete cast performance; current motion retained.'
             if phase == 'generating' and pending.get('operation') == 'context':
                 messages[phase] = 'Building ARDY approach and departure around the preserved paired motion.'
             metadata = self._clip.metadata if self._clip is not None else {}
@@ -436,6 +538,7 @@ class NativePairSession:
                     'capturing': self._capturing, 'pending': self._pending is not None, 'busy': self._busy, 'failure': self._failure,
                     'request_id': pending.get('request_id'), 'requested_frames': pending.get('frames', 0),
                     'pending_operation': pending.get('operation', 'generate') if pending else None,
+                    'progress': json_copy(self._progress),
                     'generated': bool(frames), 'buffer_frames': max(0, frames-self._frame),
                     'segments': segments}
 
@@ -481,7 +584,9 @@ class NativePairSession:
         clip, cast, pair, scene, frame, placement = decode_project(content)
         with self._lock:
             self._open()
+            self._check_geometry(clip, scene, placement, pair)
             self._invalidate()
+            self._context_source = None
             self._clip, self._cast, self._pair, self._scene, self._frame = clip, cast, pair, scene, frame
             self._placement = placement
             self._active, self._playing, self._failure = True, False, None

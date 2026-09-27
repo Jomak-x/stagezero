@@ -1,4 +1,7 @@
 import json
+import os
+import signal
+import subprocess
 from pathlib import Path
 import sys
 import tempfile
@@ -6,7 +9,7 @@ import threading
 import time
 import unittest
 
-from native_pair_provider import NativePairConfig, NativePairProvider
+from native_pair_provider import NativePairConfig, NativePairProvider, _REMOTE_SAMPLE
 
 
 ROOT = Path(__file__).resolve().parent
@@ -100,6 +103,68 @@ class NativePairProviderTests(unittest.TestCase):
         finally:
             timer.cancel()
         self.assertLess(time.monotonic() - start, 2)
+
+    def test_remote_wrapper_escalates_only_its_own_stubborn_sample(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe = root / 'probe.py'
+            pidfile = root / 'child.pid'
+            output = root / 'sample.npz'
+            checkpoint = root / 'checkpoint'
+            checkpoint.touch()
+            probe.write_text(
+                'import os, signal, time\n'
+                'from pathlib import Path\n'
+                'signal.signal(signal.SIGTERM, signal.SIG_IGN)\n'
+                f'Path({str(pidfile)!r}).write_text(str(os.getpid()))\n'
+                f'Path({str(output)!r}).write_bytes(b"partial")\n'
+                'time.sleep(60)\n')
+            payload = dict(output=str(output), checkpoint=str(checkpoint), probe=str(probe),
+                           deps=str(root), clip_cache=str(root), python=sys.executable,
+                           repo=str(root), prompt='Test', seed=1, frames=30,
+                           timeout=30, max_bytes=32000000)
+            unrelated = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])
+            try:
+                for cancellation in ('eof', 'signal'):
+                    with self.subTest(cancellation=cancellation):
+                        pidfile.unlink(missing_ok=True)
+                        wrapper = subprocess.Popen([sys.executable, '-c', _REMOTE_SAMPLE],
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        child_pid = None
+                        try:
+                            wrapper.stdin.write((json.dumps(payload) + '\n').encode())
+                            wrapper.stdin.flush()
+                            deadline = time.monotonic() + 5
+                            while not pidfile.exists() and time.monotonic() < deadline:
+                                time.sleep(.01)
+                            self.assertTrue(pidfile.exists(), 'Sample child never started')
+                            child_pid = int(pidfile.read_text())
+                            started = time.monotonic()
+                            if cancellation == 'eof':
+                                wrapper.stdin.close()
+                                wrapper.stdin = None
+                            else:
+                                wrapper.send_signal(signal.SIGTERM)
+                            wrapper.communicate(timeout=8)
+                            self.assertLess(time.monotonic() - started, 7)
+                            self.assertNotEqual(wrapper.returncode, 0)
+                            with self.assertRaises(ProcessLookupError):
+                                os.kill(child_pid, 0)
+                            self.assertFalse(output.exists())
+                            self.assertIsNone(unrelated.poll())
+                        finally:
+                            if wrapper.poll() is None:
+                                wrapper.kill(); wrapper.wait(timeout=3)
+                            if child_pid is not None:
+                                try:
+                                    os.kill(child_pid, signal.SIGKILL)
+                                except ProcessLookupError:
+                                    pass
+                            if wrapper.stdin is not None:
+                                wrapper.stdin.close()
+                            wrapper.stdout.close(); wrapper.stderr.close()
+            finally:
+                unrelated.terminate(); unrelated.wait(timeout=3)
 
     def test_config_rejects_shell_paths_and_unknown_keys(self):
         with self.assertRaises(ValueError):

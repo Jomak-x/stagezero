@@ -176,11 +176,17 @@ def main():
     from native_pair_provider import NativePairProvider
     pair_provider = NativePairProvider.from_config(args.native_pair_config) if args.native_pair_config else None
     paired = NativePairSession(pair_provider)
+    core.update_scene(session.scene_document())
+    paired.update_scene(session.scene_document())
     core_renderer = StudioCoreRenderer(server, name_prefix="/core-cast")
     paired_renderer = NativePairRenderer(server)
     native_render_lock = threading.RLock()
     core_ui = None
     pair_ui = None
+    direction_ui = None
+    direction_mode = None
+    pair_folder = cast_folder = None
+    scene_sync_error = None
     core_requested = False
     paired_requested = False
     last_core_clip = None
@@ -269,6 +275,8 @@ def main():
     def export_native_pair(client):
         nonlocal previous_objects
         from native_pair_capture import capture_pair
+        with native_render_lock:
+            direction_marks.hide()
         try:
             return capture_pair(paired, paired_renderer, client,
                                 ROOT / '.runtime/native-pair-videos' / str(time.time_ns()), flush=server.flush,
@@ -305,14 +313,96 @@ def main():
             build_studio_context(clip, core_client, scene_document, paired.snapshot()['placement'],
                                  ROOT / '.runtime/native-pair-context', cancelled=cancelled))
 
+    from paired_direction_preview import PairedDirectionPreview
+    direction_marks = PairedDirectionPreview(server, lambda request: direction_ui.set_marks(request))
+
+    def preview_paired_direction(request, client):
+        from paired_direction import preview_direction
+        result = preview_direction(request, session.scene_document())
+        direction_marks.show(result['request'], result['plan'])
+        if client is not None:
+            points = np.array([[p['x'], .8, p['z']] for p in [*result['request']['starts'], result['request']['meeting']]])
+            position, center, fov = native_cast_camera_view(None, {'x':0.,'z':0.,'yaw_degrees':0.}, points,
+                                                         aspect=getattr(client.camera, 'aspect', 16/9))
+            camera._manual(client)
+            client.camera.position = position
+            client.camera.look_at = center
+            client.camera.fov = fov
+        return result
+
+    def generate_paired_direction(request, client):
+        from paired_direction import PairedSceneBuilder, validate_request
+        request = validate_request(request)
+        with session.lock, native_render_lock:
+            if session.busy or paired.snapshot()['busy'] or paired.snapshot()['capturing']:
+                raise ValueError('Finish or cancel the current generation or export first.')
+            preview_paired_direction(request, client)
+            activate_paired(True)
+            paired.select_pair(*request['actor_ids'])
+            builder = PairedSceneBuilder(request, pair_provider, core_client, ROOT / '.runtime/paired-scenes')
+            paired.build_performance(builder, session.scene_document(), request=request)
+            direction_marks.hide()
+        return paired
+
+    def open_native_project(data):
+        from native_pair_clip import decode_project
+        decoded = decode_project(data)
+        with session.lock, native_render_lock:
+            if session.busy or paired.snapshot()['busy'] or paired.snapshot()['capturing'] or native_core_has_pending_work(core.snapshot()):
+                raise ValueError('Finish or cancel current generation before opening a project.')
+            if paired.snapshot()['total_frames']:
+                backup = ROOT / '.runtime/native-pair-projects' / ('before-open-' + str(time.time_ns()) + '.native-pair.stagezero.npz')
+                backup.parent.mkdir(parents=True, exist_ok=True)
+                backup.write_bytes(paired.save())
+            paired.load(data)
+            session.load_scene_document(decoded[3])
+            activate_paired(True)
+            direction_marks.hide()
+            if direction_ui is not None:
+                request = decoded[0].metadata.get('direction_request')
+                if request:
+                    direction_ui.restore_request(request)
+
+    def open_g1_project(data):
+        with session.lock, native_render_lock:
+            if paired.snapshot()['busy'] or paired.snapshot()['capturing'] or native_core_has_pending_work(core.snapshot()):
+                raise ValueError('Finish or cancel current generation before opening a project.')
+            session.load_project(data)
+            if paired_requested:
+                activate_paired(False)
+            if core_requested:
+                core.deactivate()
+                activate_core(False)
+            direction_marks.hide()
+
     def build_core_controls(gui):
-        nonlocal core_ui, pair_ui
-        core_ui = CoreStudioControls(gui, core, session, on_active=activate_core,
-                                    project_folder=ROOT / '.runtime/core-projects')
-        pair_ui = NativePairControls(gui, paired, session, on_active=activate_paired,
-                                     project_folder=ROOT / '.runtime/native-pair-projects',
-                                     on_capture=export_native_pair, on_frame_cast=frame_native_cast,
-                                     on_build_context=build_native_context)
+        nonlocal core_ui, pair_ui, direction_ui, direction_mode, pair_folder, cast_folder
+        from paired_direction_controls import PairedDirectionControls
+        direction_mode = gui.add_dropdown('Direct', ('One character', 'Two characters'), initial_value='One character')
+        with gui.add_folder('Two-person scene', expand_by_default=True) as pair_folder:
+            direction_ui = PairedDirectionControls(gui, paired, on_generate=generate_paired_direction,
+                on_preview=preview_paired_direction, on_frame_cast=frame_native_cast,
+                on_active=activate_paired, scene_provider=session.scene_document,
+                on_export=lambda client: pair_ui.start_capture(client), on_edit=direction_marks.hide)
+        with gui.add_folder('Cast, playback and files', expand_by_default=False) as cast_folder:
+            pair_ui = NativePairControls(gui, paired, session, on_active=activate_paired,
+                project_folder=ROOT / '.runtime/native-pair-projects', on_capture=export_native_pair,
+                on_frame_cast=frame_native_cast, on_build_context=build_native_context, on_open=open_native_project)
+        pair_folder.visible = cast_folder.visible = False
+        with gui.add_folder('Advanced scene motion', expand_by_default=False):
+            core_ui = CoreStudioControls(gui, core, session, on_active=activate_core,
+                                        project_folder=ROOT / '.runtime/core-projects')
+        @direction_mode.on_update
+        def change_direction_mode(event):
+            wanted = direction_mode.value == 'Two characters'
+            if wanted == paired_requested:
+                return
+            try:
+                activate_paired(wanted)
+                direction_marks.hide()
+            except (ValueError, RuntimeError) as exc:
+                session.project_status = str(exc)
+                direction_mode.value = 'Two characters' if paired_requested else 'One character'
     def actor_root():
         if paired_requested:
             return paired_renderer.actor_root()
@@ -393,13 +483,12 @@ def main():
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
                   characters.build_gui, core_session=core, paired_session=paired,
-                  core_controls=build_core_controls)
+                  core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core, paired_session=paired)
 
     if args.native_project:
-        paired.load(args.native_project.read_bytes())
-        activate_paired(True)
+        open_native_project(args.native_project.read_bytes())
 
     @server.scene.on_keyboard_event('keydown')
     def transport_key(event):
@@ -463,7 +552,12 @@ def main():
                         current_main_scene = session.scene_document()
                         if current_main_scene != last_main_scene:
                             core.update_scene(current_main_scene)
-                            paired.update_scene(current_main_scene)
+                            try:
+                                paired.update_scene(current_main_scene)
+                                scene_sync_error = None
+                            except ValueError as exc:
+                                scene_sync_error = str(exc)
+                                session.project_status = 'Background changed; retained paired take uses its saved scene. Generate a new scene to apply these changes. ' + str(exc)
                             last_main_scene = current_main_scene
                         last_main_scene_revision = session.project_revision
                     core_state = core.tick()
@@ -568,6 +662,11 @@ def main():
                         ui.update()
                         core_ui.tick()
                         pair_ui.tick()
+                        direction_ui.tick()
+                        pair_folder.visible = cast_folder.visible = paired_requested
+                        expected_mode = 'Two characters' if paired_requested else 'One character'
+                        if direction_mode.value != expected_mode:
+                            direction_mode.value = expected_mode
                     timeline.update()
                 if ui_due:
                     last_ui = time.monotonic()

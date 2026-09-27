@@ -4,7 +4,7 @@ The approved native InterGen character rendering now runs inside StageZero's exi
 
 ## Use it
 
-Open the review studio on `http://127.0.0.1:2378/`. Under **Motion → Cast & paired motion · native**:
+The current unified workflow is documented in [PAIRED-DIRECTION.md](PAIRED-DIRECTION.md) and runs at `http://127.0.0.1:2380/`. Choose **Motion → Direct → Two characters** for separate starts and a shared meeting. The lower-level native controls described below are under **Cast, playback and files**:
 
 1. Add and name characters; choose two different performers and press **Use this pair**. The UI supports up to six cast members. Other actors hold static poses at separate marks; this is not jointly generated group motion.
 2. Press **Play reviewed handshake** or **Play sparring preview**, or describe a new interaction and press **Generate pair motion**. The first two are reproducible library sources; generation runs the actual InterGen checkpoint on the configured Pod.

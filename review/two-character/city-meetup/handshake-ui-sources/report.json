@@ -1,0 +1,2447 @@
+{
+  "model": "ARDY Core + InterGen",
+  "fps": 30,
+  "frames": 471,
+  "segments": [
+    {
+      "source": "ardy_core",
+      "kind": "approach",
+      "label": "Core approach from independent starts",
+      "start_frame": 0,
+      "end_frame_exclusive": 240,
+      "frames": 240
+    },
+    {
+      "source": "authored_transition",
+      "kind": "transition",
+      "label": "Authored entry transition",
+      "start_frame": 240,
+      "end_frame_exclusive": 261,
+      "frames": 21
+    },
+    {
+      "source": "intergen",
+      "kind": "paired_action",
+      "label": "Native paired interaction",
+      "start_frame": 261,
+      "end_frame_exclusive": 471,
+      "frames": 210
+    }
+  ],
+  "prompt": "Two people shake hands and step apart.",
+  "render_hand_pose": "relaxed",
+  "meeting_plan": {
+    "version": 1,
+    "actor_ids": [
+      "actor_1",
+      "actor_2"
+    ],
+    "starts": [
+      {
+        "x": -2.0,
+        "z": -1.0
+      },
+      {
+        "x": 2.0,
+        "z": -1.0
+      }
+    ],
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "placement": {
+      "x": -0.10317049804143608,
+      "z": -0.8349250927567482,
+      "yaw_degrees": 0.0
+    },
+    "routes": [
+      {
+        "actor_id": "actor_1",
+        "points": [
+          [
+            -2.0,
+            -1.0
+          ],
+          [
+            0.11043200013227761,
+            0.7760989293456078
+          ]
+        ],
+        "distance_m": 2.758342008164495,
+        "initial_yaw": 0.8712104278282571,
+        "arrival_yaw": 3.0849231730283395,
+        "ground": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        }
+      },
+      {
+        "actor_id": "actor_2",
+        "points": [
+          [
+            2.0,
+            -1.0
+          ],
+          [
+            -0.11043200013227761,
+            -0.7760989293456078
+          ]
+        ],
+        "distance_m": 2.1222758813647458,
+        "initial_yaw": -1.4650991758022671,
+        "arrival_yaw": 0.01754700717333023,
+        "ground": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        }
+      }
+    ],
+    "horizons": [
+      {
+        "root_targets": {
+          "actor_1": [
+            {
+              "frame": 0,
+              "position_xz": [
+                -1.9824130666655644,
+                -0.9851991755887866
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                -1.8593045333245148,
+                -0.8815934047102928
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                -1.7186090666490297,
+                -0.7631868094205856
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                -1.5779135999735445,
+                -0.6447802141308785
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                -1.4372181332980594,
+                -0.5263736188411713
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                -1.2965226666225742,
+                -0.4079670235514642
+              ],
+              "heading": 0.871210427828257
+            }
+          ],
+          "actor_2": [
+            {
+              "frame": 0,
+              "position_xz": [
+                1.9824130666655644,
+                -0.9981341577445467
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                1.8593045333245148,
+                -0.9850732619563739
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                1.7186090666490297,
+                -0.9701465239127477
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                1.5779135999735445,
+                -0.9552197858691216
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                1.4372181332980594,
+                -0.9402930478254954
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                1.2965226666225742,
+                -0.9253663097818693
+              ],
+              "heading": -1.4650991758022671
+            }
+          ]
+        },
+        "actor_prompts": {
+          "actor_1": "A person walks forward along the route toward their partner and comes to a relaxed stop.",
+          "actor_2": "A person walks forward along the route toward their partner and comes to a relaxed stop."
+        }
+      },
+      {
+        "root_targets": {
+          "actor_1": [
+            {
+              "frame": 0,
+              "position_xz": [
+                -1.2789357332881386,
+                -0.39316619914025075
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                -1.155827199947089,
+                -0.289560428261757
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                -1.0151317332716037,
+                -0.17115383297204978
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                -0.8744362665961187,
+                -0.052747237682342574
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                -0.7337407999206336,
+                0.06565935760736452
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                -0.5930453332451484,
+                0.18406595289707162
+              ],
+              "heading": 0.871210427828257
+            }
+          ],
+          "actor_2": [
+            {
+              "frame": 0,
+              "position_xz": [
+                1.2789357332881386,
+                -0.923500467526416
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                1.155827199947089,
+                -0.9104395717382431
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                1.0151317332716039,
+                -0.895512833694617
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                0.8744362665961185,
+                -0.8805860956509908
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                0.7337407999206336,
+                -0.8656593576073647
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                0.5930453332451484,
+                -0.8507326195637385
+              ],
+              "heading": -1.4650991758022671
+            }
+          ]
+        },
+        "actor_prompts": {
+          "actor_1": "A person walks forward along the route toward their partner and comes to a relaxed stop.",
+          "actor_2": "A person walks forward along the route toward their partner and comes to a relaxed stop."
+        }
+      },
+      {
+        "root_targets": {
+          "actor_1": [
+            {
+              "frame": 0,
+              "position_xz": [
+                -0.5754583999107128,
+                0.19886677730828506
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                -0.45234986656966303,
+                0.30247254818677916
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                -0.3116543998941781,
+                0.42087914347648603
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                -0.17095893321869293,
+                0.5392857387661936
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                -0.03026346654320755,
+                0.6576923340559004
+              ],
+              "heading": 0.871210427828257
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 0.871210427828257
+            }
+          ],
+          "actor_2": [
+            {
+              "frame": 0,
+              "position_xz": [
+                0.5754583999107128,
+                -0.8488667773082852
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                0.4523498665696628,
+                -0.8358058815201124
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                0.3116543998941781,
+                -0.8208791434764863
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                0.1709589332186927,
+                -0.8059524054328601
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                0.030263466543207773,
+                -0.791025667389234
+              ],
+              "heading": -1.4650991758022671
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": -1.4650991758022671
+            }
+          ]
+        },
+        "actor_prompts": {
+          "actor_1": "A person walks forward along the route toward their partner and comes to a relaxed stop.",
+          "actor_2": "A person walks forward along the route toward their partner and comes to a relaxed stop."
+        }
+      },
+      {
+        "root_targets": {
+          "actor_1": [
+            {
+              "frame": 0,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 0.9818960650882608
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 1.7566955259082908
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 2.6421806239883225
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 3.084923173028339
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 3.084923173028339
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                0.11043200013227761,
+                0.7760989293456078
+              ],
+              "heading": 3.084923173028339
+            }
+          ],
+          "actor_2": [
+            {
+              "frame": 0,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": -1.3909668666534876
+            },
+            {
+              "frame": 7,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": -0.8720407026120277
+            },
+            {
+              "frame": 15,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": -0.27898222942178963
+            },
+            {
+              "frame": 23,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": 0.01754700717333013
+            },
+            {
+              "frame": 31,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": 0.01754700717333013
+            },
+            {
+              "frame": 39,
+              "position_xz": [
+                -0.11043200013227761,
+                -0.7760989293456078
+              ],
+              "heading": 0.01754700717333013
+            }
+          ]
+        },
+        "actor_prompts": {
+          "actor_1": "A person stands in place and turns to face their partner, relaxed and ready.",
+          "actor_2": "A person stands in place and turns to face their partner, relaxed and ready."
+        }
+      }
+    ],
+    "arrival_seconds": 6.0,
+    "approach_seconds": 8,
+    "total_frames": 471,
+    "blend_frames": 21,
+    "minimum_planned_root_separation_m": 1.3805835265333737,
+    "native_geometry": {
+      "version": 1,
+      "skeleton": "native22",
+      "frames": 210,
+      "scene_conditioned": false,
+      "physical_contact_verified": false,
+      "actors": [
+        {
+          "actor_id": "actor_1",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "city-0",
+              "city-1"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              0.010000000000000002,
+              0.025
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 210,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "city-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.9002933140129814,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.758341889014441,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.3583202602717055,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.6409102162098765,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.930850448930672,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.631592686592485,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.534851156150916,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 17.540639302967502,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 20.603497888595832,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 23.702498614944,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 26.82515556230958,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.778189284711664,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.024744941964983,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.976078755678387,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 20.200179015737593,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 26.50792906254441,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.538293988533106,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.745681813946605,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.779936617987723,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 23.010469325829934,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 29.31391237334056,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.338505467102119,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.744875795729822,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.00127070400534,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 11.682212081989114,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.57297882766353,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 17.570777432912713,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 20.62917911092774,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 23.72483679655777,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 26.844903163670168,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.776770094637121,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 8.077142465096045,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 14.003014028268353,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 20.218856988631977,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 26.52217859442086,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.651815608960635,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.788931760753277,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.8056740624839,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 23.02926869178191,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 29.32868256813796,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-42",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 33.06076382856544,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-43",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 32.142007478965624,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-44",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 31.511427536109565,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-45",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 31.569136538728248,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-46",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 32.046207611703295,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-47",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 32.90303598612277,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-48",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.504440555652319,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-49",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 18.235673868129638,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        },
+        {
+          "actor_id": "actor_2",
+          "ground": {
+            "authored_floor": true,
+            "continuous_support_verified": true,
+            "floor_ids": [
+              "city-0",
+              "city-1"
+            ],
+            "actor_footprint_margin_m": 0.28,
+            "floor_height_range_m": [
+              0.010000000000000002,
+              0.025
+            ]
+          },
+          "collision": {
+            "version": 1,
+            "skeleton": "native22",
+            "frames": 210,
+            "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+            "sampled_body_points_per_frame": 31,
+            "total_collision_frames": 0,
+            "per_object": [
+              {
+                "object_id": "city-2",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7341280417344884,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-3",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.906261360153405,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-4",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.1616117930132885,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-5",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.766352128689478,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-6",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.707237365896647,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-7",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.29218869732912,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-8",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.14889001213582,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-9",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.134338208307234,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-10",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 19.188782943236372,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-11",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 22.283971666359754,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-12",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 25.404913425548443,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-13",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.56161179301329,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-14",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.698057495192368,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-15",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.563438162481885,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-16",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 18.779482987299943,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-17",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 25.087499233895254,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-18",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.636930969464672,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-19",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.377478677272542,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-20",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.365334832609966,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-21",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 21.589819054693834,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-22",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 27.893272547255425,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-23",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.304097256566908,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-24",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.979000915254966,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-25",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 7.893937313876085,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-26",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 10.4517237143663,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-27",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 13.26816372627175,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-28",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.225952001263042,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-29",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 19.259876143065775,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-30",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 22.34002559745985,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-31",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 25.449674622924302,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-32",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 3.7037712258446764,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-33",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 6.8643635208582605,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-34",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 12.64281912045786,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-35",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 18.820677329004607,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-36",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 25.10970187633052,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-37",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 4.849565433187361,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-38",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 9.516572663150397,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-39",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 15.437939652024893,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-40",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 21.6311014959432,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-41",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 27.917453550107147,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-42",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 31.651227984434055,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-43",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 30.721102356930956,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-44",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 30.079455939510396,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-45",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 30.140405076298826,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-46",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 30.643926457192073,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-47",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 31.547692704124497,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-48",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 5.315603302241077,
+                "worst_penetration_m": 0.0
+              },
+              {
+                "object_id": "city-49",
+                "kind": "custom",
+                "collision_frames": 0,
+                "first_collision_frame": null,
+                "minimum_clearance_m": 16.85027238240855,
+                "worst_penetration_m": 0.0
+              }
+            ],
+            "assumptions": {
+              "units": "metres",
+              "up_axis": "+Y",
+              "scene_source": "object_metadata",
+              "object_geometry": "conservative boxes with explicit passage cutouts",
+              "mesh_or_physics_collision_verified": false
+            }
+          }
+        }
+      ]
+    },
+    "source_sha256": "e18bd9bfdde2ac9dc07e13ac5ebc46da3c6831d741e105ff59e3af42313a6ef0",
+    "planned_only": true,
+    "limits": {
+      "max_target_error_m": 0.8,
+      "max_arrival_error_m": 0.4,
+      "minimum_route_root_separation_m": 0.55
+    }
+  },
+  "scene_geometry": {
+    "version": 1,
+    "skeleton": "native22",
+    "frames": 471,
+    "scene_conditioned": false,
+    "physical_contact_verified": false,
+    "actors": [
+      {
+        "actor_id": "actor_1",
+        "ground": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        },
+        "collision": {
+          "version": 1,
+          "skeleton": "native22",
+          "frames": 471,
+          "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+          "sampled_body_points_per_frame": 31,
+          "total_collision_frames": 0,
+          "per_object": [
+            {
+              "object_id": "city-2",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 1.9526800662849064,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-3",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.5563429116477856,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-4",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.3444606950481646,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-5",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 4.5171989767901515,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-6",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 7.0433325855460716,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-7",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.957523812808777,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-8",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 12.998879245673056,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-9",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 16.095951982872833,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-10",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 19.226590070944248,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-11",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 22.376772608831523,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-12",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.539296598150216,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-13",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 1.7444606950481656,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-14",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 6.378535374069033,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-15",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 12.609833471397657,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-16",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 18.953301896213596,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-17",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.32512063739036,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-18",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.444558422897616,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-19",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.175801180356673,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-20",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 15.418019648624716,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-21",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 21.7517134360832,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-22",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 28.115347355123866,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-23",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 5.298844503442921,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-24",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 6.744875795729822,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-25",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.00127070400534,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-26",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 11.682212081989114,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-27",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 14.510222980110925,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-28",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 17.34519786727271,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-29",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 20.288613964083417,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-30",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 23.299549801527455,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-31",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 26.354943976228714,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-32",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.776770094637121,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-33",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 8.077142465096045,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-34",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 13.737202380229906,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-35",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 19.730929050014993,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-36",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.916096608801293,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-37",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 5.651815608960635,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-38",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 10.788931760753277,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-39",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 16.489078792267232,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-40",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 22.531771275883198,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-41",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 28.72606718464815,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-42",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 31.605091678430213,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-43",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.883338212729875,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-44",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.47618064053206,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-45",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.77665751153111,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-46",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 31.50327569087979,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-47",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 32.59567858621723,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-48",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 4.625477639538075,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-49",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 17.828329857705405,
+              "worst_penetration_m": 0.0
+            }
+          ],
+          "assumptions": {
+            "units": "metres",
+            "up_axis": "+Y",
+            "scene_source": "object_metadata",
+            "object_geometry": "conservative boxes with explicit passage cutouts",
+            "mesh_or_physics_collision_verified": false
+          }
+        }
+      },
+      {
+        "actor_id": "actor_2",
+        "ground": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        },
+        "collision": {
+          "version": 1,
+          "skeleton": "native22",
+          "frames": 471,
+          "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+          "sampled_body_points_per_frame": 31,
+          "total_collision_frames": 0,
+          "per_object": [
+            {
+              "object_id": "city-2",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.5412944816578094,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-3",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 1.830298138538297,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-4",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 5.008555552034548,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-5",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 5.766352128689478,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-6",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 7.707237365896647,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-7",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 10.29218869732912,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-8",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 13.14889001213582,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-9",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 16.134338208307234,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-10",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 19.188782943236372,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-11",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 22.283971666359754,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-12",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.404913425548443,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-13",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.4092114430047924,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-14",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 6.698057495192368,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-15",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 12.563438162481885,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-16",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 18.779482987299943,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-17",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.087499233895254,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-18",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 4.636930969464672,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-19",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.377478677272542,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-20",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 15.365334832609966,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-21",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 21.589819054693834,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-22",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 27.893272547255425,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-23",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.284823691561077,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-24",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 4.4937602659989855,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-25",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 7.006139801752342,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-26",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.919373560835014,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-27",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 12.967665152366301,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-28",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 16.074741107409356,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-29",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 19.211869232208304,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-30",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 22.34002559745985,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-31",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.449674622924302,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-32",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 1.684580373233235,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-33",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 6.341171640110243,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-34",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 12.600111454486177,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-35",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 18.820677329004607,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-36",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 25.10970187633052,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-37",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 3.4162718466690873,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-38",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 9.144104588744973,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-39",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 15.406740568268294,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-40",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 21.6311014959432,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-41",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 27.917453550107147,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-42",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 31.651227984434055,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-43",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.721102356930956,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-44",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.079455939510396,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-45",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.140405076298826,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-46",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 30.643926457192073,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-47",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 31.388310716149746,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-48",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 5.315603302241077,
+              "worst_penetration_m": 0.0
+            },
+            {
+              "object_id": "city-49",
+              "kind": "custom",
+              "collision_frames": 0,
+              "first_collision_frame": null,
+              "minimum_clearance_m": 16.85027238240855,
+              "worst_penetration_m": 0.0
+            }
+          ],
+          "assumptions": {
+            "units": "metres",
+            "up_axis": "+Y",
+            "scene_source": "object_metadata",
+            "object_geometry": "conservative boxes with explicit passage cutouts",
+            "mesh_or_physics_collision_verified": false
+          }
+        }
+      }
+    ]
+  },
+  "actor_ids": [
+    "actor_1",
+    "actor_2"
+  ],
+  "source_pair_preserved_exactly_after_shared_placement": true,
+  "transition_provenance": {
+    "source_pair_frames_modified": false,
+    "all_mechanical_gates_passed": true,
+    "boundaries": {
+      "entry": {
+        "source": "authored direction transition",
+        "model_generated": false,
+        "method": "normalized Hermite bone directions, endpoint lengths, and root Hermite",
+        "frames": 21,
+        "fps": 30.0,
+        "source_pair_frames_modified": false,
+        "input_boundary": {
+          "position_gap_m": {
+            "mean": 0.1457538627125691,
+            "max": 0.5039622810466263,
+            "per_actor_max": [
+              0.10746078940498453,
+              0.5039622810466263
+            ]
+          },
+          "root_gap_m": [
+            0.03921576287184342,
+            0.11583807813156959
+          ],
+          "root_relative_pose_gap_m": {
+            "mean": 0.11491266695294743,
+            "max": 0.4238798130581864,
+            "per_actor_max": [
+              0.09605660907403653,
+              0.4238798130581864
+            ]
+          },
+          "velocity_gap_m_s": {
+            "mean": 0.08887733409680501,
+            "max": 0.16327218447036346,
+            "per_actor_max": [
+              0.111555161825315,
+              0.16327218447036346
+            ]
+          },
+          "left_endpoint_speed_m_s": {
+            "mean": 0.030235934710363965,
+            "max": 0.07876190862823866,
+            "per_actor_max": [
+              0.03795220703171358,
+              0.07876190862823866
+            ]
+          },
+          "right_endpoint_speed_m_s": {
+            "mean": 0.07267886122785877,
+            "max": 0.14348678960196007,
+            "per_actor_max": [
+              0.09093233497643341,
+              0.14348678960196007
+            ]
+          },
+          "left_fps": 30.0,
+          "right_fps": 30.0,
+          "seamless_verified": false,
+          "interpretation": "Geometric boundary diagnostics only; skin, feet, obstacles and contact require review."
+        },
+        "max_joint_speed_m_s": 1.1648351023731538,
+        "max_endpoint_velocity_error_m_s": 0.10393586555147573,
+        "max_source_endpoint_length_change_fraction": 0.03659731385062315,
+        "max_bone_length_interpolation_error_m": 1.3877787807814457e-16,
+        "min_ankle_toe_height_m": 0.014256227761507034,
+        "max_ankle_toe_xz_travel_m": 0.27221340254546306,
+        "thresholds": {
+          "max_speed_m_s": 5.0,
+          "max_endpoint_velocity_error_m_s": 0.35,
+          "max_bone_length_change_fraction": 0.2
+        },
+        "mechanical_gate_passed": true,
+        "rejection_reasons": [],
+        "foot_lock": false,
+        "contact_preserved_in_bridge": false,
+        "visual_acceptance": "unverified",
+        "limitations": [
+          "Authored motion, not jointly generated with Core.",
+          "Bone directions and lengths are interpolated; no limb shortening from position blending.",
+          "Endpoint velocity is measured at sampled frames; continuous derivatives alone are not proof.",
+          "No foot locking, floor, partner-contact or obstacle solve."
+        ]
+      }
+    },
+    "refinement": {
+      "approach": {
+        "source": "ARDY Core",
+        "method": "Core world bone directions with native actor median segment lengths",
+        "reference_frames": 210,
+        "median_lengths_m": [
+          [
+            0.115434837375363,
+            0.11701001600643074,
+            0.10700703532061973,
+            0.354825212373047,
+            0.34725682464702384,
+            0.1188470045059434,
+            0.36525907805732805,
+            0.3635748752827558,
+            0.05849515706938208,
+            0.12113124051557089,
+            0.1271491734515332,
+            0.2139739108596001,
+            0.14696092574818306,
+            0.14771775342751803,
+            0.07434864694838719,
+            0.09488190120739926,
+            0.09007888288497298,
+            0.23736039109038154,
+            0.2407854038144543,
+            0.24066063736667026,
+            0.22581625758578372
+          ],
+          [
+            0.11210792574505812,
+            0.11289237577133274,
+            0.10317931155057872,
+            0.3433294644624447,
+            0.33804281080664245,
+            0.11886588631753764,
+            0.3538193236105657,
+            0.3543776599621467,
+            0.05570622141039723,
+            0.11981448354184313,
+            0.12199803830879648,
+            0.2091867474636319,
+            0.14320092029478995,
+            0.14385621047381492,
+            0.07380245578763203,
+            0.09249447101020428,
+            0.08876469577410753,
+            0.23300748829026147,
+            0.2359752398332289,
+            0.23140854648932266,
+            0.22238317954613024
+          ]
+        ],
+        "core_endpoint_displacement_m": {
+          "mean": 0.1937751854975184,
+          "max": 0.379235242081257,
+          "per_actor_max": [
+            0.339746567022607,
+            0.379235242081257
+          ]
+        },
+        "root_xz_modified": false,
+        "native_pair_modified": false,
+        "root_y_correction_range_m": [
+          -0.1900593744710658,
+          -0.139742043329524
+        ],
+        "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+        "foot_lock": false,
+        "limitations": [
+          "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+          "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+          "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+          "Native source lengths vary while Core display lengths use actor-specific medians."
+        ]
+      }
+    },
+    "gpu_jobs": 4,
+    "visual_acceptance": "unverified"
+  },
+  "approach_measurements": [
+    {
+      "window": 0,
+      "maximum_target_error_m": 0.028052862688533676
+    },
+    {
+      "window": 1,
+      "maximum_target_error_m": 0.04793503036496114
+    },
+    {
+      "window": 2,
+      "maximum_target_error_m": 0.048528011807951896
+    },
+    {
+      "window": 3,
+      "maximum_target_error_m": 0.06623237317482063
+    }
+  ],
+  "arrival_errors_m": [
+    0.038203817410086355,
+    0.03349973125603257
+  ],
+  "animation_accepted": false,
+  "physical_contact_verified": false,
+  "features": "No unified model features; preserve source archives separately."
+}

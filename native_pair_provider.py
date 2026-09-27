@@ -45,23 +45,56 @@ argv = [p['python'], p['probe'], 'sample', '--repo', p['repo'],
         '--output', str(output)]
 child = subprocess.Popen(argv, env=env, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT, start_new_session=True)
+def stop_child():
+    # Kill only this request's fresh process group, including stubborn workers.
+    # Cancellation must have the same escalation bound as the request timeout.
+    try:
+        os.killpg(child.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        child.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        pass
+    # The leader can exit while its data-loader children remain alive.
+    try:
+        os.killpg(child.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    child.wait(timeout=3)
+def interrupted(signum, frame):
+    # Unwind communicate's waitpid lock before cleanup; waiting from a signal
+    # handler can deadlock when the signal interrupted Popen.wait itself.
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+    raise InterruptedError('Native InterGen generation cancelled')
+cancellation_started = threading.Event()
+cancellation_done = threading.Event()
 def cancelled():
     if os.read(0, 1) == b'':
-        if child.poll() is None:
-            os.killpg(child.pid, signal.SIGTERM)
-threading.Thread(target=cancelled, daemon=True).start()
+        cancellation_started.set()
+        try:
+            stop_child()
+        finally:
+            cancellation_done.set()
 try:
+    signal.signal(signal.SIGTERM, interrupted)
+    signal.signal(signal.SIGHUP, interrupted)
+    threading.Thread(target=cancelled, daemon=True).start()
     log, _ = child.communicate(timeout=p['timeout'])
+except InterruptedError:
+    stop_child()
+    output.unlink(missing_ok=True)
+    raise SystemExit('Native InterGen generation cancelled')
 except subprocess.TimeoutExpired:
-    if child.poll() is None:
-        os.killpg(child.pid, signal.SIGTERM)
-    try:
-        child.communicate(timeout=5)
-    except subprocess.TimeoutExpired:
-        os.killpg(child.pid, signal.SIGKILL)
-        child.communicate()
+    stop_child()
+    child.communicate(timeout=3)
     output.unlink(missing_ok=True)
     raise SystemExit('Native InterGen generation timed out')
+if cancellation_started.is_set():
+    cancellation_done.wait(timeout=7)
+    output.unlink(missing_ok=True)
+    raise SystemExit('Native InterGen generation cancelled')
 if child.returncode:
     output.unlink(missing_ok=True)
     raise SystemExit('Native InterGen generation failed: ' + log[-4000:].decode('utf-8', 'replace'))
@@ -203,13 +236,22 @@ class NativePairProvider:
             if process.poll() is None:
                 # Closing stdin signals the remote wrapper to terminate exactly
                 # its own sample process group, with no global process kills.
-                process.stdin.close()
-                process.terminate()
-                try:
-                    process.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait(timeout=2)
+                if not process.stdin.closed:
+                    process.stdin.close()
+                if keep_stdin and input_bytes is not None:
+                    # Leave SSH connected until its wrapper acknowledges bounded
+                    # remote cleanup; do not release the provider lock first.
+                    try:
+                        process.wait(timeout=7)
+                    except subprocess.TimeoutExpired:
+                        pass
+                if process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=2)
             raise
         finally:
             selector.close()

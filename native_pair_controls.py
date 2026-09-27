@@ -26,13 +26,14 @@ class NativePairControls:
     """Build and refresh the native pair controls inside Studio's Motion tab."""
 
     def __init__(self, gui, session, studio_session, *, on_active, project_folder,
-                 on_capture=None, on_frame_cast=None, on_build_context=None):
+                 on_capture=None, on_frame_cast=None, on_build_context=None, on_open=None):
         self.session = session
         self.studio = studio_session
         self.on_active = on_active
         self.on_capture = on_capture
         self.on_frame_cast = on_frame_cast
         self.on_build_context = on_build_context
+        self.on_open = on_open
         self.folder = Path(project_folder)
         self._notice = ""
         self._syncing = False
@@ -196,8 +197,11 @@ class NativePairControls:
         if self.session.snapshot().get("busy"):
             raise ValueError("Wait for generation to finish before opening another performance.")
         # Decoding is owned by the session; it validates before replacing its clip.
-        self.session.load(data)
-        self._activate()
+        if self.on_open is not None:
+            self.on_open(data)
+        else:
+            self.session.load(data)
+            self._activate()
         self._notice = "Opened native paired performance."
 
     def _bind(self):
@@ -348,18 +352,7 @@ class NativePairControls:
 
         @self.capture.on_click
         def capture_clicked(event):
-            def action():
-                if self.on_capture is None:
-                    raise RuntimeError("Video export is not available in this viewer.")
-                with self._capture_lock:
-                    if self._capture_pending:
-                        raise RuntimeError("A video export is already running.")
-                    self._capture_pending = True
-                    self._capture_message = "Exporting all native frames to MP4…"
-                client = getattr(event, "client", None)
-                threading.Thread(target=self._capture_worker, args=(client,),
-                                 name="native-pair-video-export", daemon=True).start()
-            self._run(action)
+            self._run(lambda: self.start_capture(getattr(event, 'client', None)))
 
         @self.save.on_click
         def save_clicked(event):
@@ -486,6 +479,17 @@ class NativePairControls:
             self._set(self.status, "content", self._safe_text(status))
         finally:
             self._syncing = False
+
+    def start_capture(self, client):
+        if self.on_capture is None:
+            raise RuntimeError('Video export is not available in this viewer.')
+        with self._capture_lock:
+            if self._capture_pending:
+                raise RuntimeError('A video export is already running.')
+            self._capture_pending = True
+            self._capture_message = 'Exporting all native frames to MP4…'
+        threading.Thread(target=self._capture_worker, args=(client,),
+                         name='native-pair-video-export', daemon=True).start()
 
     def _capture_worker(self, client):
         try:

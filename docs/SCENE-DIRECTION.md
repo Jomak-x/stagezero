@@ -11,6 +11,8 @@ not a G1 take, and switching modes does not convert either skeleton. Core mode
 renders its own two supplied human character assets; selecting or generating a
 G1/GLB character does not change the native Core cast.
 
+For paired acting with separate starts and a shared meeting, use **Motion → Direct → Two characters**; see [Paired direction](PAIRED-DIRECTION.md). The existing native Core panel below is now inside **Advanced scene motion**. Core and paired native projects remain separate.
+
 ## Use the current UI
 
 1. In **Scene**, load or create a layout. Start with a spacious set and a clear

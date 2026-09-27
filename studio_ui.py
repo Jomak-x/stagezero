@@ -69,11 +69,13 @@ def section(gui, title, description=''):
 
 
 class StudioUI:
-    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, core_controls=None):
+    def __init__(self, server, session, camera, project_folder, scene_controls, character_controls=None, *, core_session=None, paired_session=None, core_controls=None, on_native_open=None, on_g1_open=None):
         install_upload_snapshots(server)
         self.server, self.session, self.camera = server, session, camera
         self.core_session = core_session
         self.paired_session = paired_session
+        self.on_native_open = on_native_open
+        self.on_g1_open = on_g1_open
         self._core_visibility = []
         self._legacy_motion_controls = []
         self.folder = project_folder
@@ -520,7 +522,12 @@ class StudioUI:
                   'Retry generation' if retry else 'Generate motion')
 
     def refresh_saved(self):
-        self.saved_map = {p.name: p for p in sorted(self.folder.glob('*.stagezero.npz'), key=lambda p: p.stat().st_mtime, reverse=True)}
+        candidates = []
+        for folder in (self.folder, self.folder.parent / 'native-pair-projects'):
+            for path in folder.glob('*.stagezero.npz'):
+                if path.is_file() and not path.is_symlink():
+                    candidates.append(path)
+        self.saved_map = {p.name: p for p in sorted(candidates, key=lambda p: p.stat().st_mtime, reverse=True)}
         self._set(self.saved, 'options', tuple(self.saved_map) or ('No saved projects',))
         if self.saved.value not in self.saved.options:
             self._set(self.saved, 'value', self.saved.options[0])
@@ -922,6 +929,8 @@ class StudioUI:
                     path = native_folder / f'native-{time.time_ns()}.native-pair.stagezero.npz'
                     path.write_bytes(data)
                     s.project_status = f'Saved native performance: {path.name}'
+                    self.refresh_saved()
+                    self._set(self.saved, 'value', path.name)
                     if e.client is not None:
                         e.client.send_file_download(path.name, data)
                     self.update()
@@ -964,10 +973,29 @@ class StudioUI:
 
     def open_data(self, data):
         try:
+            # Inspect member names only; native decoder validates bounded contents
+            # before any state is changed. Never coerce native motion into G1.
+            import io
+            from zipfile import ZipFile
+            if isinstance(data, bytes) and len(data) <= 32_000_000:
+                with ZipFile(io.BytesIO(data)) as archive:
+                    native = 'joints.npy' in archive.namelist()
+                if native:
+                    callback = getattr(self, 'on_native_open', None)
+                    if callback is None:
+                        raise ValueError('Native cast playback is unavailable in this viewer.')
+                    callback(data)
+                    self.session.project_status = 'Opened paired scene with its saved cast and background.'
+                    self.update()
+                    return
             with self.session.lock:
                 if self.session.busy: return
                 self.session.save_project(self.folder, 'before-open-backup')
-                self.session.load_project(data)
+                callback = getattr(self, 'on_g1_open', None)
+                if callback is None:
+                    self.session.load_project(data)
+                else:
+                    callback(data)
                 self._clear_action_edit()
                 self._set(self.mode, 'value', self.session.mode)
                 self._set(self.edit_action, 'value', EXTEND if self.session.active_take else CREATE)

@@ -1,0 +1,164 @@
+{
+  "date": "2026-09-26",
+  "new_pods": 0,
+  "real_core_windows": 19,
+  "fresh_native_intergen_samples": 2,
+  "ai_gateway_plans": 2,
+  "scene_source": "review/scene-integration/live-city.json",
+  "python_tests": 956,
+  "client_tests": 29,
+  "typecheck": "passed",
+  "production_build": "passed; existing bundle-size warning",
+  "scenes": [
+    {
+      "scene": "handshake",
+      "frames": 471,
+      "duration_s": 15.7,
+      "core_windows": 4,
+      "generation_wall_s": 3.769819917040877,
+      "max_root_target_error_m": 0.06623237317482063,
+      "arrival_errors_m": [
+        0.038203817410086355,
+        0.03349973125603257
+      ],
+      "minimum_actual_approach_root_separation_m": 1.3838576392654014,
+      "entry_root_height_gaps_m": [
+        0.008851236801568185,
+        -0.11088835985345447
+      ],
+      "entry_max_endpoint_velocity_error_m_s": 0.10393586555147573,
+      "scene_proxy_collision_frames": [
+        0,
+        0
+      ],
+      "native_pair_frames_bit_exact": true,
+      "review": "reviewed: usable research scene; approach foot glide remains",
+      "physical_contact_verified": false
+    },
+    {
+      "scene": "sparring-live",
+      "frames": 471,
+      "duration_s": 15.7,
+      "core_windows": 4,
+      "generation_wall_s": 3.7999714160105214,
+      "max_root_target_error_m": 0.0469505478570736,
+      "arrival_errors_m": [
+        0.01024443019910582,
+        0.028939385501931734
+      ],
+      "minimum_actual_approach_root_separation_m": 0.9007588735268839,
+      "entry_root_height_gaps_m": [
+        -0.16686641685125192,
+        0.011592082626394218
+      ],
+      "entry_max_endpoint_velocity_error_m_s": 0.15378391289542,
+      "scene_proxy_collision_frames": [
+        0,
+        0
+      ],
+      "native_pair_frames_bit_exact": true,
+      "review": "numerical-only; no full capture",
+      "physical_contact_verified": false
+    },
+    {
+      "scene": "crossed-sparring-live",
+      "frames": 531,
+      "duration_s": 17.7,
+      "core_windows": 5,
+      "generation_wall_s": 4.8959576659835875,
+      "max_root_target_error_m": 0.12278140821051575,
+      "arrival_errors_m": [
+        0.03406226094675837,
+        0.020038671638876952
+      ],
+      "minimum_actual_approach_root_separation_m": 0.6026978251314176,
+      "entry_root_height_gaps_m": [
+        -0.041279076872255294,
+        0.014593013692953738
+      ],
+      "entry_max_endpoint_velocity_error_m_s": 0.1578200277873591,
+      "scene_proxy_collision_frames": [
+        0,
+        0
+      ],
+      "native_pair_frames_bit_exact": true,
+      "review": "reviewed: usable research scene; approach foot glide remains",
+      "physical_contact_verified": false
+    },
+    {
+      "scene": "embrace-live",
+      "frames": 411,
+      "duration_s": 13.7,
+      "core_windows": 3,
+      "generation_wall_s": 19.815955541969743,
+      "max_root_target_error_m": 0.09469300313416966,
+      "arrival_errors_m": [
+        0.04855339528491746,
+        0.01680742149914783
+      ],
+      "minimum_actual_approach_root_separation_m": 2.7002900461453496,
+      "entry_root_height_gaps_m": [
+        -0.909713717039561,
+        0.15878337762320038
+      ],
+      "entry_max_endpoint_velocity_error_m_s": 0.22962855406438237,
+      "scene_proxy_collision_frames": [
+        0,
+        0
+      ],
+      "native_pair_frames_bit_exact": true,
+      "review": "rejected: 0.91m entry height drop",
+      "physical_contact_verified": false
+    },
+    {
+      "scene": "standing-hug-live",
+      "frames": 411,
+      "duration_s": 13.7,
+      "core_windows": 3,
+      "generation_wall_s": 19.67569129203912,
+      "max_root_target_error_m": 0.06119034731687766,
+      "arrival_errors_m": [
+        0.0027356018024435286,
+        0.012604902103954072
+      ],
+      "minimum_actual_approach_root_separation_m": 1.5090205468978994,
+      "entry_root_height_gaps_m": [
+        0.07947347782486691,
+        0.02652371869788961
+      ],
+      "entry_max_endpoint_velocity_error_m_s": 0.06159607116678,
+      "scene_proxy_collision_frames": [
+        0,
+        0
+      ],
+      "native_pair_frames_bit_exact": true,
+      "review": "reviewed: usable research scene; approach foot glide remains",
+      "physical_contact_verified": false
+    }
+  ],
+  "capture_archive_roundtrips": [
+    {
+      "archive": "handshake-ui-capture/scene.native-pair.stagezero.npz",
+      "exact_joint_roundtrip": true
+    },
+    {
+      "archive": "standing-hug-capture/scene.native-pair.stagezero.npz",
+      "exact_joint_roundtrip": true
+    },
+    {
+      "archive": "crossed-sparring-capture/scene.native-pair.stagezero.npz",
+      "exact_joint_roundtrip": true
+    },
+    {
+      "archive": "embrace-capture/scene.native-pair.stagezero.npz",
+      "exact_joint_roundtrip": true
+    }
+  ],
+  "limitations": [
+    "Authored transition, not a single learned continuous rollout.",
+    "InterGen noncommercial license and rig licensing require clearance before commercial production.",
+    "Approach foot sliding, mesh contact and physical strikes remain unverified.",
+    "One selected pair acts at a time; extra cast members stay idle.",
+    "Bounded 20-second approach and 1000-frame composed timeline."
+  ]
+}

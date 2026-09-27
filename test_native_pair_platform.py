@@ -187,6 +187,7 @@ class NativePairPlatformTests(unittest.TestCase):
             with self.subTest(action=action):
                 session = self.session()
                 original = session.timeline_clip()
+                third = session.add_actor('Third')
                 started, release = threading.Event(), threading.Event()
                 def builder(base, scene, *, cancelled):
                     started.set(); release.wait(2)
@@ -205,7 +206,6 @@ class NativePairPlatformTests(unittest.TestCase):
                 elif action == 'load':
                     session.load_reviewed_handshake()
                 else:
-                    third = session.add_actor('Third')
                     session.select_pair('actor_1', third)
                 retained = session.timeline_clip()
                 release.set(); session._thread.join(2)
@@ -240,6 +240,128 @@ class NativePairPlatformTests(unittest.TestCase):
         self.assertEqual(restored.timeline_clip().metadata['segments'], metadata['segments'])
         self.assertEqual(restored.timeline_clip().joints.tobytes(), source.joints.tobytes())
         self.assertIsNone(restored.timeline_clip().features)
+
+    def test_performance_build_progress_and_atomic_commit(self):
+        session = self.session()
+        original = session.timeline_clip()
+        started, release = threading.Event(), threading.Event()
+        result_clip = self.context_fixture(original)
+        def builder(scene, *, cancelled, on_progress):
+            on_progress({'stage': 'routing', 'completed': 1, 'total': 3})
+            started.set(); release.wait(2)
+            self.assertFalse(cancelled())
+            return {'clip': result_clip, 'placement': {'x': 2., 'z': 0., 'yaw_degrees': 30.}}
+        session.build_performance(builder, request={'action': 'handshake'})
+        self.assertTrue(started.wait(1))
+        self.assertIs(session.timeline_clip(), original)
+        self.assertEqual(session.snapshot()['pending_operation'], 'performance')
+        self.assertEqual(session.snapshot()['progress']['stage'], 'routing')
+        for edit in (lambda: session.add_actor('Blocked'),
+                     lambda: session.rename_actor('actor_1', 'Blocked'),
+                     lambda: session.set_placement(x=4.)):
+            with self.assertRaises(RuntimeError):
+                edit()
+        release.set(); session._thread.join(2)
+        self.assertIs(session.timeline_clip(), result_clip)
+        self.assertEqual(session.snapshot()['placement']['x'], 2.)
+        self.assertIsNone(session.snapshot()['progress'])
+
+    def test_failed_performance_retry_then_scene_change_invalidates_retry(self):
+        session = self.session()
+        original = session.timeline_clip()
+        attempts = []
+        def builder(scene, *, cancelled, on_progress):
+            attempts.append(scene)
+            if len(attempts) == 1:
+                raise RuntimeError('temporary service failure')
+            return {'clip': original, 'placement': {'x': 0., 'z': 0., 'yaw_degrees': 0.}}
+        session.build_performance(builder, request={'seed': 42})
+        session._thread.join(2)
+        self.assertIs(session.timeline_clip(), original)
+        self.assertIn('temporary', session.snapshot()['failure'])
+        session.retry(); session._thread.join(2)
+        self.assertEqual(attempts[0], attempts[1])
+        scene = session.scene_document
+        scene['name'] = 'Edited scene'
+        session.update_scene(scene)
+        with self.assertRaisesRegex(ValueError, 'No generation request'):
+            session.retry()
+
+    def test_cancelled_performance_late_output_retains_complete_previous_state(self):
+        session = self.session()
+        original = session.timeline_clip()
+        started, release = threading.Event(), threading.Event()
+        def builder(scene, *, cancelled, on_progress):
+            started.set(); release.wait(2)
+            self.assertTrue(cancelled())
+            on_progress('late progress')
+            return {'clip': self.context_fixture(original),
+                    'placement': {'x': 50., 'z': 0., 'yaw_degrees': 0.}}
+        session.build_performance(builder)
+        self.assertTrue(started.wait(1))
+        session.cancel(); release.set(); session._thread.join(2)
+        self.assertIs(session.timeline_clip(), original)
+        self.assertEqual(session.snapshot()['placement']['x'], 0.)
+        self.assertIsNone(session.snapshot()['progress'])
+        self.assertFalse(session.snapshot()['busy'])
+
+    def test_scene_and_placement_collision_reject_before_commit(self):
+        from scene_objects import make_object
+        session = self.session()
+        original = session.timeline_clip()
+        scene = session.scene_document
+        blocker = make_object('crate', 0)
+        blocker['position'] = original.joints[0, 0, 0].tolist()
+        scene['objects'].append(blocker)
+        with self.assertRaisesRegex(ValueError, 'scene solid'):
+            session.update_scene(scene)
+        self.assertEqual(session.scene_document['objects'], [])
+        blocker['position'][0] += 10.
+        session.update_scene(scene)
+        with self.assertRaisesRegex(ValueError, 'scene solid'):
+            session.set_placement(x=10.)
+        self.assertEqual(session.snapshot()['placement']['x'], 0.)
+        shifted = NativePairClip(original.joints + [10., 0., 0.], metadata=original.metadata)
+        with self.assertRaisesRegex(ValueError, 'scene solid'):
+            session.load_source(shifted)
+        self.assertIs(session.timeline_clip(), original)
+
+    def test_generated_and_imported_collision_reject_before_commit(self):
+        from native_pair_clip import encode_project
+        from scene_objects import make_object
+        original = load_source(REVIEWED_HANDSHAKE)
+        shifted = NativePairClip(original.joints + [10., 0., 0.], metadata=original.metadata)
+        class Provider:
+            def generate(self, **request):
+                return shifted
+        session = self.session(Provider())
+        retained = session.timeline_clip()
+        scene = session.scene_document
+        blocker = make_object('crate', 0)
+        blocker['position'] = shifted.joints[0, 0, 0].tolist()
+        scene['objects'].append(blocker)
+        session.update_scene(scene)
+        session.generate('Greeting', 42)
+        session._thread.join(2)
+        self.assertIs(session.timeline_clip(), retained)
+        self.assertIn('scene solid', session.snapshot()['failure'])
+        state = session.snapshot()
+        archive = encode_project(shifted, state['cast'], state['selected_pair'], scene)
+        with self.assertRaisesRegex(ValueError, 'scene solid'):
+            session.load(archive)
+        self.assertIs(session.timeline_clip(), retained)
+
+    def test_replacing_source_discards_context_retry_and_original(self):
+        session = self.session()
+        original = session.timeline_clip()
+        def builder(base, scene, *, cancelled):
+            return self.context_fixture(base)
+        session.build_context(builder); session._thread.join(2)
+        self.assertIs(session.original_pair_clip(), original)
+        session.load_reviewed_handshake()
+        self.assertIsNone(session.original_pair_clip())
+        with self.assertRaisesRegex(ValueError, 'No generation request'):
+            session.retry()
 
     def test_malformed_segment_provenance_is_rejected_before_replacing_motion(self):
         session = self.session()
