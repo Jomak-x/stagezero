@@ -2,6 +2,10 @@
 
 Last updated: 2026-09-27. The latest continuation below supersedes the older native-only checkpoint retained afterward.
 
+## Opt-in terrain follow-up
+
+PR #30 was merged at `184eca0`. The user authorized a separate follow-up to fix the remaining real descent failures, superseding the earlier freeze instruction. Fresh normal-app descent now extends the industrial take from 480 to 640 frames; two separate forward commands, with save/reopen between them, extend it to 720. A fresh 80-frame descent also passes on a 37° rotated and translated scene. All native/display prefixes remain exact, and ordinary ARDY remains off-path with terrain disabled by default. See [reproduction, videos, and bounded scope](../../review/terrain-followup/README.md).
+
 ## Normal-app integration continuation
 
 The terrain option is now integrated into normal Studio, with a separate native take and rig17 display. Read [the usage and supported scope](../TERRAIN-AWARE.md) and [normal-app evidence](../../review/terrain-assisted/normal-app/README.md). The fresh normal-UI temple run passed stairs/bridge (200 frames), a separate open command (280), and save/reopen followed by `enter` (360). Prior native and display frames remain exact across these appends. Turning the option off restores the ordinary 240-frame take byte-for-byte. An unsupported jump command preserved the committed terrain take.

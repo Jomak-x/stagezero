@@ -56,6 +56,11 @@ def _clearance_profile(geometry, first, last, first_r, last_r, samples, pivot, c
     rigid-foot envelope as final validation, including rotation interpolation.
     """
     u = np.linspace(0., 1., count)
+    # Descending contacts need their heel beyond the upper tread before the
+    # final lowering phase. A feasible late crossing can still demand a large
+    # last-frame drop (and an abrupt knee extension), so reserve the landing
+    # sample for every descent, not only when the lift solver is infeasible.
+    _landing_hold = _landing_hold or (count >= 4 and first[1]-last[1] > .005)
     finish = u[-2] if _landing_hold else 1.
     travel = np.clip((u-u[1])/(finish-u[1]), 0., 1.)
     blend = travel*travel*(3-2*travel)
@@ -176,6 +181,7 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
     # initial stand; avoid compressed transfers when resuming that contact.
     runs, route_yaw, bouts = _plan_contacts(native, native_r, fps, fake_p, fake_r,
                                           initial_is_continuation=boundary,
+                                          heading_assistance=heading_assistance,
                                           # Center ankle stance about the pelvis. The
                                           # planner targets a toe pivot, not an ankle;
                                           # this actual mesh has a much longer toe
@@ -529,7 +535,20 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
         report['numerical_rejections'].append('knee flexion exceeds110deg')
     if max(frame_angles) > 35:
         report['numerical_rejections'].append('local leg rotation step exceeds35deg/frame')
-    if (not _follow_turn_swing and (report['max_actual_mesh_sole_penetration_m'] > .008 or swept_penetration > .008)):
+    actual_penetration = report['max_actual_mesh_sole_penetration_m']
+    penetration_failed = ((actual_penetration is not None and actual_penetration > .008)
+                          or swept_penetration > .008)
+    if not _clearance_mode and penetration_failed:
+        # Samplewise sine arcs can clear every stored pose yet strike a riser
+        # between poses. Retry with the existing bounded swept-envelope solve
+        # before accepting or rejecting; its output reruns every quality gate.
+        return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
+            initial_assisted_positions=initial_assisted_positions,
+            initial_assisted_rotations=initial_assisted_rotations,
+            _anchor_advances=_anchor_advances, _repair_attempt=_repair_attempt, _clearance_mode=True,
+            _minimum_stance_frames=_minimum_stance_frames, _follow_turn_swing=_follow_turn_swing,
+            heading_assistance=heading_assistance)
+    if not _follow_turn_swing and penetration_failed:
         return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
             initial_assisted_positions=initial_assisted_positions,
             initial_assisted_rotations=initial_assisted_rotations,
