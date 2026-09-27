@@ -81,7 +81,8 @@ def _route_frames(native, rotations, fps):
 
 
 def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_continuation=False,
-                   minimum_transfer_frames=None, touchdown_lead=.18, minimum_stance_frames=4):
+                   minimum_transfer_frames=None, touchdown_lead=.18, minimum_stance_frames=4,
+                   heading_assistance=False):
     path, progress, yaw, bouts = _route_frames(native, rotations, fps)
     native_yaw = np.unwrap(np.arctan2(rotations[:, 0, 0, 2], rotations[:, 0, 2, 2]))
     count = len(native)
@@ -107,11 +108,26 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         if b-a < 3:
             return
         # Native yaw may contain brief oscillations while the character is
-        # standing. Smooth for planning only; leave every native rotation and
-        # the resulting retargeted non-leg rotation unchanged.
+        # standing. Smooth for planning only; native rotations stay unchanged.
         turn = gaussian_filter1d(native_yaw[a:b], 1.5)
+        foot_angles = [np.arctan2(entries[-1][2][0, 2], entries[-1][2][2, 2])
+                       for entries in contacts]
+        anchor_yaw = float(np.angle(np.mean(np.exp(1j*np.array(foot_angles)))))
+        route_directed = heading_assistance and followed_by_walk
+        if route_directed:
+            # Explicit world-heading assistance gives travel direction priority
+            # over native pelvis overshoot during a buffered walking lead-in.
+            # Turn from the inherited contacts along the shortest arc, keeping
+            # ordinary/native-heading pivots subject to the reversal check.
+            delta = float(np.arctan2(np.sin(yaw[b]-anchor_yaw), np.cos(yaw[b]-anchor_yaw)))
+            if np.isclose(abs(delta), np.pi, atol=1e-7, rtol=0):
+                raise ValueError('Stationary pivot has an ambiguous half-turn route heading')
+            phase = np.linspace(0., 1., b-a)
+            turn = anchor_yaw+delta*phase*phase*(3.-2.*phase)
         delta = float(turn[-1]-turn[0])
         if abs(delta) < np.radians(30):
+            if route_directed:
+                yaw[a:b] = turn
             return
         if not followed_by_walk and np.ptp(turn[-min(5, len(turn)):]) > np.radians(5):
             raise ValueError('Stationary pivot needs a settled final heading')
@@ -121,13 +137,10 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         # Native pelvis orientation can differ from the accepted foot heading
         # (for example while reaching). Transport its turn delta from the
         # current contacts; treating it as absolute foot yaw snaps the legs.
-        foot_angles = [np.arctan2(entries[-1][2][0, 2], entries[-1][2][2, 2])
-                       for entries in contacts]
-        anchor_yaw = float(np.angle(np.mean(np.exp(1j*np.array(foot_angles)))))
         anchor_yaw += 2*np.pi*round((turn[0]-anchor_yaw)/(2*np.pi))
         turn = turn+(anchor_yaw-turn[0])
         yaw[a:b] = turn
-        if followed_by_walk:
+        if followed_by_walk and not route_directed:
             # Velocity gives the next walking heading. Join it during the
             # stationary tail rather than switching the knee pole at b.
             destination = yaw[b]+2*np.pi*round((turn[-1]-yaw[b])/(2*np.pi))

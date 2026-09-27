@@ -41,10 +41,105 @@ def stationary_pivot_native(turn_frames=40, frames=76):
     return positions, rotations
 
 
+class RouteDirectedPivotTests(unittest.TestCase):
+    def plan(self, *, initial_heading=90., destination=-165., hold=40,
+             heading_assistance=True, walk=True):
+        from terrain_assisted_motion import _plan_contacts
+        times = np.arange(hold+95)
+        # A large reversible pelvis excursion is not evidence of turn intent.
+        angles = np.interp(times, [0, max(1, hold//4), hold-1], [-140., -249., -190.])
+        native_r = np.array([np.broadcast_to(Rotation.from_euler('y', a, degrees=True).as_matrix(),
+                                             (27, 3, 3)) for a in angles])
+        heading = np.radians(destination)
+        advance = 1.8*np.clip((times-hold)/60., 0., 1.) if walk else np.zeros(len(times))
+        native_p = np.array([core_fk([v*np.sin(heading), .94, v*np.cos(heading)], r)
+                             for v, r in zip(advance, native_r)])
+        saved_p, saved_r = native_p.copy(), native_r.copy()
+        initial_r = np.broadcast_to(Rotation.from_euler('y', initial_heading, degrees=True).as_matrix(),
+                                    (27, 3, 3)).copy()
+        initial_p = core_fk(native_p[0, 0], initial_r)
+        result = _plan_contacts(native_p, native_r, 20., initial_p, initial_r,
+                                initial_is_continuation=True, heading_assistance=heading_assistance)
+        np.testing.assert_array_equal(native_p, saved_p)
+        np.testing.assert_array_equal(native_r, saved_r)
+        for entries in result[0]:
+            np.testing.assert_array_equal(entries[0][3], initial_r[0])
+        return result
+
+    def test_explicit_route_intent_replaces_reversible_native_pelvis_excursion(self):
+        contacts, yaw, bouts = self.plan()
+        start = bouts[0][0]
+        hold_yaw = np.unwrap(yaw[:start+1])
+        self.assertAlmostEqual(hold_yaw[0], np.pi/2)
+        self.assertAlmostEqual(hold_yaw[-1], np.radians(195.))
+        self.assertTrue((np.diff(hold_yaw) >= -1e-10).all())
+        self.assertLess(np.max(np.diff(hold_yaw)), np.radians(5))
+        self.assertGreaterEqual(sum(0 < row[0] < start for side in contacts for row in side), 3)
+        with self.assertRaisesRegex(ValueError, 'reverses direction'):
+            self.plan(heading_assistance=False)
+
+    def test_route_heading_crosses_wrap_in_shortest_direction(self):
+        for start, end, change in [(170., -170., 20.), (-170., 170., -20.)]:
+            with self.subTest(start=start):
+                _, yaw, bouts = self.plan(initial_heading=start, destination=end)
+                turn = np.unwrap(yaw[:bouts[0][0]+1])
+                self.assertAlmostEqual(turn[-1]-turn[0], np.radians(change))
+                self.assertLess(np.max(abs(np.diff(turn))), np.radians(1.))
+
+    def test_heading_assistance_keeps_timing_and_intent_rejections(self):
+        with self.assertRaisesRegex(ValueError, 'more time for alternating lifted contacts'):
+            self.plan(hold=8)
+        with self.assertRaisesRegex(ValueError, 'ambiguous half-turn'):
+            self.plan(initial_heading=0., destination=180.)
+        with self.assertRaisesRegex(ValueError, 'reverses direction'):
+            self.plan(walk=False)
+
+
 class AuthoredRouteRigTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.character = GroundedCharacter(Path(__file__).parent/'assets/core-characters/civilian.glb')
+
+    def test_missing_actual_mesh_support_returns_rejection_without_retry_error(self):
+        from unittest.mock import patch
+        native_p, native_r = stationary_pivot_native(frames=6)
+        original = self.character._sole_vertices
+
+        def unsupported_vertices(*args):
+            # Simulate an actual mesh wholly outside the authored support while
+            # leaving the planner's conservative contact footprint measurable.
+            return original(*args)+[100., 0., 0.]
+
+        with patch.object(self.character, '_sole_vertices', side_effect=unsupported_vertices):
+            _, _, _, report = assist_rig_clip(native_p, native_r, authored_floor(), self.character)
+        self.assertIsNone(report['max_actual_mesh_sole_penetration_m'])
+        self.assertGreater(report['unsupported_actual_mesh_sole_vertices'], 0)
+        self.assertIn('actual sole vertices leave authored support', report['numerical_rejections'])
+        self.assertIn('actual mesh sole penetration exceeds8mm', report['numerical_rejections'])
+        self.assertFalse(report['swept_clearance_contact_mode'])
+        self.assertFalse(report['route_tangent_swing_paths'])
+
+    def test_feasible_descent_also_reserves_vertical_landing(self):
+        from terrain_assisted_rig import _clearance_profile
+
+        class EarlyDescendingTread:
+            def support_height(self, x, z, y, **kwargs):
+                return .20 if z > -.4 else .12
+
+        samples = np.array([[x, -.09, z] for x in (-.05, 0., .05)
+                            for z in np.linspace(-.11, .20, 5)])
+        pivot = np.array([0., -.09, .197])
+        first, last = np.array([0., .204, 0.]), np.array([0., .124, -1.15])
+        rotation = Rotation.from_euler('y', np.pi).as_matrix()
+        # This lip can be cleared without the former infeasibility fallback;
+        # descending still needs an explicit lowering phase before touchdown.
+        path, rotations, lift = _clearance_profile(EarlyDescendingTread(), first, last,
+                                                   rotation, rotation, samples, pivot, 10)
+        np.testing.assert_array_equal(path[[0, -1]], [first, last])
+        np.testing.assert_allclose(path[-2, [0, 2]], path[-1, [0, 2]], atol=1e-10)
+        np.testing.assert_allclose(rotations[-2], rotations[-1], atol=1e-10)
+        self.assertGreater(path[-2, 1], path[-1, 1])
+        self.assertLessEqual(lift, .24)
 
     def test_descent_clears_heel_edge_before_vertical_landing(self):
         from scipy.spatial.transform import Slerp
@@ -68,6 +163,9 @@ class AuthoredRouteRigTests(unittest.TestCase):
         # The whole rigid envelope must clear the lip between stored poses,
         # including the heel immediately before the lower-tread touchdown.
         ankles = path-np.einsum('tij,j->ti', rotations, pivot)
+        # The descent reaches its destination before touchdown, leaving the
+        # final sample for vertical lowering rather than a late heel crossing.
+        np.testing.assert_allclose(ankles[-2, [0, 2]], ankles[-1, [0, 2]], atol=1e-10)
         for t in range(len(path)-1):
             for fraction in np.linspace(0., 1., 9):
                 rotation = Slerp([0., 1.], Rotation.from_matrix(rotations[t:t+2]))([fraction]).as_matrix()[0]
@@ -154,6 +252,39 @@ class AuthoredRouteRigTests(unittest.TestCase):
         self.assertLess(report['max_actual_mesh_sole_penetration_m'], .001)
         self.assertLess(report['max_flat_stance_mesh_vertex_slip_m_s'], .001)
         self.assertTrue(stance[-10:].all())
+
+    def test_rotated_descent_repairs_interframe_riser_contact(self):
+        from switchback_traversal import industrial_switchback_scene
+        scene = industrial_switchback_scene()
+        turn = Rotation.from_euler('y', 37., degrees=True).as_matrix()
+        offset = np.array([3., 0., -2.])
+        for obj in scene['objects']:
+            obj['position'] = (turn@obj['position']+offset).tolist()
+            if obj['kind'] in ('custom', 'door'):
+                obj['yaw'] = obj.get('yaw', 0.)+37.
+        geometry = SceneInteractionGeometry.from_scene(scene, include_studio_floor=False)
+        times = np.arange(110)
+        z = -7.5-3.875*np.clip((times-15)/70., 0., 1.)
+        native_r = np.broadcast_to(turn@Rotation.from_euler('y', np.pi).as_matrix(),
+                                   (len(times), 27, 3, 3)).copy()
+        roots = np.array([turn@[10.5, .94, value]+offset for value in z])
+        for root in roots:
+            root[1] = geometry.support_height(root[0], root[2], .2,
+                                              max_step_up=.4, max_drop=.4)+.94
+        native_p = np.array([core_fk(root, r) for root, r in zip(roots, native_r)])
+        saved_p, saved_r = native_p.copy(), native_r.copy()
+        poses, rotations, stance, report = assist_rig_clip(native_p, native_r, geometry,
+                                                          self.character, heading_assistance=True)
+        # The inexpensive arc clears stored poses but crosses a riser between
+        # them. Actual swept validation must trigger the bounded contact solve.
+        self.assertTrue(report['swept_clearance_contact_mode'])
+        self.assertEqual(report['numerical_rejections'], [])
+        self.assertLessEqual(report['max_swept_sole_envelope_penetration_m'], .008)
+        self.assertLessEqual(report['max_local_leg_rotation_frame_step_deg'], 35.)
+        self.assertEqual(report['unsupported_swept_sole_envelope_samples'], 0)
+        np.testing.assert_array_equal(native_p, saved_p)
+        np.testing.assert_array_equal(native_r, saved_r)
+        np.testing.assert_array_equal(poses[:, 0, [0, 2]], native_p[:, 0, [0, 2]])
 
     def test_authored_narrow_support_cannot_sustain_turning_footprint(self):
         native_p, native_r = quarter_circle_native()

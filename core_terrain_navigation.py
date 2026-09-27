@@ -304,7 +304,7 @@ def plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initia
         if (not adapted.get("terrain_active") or type(planning_heading) not in (int, float)
                 or not math.isfinite(planning_heading)):
             raise ValueError("Terrain planning heading must be a finite terrain-only yaw")
-        yaws[actor_id] = float(planning_heading)
+        yaws[actor_id] = math.atan2(math.sin(planning_heading), math.cos(planning_heading))
     verb = action["verb"]
     resolved_target_id = None
     if verb == "move":
@@ -381,7 +381,11 @@ def plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initia
                               "position_xz": [round(float(point[0]), 5), round(float(point[2]), 5)],
                               "root_height": round(float(height+ROOT_TO_SOLE_M), 5)}
                     if turning:
-                        target["heading"] = max(-math.pi, min(math.pi, round(yaw, 6)))
+                        # The Core request bounds heading to ±π. Preserve the
+                        # intended turn across that boundary instead of
+                        # flattening every target beyond it to the limit.
+                        wrapped = math.atan2(math.sin(yaw), math.cos(yaw))
+                        target["heading"] = max(-math.pi, min(math.pi, round(wrapped, 6)))
                     targets.append(target)
                 goals[aid] = targets
                 frames_y[aid] = round(floor_origin, 5)

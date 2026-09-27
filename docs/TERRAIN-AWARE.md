@@ -19,7 +19,7 @@ walk up foundry approach stairs, cross service gantry bridge
 open workshop door, enter
 ```
 
-`walk down loading exit steps` is experimental: a saved native trial passes CPU contact repair, but the final fresh UI trial rejected a direction-reversing pivot. It is not part of the verified demo. For the demo, use the two commands above or replay the included industrial archive.
+`walk down loading exit steps` now passes fresh normal-app generation, followed by separate forward commands and save/reopen. A second fresh descent passes with the scene rotated 37° and translated. Descent and difficult pivots remain experimental outside these verified shallow routes; unsuitable motion still rejects. See [follow-up evidence](../review/terrain-followup/README.md).
 
 Scene-tab edits do not silently move an existing terrain take onto different geometry. Save the take, build the new scene, then use **Start terrain actor here** for it. Saved projects retain their own authored scene.
 
@@ -30,7 +30,7 @@ For adaptive AI Scene3 generation, explicitly request walking up/down stairs or 
 | Interaction | Behavior |
 | --- | --- |
 | Walking, approaching, ascending shallow stairs, crossing a bridge | Uses actual supported surfaces and obstacle clearance; rejects missing, ambiguous, blocked, or unsuitable routes. |
-| Descent and difficult pivots | Experimental. The final industrial descent UI trial rejected safely; not verified for the demo. |
+| Descent and difficult pivots | Experimental. Fresh shallow industrial descent, rotated/translated descent, and repeated continuations pass. Ambiguous 180° pivots and motion beyond the existing limits still reject. |
 | Static Scene3 geometry | Uses rendered triangles, boxes, and yaw transforms; no invisible ramp or floor through a gap. Stair aliases select detected stair flights rather than decorative names alone. |
 | Configured automatic doors | Lift from measured actor proximity and height, retain the trigger during replay, and permit crossing only after opening. |
 | Repeated submissions and save/load | Preserve committed native features and display poses exactly. Relative directions use the displayed actor's committed facing, regardless of playback cursor. |
