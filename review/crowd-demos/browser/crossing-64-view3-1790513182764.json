@@ -1,0 +1,302 @@
+{
+  "schema": "stagezero.saved-crowd-profile.v1",
+  "scene": "crossing",
+  "count": 64,
+  "durationWallSeconds": 30.0155,
+  "sustainedFps": 60.002332128400326,
+  "frameMs": {
+    "median": 16.70000000001164,
+    "p95": 18.599999999976717,
+    "p99": 18.70000000001164,
+    "max": 18.800000000017462,
+    "samples": 1801
+  },
+  "animationCpuMs": {
+    "median": 0.10000002384185791,
+    "p95": 0.19999998807907104,
+    "p99": 0.20000004768371582,
+    "max": 0.30000001192092896,
+    "samples": 1801
+  },
+  "renderSubmissionCpuMs": {
+    "median": 3.600000023841858,
+    "p95": 4.5,
+    "p99": 4.699999988079071,
+    "max": 5.199999988079071,
+    "samples": 1801
+  },
+  "gpuMs": {
+    "median": 4.485875,
+    "p95": 5.315999,
+    "p99": 6.114499,
+    "max": 7.187749,
+    "samples": 1800
+  },
+  "heapBytes": {
+    "median": 60612864,
+    "p95": 61566785,
+    "p99": 61790607,
+    "max": 61888722,
+    "samples": 1801
+  },
+  "hiddenFrames": 0,
+  "slowFrames": [],
+  "validForegroundRun": true,
+  "loadMs": 541.4000000357628,
+  "loadScope": "Scene data fetch, parse, geometry init and first render; excludes initial JS navigation. Module-to-ready recorded separately.",
+  "moduleToReadyMs": 639.0999999642372,
+  "payloadBytes": 20140711,
+  "inputHashes": {
+    "/review/crowd-demos/assets/manifest.json": {
+      "bytes": 12399176,
+      "sha256": "ab964b850add29362c705a00b2cee25c285d0591adaa47857c0101b09c375bac"
+    },
+    "http://127.0.0.1:24985/review/crowd-demos/assets/affine.bin": {
+      "bytes": 1802592,
+      "sha256": "f3a60de45198264259705f17642d695d9016db44c389a950991307a34c7f71fd"
+    },
+    "/review/crowd-demos/crossing-32.json": {
+      "bytes": 2044292,
+      "sha256": "7ab5cbc61c05127452b85cf25af264490ce2bc85f1b8ea5f5e19980141231e0d"
+    },
+    "/review/crowd-demos/crossing-64.json": {
+      "bytes": 3894651,
+      "sha256": "a6820ce63b8cfd0115b2c6efa5f9b93b97a71e2edc1a088c211d9365c2f48e63"
+    }
+  },
+  "device": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M6, Unspecified Version)",
+    "resolution": [
+      1200,
+      842
+    ],
+    "pixelRatio": 1,
+    "hardwareConcurrency": 12
+  },
+  "rendererMemory": {
+    "geometries": 143,
+    "textures": 122
+  },
+  "drawCalls": 159,
+  "triangles": 3569742,
+  "actorTriangles": 3143168,
+  "positionParity": {
+    "method": "WebGL2 transform feedback of the exact shared affine position shader vs shipped native CPU skinning",
+    "diagnostics": [
+      {
+        "case": [
+          0,
+          1,
+          0.37,
+          122,
+          1
+        ],
+        "actual": [
+          0.03554108738899231,
+          0.8116250038146973,
+          0.026135560125112534,
+          0.018504193052649498,
+          0.8115424513816833,
+          0.0340418666601181,
+          0.015301432460546494,
+          0.808782696723938,
+          0.029385661706328392
+        ],
+        "cpuFirst": [
+          0.03557650372385979,
+          0.8142452836036682,
+          0.026361361145973206,
+          0.018530376255512238,
+          0.8141658902168274,
+          0.03424782678484917,
+          0.015334789641201496,
+          0.811396062374115,
+          0.02959262579679489
+        ],
+        "cpuSecond": [
+          0.03548077866435051,
+          0.807163417339325,
+          0.025751085951924324,
+          0.018459608778357506,
+          0.8070756196975708,
+          0.033691175282001495,
+          0.015244634822010994,
+          0.8043329119682312,
+          0.02903326228260994
+        ],
+        "cpuIdle": [
+          0.03881276398897171,
+          0.840527355670929,
+          0.04607807472348213,
+          0.021358536556363106,
+          0.8408526182174683,
+          0.05300753936171532,
+          0.01856900192797184,
+          0.8371595740318298,
+          0.04874910041689873
+        ]
+      },
+      {
+        "case": [
+          569,
+          570,
+          0.63,
+          122,
+          0.41
+        ],
+        "actual": [
+          0.0100812166929245,
+          0.7741882801055908,
+          0.02975100837647915,
+          0.0059459456242620945,
+          0.7726671099662781,
+          0.0332765057682991,
+          0.004773113876581192,
+          0.7703325152397156,
+          0.0328032486140728
+        ],
+        "cpuFirst": [
+          -0.03139925375580788,
+          0.6783595681190491,
+          0.005952091887593269,
+          -0.0163621436804533,
+          0.6741735339164734,
+          0.004677687305957079,
+          -0.01524236612021923,
+          0.6737893223762512,
+          0.009658853523433208
+        ],
+        "cpuSecond": [
+          -0.03118485026061535,
+          0.6789392232894897,
+          0.006434433162212372,
+          -0.01615739054977894,
+          0.6747654676437378,
+          0.005003702826797962,
+          -0.014983858913183212,
+          0.6743884086608887,
+          0.009973032400012016
+        ],
+        "cpuIdle": [
+          0.03881276398897171,
+          0.840527355670929,
+          0.04607807472348213,
+          0.021358536556363106,
+          0.8408526182174683,
+          0.05300753936171532,
+          0.01856900192797184,
+          0.8371595740318298,
+          0.04874910041689873
+        ]
+      },
+      {
+        "case": [
+          0,
+          1,
+          0.5,
+          122,
+          0
+        ],
+        "actual": [
+          0.03881276398897171,
+          0.840527355670929,
+          0.04607807472348213,
+          0.021358536556363106,
+          0.8408526182174683,
+          0.05300753936171532,
+          0.01856900192797184,
+          0.8371595740318298,
+          0.048749104142189026
+        ],
+        "cpuFirst": [
+          0.03557650372385979,
+          0.8142452836036682,
+          0.026361361145973206,
+          0.018530376255512238,
+          0.8141658902168274,
+          0.03424782678484917,
+          0.015334789641201496,
+          0.811396062374115,
+          0.02959262579679489
+        ],
+        "cpuSecond": [
+          0.03548077866435051,
+          0.807163417339325,
+          0.025751085951924324,
+          0.018459608778357506,
+          0.8070756196975708,
+          0.033691175282001495,
+          0.015244634822010994,
+          0.8043329119682312,
+          0.02903326228260994
+        ],
+        "cpuIdle": [
+          0.03881276398897171,
+          0.840527355670929,
+          0.04607807472348213,
+          0.021358536556363106,
+          0.8408526182174683,
+          0.05300753936171532,
+          0.01856900192797184,
+          0.8371595740318298,
+          0.04874910041689873
+        ]
+      }
+    ],
+    "cases": 3,
+    "comparedScalarValues": 255366,
+    "maxAbsolutePositionErrorMeters": 2.0146369927864782e-7,
+    "toleranceMeters": 0.00001,
+    "passed": true,
+    "normals": "Approximate weighted affine normals; not claimed equal to CPU triangle-normal recomputation"
+  },
+  "trajectoryMetrics": {
+    "actor_count": 64,
+    "duration_s": 120,
+    "frames": 1201,
+    "pair_overlap_samples": 0,
+    "swept_pair_overlap_samples": 0,
+    "min_pair_distance_m": 0.65,
+    "min_swept_pair_distance_m": 0.65,
+    "max_proxy_penetration_m": 0,
+    "static_collision_samples": 0,
+    "outside_walkable_samples": 0,
+    "max_root_acceleration_mps2": 36.77,
+    "heading_interpretation": "Navigation yaw eased at2.8rad/s; explicit native pair common-yaw is a source coordinate transform, not body heading",
+    "root_motion_interpretation": "Piecewise linear reserved-grid motion; acceleration is discontinuous at route vertices and dwell boundaries",
+    "max_root_step_m": 0.1838,
+    "max_root_speed_mps": 1.8385,
+    "root_jump_samples": 0,
+    "max_unscheduled_stall_s": 0.5,
+    "deadlocked_actor_count": 0,
+    "max_continuous_stationary_s": 46,
+    "max_signal_queue_wait_s": 36,
+    "actors_stationary_over_30s": 1,
+    "stall_scope": "Deadlock count covers unscheduled walking/yielding stalls only. Signal queues, scheduled dwell and staff work are measured separately; zero deadlocks does not mean zero long pauses.",
+    "min_actor_travel_m": 96.891,
+    "min_mobile_actor_travel_m": 96.891,
+    "stationary_work_actor_ids": [],
+    "median_actor_travel_m": 154.714,
+    "interior_visitors": 0,
+    "full_body_collision": "not measured; disc proxy only",
+    "foot_sliding": "not measured by root navigation",
+    "validation_scope": "All frames and continuous linear pair motion between cached samples; authored ground obstacles",
+    "peak_green_central_actors": 62,
+    "peak_green_central_time_s": 83.2,
+    "first_40_central_time_s": 13.2,
+    "road_actor_samples_during_wait": 0,
+    "road_entry_samples_outside_cross": 0,
+    "central_region": "abs(x)<12.76 and abs(z)<12.76 metres; excludes outer arterial arms",
+    "mean_green_central_actors": 35.49,
+    "actors_visiting_central_10m_square": 64,
+    "actors_reaching_opposite_corner": 64
+  },
+  "capture": false,
+  "notes": [
+    "Saved offline trajectories, not live navigation decisions",
+    "GPU affine shared Xbot mesh; root-discs do not certify full mesh collision",
+    "Heap excludes GPU and total process memory",
+    "Background shadow maps; animated people use contact blobs, no SSAO override"
+  ]
+}

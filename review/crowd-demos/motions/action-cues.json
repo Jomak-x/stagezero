@@ -1,0 +1,91 @@
+{
+  "schema": "crowd_demo_action_cues_v1",
+  "atlas": "../assets/manifest.json",
+  "person_fields": {
+    "6": "clipIndex; -1 normal locomotion",
+    "7": "clipTimeSeconds",
+    "8": "rootY translation (0 for exported floor-normalized bodies)"
+  },
+  "gestureCues": [
+    {
+      "id": "wave",
+      "clipIndex": 3,
+      "duration": 1.9333333333333333,
+      "loop": false,
+      "observed": "hand raises beside head; blend to idle at exit"
+    },
+    {
+      "id": "look",
+      "clipIndex": 4,
+      "duration": 1.9333333333333333,
+      "loop": true,
+      "observed": "subtle active idle; no clear head turn"
+    },
+    {
+      "id": "conversation",
+      "clipIndex": 5,
+      "duration": 1.9333333333333333,
+      "loop": false,
+      "observed": "hands rise conversationally; not quiet listening"
+    }
+  ],
+  "pairCue": {
+    "id": "greeting",
+    "clipIndices": [
+      6,
+      7
+    ],
+    "duration": 3.966666666666667,
+    "fps": 30,
+    "frames": 120,
+    "sourceOriginXZ": [
+      0.06470362120307982,
+      0.6922433003783226
+    ],
+    "startFacingYaws": [
+      -0.110622603370976,
+      2.9532752597509093
+    ],
+    "endFacingYaws": [
+      -0.2714868314546216,
+      2.8689953635728114
+    ],
+    "startRootXZ": [
+      [
+        -0.05827502137981355,
+        -0.6364485397934914
+      ],
+      [
+        0.05827502137981355,
+        0.6364485397934914
+      ]
+    ],
+    "endRootXZ": [
+      [
+        -0.19600767665542662,
+        -0.34932854026556015
+      ],
+      [
+        0.06699048704467714,
+        0.5786787644028664
+      ]
+    ],
+    "instanceYaw": "shared event yaw for both roles; do not separately face actors",
+    "instanceScale": [
+      1,
+      1,
+      1
+    ],
+    "nearestWristMinMeters": 0.026604248859159785,
+    "framesWristUnder15cm": 103,
+    "nativeBodyPoseUnmodified": true
+  },
+  "placement": "For pair, roleRoot=eventAnchor+R_y(eventYaw)*clip.rootXZ[clipTime*fps]; instanceYaw=eventYaw for both roles, scale=1; interpolate root track linearly. Body poses are already floor normalized, rootY=0. Standard actor heading must be ignored during native pair playback.",
+  "transition": "Approach heading equals eventYaw+startFacingYaws[role], exit heading equals eventYaw+endFacingYaws[role]. Pair pose instanceYaw is shared eventYaw. Transition from/to pair-specific edge poses; do not blend role1 to unrotated canonical idle.",
+  "limitations": [
+    "Short generated wave finishes before hand fully lowers; exit blend required.",
+    "Look prompt produced subtle idle with no clear head turn.",
+    "Listen prompt produced conversational hand gesture, not quiet listening.",
+    "Pair wrists come within15cm for103/120frames; fingers are authored rest pose, not generated contact."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "source_model": "ARDY Core",
+  "fresh_generation": false,
+  "sources": [
+    {
+      "clip": "dance-knee-step",
+      "files": [
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s73/attempt-001/sources/independent-8dba317de8b742b4be837405460470f9/core-003.npz",
+          "sha256": "5f9b8f5dda8174722e985bf59212fcb560c4746f15ef63676fb3b7c67469e8c5"
+        },
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s73/attempt-001/sources/independent-8dba317de8b742b4be837405460470f9/core-004.npz",
+          "sha256": "befa8ee696d92da4c7008b130dbde361e0beccac1b8400d9860a100a2fd6d4c6"
+        },
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s73/attempt-001/sources/independent-8dba317de8b742b4be837405460470f9/core-005.npz",
+          "sha256": "a3c4ae765168045b65b3cfd0623174f1629a04f1e5b7cbe3b4e83cfee9e02a4c"
+        }
+      ],
+      "seeds": [
+        1082,
+        1082,
+        1082
+      ],
+      "prompt": "A person dances happily in place with small rhythmic steps and relaxed arm movements. Stay near the starting spot.",
+      "initial_facing_yaw_radians": -0.017846575500852817
+    },
+    {
+      "clip": "dance-sway",
+      "files": [
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s74/attempt-001/sources/independent-5814adc5c9f5416daea910b0e1fb8ceb/core-000.npz",
+          "sha256": "a9f57f93f06d7048a820b2b9a4961cdbadd0ee96ce2c6da83de56088729d8bea"
+        },
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s74/attempt-001/sources/independent-5814adc5c9f5416daea910b0e1fb8ceb/core-001.npz",
+          "sha256": "9422cb11d6a555275fa3d40fbaa0c9506e2f14f261dedede44f48c1be07f7a01"
+        },
+        {
+          "path": "review/group-motion-probe/fresh/dance-three-s74/attempt-001/sources/independent-5814adc5c9f5416daea910b0e1fb8ceb/core-002.npz",
+          "sha256": "ac1c2419638c6681a708cfe5649774db1dab45c2285b8283de6320dbbfdb3431"
+        }
+      ],
+      "seeds": [
+        74,
+        74,
+        74
+      ],
+      "prompt": "A person dances happily in place with small rhythmic steps and relaxed arm movements. Stay near the starting spot.",
+      "initial_facing_yaw_radians": 0.006677046287913331
+    }
+  ],
+  "canonical_heading": "Both reused sources initially face +Z within1.1degrees; no additional source rotation applied. Expressive torso yaw within phrases retained.",
+  "raw_source_scope": "Original 3x40frame20fps Core source archives unchanged; resampled30fps via existing adapter and only rootXZ removed into retained track.",
+  "routine_source_spans": [
+    {
+      "kind": "authored_pose_root_bridge",
+      "start_frame": 1,
+      "end_frame_exclusive": 19,
+      "label": "settle into phrase"
+    },
+    {
+      "kind": "generated_source",
+      "start_frame": 19,
+      "end_frame_exclusive": 179,
+      "source_clip_index": 8,
+      "source_window_inclusive": [
+        1,
+        160
+      ]
+    },
+    {
+      "kind": "authored_pose_root_bridge",
+      "start_frame": 179,
+      "end_frame_exclusive": 197,
+      "label": "change dance phrase"
+    },
+    {
+      "kind": "generated_source",
+      "start_frame": 197,
+      "end_frame_exclusive": 357,
+      "source_clip_index": 9,
+      "source_window_inclusive": [
+        1,
+        160
+      ]
+    },
+    {
+      "kind": "authored_pose_root_bridge",
+      "start_frame": 357,
+      "end_frame_exclusive": 375,
+      "label": "change dance phrase"
+    },
+    {
+      "kind": "generated_source",
+      "start_frame": 375,
+      "end_frame_exclusive": 535,
+      "source_clip_index": 8,
+      "source_window_inclusive": [
+        1,
+        160
+      ]
+    },
+    {
+      "kind": "authored_pose_root_bridge",
+      "start_frame": 535,
+      "end_frame_exclusive": 553,
+      "label": "change dance phrase"
+    },
+    {
+      "kind": "generated_source",
+      "start_frame": 553,
+      "end_frame_exclusive": 713,
+      "source_clip_index": 9,
+      "source_window_inclusive": [
+        1,
+        160
+      ]
+    },
+    {
+      "kind": "authored_pose_root_bridge",
+      "start_frame": 713,
+      "end_frame_exclusive": 751,
+      "label": "settle and return to formation slot"
+    }
+  ],
+  "visual_review": "Existing native mesh video contact sheets reviewed; new full-mesh contact sheet shows knee lift steps and torso sway with hand rhythm; no claim of advanced choreographic style.",
+  "max_joint_step_m": 0.09763054549694061,
+  "foot_limit": "Original full mesh dipped9.33cm. Approved authored whole-body rootY display correction now maintainsatleast2mm sole clearance during dance; nativeXZ and originalsourceposes remainunchanged. One-second entry/exit height ramps connect ordinaryidle baseline.",
+  "published_assets_changed": false
+}

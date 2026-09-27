@@ -210,7 +210,8 @@ class Builder {
       this.box(g, this.dark, 2.8 + i * .39, 5.075, .24, .3, .06, .3);
     }
     this.box(g, this.dark, 0, 2.2, .16, .38, .64, .28);
-    this.box(g, material("#85d3a0", .4, 0, "#68c688"), 0, 2.12, .312, .15, .2, .018);
+    const pedestrian = material("#85d3a0", .4, 0, "#68c688"); pedestrian.userData.pedestrianSignal = true;
+    this.box(g, pedestrian, 0, 2.12, .312, .15, .2, .018);
     this.box(g, this.metal, .12, 1.05, .12, .18, .22, .16);
   }
   roof(g: THREE.Object3D, w: number, d: number, h: number) {
@@ -547,6 +548,14 @@ function city(b: Builder) {
     b.lamp(x, -13.3); b.lamp(x + 7, 13.3, Math.PI);
     b.tree(x + 8, -14.3, .8); b.bench(x + 4.8, -14.4);
   }
+  // Portable music rig motivates the scheduled courtyard performance.
+  // Navigation reserves this exact 1.0 by0.7m footprint.
+  b.box(b.group, b.dark, -57.5, .55, -59.5, 1, 1.1, .7);
+  for(const x of [-57.73,-57.27]) {
+    const rim=b.cyl(b.group,b.metal,x,.43,-59.135,.20,.025);rim.rotation.x=Math.PI/2;
+    const cone=b.cyl(b.group,b.dark,x,.43,-59.11,.16,.027);cone.rotation.x=Math.PI/2;
+  }
+  b.text(b.group,"MORI / LIVE",-57.5,.91,-59.13,.82,.18,"#17252d","#b8e8c5");
   // Menus and bicycle racks sit in furnishing bands, clear of the shop entrances.
   const menu = b.local(-33, -15.5, .12);
   b.box(menu, b.wood, 0, .66, 0, .72, 1.3, .1);
@@ -563,8 +572,10 @@ function city(b: Builder) {
   const metadata = baseMetadata("Mori High Street", "A connected neighborhood street with open furnished coffee shop and bookshop, a side street and a quiet planted rear courtyard.");
   metadata.bounds = { min: [-115, 0, -115], max: [115, 35, 115] };
   metadata.walkableRects = [
-    { id: "street", min: [-100, -16], max: [100, 16], y: 0 },
-    { id: "side-street", min: [-11.5, -102], max: [11.5, 12], y: 0 },
+    { id: "north-sidewalk", min: [-100, -16], max: [100, -12.3], y: 0 },
+    { id: "south-sidewalk", min: [-100, 12.3], max: [100, 16], y: 0 },
+    { id: "west-zebra", min: [-8.5, -12.3], max: [-4.5, 12.3], y: 0 },
+    { id: "east-zebra", min: [5, -12.3], max: [9, 12.3], y: 0 },
     { id: "cafe", min: [-34.5, -24], max: [-23.5, -16], y: 0 },
     { id: "bookshop", min: [-22.5, -24], max: [-11.5, -16], y: 0 },
     { id: "courtyard-alley", min: [-40, -66], max: [-35, -12], y: 0 },
@@ -572,7 +583,7 @@ function city(b: Builder) {
   metadata.spawnExitGates = [
     { id: "west", position: [-100, 0, -13.5], width: 5, direction: [1, 0, 0] },
     { id: "east", position: [100, 0, 13.5], width: 5, direction: [-1, 0, 0] },
-    { id: "north", position: [0, 0, -100], width: 10, direction: [0, 0, 1] }];
+    { id: "courtyard", position: [-37.5, 0, -64], width: 5, direction: [0, 0, 1] }];
   metadata.interactionAnchors = [
     { id: "cafe", label: "Koma Coffee counter", position: [-29, 0, -21.6] },
     { id: "books", label: "Sen Books display", position: [-17, 0, -20.1] },

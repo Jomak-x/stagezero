@@ -1,0 +1,38 @@
+## Draft architecture review
+
+**Assessment:** A 100+ actor demo is plausible using reviewed gait clips and GPU animated instancing, but neither establishes crowd navigation, indoor task execution, or multi-actor terrain capability. Treat these as separate integration and validation claims. No files or measurements were supplied, so the following are proposed gates, not verified results.
+
+### Architecture and interfaces
+
+Keep three explicit layers:
+
+- **Task scheduler:** Owns destinations, job/shop/commute roles, opening hours, occupancy limits, and interaction reservations. Use repeatable task graphs rather than random wandering. Blocked tasks should select meaningful alternatives—not permanently idle or endlessly repath.
+- **Navigation:** Owns traversable geometry, routes, local avoidance, doorway queues, and achievable speed/heading. Supplies animation with actor pose, desired velocity, turn rate, surface information, and arrival constraints. Animation reports motion limits; navigation must respect them.
+- **Animation/interaction:** Selects compatible gait clips and transitions. Define whether navigation or root motion controls displacement; never let both independently move an actor. Featured greetings reserve participants and safe space, synchronize approach and animation, then release actors back to tasks. Include timeout, cancellation, and interruption behavior.
+
+Use stable actor IDs, seeded decisions, fixed simulation ticks, and deterministic tie-breaking. Save the initial state, seeds, content versions, and external event schedule. If cross-device reproducibility requires recorded trajectories/events, label this **replay**, not proof of deterministic live simulation.
+
+### Scene-specific pitfalls
+
+**Tokyo crossing:** The compact 25.5 m setting makes density and bottlenecks central risks. Validate usable pedestrian area, crossing phases, spawn placement, and queues. Do not equate “100 actors rendered” with “100 actors navigating safely.”
+
+**City block:** Real cafe/bookstore rooms require interior navigation connectivity, doorway capacity, service points, occupancy rules, and credible entry/exit behavior. Distinct roles should change destinations and activity sequences, not merely clothing or animation speed.
+
+**Station plaza:** The flat central approach can use conventional navigation. Stairs require separately validated locomotion and routing. The current opt-in terrain implementation supports only one actor’s foot-contact assistance along geometry-planned routes; it does **not** establish learned, general multi-actor terrain traversal.
+
+### Reuse versus new generation
+
+Reuse reviewed gaits only within their demonstrated speed, turning, rig, and surface envelopes. Reuse GPU instancing for compatible animations and assets, subject to profiling. Single-actor terrain assistance remains a bounded experimental feature until independently expanded and tested.
+
+New generation or authored content may be needed for unsupported turns, stops/starts, task-specific actions, stairs, and synchronized greetings. Jointly generated greetings require pairwise alignment, timing, collision clearance, and transition review. Navigation meshes, task graphs, reservations, and crowd arbitration need engineering; more motion clips alone will not supply them.
+
+### Defensible test gates
+
+1. **Content:** Validate every used clip’s rig compatibility, displacement, transitions, and contact quality against documented tolerances.
+2. **Crowd:** Run each full 120-second scenario with at least 100 active actors. Track penetrations, deadlocks, replans, queue times, and destination completion. Set thresholds before review.
+3. **Continuity:** Require bounded task progress; distinguish intentional animated waiting from frozen or indefinitely blocked actors. Verify role-specific task coverage.
+4. **Interactions:** Test greeting approach, synchronization, cancellation, clearance, and return to task under congestion.
+5. **Reproducibility:** Repeat saved runs; compare simulation-state hashes and event logs. Specify separately whether visual output must match.
+6. **Performance:** On declared hardware, report CPU subsystem timings, GPU frame time, memory, median/p95/p99 frame times, and worst crowd/interaction loads. Disclose resolution, actor count, assets, and instrumentation.
+
+Show failures and limitations directly; camera placement is presentation, not validation.
