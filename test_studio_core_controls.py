@@ -9,6 +9,7 @@ import unittest
 
 from studio_core_controls import CoreStudioControls
 from scene_objects import make_object
+from scene_composition import make_preset
 
 
 class Handle:
@@ -301,6 +302,32 @@ class CoreStudioControlsTests(unittest.TestCase):
         self.assertFalse(any(call[0] == "start" for call in self.core.calls))
         self.assertTrue(self.controls.terrain_aware.value)
         self.assertEqual(self.active_requests, [True])
+
+    def test_cinematic_temple_shows_correct_starter_set_and_refuses_terrain_start(self):
+        scene = make_preset("Jungle temple")
+        self.controls.studio = SimpleNamespace(scene_document=lambda: scene, project_revision=1)
+        self.controls.tick()
+        self.assertIn("choose Traversable temple", self.controls.terrain_status.content)
+        self.controls.terrain_start.click()
+        self.assertEqual(self.core.calls, [])
+        self.assertIn("choose Traversable temple", self.controls.status.content)
+
+    def test_traversable_temple_offers_ascent_instead_of_flat_default(self):
+        scene = make_preset("Traversable temple")
+        self.controls.studio = SimpleNamespace(scene_document=lambda: scene, project_revision=1)
+        self.controls.terrain_start.click()
+        self.assertEqual(self.controls.spatial_text.value,
+                         "walk up temple stairs then cross temple bridge")
+        self.controls.spatial_text.value = "open temple gate then enter"
+        self.controls.terrain_start.click()
+        self.assertEqual(self.controls.spatial_text.value, "open temple gate then enter")
+
+    def test_traversable_temple_still_starts_terrain_actor(self):
+        scene = make_preset("Traversable temple")
+        self.controls.studio = SimpleNamespace(scene_document=lambda: scene, project_revision=1)
+        self.controls.terrain_start.click()
+        self.assertEqual(self.core.calls[-1][0], "start_terrain")
+        self.assertTrue(self.controls.terrain_aware.value)
 
     def test_invalid_terrain_start_leaves_existing_take_untouched(self):
         self.controls.enabled.edit(True, client=object())

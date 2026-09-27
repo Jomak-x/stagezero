@@ -1,6 +1,6 @@
 # Background navigation demo (opt-in Native Core)
 
-**Continuation checkpoint:** see [current status and next steps](handoff/BACKGROUND-INTERACTION-CONTINUE.md). The full temple route is unfinished.
+**Historical PR #30 flat-navigation notes.** The current opt-in terrain implementation and working Traversable temple sequence are documented in [Terrain-aware movement](TERRAIN-AWARE.md). The older Jungle temple cinematic preset is a different scene and is not the tested stair route. The limits below describe the earlier flat demo.
 
 This adds ordered spatial commands to the existing **Motion → Advanced scene
 motion → Scene direction · Core → Move to a scene object** panel. It does not
