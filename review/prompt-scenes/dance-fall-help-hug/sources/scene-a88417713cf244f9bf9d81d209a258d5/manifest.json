@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "prompt": "Two people start dancing together. Person 1 trips and falls. Person 2 helps person 1 stand up, then they hug and laugh together.",
+  "seed": 37,
+  "status": "rejected",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "review/prompt-scenes/dance-fall-help-hug/sources/scene-a88417713cf244f9bf9d81d209a258d5/pair-00.npz",
+      "seconds": 1.4857324580079876,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "Dance together, facing each other with coordinated steps.",
+      "planned_prompt": "Dance together, facing each other with coordinated steps.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "fbd6a7192ef591ce5817e3e2b19f67ccf02e4ecc4ca8bb55b38bf5d40b6dd033"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/dance-fall-help-hug/sources/scene-a88417713cf244f9bf9d81d209a258d5/core-000.npz",
+      "seconds": 0.76307079102844,
+      "sha256": "a5e0f24e2a0cbccbfa4d927522030c223a45b48dca603c0037e1e586f0ce7993"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/dance-fall-help-hug/sources/scene-a88417713cf244f9bf9d81d209a258d5/core-001.npz",
+      "seconds": 0.8929154999786988,
+      "sha256": "631a17dda930fa54a1d57d15141df47c2cdf556cbe1d9a3c981900fb8b916516"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/prompt-scenes/dance-fall-help-hug/sources/scene-a88417713cf244f9bf9d81d209a258d5/core-002.npz",
+      "seconds": 0.9376826669904403,
+      "sha256": "36ed56b73a9456c0fefc8f5688ff8b1f107a7cc062196112230fa216301e533f"
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 6.448288708052132
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.0036834169877693057
+    },
+    {
+      "stage": "intergen_generation",
+      "seconds": 1.4857324580079876
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-c5fbb6ea160a4b9e95247af3d9fea57e",
+      "seconds": 0.76307079102844
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-2777c69ca7c24098944da3cd031884fa",
+      "seconds": 0.8929154999786988
+    },
+    {
+      "stage": "core_generation",
+      "request_id": "meetup-47aab0bffd4b4e2cb42fafcdecf3275d",
+      "seconds": 0.9376826669904403
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Dance, Fall, Help, and Hug",
+    "prompt": "Two people start dancing together. Person 1 trips and falls. Person 2 helps person 1 stand up, then they hug and laugh together.",
+    "actor_count": 2,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Dance together, facing each other with coordinated steps.",
+        "seconds": 6.0
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 1 trips during the dance and falls; Person 2 stops and reacts.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-3",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 2 reaches down and helps Person 1 rise back to standing.",
+        "seconds": 5.0
+      },
+      {
+        "id": "beat-4",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "They hug, then remain together laughing.",
+        "seconds": 5.0
+      }
+    ],
+    "warnings": [
+      "Falling, assisted standing, and hugging require local contact and geometry validation."
+    ],
+    "raw_plan": {
+      "version": 1,
+      "title": "Dance, Fall, Help, and Hug",
+      "prompt": "Two people start dancing together. Person 1 trips and falls. Person 2 helps person 1 stand up, then they hug and laugh together.",
+      "actor_count": 2,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person 1",
+          "start": null
+        },
+        {
+          "id": "actor_2",
+          "name": "Person 2",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "Dance together, facing each other with coordinated steps.",
+          "seconds": 6
+        },
+        {
+          "id": "beat-2",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "Person 1 trips during the dance and falls; Person 2 stops and reacts.",
+          "seconds": 4
+        },
+        {
+          "id": "beat-3",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "Person 2 reaches down and helps Person 1 rise back to standing.",
+          "seconds": 5
+        },
+        {
+          "id": "beat-4",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "They hug, then remain together laughing.",
+          "seconds": 5
+        }
+      ],
+      "warnings": [
+        "Falling, assisted standing, and hugging require local contact and geometry validation."
+      ]
+    },
+    "planning_seconds": 6.446111708995886,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol"
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.9,
+        "z": -1.5
+      },
+      "actor_2": {
+        "x": 0.9,
+        "z": -1.5
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "error": "Meeting entry transition rejected: sampled endpoint velocity exceeds tolerance",
+  "wall_seconds": 10.773530917009339
+}

@@ -159,6 +159,28 @@ class StudioTimelineTest(unittest.TestCase):
         self.timeline.on_scrub(40)
         self.assertEqual(self.session.frame, 0)
 
+    def test_three_actor_cast_scrubs_on_30fps_timeline_and_returns_to_g1(self):
+        from cast_performance_session import CastPerformanceSession
+        from cast_performance import encode_project, cast_from_performance
+        from test_cast_performance import performance
+        cast = CastPerformanceSession()
+        clip = performance(3, frames=60)
+        cast.load(encode_project(clip, cast_from_performance(clip)))
+        timeline = FakeTimeline()
+        main = FakeSession()
+        adapter = StudioTimeline(SimpleNamespace(timeline=timeline), main, cast_session=cast)
+        self.assertIn(('set_fps', (30.,), {}), timeline.calls)
+        self.assertEqual(timeline.end_frame, 59)
+        timeline.on_scrub(500)
+        self.assertEqual(cast.snapshot()['frame'], 59)
+        self.assertEqual(main.frame, 0)
+        cast.deactivate()
+        adapter.update()
+        self.assertIn(('set_fps', (25.,), {}), timeline.calls)
+        timeline.on_scrub(10)
+        self.assertEqual(main.frame, 10)
+
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -186,6 +208,33 @@ class CoreTimelineTests(unittest.TestCase):
         timeline.on_scrub(21)
         self.assertEqual(g1.frame,21)
 
+    def test_paired_research_timeline_has_separate_source_and_scrub(self):
+        class Motion:
+            def __init__(self, active, prompt):
+                self.state = dict(active=active, total_frames=120, frame=8,
+                                  segments=[{'start': 0, 'end': 120, 'prompt': prompt}])
+
+            def snapshot(self):
+                return dict(self.state)
+
+            def seek(self, frame):
+                self.state['frame'] = frame
+
+        core, paired = Motion(False, 'Native Core'), Motion(True, 'Joint research pair')
+        ruler, g1 = FakeTimeline(), FakeSession()
+        adapter = StudioTimeline(SimpleNamespace(timeline=ruler), g1,
+                                 core_session=core, paired_session=paired)
+        prompts = [call for call in ruler.calls if call[0] == 'add_prompt']
+        self.assertEqual(prompts[-1][1][0], 'Joint research pair')
+        self.assertEqual(prompts[-1][2]['uuid'], 'paired-research-scene-0')
+        ruler.on_scrub(999)
+        self.assertEqual(paired.state['frame'], 119)
+        self.assertEqual(g1.frame, 0)
+        paired.state['active'] = False
+        core.state['active'] = True
+        adapter.update()
+        self.assertEqual([call for call in ruler.calls if call[0] == 'add_prompt'][-1][1][0], 'Native Core')
+
     def test_native_playhead_does_not_republish_timeline_layout(self):
         state=dict(active=True,total_frames=40,frame=0,segments=[])
         core=SimpleNamespace(snapshot=lambda:dict(state),seek=lambda f:None)
@@ -195,3 +244,15 @@ class CoreTimelineTests(unittest.TestCase):
         state['frame']=17;adapter.update()
         self.assertEqual(sum(c[0]=='clear_prompts' for c in timeline.calls),count)
         self.assertEqual(timeline.current_frame,17)
+
+
+class NativePairFrameRateTests(unittest.TestCase):
+    def test_native_pair_uses_30fps_and_refreshes_on_rate_change(self):
+        state = dict(active=True, total_frames=210, frame=30, fps=30, segments=[])
+        pair = SimpleNamespace(snapshot=lambda: dict(state), seek=lambda f: None)
+        ruler = FakeTimeline()
+        adapter = StudioTimeline(SimpleNamespace(timeline=ruler), FakeSession(), paired_session=pair)
+        self.assertIn(('set_fps', (30.0,), {}), ruler.calls)
+        state['fps'] = 20
+        adapter.update()
+        self.assertEqual([c for c in ruler.calls if c[0] == 'set_fps'][-1][1], (20.0,))

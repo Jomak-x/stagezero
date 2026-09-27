@@ -9,6 +9,7 @@ offset and the already fitted prefix byte for byte.
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
 
@@ -37,7 +38,11 @@ class StudioCoreRenderer:
     """
 
     def __init__(self, server, *, asset_paths=None, floor_y: float = 0.0,
-                 name_prefix: str = "/actor/core") -> None:
+                 name_prefix: str = "/actor/core", paired_retarget: bool = False) -> None:
+        if type(paired_retarget) is not bool:
+            raise ValueError("paired_retarget must be a boolean")
+        self.paired_retarget = paired_retarget
+        self._fitting_provenance: dict | None = None
         if not np.isfinite(floor_y):
             raise ValueError("floor_y must be finite")
         paths = tuple(DEFAULT_ASSETS if asset_paths is None else asset_paths)
@@ -48,6 +53,17 @@ class StudioCoreRenderer:
         self.server = server
         self.floor_y = float(floor_y)
         self.characters = tuple(GroundedCharacter(path) for path in paths)
+        self._paired_root_height_offset = None
+        if self.paired_retarget:
+            offsets = [character.root_height_offset for character in self.characters]
+            # The body and its hand targets must receive the same canonical
+            # height correction. Unshifted world wrists made resting arms lift
+            # relative to the lowered mesh torso. A shared correction preserves
+            # pair contact; differently proportioned root mappings need their
+            # own reviewed retargeting strategy instead of silent drift.
+            if not np.allclose(offsets, offsets[0], atol=1e-7, rtol=0):
+                raise ValueError("Paired retargeting requires matching character root-height offsets")
+            self._paired_root_height_offset = float(offsets[0])
         self.handles = tuple(
             self._add_actor(f"{name_prefix}/{index}", character)
             for index, character in enumerate(self.characters)
@@ -115,6 +131,11 @@ class StudioCoreRenderer:
     def fitted_rotations(self) -> np.ndarray | None:
         return self._fitted_rotations
 
+    @property
+    def fitting_provenance(self) -> dict | None:
+        """Disclosed fitting measurements, never a claim of visible contact."""
+        return deepcopy(self._fitting_provenance)
+
     def _fit_actor(self, index: int, clip: CanonicalClip, start: int,
                    offset: float | None) -> tuple[np.ndarray, np.ndarray, float]:
         character = self.characters[index]
@@ -131,7 +152,8 @@ class StudioCoreRenderer:
             )
             offset = float(calibrated["character_provenance"]["floor_offsets"][0])
         payload = character.clip_payload(
-            native_positions, native_rotations, preserve_wrists=False,
+            native_positions, native_rotations, preserve_wrists=self.paired_retarget,
+            wrist_target_space="retargeted_root",
             preserve_feet=True, floor_y=self.floor_y, floor_offsets=[offset],
         )
         return (np.asarray(payload["fitted_positions"][0], dtype=np.float32),
@@ -144,6 +166,8 @@ class StudioCoreRenderer:
             raise RuntimeError("Core renderer has been removed")
         if not isinstance(clip, CanonicalClip):
             raise TypeError("Expected a CanonicalClip")
+        if self.paired_retarget and len(clip.actor_ids) != 2:
+            raise ValueError("Paired retargeting requires exactly two actors")
         previous = self._clip
         append = (previous is not None and previous.actor_ids == clip.actor_ids
                   and clip.frames >= previous.frames
@@ -154,6 +178,21 @@ class StudioCoreRenderer:
             return
         start = previous.frames if append else 0
         offsets = self._floor_offsets if append else None
+        if self.paired_retarget and offsets is None:
+            # One pair translation retains the model's relative wrist heights.
+            # Use the higher of the two support estimates to avoid lowering
+            # either actor below its calibrated floor. No actor is moved apart.
+            estimates = []
+            for index, character in enumerate(self.characters):
+                sample = min(40, clip.frames)
+                payload = character.clip_payload(
+                    clip.positions[index:index + 1, :sample],
+                    clip.rotations[index:index + 1, :sample],
+                    preserve_wrists=True, wrist_target_space="retargeted_root",
+                    floor_y=self.floor_y,
+                )
+                estimates.append(float(payload["character_provenance"]["floor_offsets"][0]))
+            offsets = (max(estimates),) * 2
         fitted = [self._fit_actor(index, clip, start,
                                   offsets[index] if offsets is not None else None)
                   for index in range(len(clip.actor_ids))]
@@ -168,10 +207,51 @@ class StudioCoreRenderer:
         self._fitted_positions = new_positions
         self._fitted_rotations = new_rotations
         self._floor_offsets = tuple(row[2] for row in fitted)
+        self._fitting_provenance = self._measure_fitting(clip)
         if self._frame is not None:
             self.tick(min(self._frame, clip.frames - 1))
         else:
             self._sync_visibility()
+
+    def _measure_fitting(self, clip: CanonicalClip) -> dict:
+        result = {
+            "paired_retarget": self.paired_retarget,
+            "preserve_native_wrists": self.paired_retarget,
+            "floor_offsets_m": list(self._floor_offsets),
+            "floor_method": ("common maximum of initial actor support offsets; reused on append"
+                             if self.paired_retarget else "independent initial actor support offsets; reused on append"),
+        }
+        if not self.paired_retarget:
+            return result
+        wrists = [self.characters[0].core_idx[name] for name in ("LeftHand", "RightHand")]
+        targets = np.array(clip.positions[:, :, wrists], dtype=float, copy=True)
+        targets[:, :, :, 1] += self._floor_offsets[0] + self._paired_root_height_offset
+        fitted = self._fitted_positions[:, :, [5, 8]]
+        errors = np.linalg.norm(fitted - targets, axis=-1)
+        result.update({
+            "wrist_target_space": "native world plus shared canonical root-height correction and common floor translation",
+            "shared_root_height_correction_m": self._paired_root_height_offset,
+            "wrist_target_error_m": {
+                "mean": float(errors.mean()), "max": float(errors.max()),
+                "fraction_over_5mm": float(np.mean(errors > .005)),
+                "per_actor_max": [float(row.max()) for row in errors],
+            },
+            "limitations": "Endpoint IK follows frame-native wrists with the same shared height correction as the body; no shared hand lock, finger pose, mesh contact, or collision guarantee. Common floor shift may leave one sole elevated.",
+        })
+        pairs = {}
+        for first, name_a in enumerate(("left", "right")):
+            for second, name_b in enumerate(("left", "right")):
+                native_gap = np.linalg.norm(targets[0, :, first] - targets[1, :, second], axis=-1)
+                rendered_gap = np.linalg.norm(fitted[0, :, first] - fitted[1, :, second], axis=-1)
+                pairs[f"{name_a}_{name_b}"] = {
+                    "native_min_m": float(native_gap.min()),
+                    "rendered_min_m": float(rendered_gap.min()),
+                    "native_frames_under_15cm": int(np.sum(native_gap < .15)),
+                    "rendered_frames_under_15cm": int(np.sum(rendered_gap < .15)),
+                    "gap_drift_max_m": float(np.max(np.abs(rendered_gap - native_gap))),
+                }
+        result["wrist_gaps"] = pairs
+        return result
 
     set_clips = set_clip
 
@@ -241,3 +321,4 @@ class StudioCoreRenderer:
         self._clip = None
         self._fitted_positions = None
         self._fitted_rotations = None
+        self._fitting_provenance = None

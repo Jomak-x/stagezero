@@ -1,0 +1,1614 @@
+{
+  "seed_stride": 0,
+  "conditioning_history_frames": 40,
+  "name": "pose-duet-integrated-6201",
+  "plan": {
+    "version": 1,
+    "name": "Pose-cued sparring duet",
+    "seed": 6201,
+    "beats": [
+      {
+        "name": "Opening",
+        "seconds": 2,
+        "actor_prompts": {
+          "actor_1": "A martial artist performs sharp punches and a front kick.",
+          "actor_2": "A boxer dodges punches, ducking and weaving."
+        }
+      },
+      {
+        "name": "Lead kick and dodge",
+        "seconds": 2,
+        "actor_prompts": {
+          "actor_1": "A martial artist performs a high front kick.",
+          "actor_2": "A boxer ducks deeply under a high kick."
+        }
+      },
+      {
+        "name": "Reply kick and dodge",
+        "seconds": 2,
+        "actor_prompts": {
+          "actor_1": "A boxer ducks deeply under a high kick.",
+          "actor_2": "A martial artist performs a high front kick."
+        }
+      },
+      {
+        "name": "Shared victory",
+        "seconds": 2,
+        "actor_prompts": {
+          "actor_1": "A person raises both arms high overhead in victory.",
+          "actor_2": "A person raises both arms high overhead in victory."
+        }
+      }
+    ],
+    "recipe": "pose_duet_v1"
+  },
+  "scene_source": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/review/scene-integration/live-city.json",
+  "placements": {
+    "actor_1": {
+      "position_xz": [
+        -0.9,
+        0.0
+      ],
+      "yaw": 1.5707963267948966
+    },
+    "actor_2": {
+      "position_xz": [
+        0.9,
+        0.0
+      ],
+      "yaw": -1.5707963267948966
+    }
+  },
+  "status": "complete",
+  "visual_review": "pending",
+  "no_postprocess": true,
+  "health": {
+    "ready": true,
+    "model": "ARDY-Core-RP-20FPS-Horizon40",
+    "fps": 20,
+    "joints": 27,
+    "horizon": 40,
+    "pair_research_enabled": true,
+    "queue_depth": 0
+  },
+  "compiled": {
+    "version": 1,
+    "plan": {
+      "version": 1,
+      "name": "Pose-cued sparring duet",
+      "seed": 6201,
+      "beats": [
+        {
+          "name": "Opening",
+          "seconds": 2,
+          "actor_prompts": {
+            "actor_1": "A martial artist performs sharp punches and a front kick.",
+            "actor_2": "A boxer dodges punches, ducking and weaving."
+          }
+        },
+        {
+          "name": "Lead kick and dodge",
+          "seconds": 2,
+          "actor_prompts": {
+            "actor_1": "A martial artist performs a high front kick.",
+            "actor_2": "A boxer ducks deeply under a high kick."
+          }
+        },
+        {
+          "name": "Reply kick and dodge",
+          "seconds": 2,
+          "actor_prompts": {
+            "actor_1": "A boxer ducks deeply under a high kick.",
+            "actor_2": "A martial artist performs a high front kick."
+          }
+        },
+        {
+          "name": "Shared victory",
+          "seconds": 2,
+          "actor_prompts": {
+            "actor_1": "A person raises both arms high overhead in victory.",
+            "actor_2": "A person raises both arms high overhead in victory."
+          }
+        }
+      ],
+      "recipe": "pose_duet_v1"
+    },
+    "actor_ids": [
+      "actor_1",
+      "actor_2"
+    ],
+    "frames": 160,
+    "fps": 20,
+    "origins_xz": {
+      "actor_1": [
+        -0.9,
+        0.0
+      ],
+      "actor_2": [
+        0.9,
+        0.0
+      ]
+    },
+    "beats": [
+      {
+        "name": "Opening",
+        "start_frame": 0,
+        "end_frame": 40
+      },
+      {
+        "name": "Lead kick and dodge",
+        "start_frame": 40,
+        "end_frame": 80
+      },
+      {
+        "name": "Reply kick and dodge",
+        "start_frame": 80,
+        "end_frame": 120
+      },
+      {
+        "name": "Shared victory",
+        "start_frame": 120,
+        "end_frame": 160
+      }
+    ],
+    "planned_only": true,
+    "coordination": "shared timed prompts and optional native root conditions; independent actor generation",
+    "physical_contact_verified": false,
+    "stage_ids": [
+      "80a99b497809415f8bc98c11f6f3c7d6",
+      "86eb2c0d2e7c46f988d482fa738956fb",
+      "d591558c2f4341329378d7b278d3dc88",
+      "083e649cdfd34446b5e1dd1b81a7705b"
+    ],
+    "submitted_after_committed_frame": 0,
+    "queued": false
+  },
+  "playback": {
+    "elapsed_seconds": 3.888930665998487,
+    "first_new_commit_seconds": 0.9680397079791874,
+    "post_start_buffer_hold_seconds": 0.0,
+    "observed_phases": [
+      "buffering",
+      "playing"
+    ],
+    "state": {
+      "phase": "playing",
+      "status": "Playing generated motion.",
+      "frame": 58,
+      "total_frames": 160,
+      "buffer_frames": 102,
+      "playing": true,
+      "generated": true,
+      "inflight_request_id": null,
+      "queued_stages": 0,
+      "contact_open": false,
+      "failure": null,
+      "revision": 4,
+      "mode": "production",
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "active": true,
+      "epoch": 2,
+      "initialized": true,
+      "scene_changed_since_motion": false,
+      "available": true,
+      "schema": "Native Core27 / 20 fps (separate from G1)",
+      "example_available": true,
+      "route": null,
+      "fps": 20,
+      "segments": [
+        {
+          "start": 0,
+          "end": 40,
+          "stage_id": "80a99b497809415f8bc98c11f6f3c7d6",
+          "kind": "action",
+          "prompt": "actor_1: A martial artist performs sharp punches and a front kick. / actor_2: A boxer dodges punches, ducking and weaving.",
+          "source": "ardy_core",
+          "request_id": "6f42df9cb72d4d4ead68dcff465ecfbf",
+          "stage_complete": true,
+          "metadata": {
+            "seed": 6201,
+            "choreography": {
+              "version": 1,
+              "name": "Pose-cued sparring duet",
+              "beat": "Opening",
+              "beat_index": 0,
+              "beat_start_frame": 0,
+              "beat_frames": 40,
+              "window_start_frame": 0,
+              "shared_clock": true,
+              "physical_contact_verified": false
+            },
+            "pose_cue_profile": {
+              "recipe": "pose_duet_v1",
+              "window_index": 0,
+              "roles_swapped": false,
+              "cue_ids": [
+                null,
+                null
+              ],
+              "conditioning_history_frames": 4,
+              "asset_sha256": "997ae56122d16dc6572be1ddae6220aed320247bf62da1a0f5caa7ac05b6a670",
+              "asset_provenance": {
+                "cues": {
+                  "duck": {
+                    "archive_name": "feint-ai-v2-h4.core.stagezero.npz",
+                    "archive_sha256": "ecc0a00e0208a51021dec8760f91c3f40ae6c21682b024c693954ef8decaeafa",
+                    "source_actor_id": "actor_1",
+                    "source_actor_index": 0,
+                    "source_frames": [
+                      63,
+                      64,
+                      65,
+                      66
+                    ]
+                  },
+                  "kick": {
+                    "archive_name": "athletic-h4.core.stagezero.npz",
+                    "archive_sha256": "6e62f86323bf39fc5cfa649858843a254546f69d96529eabab94c61452e9a58d",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      107,
+                      108,
+                      109,
+                      110
+                    ]
+                  },
+                  "victory": {
+                    "archive_name": "athletic-h4-stride.core.stagezero.npz",
+                    "archive_sha256": "c4dfe6f3c4b713b774b473cd5bf73ccf320dee036acadb0e20b5ef86929413ae",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      236,
+                      237,
+                      238,
+                      239
+                    ]
+                  }
+                },
+                "fps": 20,
+                "skeleton": "Core27",
+                "source": "Actual native ARDY Core generations; four contiguous cue frames each",
+                "version": 1
+              },
+              "conditioned_frames": [],
+              "alignment": "kick foot toward partner; duck hips toward partner; victory hips toward shared perpendicular audience",
+              "root_height_preserved": true,
+              "model_outcome_verified": false
+            },
+            "choreography_plan": {
+              "version": 1,
+              "name": "Pose-cued sparring duet",
+              "seed": 6201,
+              "beats": [
+                {
+                  "name": "Opening",
+                  "seconds": 2,
+                  "actor_prompts": {
+                    "actor_1": "A martial artist performs sharp punches and a front kick.",
+                    "actor_2": "A boxer dodges punches, ducking and weaving."
+                  }
+                },
+                {
+                  "name": "Lead kick and dodge",
+                  "seconds": 2,
+                  "actor_prompts": {
+                    "actor_1": "A martial artist performs a high front kick.",
+                    "actor_2": "A boxer ducks deeply under a high kick."
+                  }
+                },
+                {
+                  "name": "Reply kick and dodge",
+                  "seconds": 2,
+                  "actor_prompts": {
+                    "actor_1": "A boxer ducks deeply under a high kick.",
+                    "actor_2": "A martial artist performs a high front kick."
+                  }
+                },
+                {
+                  "name": "Shared victory",
+                  "seconds": 2,
+                  "actor_prompts": {
+                    "actor_1": "A person raises both arms high overhead in victory.",
+                    "actor_2": "A person raises both arms high overhead in victory."
+                  }
+                }
+              ],
+              "recipe": "pose_duet_v1"
+            },
+            "initial_placements": {
+              "actor_1": {
+                "position_xz": [
+                  -0.9,
+                  0.0
+                ],
+                "yaw": 1.5707963267948966
+              },
+              "actor_2": {
+                "position_xz": [
+                  0.9,
+                  0.0
+                ],
+                "yaw": -1.5707963267948966
+              }
+            }
+          },
+          "clip_metadata": {
+            "request_id": "6f42df9cb72d4d4ead68dcff465ecfbf",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "approach",
+            "actor_ids": [
+              "actor_1",
+              "actor_2"
+            ],
+            "source": "ARDY Core",
+            "seed": 6201
+          }
+        },
+        {
+          "start": 40,
+          "end": 80,
+          "stage_id": "86eb2c0d2e7c46f988d482fa738956fb",
+          "kind": "action",
+          "prompt": "actor_1: A martial artist performs a high front kick. / actor_2: A boxer ducks deeply under a high kick.",
+          "source": "ardy_core",
+          "request_id": "b6b49a30085141c9b3271e0c8a205c07",
+          "stage_complete": true,
+          "metadata": {
+            "seed": 6202,
+            "choreography": {
+              "version": 1,
+              "name": "Pose-cued sparring duet",
+              "beat": "Lead kick and dodge",
+              "beat_index": 1,
+              "beat_start_frame": 40,
+              "beat_frames": 40,
+              "window_start_frame": 40,
+              "shared_clock": true,
+              "physical_contact_verified": false
+            },
+            "pose_cue_profile": {
+              "recipe": "pose_duet_v1",
+              "window_index": 1,
+              "roles_swapped": false,
+              "cue_ids": [
+                "kick",
+                "duck"
+              ],
+              "conditioning_history_frames": 4,
+              "asset_sha256": "997ae56122d16dc6572be1ddae6220aed320247bf62da1a0f5caa7ac05b6a670",
+              "asset_provenance": {
+                "cues": {
+                  "duck": {
+                    "archive_name": "feint-ai-v2-h4.core.stagezero.npz",
+                    "archive_sha256": "ecc0a00e0208a51021dec8760f91c3f40ae6c21682b024c693954ef8decaeafa",
+                    "source_actor_id": "actor_1",
+                    "source_actor_index": 0,
+                    "source_frames": [
+                      63,
+                      64,
+                      65,
+                      66
+                    ]
+                  },
+                  "kick": {
+                    "archive_name": "athletic-h4.core.stagezero.npz",
+                    "archive_sha256": "6e62f86323bf39fc5cfa649858843a254546f69d96529eabab94c61452e9a58d",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      107,
+                      108,
+                      109,
+                      110
+                    ]
+                  },
+                  "victory": {
+                    "archive_name": "athletic-h4-stride.core.stagezero.npz",
+                    "archive_sha256": "c4dfe6f3c4b713b774b473cd5bf73ccf320dee036acadb0e20b5ef86929413ae",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      236,
+                      237,
+                      238,
+                      239
+                    ]
+                  }
+                },
+                "fps": 20,
+                "skeleton": "Core27",
+                "source": "Actual native ARDY Core generations; four contiguous cue frames each",
+                "version": 1
+              },
+              "conditioned_frames": [
+                36,
+                37,
+                38,
+                39
+              ],
+              "alignment": "kick foot toward partner; duck hips toward partner; victory hips toward shared perpendicular audience",
+              "root_height_preserved": true,
+              "model_outcome_verified": false
+            }
+          },
+          "clip_metadata": {
+            "request_id": "b6b49a30085141c9b3271e0c8a205c07",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "transition",
+            "actor_ids": [
+              "actor_1",
+              "actor_2"
+            ],
+            "source": "ARDY Core",
+            "seed": 6202
+          }
+        },
+        {
+          "start": 80,
+          "end": 120,
+          "stage_id": "d591558c2f4341329378d7b278d3dc88",
+          "kind": "action",
+          "prompt": "actor_1: A boxer ducks deeply under a high kick. / actor_2: A martial artist performs a high front kick.",
+          "source": "ardy_core",
+          "request_id": "cf3970a462384129b0cd81974520ab66",
+          "stage_complete": true,
+          "metadata": {
+            "seed": 6203,
+            "choreography": {
+              "version": 1,
+              "name": "Pose-cued sparring duet",
+              "beat": "Reply kick and dodge",
+              "beat_index": 2,
+              "beat_start_frame": 80,
+              "beat_frames": 40,
+              "window_start_frame": 80,
+              "shared_clock": true,
+              "physical_contact_verified": false
+            },
+            "pose_cue_profile": {
+              "recipe": "pose_duet_v1",
+              "window_index": 2,
+              "roles_swapped": false,
+              "cue_ids": [
+                "duck",
+                "kick"
+              ],
+              "conditioning_history_frames": 4,
+              "asset_sha256": "997ae56122d16dc6572be1ddae6220aed320247bf62da1a0f5caa7ac05b6a670",
+              "asset_provenance": {
+                "cues": {
+                  "duck": {
+                    "archive_name": "feint-ai-v2-h4.core.stagezero.npz",
+                    "archive_sha256": "ecc0a00e0208a51021dec8760f91c3f40ae6c21682b024c693954ef8decaeafa",
+                    "source_actor_id": "actor_1",
+                    "source_actor_index": 0,
+                    "source_frames": [
+                      63,
+                      64,
+                      65,
+                      66
+                    ]
+                  },
+                  "kick": {
+                    "archive_name": "athletic-h4.core.stagezero.npz",
+                    "archive_sha256": "6e62f86323bf39fc5cfa649858843a254546f69d96529eabab94c61452e9a58d",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      107,
+                      108,
+                      109,
+                      110
+                    ]
+                  },
+                  "victory": {
+                    "archive_name": "athletic-h4-stride.core.stagezero.npz",
+                    "archive_sha256": "c4dfe6f3c4b713b774b473cd5bf73ccf320dee036acadb0e20b5ef86929413ae",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      236,
+                      237,
+                      238,
+                      239
+                    ]
+                  }
+                },
+                "fps": 20,
+                "skeleton": "Core27",
+                "source": "Actual native ARDY Core generations; four contiguous cue frames each",
+                "version": 1
+              },
+              "conditioned_frames": [
+                36,
+                37,
+                38,
+                39
+              ],
+              "alignment": "kick foot toward partner; duck hips toward partner; victory hips toward shared perpendicular audience",
+              "root_height_preserved": true,
+              "model_outcome_verified": false
+            }
+          },
+          "clip_metadata": {
+            "request_id": "cf3970a462384129b0cd81974520ab66",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "transition",
+            "actor_ids": [
+              "actor_1",
+              "actor_2"
+            ],
+            "source": "ARDY Core",
+            "seed": 6203
+          }
+        },
+        {
+          "start": 120,
+          "end": 160,
+          "stage_id": "083e649cdfd34446b5e1dd1b81a7705b",
+          "kind": "action",
+          "prompt": "actor_1: A person raises both arms high overhead in victory. / actor_2: A person raises both arms high overhead in victory.",
+          "source": "ardy_core",
+          "request_id": "fbb09b8934f9433294d2420c667187d4",
+          "stage_complete": true,
+          "metadata": {
+            "seed": 6204,
+            "choreography": {
+              "version": 1,
+              "name": "Pose-cued sparring duet",
+              "beat": "Shared victory",
+              "beat_index": 3,
+              "beat_start_frame": 120,
+              "beat_frames": 40,
+              "window_start_frame": 120,
+              "shared_clock": true,
+              "physical_contact_verified": false
+            },
+            "pose_cue_profile": {
+              "recipe": "pose_duet_v1",
+              "window_index": 3,
+              "roles_swapped": false,
+              "cue_ids": [
+                "victory",
+                "victory"
+              ],
+              "conditioning_history_frames": 4,
+              "asset_sha256": "997ae56122d16dc6572be1ddae6220aed320247bf62da1a0f5caa7ac05b6a670",
+              "asset_provenance": {
+                "cues": {
+                  "duck": {
+                    "archive_name": "feint-ai-v2-h4.core.stagezero.npz",
+                    "archive_sha256": "ecc0a00e0208a51021dec8760f91c3f40ae6c21682b024c693954ef8decaeafa",
+                    "source_actor_id": "actor_1",
+                    "source_actor_index": 0,
+                    "source_frames": [
+                      63,
+                      64,
+                      65,
+                      66
+                    ]
+                  },
+                  "kick": {
+                    "archive_name": "athletic-h4.core.stagezero.npz",
+                    "archive_sha256": "6e62f86323bf39fc5cfa649858843a254546f69d96529eabab94c61452e9a58d",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      107,
+                      108,
+                      109,
+                      110
+                    ]
+                  },
+                  "victory": {
+                    "archive_name": "athletic-h4-stride.core.stagezero.npz",
+                    "archive_sha256": "c4dfe6f3c4b713b774b473cd5bf73ccf320dee036acadb0e20b5ef86929413ae",
+                    "source_actor_id": "actor_2",
+                    "source_actor_index": 1,
+                    "source_frames": [
+                      236,
+                      237,
+                      238,
+                      239
+                    ]
+                  }
+                },
+                "fps": 20,
+                "skeleton": "Core27",
+                "source": "Actual native ARDY Core generations; four contiguous cue frames each",
+                "version": 1
+              },
+              "conditioned_frames": [
+                36,
+                37,
+                38,
+                39
+              ],
+              "alignment": "kick foot toward partner; duck hips toward partner; victory hips toward shared perpendicular audience",
+              "root_height_preserved": true,
+              "model_outcome_verified": false
+            }
+          },
+          "clip_metadata": {
+            "request_id": "fbb09b8934f9433294d2420c667187d4",
+            "chunk_index": 0,
+            "start_frame": 0,
+            "frames": 40,
+            "fps": 20,
+            "stage_kind": "transition",
+            "actor_ids": [
+              "actor_1",
+              "actor_2"
+            ],
+            "source": "ARDY Core",
+            "seed": 6204
+          }
+        }
+      ],
+      "geometry_check": "sampled body spheres vs scene boxes; actor root discs; continuous root footprint on authored floors (not mesh physics)"
+    }
+  },
+  "metrics": {
+    "frames": 160,
+    "actor_ids": [
+      "actor_1",
+      "actor_2"
+    ],
+    "fps": 20,
+    "scene_objects": 50,
+    "geometry_proxy_only": true,
+    "scene_collision_proxy": [
+      {
+        "version": 1,
+        "skeleton": "core27",
+        "frames": 160,
+        "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+        "sampled_body_points_per_frame": 30,
+        "total_collision_frames": 0,
+        "per_object": [
+          {
+            "object_id": "city-2",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 2.880805672011209,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-3",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 3.758502182691066,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-4",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 4.407809286679158,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-5",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.827733458500346,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-6",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 8.29259812840923,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-7",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 11.134472962045516,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-8",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 14.120441872178178,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-9",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 17.169305652840286,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-10",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.264598410536966,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-11",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 23.387971796510396,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-12",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.529546932024413,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-13",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 2.830743292648202,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-14",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 7.532602113782013,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-15",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 13.633978602104724,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-16",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 19.916744730987517,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-17",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.255985487322665,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-18",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 4.7514341454130715,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-19",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 10.310064917618524,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-20",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 16.443801043638015,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-21",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 22.724225164371394,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-22",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 29.05670001451417,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-23",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.226476050026924,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-24",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 6.663290218634913,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-25",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 8.966996206965902,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-26",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 11.643186506352405,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-27",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 14.525045240080223,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-28",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 17.510422726309695,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-29",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.55930019328826,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-30",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 23.647976342279684,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-31",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.762726522647522,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-32",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 3.688388128296323,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-33",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 8.039741989682701,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-34",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 13.936334194680283,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-35",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.134872605946924,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-36",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.429256701480572,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-37",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.567790099066399,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-38",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 10.744726720122728,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-39",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 16.736201814587094,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-40",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 22.945370105417183,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-41",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 29.236674573813005,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-42",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 32.692740018397366,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-43",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.860295488717856,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-44",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.32324454771467,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-45",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.460613539682527,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-46",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.960048172551787,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-47",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 32.839402567770414,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-48",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.86196838624601,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-49",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 18.16470407825648,
+            "worst_penetration_m": 0.0
+          }
+        ],
+        "assumptions": {
+          "units": "metres",
+          "up_axis": "+Y",
+          "scene_source": "object_metadata",
+          "object_geometry": "conservative boxes with explicit passage cutouts",
+          "mesh_or_physics_collision_verified": false
+        }
+      },
+      {
+        "version": 1,
+        "skeleton": "core27",
+        "frames": 160,
+        "proxy": "named_joint_spheres_and_segment_midpoints_vs_oriented_boxes",
+        "sampled_body_points_per_frame": 30,
+        "total_collision_frames": 0,
+        "per_object": [
+          {
+            "object_id": "city-2",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 4.020504997657983,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-3",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 2.892948999404906,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-4",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.456112650948275,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-5",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 6.797562182146393,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-6",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 9.013291557570819,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-7",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 11.657482622305263,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-8",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 14.52539761126019,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-9",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 17.508105181553468,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-10",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.539721549077957,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-11",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 23.6047014101506,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-12",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.701261766292248,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-13",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 3.884553469481686,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-14",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 8.057009617478126,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-15",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 13.932248978844727,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-16",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.07041244115089,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-17",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.333067636730707,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-18",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.698597545106134,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-19",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 10.751210110716448,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-20",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 16.720497321500527,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-21",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 22.879788005646443,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-22",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 29.142643235971292,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-23",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 4.260722099938689,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-24",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 5.761550657345384,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-25",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 8.226525823279257,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-26",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 11.015265291719393,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-27",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 13.973801282885834,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-28",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 17.017737365301357,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-29",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 20.109947611627046,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-30",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 23.231245839474262,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-31",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.371344551783924,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-32",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 2.693233818488175,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-33",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 7.407524243950278,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-34",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 13.479124045737093,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-35",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 19.757359083323895,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-36",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 26.094595047043903,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-37",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 4.696892716458062,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-38",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 10.16575133005689,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-39",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 16.288646993730616,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-40",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 22.565168214678362,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-41",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 28.895722962433908,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-42",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 33.02028773839438,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-43",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.997326701324184,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-44",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.25923465887254,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-45",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.210129696225405,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-46",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 31.58709013314219,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-47",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 32.35371621317468,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-48",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 6.597230246651289,
+            "worst_penetration_m": 0.0
+          },
+          {
+            "object_id": "city-49",
+            "kind": "custom",
+            "collision_frames": 0,
+            "first_collision_frame": null,
+            "minimum_clearance_m": 17.751411149123474,
+            "worst_penetration_m": 0.0
+          }
+        ],
+        "assumptions": {
+          "units": "metres",
+          "up_axis": "+Y",
+          "scene_source": "object_metadata",
+          "object_geometry": "conservative boxes with explicit passage cutouts",
+          "mesh_or_physics_collision_verified": false
+        }
+      }
+    ],
+    "authored_floor_coverage": [
+      {
+        "supported": true,
+        "diagnostics": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        }
+      },
+      {
+        "supported": true,
+        "diagnostics": {
+          "authored_floor": true,
+          "continuous_support_verified": true,
+          "floor_ids": [
+            "city-0",
+            "city-1"
+          ],
+          "actor_footprint_margin_m": 0.28,
+          "floor_height_range_m": [
+            0.010000000000000002,
+            0.025
+          ]
+        }
+      }
+    ],
+    "root_seams_m": [
+      {
+        "frame": 40,
+        "per_actor": [
+          0.04319565370678902,
+          0.0018378027016296983
+        ]
+      },
+      {
+        "frame": 80,
+        "per_actor": [
+          0.006839198991656303,
+          0.009049111977219582
+        ]
+      },
+      {
+        "frame": 120,
+        "per_actor": [
+          0.007125993259251118,
+          0.005102877505123615
+        ]
+      }
+    ],
+    "maximum_root_seam_m": 0.04319565370678902,
+    "maximum_root_frame_step_m": 0.07746825367212296,
+    "pair_separation": {
+      "min_root_separation_xz_m": 1.193819580437158,
+      "mean_root_separation_xz_m": 1.5001754043092004,
+      "root_disc_overlap_proxy_frames": 0,
+      "root_disc_overlap_proxy_fraction": 0.0,
+      "collision_radius_sum_m": 0.65
+    }
+  },
+  "performance_metrics": {
+    "horizon_boundaries": [
+      {
+        "frame": 40,
+        "joint_step_mean_m": [
+          0.08519654485601781,
+          0.002740235427995294
+        ],
+        "joint_step_max_m": [
+          0.3430839021743322,
+          0.005398737236455314
+        ],
+        "joint_rotation_max_degrees": [
+          43.679757746452545,
+          0.929881754203499
+        ]
+      },
+      {
+        "frame": 80,
+        "joint_step_mean_m": [
+          0.03743109234239858,
+          0.012187780234096047
+        ],
+        "joint_step_max_m": [
+          0.2131637010726055,
+          0.025588796319449762
+        ],
+        "joint_rotation_max_degrees": [
+          21.012646316783346,
+          6.600203460688006
+        ]
+      },
+      {
+        "frame": 120,
+        "joint_step_mean_m": [
+          0.007150024617475922,
+          0.03048288518791007
+        ],
+        "joint_step_max_m": [
+          0.014514296297181619,
+          0.18773608978219983
+        ],
+        "joint_rotation_max_degrees": [
+          4.559610253357924,
+          17.91305397277308
+        ]
+      }
+    ],
+    "minimum_cross_actor_joint_distance_m": 0.06210533806102656,
+    "cross_actor_joint_pairs_under_12cm_frames": 3,
+    "foot_slide_proxy": [
+      {
+        "low_foot_sample_count": 259,
+        "low_foot_speed_median_mps": 0.10920629711595083,
+        "low_foot_speed_p95_mps": 0.8519366590518096,
+        "note": "Height-based proxy, not inferred physical contact"
+      },
+      {
+        "low_foot_sample_count": 302,
+        "low_foot_speed_median_mps": 0.04481879754211938,
+        "low_foot_speed_p95_mps": 0.8335991173716988,
+        "note": "Height-based proxy, not inferred physical contact"
+      }
+    ]
+  },
+  "archive": "/Users/jakob/.codex/worktrees/motion-performance/Shellhacks/review/two-character/pose-duet-integrated-6201.core.stagezero.npz",
+  "archive_bytes": 792852,
+  "exact_save_load": true,
+  "gpu_jobs": 4
+}

@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+  "seed": 42,
+  "status": "rejected",
+  "sources": [
+    {
+      "source": "intergen",
+      "path": "review/prompt-scenes/market-three-navigation/sources/scene-291d8fced05d413cbd3ecc5d74c377d9/pair-01.npz",
+      "seconds": 1.660725875000935,
+      "actor_ids": [
+        "actor_2",
+        "actor_3"
+      ],
+      "source_prompt": "the first person and the second person shake hands.",
+      "planned_prompt": "Person 2 and Person 3 shake hands.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_2"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_3"
+        }
+      ],
+      "sha256": "8842e6280476fa3bc4d682d91b2fdb2be6a540db426de14496ef75887c27f464",
+      "used_in_performance": true
+    },
+    {
+      "source": "intergen",
+      "path": "review/prompt-scenes/market-three-navigation/sources/scene-291d8fced05d413cbd3ecc5d74c377d9/pair-00.npz",
+      "seconds": 1.6499243339640088,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "the first person and the second person shake hands, then release.",
+      "planned_prompt": "Person 1 and Person 2 shake hands, then release.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "762dc4fc3d85ad59f3bd1676e19a796696ba9c0d79a4c8ea439c1c8653ea0d16",
+      "used_in_performance": true
+    }
+  ],
+  "timings": [
+    {
+      "stage": "planning",
+      "seconds": 3.8425507920328528
+    },
+    {
+      "stage": "placement",
+      "seconds": 0.007976415974553674
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 1,
+      "seconds": 1.660725875000935
+    },
+    {
+      "stage": "intergen_generation",
+      "beat_index": 0,
+      "seconds": 1.6499243339640088
+    }
+  ],
+  "beats": [],
+  "plan": {
+    "version": 1,
+    "title": "Three-Person Sequential Greeting",
+    "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+    "actor_count": 3,
+    "actors": [
+      {
+        "id": "actor_1",
+        "name": "Person 1",
+        "start": null
+      },
+      {
+        "id": "actor_2",
+        "name": "Person 2",
+        "start": null
+      },
+      {
+        "id": "actor_3",
+        "name": "Person 3",
+        "start": null
+      }
+    ],
+    "meeting": null,
+    "beats": [
+      {
+        "id": "beat-1",
+        "actor_ids": [
+          "actor_1",
+          "actor_2"
+        ],
+        "prompt": "Person 1 and Person 2 shake hands, then release.",
+        "seconds": 4.0
+      },
+      {
+        "id": "beat-2",
+        "actor_ids": [
+          "actor_2",
+          "actor_3"
+        ],
+        "prompt": "Person 2 and Person 3 shake hands.",
+        "seconds": 4.0
+      }
+    ],
+    "warnings": [],
+    "raw_plan": {
+      "version": 1,
+      "title": "Three-Person Sequential Greeting",
+      "prompt": "Three people greet each other in turn. Person 1 shakes hands with person 2 and releases. Then person 2 shakes hands with person 3.",
+      "actor_count": 3,
+      "actors": [
+        {
+          "id": "actor_1",
+          "name": "Person 1",
+          "start": null
+        },
+        {
+          "id": "actor_2",
+          "name": "Person 2",
+          "start": null
+        },
+        {
+          "id": "actor_3",
+          "name": "Person 3",
+          "start": null
+        }
+      ],
+      "meeting": null,
+      "beats": [
+        {
+          "id": "beat-1",
+          "actor_ids": [
+            "actor_1",
+            "actor_2"
+          ],
+          "prompt": "Person 1 and Person 2 shake hands, then release.",
+          "seconds": 4
+        },
+        {
+          "id": "beat-2",
+          "actor_ids": [
+            "actor_2",
+            "actor_3"
+          ],
+          "prompt": "Person 2 and Person 3 shake hands.",
+          "seconds": 4
+        }
+      ],
+      "warnings": []
+    },
+    "planning_seconds": 3.837040165963117,
+    "planning_attempts": 1,
+    "planner_model": "gpt-5-6-sol",
+    "planner_cache_hit": false
+  },
+  "placement": {
+    "starts": {
+      "actor_1": {
+        "x": -0.9,
+        "z": -1.5
+      },
+      "actor_2": {
+        "x": 0.9,
+        "z": -1.5
+      },
+      "actor_3": {
+        "x": 0.0,
+        "z": -3.3
+      }
+    },
+    "meeting": {
+      "x": 0.0,
+      "z": 0.0,
+      "yaw_degrees": 0.0
+    },
+    "target_id": null,
+    "routes": {
+      "actor_1": [
+        [
+          -0.9,
+          -1.5
+        ],
+        [
+          -0.9,
+          0.0
+        ]
+      ],
+      "actor_2": [
+        [
+          0.9,
+          -1.5
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ],
+      "actor_3": [
+        [
+          0.0,
+          -3.3
+        ],
+        [
+          0.0,
+          -1.8
+        ]
+      ]
+    },
+    "planned_only": true,
+    "physical_contact_verified": false
+  },
+  "prefetch": {
+    "maximum_concurrent_pair_calls": 1,
+    "scheduled_pair_sources": 2,
+    "core_horizons": "sequential native330 history"
+  },
+  "idle_initializations": [
+    {
+      "actor_ids": [
+        "actor_3"
+      ],
+      "source": "intergen",
+      "source_beat_index": 1,
+      "source_actor_index": 1,
+      "source_frame": 0,
+      "yaw_radians": 0.0,
+      "translation": [
+        -0.16514061391353607,
+        0.0,
+        -4.466147947311401
+      ],
+      "display_policy": "explicit stationary hold of real incoming native first pose at the assigned start"
+    }
+  ],
+  "error": "Actor routes cross too closely and no bounded clear detour fits; move the starts or meeting spot",
+  "wall_seconds": 7.230666083050892
+}

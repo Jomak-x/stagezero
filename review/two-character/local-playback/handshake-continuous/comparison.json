@@ -1,0 +1,78 @@
+{
+  "command": ".venv/bin/python experiments/trial_paired_direction.py --request review/two-character/city-meetup/handshake-ui-sources/request.json --scene review/scene-integration/live-city.json --token /Users/jakob/Desktop/Shellhacks/.runtime/api-token --entry-policy continuous --speed-mps .85 --output review/two-character/local-playback/handshake-continuous",
+  "exit_code": 0,
+  "generation_wall_seconds": 2.9481015410274267,
+  "legacy": {
+    "frames": 471,
+    "native_start_frame": 261,
+    "native_start_seconds": 8.7,
+    "duration_seconds": 15.7,
+    "arrival_seconds": 6.0,
+    "approach_seconds": 8,
+    "bridge_frames": 21,
+    "max_joint_speed_m_s": 1.1648351023731538,
+    "max_endpoint_velocity_error_m_s": 0.10393586555147573,
+    "max_ankle_toe_xz_travel_m": 0.27221340254546306,
+    "min_ankle_toe_height_m": 0.014256227761507034,
+    "arrival_errors_m": [
+      0.038203817410086355,
+      0.03349973125603257
+    ],
+    "mechanical_gate_passed": true,
+    "first_hand_hand_distance_below_0_1m_seconds": 10.166666666666666
+  },
+  "continuous": {
+    "frames": 373,
+    "native_start_frame": 163,
+    "native_start_seconds": 5.433333333333334,
+    "duration_seconds": 12.433333333333334,
+    "arrival_seconds": 4.05,
+    "approach_seconds": 5.05,
+    "bridge_frames": 12,
+    "max_joint_speed_m_s": 1.4140355215961085,
+    "max_endpoint_velocity_error_m_s": 0.23755547609178923,
+    "max_ankle_toe_xz_travel_m": 0.1751111677705811,
+    "min_ankle_toe_height_m": -0.00043883294999547823,
+    "arrival_errors_m": [
+      0.01810820979997686,
+      0.06849879226288112
+    ],
+    "mechanical_gate_passed": true,
+    "first_hand_hand_distance_below_0_1m_seconds": 6.9
+  },
+  "native_pair_frames_preserved_exactly": true,
+  "native_features_identical_to_legacy": true,
+  "native_hand_hand_distance_threshold_first_frame": {
+    "0.2": 39,
+    "0.15": 40,
+    "0.1": 44,
+    "0.08": 46
+  },
+  "contact_interpretation": "Geometric hand-joint proximity proxy only; physical contact is not verified.",
+  "full_scene_geometry": {
+    "frames": 373,
+    "actors": [
+      {
+        "actor_id": "actor_1",
+        "continuous_support_verified": true,
+        "total_collision_frames": 0
+      },
+      {
+        "actor_id": "actor_2",
+        "continuous_support_verified": true,
+        "total_collision_frames": 0
+      }
+    ]
+  },
+  "core_playback_selection": {
+    "generated_frames": 120,
+    "retained_frames": 101,
+    "source_fps": 20,
+    "selection": "contiguous prefix; raw horizons archived separately"
+  },
+  "visual_acceptance": "pending main-agent full-scene review",
+  "limitations": [
+    "Bridge minimum ankle/toe height is 0.44 mm below world zero; inspect foot-floor relation visually.",
+    "Authored transition has no foot locking or contact solve."
+  ]
+}

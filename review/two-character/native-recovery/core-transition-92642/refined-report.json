@@ -1,0 +1,388 @@
+{
+  "status": "review candidate; animation acceptance unverified",
+  "gpu_jobs": 0,
+  "source_trial": "review/two-character/native-recovery/core-transition-92642",
+  "source_pair_sha256": "c552070badd291c349917aa704ef285cf67ff70c8762c3d7149647bfb8a0907d",
+  "shared_placement": {
+    "yaw_radians": 0.0,
+    "translation_xyz_m": [
+      -0.1031704992055893,
+      0.02500000037252903,
+      -0.83492511510849
+    ],
+    "per_actor_offsets": false,
+    "scale": 1.0
+  },
+  "source_pair_frames_modified": false,
+  "refinement": {
+    "approach": {
+      "source": "ARDY Core",
+      "method": "Core world bone directions with native actor median segment lengths",
+      "reference_frames": 210,
+      "median_lengths_m": [
+        [
+          0.115434837375363,
+          0.11701001600643074,
+          0.10700703532061973,
+          0.354825212373047,
+          0.34725682464702384,
+          0.1188470045059434,
+          0.36525907805732805,
+          0.3635748752827558,
+          0.05849515706938208,
+          0.12113124051557089,
+          0.1271491734515332,
+          0.2139739108596001,
+          0.14696092574818306,
+          0.14771775342751803,
+          0.07434864694838719,
+          0.09488190120739926,
+          0.09007888288497298,
+          0.23736039109038154,
+          0.2407854038144543,
+          0.24066063736667026,
+          0.22581625758578372
+        ],
+        [
+          0.11210792574505812,
+          0.11289237577133274,
+          0.10317931155057872,
+          0.3433294644624447,
+          0.33804281080664245,
+          0.11886588631753764,
+          0.3538193236105657,
+          0.3543776599621467,
+          0.05570622141039723,
+          0.11981448354184313,
+          0.12199803830879648,
+          0.2091867474636319,
+          0.14320092029478995,
+          0.14385621047381492,
+          0.07380245578763203,
+          0.09249447101020428,
+          0.08876469577410753,
+          0.23300748829026147,
+          0.2359752398332289,
+          0.23140854648932266,
+          0.22238317954613024
+        ]
+      ],
+      "core_endpoint_displacement_m": {
+        "mean": 0.1909537881348068,
+        "max": 0.3755864227682045,
+        "per_actor_max": [
+          0.34314198177186406,
+          0.3755864227682045
+        ]
+      },
+      "root_xz_modified": false,
+      "native_pair_modified": false,
+      "root_y_correction_range_m": [
+        -0.1840822881312105,
+        -0.15033400194590016
+      ],
+      "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+      "foot_lock": false,
+      "limitations": [
+        "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+        "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+        "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+        "Native source lengths vary while Core display lengths use actor-specific medians."
+      ],
+      "resampling": {
+        "source_fps": 20,
+        "display_fps": 30,
+        "method": "linear Core positions then normalized bone directions and fixed actor lengths",
+        "final_sample_hold_seconds": 0.016666666666666607
+      }
+    },
+    "exit": {
+      "source": "ARDY Core",
+      "method": "Core world bone directions with native actor median segment lengths",
+      "reference_frames": 210,
+      "median_lengths_m": [
+        [
+          0.115434837375363,
+          0.11701001600643074,
+          0.10700703532061973,
+          0.354825212373047,
+          0.34725682464702384,
+          0.1188470045059434,
+          0.36525907805732805,
+          0.3635748752827558,
+          0.05849515706938208,
+          0.12113124051557089,
+          0.1271491734515332,
+          0.2139739108596001,
+          0.14696092574818306,
+          0.14771775342751803,
+          0.07434864694838719,
+          0.09488190120739926,
+          0.09007888288497298,
+          0.23736039109038154,
+          0.2407854038144543,
+          0.24066063736667026,
+          0.22581625758578372
+        ],
+        [
+          0.11210792574505812,
+          0.11289237577133274,
+          0.10317931155057872,
+          0.3433294644624447,
+          0.33804281080664245,
+          0.11886588631753764,
+          0.3538193236105657,
+          0.3543776599621467,
+          0.05570622141039723,
+          0.11981448354184313,
+          0.12199803830879648,
+          0.2091867474636319,
+          0.14320092029478995,
+          0.14385621047381492,
+          0.07380245578763203,
+          0.09249447101020428,
+          0.08876469577410753,
+          0.23300748829026147,
+          0.2359752398332289,
+          0.23140854648932266,
+          0.22238317954613024
+        ]
+      ],
+      "core_endpoint_displacement_m": {
+        "mean": 0.19539468401535276,
+        "max": 0.37460896628239965,
+        "per_actor_max": [
+          0.3567524702148662,
+          0.37460896628239965
+        ]
+      },
+      "root_xz_modified": false,
+      "native_pair_modified": false,
+      "root_y_correction_range_m": [
+        -0.18215681714610163,
+        -0.15271755494170228
+      ],
+      "floor_policy": "Preserve source minimum ankle/toe height with one Y-only root translation each frame.",
+      "foot_lock": false,
+      "limitations": [
+        "Core wrist and elbow endpoints move as part of this explicit morphology retarget.",
+        "No FK from the old 17-bone rig and no InterGen-to-Core conversion.",
+        "Core foot sliding is not repaired; ground contact and mesh penetration remain unverified.",
+        "Native source lengths vary while Core display lengths use actor-specific medians."
+      ],
+      "resampling": {
+        "source_fps": 20,
+        "display_fps": 30,
+        "method": "linear Core positions then normalized bone directions and fixed actor lengths",
+        "final_sample_hold_seconds": 0.016666666666666607
+      }
+    }
+  },
+  "boundaries": {
+    "entry": {
+      "source": "authored direction transition",
+      "model_generated": false,
+      "method": "normalized Hermite bone directions, endpoint lengths, and root Hermite",
+      "frames": 21,
+      "fps": 30.0,
+      "source_pair_frames_modified": false,
+      "input_boundary": {
+        "position_gap_m": {
+          "mean": 0.0887257366943106,
+          "max": 0.1570858201445886,
+          "per_actor_max": [
+            0.12408463303045147,
+            0.1570858201445886
+          ]
+        },
+        "root_gap_m": [
+          0.038752115671434925,
+          0.07779084042811861
+        ],
+        "root_relative_pose_gap_m": {
+          "mean": 0.07782019017509766,
+          "max": 0.13010403452057617,
+          "per_actor_max": [
+            0.12002206296026398,
+            0.13010403452057617
+          ]
+        },
+        "velocity_gap_m_s": {
+          "mean": 0.07261699405189664,
+          "max": 0.14262665499647778,
+          "per_actor_max": [
+            0.08631322485007216,
+            0.14262665499647778
+          ]
+        },
+        "left_endpoint_speed_m_s": {
+          "mean": 0.006859412284925398,
+          "max": 0.02512417092867688,
+          "per_actor_max": [
+            0.014035873044951195,
+            0.02512417092867688
+          ]
+        },
+        "right_endpoint_speed_m_s": {
+          "mean": 0.07267886122785877,
+          "max": 0.14348678960196007,
+          "per_actor_max": [
+            0.09093233497643341,
+            0.14348678960196007
+          ]
+        },
+        "left_fps": 30.0,
+        "right_fps": 30.0,
+        "seamless_verified": false,
+        "interpretation": "Geometric boundary diagnostics only; skin, feet, obstacles and contact require review."
+      },
+      "max_joint_speed_m_s": 0.3416733829707152,
+      "max_endpoint_velocity_error_m_s": 0.04041996864244583,
+      "max_source_endpoint_length_change_fraction": 0.036597313850622926,
+      "max_bone_length_interpolation_error_m": 1.3877787807814457e-16,
+      "min_ankle_toe_height_m": 0.007611614739431574,
+      "max_ankle_toe_xz_travel_m": 0.09302237247074961,
+      "thresholds": {
+        "max_speed_m_s": 5.0,
+        "max_endpoint_velocity_error_m_s": 0.35,
+        "max_bone_length_change_fraction": 0.2
+      },
+      "mechanical_gate_passed": true,
+      "rejection_reasons": [],
+      "foot_lock": false,
+      "contact_preserved_in_bridge": false,
+      "visual_acceptance": "unverified",
+      "limitations": [
+        "Authored motion, not jointly generated with Core.",
+        "Bone directions and lengths are interpolated; no limb shortening from position blending.",
+        "Endpoint velocity is measured at sampled frames; continuous derivatives alone are not proof.",
+        "No foot locking, floor, partner-contact or obstacle solve."
+      ]
+    },
+    "exit": {
+      "source": "authored direction transition",
+      "model_generated": false,
+      "method": "normalized Hermite bone directions, endpoint lengths, and root Hermite",
+      "frames": 21,
+      "fps": 30.0,
+      "source_pair_frames_modified": false,
+      "input_boundary": {
+        "position_gap_m": {
+          "mean": 0.1438161588759016,
+          "max": 0.2710547361039156,
+          "per_actor_max": [
+            0.26012992421543724,
+            0.2710547361039156
+          ]
+        },
+        "root_gap_m": [
+          0.10543634815857897,
+          0.09005049983019411
+        ],
+        "root_relative_pose_gap_m": {
+          "mean": 0.10030328749472216,
+          "max": 0.25952203803843976,
+          "per_actor_max": [
+            0.25349875287595136,
+            0.25952203803843976
+          ]
+        },
+        "velocity_gap_m_s": {
+          "mean": 0.49803715750277494,
+          "max": 1.3915937350480077,
+          "per_actor_max": [
+            0.5398620780914267,
+            1.3915937350480077
+          ]
+        },
+        "left_endpoint_speed_m_s": {
+          "mean": 0.49996686570817667,
+          "max": 1.421593106915442,
+          "per_actor_max": [
+            0.5304733362572933,
+            1.421593106915442
+          ]
+        },
+        "right_endpoint_speed_m_s": {
+          "mean": 0.015326757102236787,
+          "max": 0.03695549771422164,
+          "per_actor_max": [
+            0.03695549771422164,
+            0.031265403822707434
+          ]
+        },
+        "left_fps": 30.0,
+        "right_fps": 30.0,
+        "seamless_verified": false,
+        "interpretation": "Geometric boundary diagnostics only; skin, feet, obstacles and contact require review."
+      },
+      "max_joint_speed_m_s": 1.2831602536438669,
+      "max_endpoint_velocity_error_m_s": 0.20583012604902262,
+      "max_source_endpoint_length_change_fraction": 0.06617985655060021,
+      "max_bone_length_interpolation_error_m": 1.3877787807814457e-16,
+      "min_ankle_toe_height_m": -0.00975269079208374,
+      "max_ankle_toe_xz_travel_m": 0.32699107853870746,
+      "thresholds": {
+        "max_speed_m_s": 5.0,
+        "max_endpoint_velocity_error_m_s": 0.35,
+        "max_bone_length_change_fraction": 0.2
+      },
+      "mechanical_gate_passed": true,
+      "rejection_reasons": [],
+      "foot_lock": false,
+      "contact_preserved_in_bridge": false,
+      "visual_acceptance": "unverified",
+      "limitations": [
+        "Authored motion, not jointly generated with Core.",
+        "Bone directions and lengths are interpolated; no limb shortening from position blending.",
+        "Endpoint velocity is measured at sampled frames; continuous derivatives alone are not proof.",
+        "No foot locking, floor, partner-contact or obstacle solve."
+      ]
+    }
+  },
+  "all_mechanical_gates_passed": true,
+  "visual_acceptance": "unverified",
+  "segments": [
+    {
+      "label": "ARDY Core approach; anatomy retarget and 20 to 30 fps interpolation",
+      "source": "ardy_core",
+      "kind": "approach",
+      "start_frame": 0,
+      "end_frame_exclusive": 120,
+      "frames": 120
+    },
+    {
+      "label": "Authored direction entry; no foot lock",
+      "source": "authored_transition",
+      "kind": "transition",
+      "start_frame": 120,
+      "end_frame_exclusive": 141,
+      "frames": 21
+    },
+    {
+      "label": "Native30 paired interaction; shared rigid placement only",
+      "source": "intergen",
+      "kind": "paired_action",
+      "start_frame": 141,
+      "end_frame_exclusive": 351,
+      "frames": 210
+    },
+    {
+      "label": "Authored direction exit; no foot lock",
+      "source": "authored_transition",
+      "kind": "transition",
+      "start_frame": 351,
+      "end_frame_exclusive": 372,
+      "frames": 21
+    },
+    {
+      "label": "ARDY Core departure; anatomy retarget and 20 to 30 fps interpolation",
+      "source": "ardy_core",
+      "kind": "departure",
+      "start_frame": 372,
+      "end_frame_exclusive": 492,
+      "frames": 120
+    }
+  ],
+  "archive": "review/two-character/native-recovery/core-transition-92642/refined-review-native22.npz"
+}
