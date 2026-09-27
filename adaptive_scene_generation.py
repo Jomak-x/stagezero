@@ -127,6 +127,30 @@ class AdaptiveSceneGenerator:
                         part['repeat']['step'] = [v * .9 for v in part['repeat']['step']]
             reviewed = refine_assets(reviewed)
             issues = [issue for issue in assess_assets(reviewed) if issue['severity'] == 'error']
+        # A thin overlay can be flush with a backing exactly at the unit-box
+        # boundary. refine_assets cannot move it outward while the box is full,
+        # leaving coincident faces that shimmer as the camera moves. Reserve a
+        # 1% local margin, keeping minimum-size details valid, then retry the nudge.
+        by_id = {asset['id']: asset for asset in reviewed}
+        coplanar = set()
+        for issue in assess_assets(reviewed):
+            if issue['code'] != 'coplanar_surface':
+                continue
+            part = by_id[issue['asset_id']]['parts'][issue['part_index']]
+            axis = min(range(3), key=lambda i: part['size'][i])
+            if abs(part['position'][axis]) + part['size'][axis] / 2 >= .4999:
+                coplanar.add(issue['asset_id'])
+        if coplanar:
+            for asset in reviewed:
+                if asset['id'] not in coplanar:
+                    continue
+                for part in asset['parts']:
+                    part['position'] = [v * .99 for v in part['position']]
+                    part['size'] = [max(.001, v * .99) for v in part['size']]
+                    if 'repeat' in part:
+                        part['repeat']['step'] = [v * .99 for v in part['repeat']['step']]
+            reviewed = refine_assets(reviewed)
+            issues = [issue for issue in assess_assets(reviewed) if issue['severity'] == 'error']
         if issues:
             summary = '; '.join(f"{issue['asset_id']}: {issue['message']}" for issue in issues[:6])
             raise ValueError('Generated prop quality check failed: ' + summary)
