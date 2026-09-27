@@ -17,6 +17,9 @@ class _SceneGui(fixtures.Gui):
 
     add_slider = add_number
 
+    def add_vector3(self, label, initial_value=(0, 0, 0), **kwargs):
+        return self._handle(label=label, value=initial_value)
+
 
 class UploadConsumerTests(unittest.TestCase):
     setUp = fixtures.StudioUITests.setUp

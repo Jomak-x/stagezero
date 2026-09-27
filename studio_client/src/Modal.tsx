@@ -49,6 +49,7 @@ function GeneratedModal({
 }) {
   const viewer = useContext(ViewerContext)!;
   const isStudioSceneModal = conf.title === "Full scene";
+  const isStudioGalleryModal = conf.title === "Choose a background" || conf.title === "Choose your character";
 
   const requestClose = conf.show_close_button
     ? () => {
@@ -64,9 +65,11 @@ function GeneratedModal({
       opened={true}
       title={conf.title}
       size={isStudioSceneModal ? "min(640px, calc(100vw - 28px))" : conf.size ?? "md"}
-      classNames={isStudioSceneModal ? {
+      classNames={isStudioSceneModal || isStudioGalleryModal ? {
         overlay: "sz-studio-modal-overlay",
-        content: "sz-studio-modal",
+        content: isStudioGalleryModal
+          ? `sz-studio-modal sz-gallery-modal${conf.title === "Choose your character" ? " sz-character-gallery-modal" : ""}`
+          : "sz-studio-modal",
         header: "sz-studio-modal-header",
         title: "sz-studio-modal-title",
         body: "sz-studio-modal-body",

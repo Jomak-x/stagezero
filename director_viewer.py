@@ -21,6 +21,7 @@ from studio_camera_protocol import CameraStudioController
 from studio_timeline import StudioTimeline
 from studio_ui import StudioUI, section
 from character_controls import CharacterControls
+from character_placement import CharacterPlacement
 from realtime_client import RealtimeClient
 from studio_core_session import CoreStudioSession
 from studio_core_controls import CoreStudioControls
@@ -79,6 +80,7 @@ def build_parser():
     parser.add_argument('--objects', type=str, help='Load a generated object scene JSON')
     parser.add_argument('--characters', type=Path, default=ROOT / '.runtime/characters', help='Private imported GLB library')
     parser.add_argument('--glb', type=Path, help='Open a local GLB on first browser connection')
+    parser.add_argument('--legacy-characters', type=Path, help='Import a previous flat character library into the current catalog')
     parser.add_argument('--environment', choices=('studio', 'warehouse', 'none'), default='studio',
                         help='Reflection lighting for PBR character materials')
     parser.add_argument('--reference-only', action='store_true',
@@ -175,6 +177,8 @@ def main():
     if args.reference_only:
         session.set_mode('Live ARDY')
     characters = CharacterControls(server, session, skeleton, args.characters)
+    if args.legacy_characters is not None:
+        characters.import_legacy_catalog(args.legacy_characters)
     load_startup_glb(parser, characters, args.glb)
     if args.project:
         session.load_project(Path(args.project).read_bytes())
@@ -539,6 +543,8 @@ def main():
             return core_renderer.actor_root()
         return characters.actor_root()
     camera = StudioCamera(server, actor_root)
+    placement = CharacterPlacement(server, session, camera,
+        enabled=lambda: not (core_requested or paired_requested or cast_requested))
     camera_studio = CameraStudioController(server, session, camera)
     @server.on_client_connect
     def connected(client):
@@ -616,8 +622,13 @@ def main():
     def move_gate(_):
         edit_gate(gizmo.position)
 
+    def character_controls(gui):
+        characters.build_gui(gui)
+        with gui.add_folder('Character start position', expand_by_default=False):
+            placement.build(gui)
+
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
-                  characters.build_gui, core_session=core, paired_session=paired, cast_session=cast,
+                  character_controls, core_session=core, paired_session=paired, cast_session=cast,
                   core_controls=build_core_controls, on_native_open=open_native_project, on_g1_open=open_g1_project,
                   on_story_activate=activate_story, on_generate_cast=generate_scene_cast)
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
@@ -863,6 +874,7 @@ def main():
                 with server.atomic():
                     if ui_due:
                         ui.update()
+                        placement.update()
                         core_ui.tick()
                         voice.update()
                         dialogue.update()

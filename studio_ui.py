@@ -100,6 +100,8 @@ class StudioUI:
         self.slot_ids = ()
         gui = server.gui
         gui.add_html(STYLE)
+        gui.add_html('<div class="sz-brand"><strong>StageZero.</strong><span>Imagine it. Direct it.</span></div>')
+        self._selected_sequence = None
         self.status = gui.add_html('')
         from story_controls import StoryControls
         self.story_controls = StoryControls(gui, session, core_session=core_session, paired_session=paired_session, cast_session=cast_session,
@@ -158,6 +160,7 @@ class StudioUI:
                 self.seek_go = gui.add_button('Go to time', color='gray')
             section(gui, 'Selected take', 'Click an action on the timeline to edit it, or add to the end.')
             self.take_info = gui.add_html('')
+            self.append_saved = gui.add_button('Add a saved take', color='green')
             self.prepare_extend = gui.add_button('Add action to end', color='gray')
             self.prepare_replace = gui.add_button('Change ending · new version', color='gray')
             self.remove_take = gui.add_button('Remove selected take', color='gray')
@@ -176,6 +179,9 @@ class StudioUI:
             section(gui, 'Motion in this take', 'Jump to an action or reuse its direction for another version.')
             self.segments = gui.add_dropdown('Generated motion', ('No generated actions',))
             self.jump = gui.add_button_group('Find motion', ('Previous', 'Go to action', 'Next'))
+            self.edit_selected_action = gui.add_button('Edit selected action', color='green')
+            self.delete_selected_action = gui.add_button('Delete selected action', color='gray')
+            self.undo_sequence_edit = gui.add_button('Undo sequence edit', color='gray')
             self.reuse = gui.add_button('Copy this direction to Motion', color='gray')
             self.action = gui.add_html('')
             self.speed = gui.add_dropdown('Speed', ('0.25×', '0.5×', '1×', '1.5×', '2×'), initial_value='1×')
@@ -212,6 +218,99 @@ class StudioUI:
             self.guide_scene = gui.add_button('Add scene objects', color='gray')
         self.refresh_saved()
         self.bind()
+        self.update()
+
+    def _sequence_editable(self, take):
+        return (take is not None and self.session.mode == 'Live ARDY'
+                and self._active_motion_session() is None and not self.session.busy
+                and not any('beat_id' in segment for segment in take.segments)
+                and not self.story_controls.owns_take(take.id))
+
+    def _open_take_picker(self, event):
+        s = self.session
+        with s.lock:
+            target = s.takes.get(s.active_take)
+            if not self._sequence_editable(target):
+                return
+            revision = s.project_revision
+            available = [(take, take.name, len(take.positions)/25)
+                         for take in s.takes.values() if take is not target
+                         and not any('beat_id' in segment for segment in take.segments)
+                         and not self.story_controls.owns_take(take.id)]
+        client = getattr(event, 'client', None)
+        panel = client.gui if client is not None and hasattr(client, 'gui') else self.server.gui
+        modal = panel.add_modal('Add a saved take', size='md', show_close_button=True)
+        completed = False
+        with modal:
+            feedback = panel.add_markdown(
+                'Choose a take to append. The source stays available. Motion joins use a cut between poses.'
+                if available else 'Create another take first, then return here to join your saved actions.')
+            for source, name, seconds in available:
+                choose = panel.add_button(f'Add {name} · {seconds:.2f}s')
+                def append(_, selected=source):
+                    nonlocal completed
+                    with s.lock:
+                        if completed:
+                            return
+                        if (not self._sequence_editable(target) or s.project_revision != revision
+                                or s.active_take != target.id or s.takes.get(target.id) is not target
+                                or s.takes.get(selected.id) is not selected):
+                            feedback.content = 'The project changed. Close this window and choose the takes again.'
+                            return
+                        try:
+                            s.append_take(selected.id)
+                        except (ValueError, RuntimeError) as exc:
+                            feedback.content = str(exc)
+                            return
+                        completed = True
+                        self._clear_action_edit()
+                        self._set(self.edit_action, 'value', EXTEND)
+                    modal.close()
+                    self.update()
+                choose.on_click(append)
+            close = panel.add_button('Back to editor', color='gray')
+            close.on_click(lambda _: modal.close())
+
+    def _edit_selected_sequence_action(self, event):
+        snapshot = self._selected_sequence
+        s = self.session
+        with s.lock:
+            if snapshot is None or s.busy or self._active_motion_session() is not None:
+                return
+            source, index = snapshot
+            take = s.takes.get(s.active_take)
+            if take is not source or not 0 <= index < len(take.segments):
+                return
+            story_owned = ('beat_id' in take.segments[index] or self.story_controls.owns_take(take.id))
+        client = getattr(event, 'client', None)
+        if story_owned and self.story_controls.open_for_movement(client, take.id, index):
+            self._clear_action_edit()
+            self.update()
+            return
+        with s.lock:
+            if s.takes.get(s.active_take) is not source or s.busy or not s.character_motion_enabled:
+                return
+            self._begin_action_edit(take, index, 'replace')
+            s.seek(take.segments[index]['start'])
+        self.update()
+        navigate_tab(self.tabs, 0, client)
+
+    def _delete_selected_sequence_action(self, _event):
+        snapshot = self._selected_sequence
+        s = self.session
+        with s.lock:
+            if snapshot is None:
+                return
+            source, index = snapshot
+            take = s.takes.get(s.active_take)
+            if take is not source or not self._sequence_editable(take) or len(take.segments) <= 1:
+                return
+            try:
+                s.delete_action(index)
+            except (ValueError, RuntimeError) as exc:
+                s.status = str(exc)
+            else:
+                self._clear_action_edit()
         self.update()
 
     def _active_motion_session(self):
@@ -623,6 +722,23 @@ class StudioUI:
 
     def bind(self):
         s = self.session
+        self.append_saved.on_click(self._open_take_picker)
+        self.edit_selected_action.on_click(self._edit_selected_sequence_action)
+        self.delete_selected_action.on_click(self._delete_selected_sequence_action)
+
+        @self.segments.on_update
+        def selected_segment(event):
+            if getattr(event, 'client', None) is not None:
+                self.update()
+
+        @self.undo_sequence_edit.on_click
+        def undo_sequence(_):
+            with s.lock:
+                if s.busy or self._active_motion_session() is not None:
+                    return
+                s.undo_action_edit()
+                self._clear_action_edit()
+            self.update()
 
         def begin_new_take(client):
             with s.lock:
@@ -1214,8 +1330,12 @@ class StudioUI:
             # capture owns the take; callbacks also reject stale clicks.
             motion_session = self._active_motion_session()
             motion_state = motion_session.snapshot() if motion_session is not None else {}
-            self._set(self.playhead, 'visible', False)
-            self._set(self.transport, 'visible', bool(motion_state.get('total_frames') and
+            fallback_transport = (motion_session is None and has_clip and s.character_motion_enabled
+                                  and not s.busy and not (s.kind == 'generated' and take and take.segments))
+            self._set(self.playhead, 'visible', fallback_transport)
+            self._set(self.playhead, 'content',
+                      f'<div class="sz-clock">{s.frame/s.fps:.2f}<small> / {len(s.positions)/s.fps:.2f} s</small></div>' if fallback_transport else '')
+            self._set(self.transport, 'visible', fallback_transport or bool(motion_state.get('total_frames') and
                 not motion_state.get('busy') and not motion_state.get('capturing')))
             self._set(self.seek_go, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
             self._set(self.seek_time, 'disabled', not s.character_motion_enabled or not has_clip or s.busy)
@@ -1315,6 +1435,14 @@ class StudioUI:
             self.segment_map = {f'{i+1:02d} · {seg["start"]/25:.2f}s · {seg["prompt"][:30]}':seg for i,seg in enumerate(take.segments)} if take else {}
             segments = tuple(self.segment_map) or ('No generated actions',)
             self._set(self.segments, 'options', segments)
+            selected = self.segment_map.get(self.segments.value)
+            selected_index = next((i for i, segment in enumerate(take.segments) if segment is selected), None) if take else None
+            self._selected_sequence = (take, selected_index) if selected_index is not None else None
+            sequence_editable = self._sequence_editable(take)
+            self._set(self.append_saved, 'disabled', not sequence_editable)
+            self._set(self.edit_selected_action, 'disabled', self._selected_sequence is None or s.busy or self._active_motion_session() is not None)
+            self._set(self.delete_selected_action, 'disabled', not sequence_editable or self._selected_sequence is None or len(take.segments) <= 1)
+            self._set(self.undo_sequence_edit, 'disabled', s.busy or not s.can_undo_action_edit or self._active_motion_session() is not None)
             self._set(self.action, 'content', f'<div class="sz-note">At playhead: {escape(s.current_action() or "No generated action")}</div>')
             project_status = s.project_status or 'No project save in this session.'
             self._set(self.files, 'content',

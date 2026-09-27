@@ -6,7 +6,7 @@ import uuid
 import numpy as np
 from live_motion import MotionSession, validate_result
 from takes import Take, encode_project, decode_project, validate_take, MAX_TAKES, MAX_FRAMES, MAX_TOTAL_FRAMES
-from duration_planning import CHUNK_FRAMES, plan_duration
+from duration_planning import CHUNK_FRAMES, MAX_FRAMES_PER_REQUEST, DurationPlan, plan_duration
 from story_action_execution import (action_spec, action_prompt, action_completion_frame,
                                     action_finished, generate_action_chunk, action_attempt_limit,
                                     action_sample_suitable,
@@ -25,6 +25,7 @@ class DirectorSession(MotionSession):
         self.active_take = None
         self._removed_take = None
         self._undo_action_edit = None
+        self._placement_undo = None
         self.edit_context = None
         self.planned_frames = CHUNK_FRAMES
         self.planned_seconds = CHUNK_FRAMES / 25
@@ -203,6 +204,33 @@ class DirectorSession(MotionSession):
         self.kind = 'reference'
         self.metrics = None
         self.clip_revision += 1
+        from take_placement import show_draft_start
+        show_draft_start(self)
+
+    def get_start_pose(self):
+        from take_placement import get_start_pose
+        return get_start_pose(self)
+
+    def set_start_pose(self, x, z, heading):
+        from take_placement import set_start_pose
+        return set_start_pose(self, x, z, heading)
+
+    @property
+    def can_undo_start_pose(self):
+        from take_placement import can_undo_start_pose
+        return can_undo_start_pose(self)
+
+    def undo_start_pose(self):
+        from take_placement import undo_start_pose
+        return undo_start_pose(self)
+
+    def append_take(self, source_id):
+        from take_editing import append_saved_take
+        return append_saved_take(self, source_id)
+
+    def delete_action(self, segment_index):
+        from take_editing import delete_stored_action
+        return delete_stored_action(self, segment_index)
 
     def new_take(self):
         with self.lock:
@@ -531,6 +559,18 @@ class DirectorSession(MotionSession):
             if (t is None or branch) and len(self.takes) >= MAX_TAKES:
                 self.status = 'Take limit reached; save the project before starting another.'
                 return
+            try:
+                generation_context = self._prepare_generation(prompt, t, stop)
+            except ValueError as exc:
+                if self.busy:
+                    self._invalidate()
+                self.status = f'Cannot generate this scene action · {exc}'
+                return
+            suggested_seconds = self._generation_seconds(generation_context)
+            if plan.label == 'Auto · text-length estimate' and suggested_seconds is not None:
+                frames = min(MAX_FRAMES_PER_REQUEST, max(plan.frames, int(np.ceil(suggested_seconds * 25))))
+                label = 'Auto · scene route' + (' capped at 30 s' if suggested_seconds > 30 else '')
+                plan = DurationPlan(frames, frames / 25, label, True)
             total = sum(len(x.positions) for x in self.takes.values())
             growth = stop + plan.frames if t is None or branch else plan.frames
             if stop + plan.frames > MAX_FRAMES or total + growth > MAX_TOTAL_FRAMES:
@@ -547,9 +587,22 @@ class DirectorSession(MotionSession):
                 if t is not None and stop:
                     count = min(52, stop) // 4 * 4
                     history = t.motion[stop - count:stop].copy() if count else None
-                self.pending = (version, request_id, submitted_prompt, history, submitted, plan.frames)
+                self.pending = (version, request_id, submitted_prompt, history, submitted, plan.frames,
+                                generation_context)
                 action = 'alternate ending · original preserved' if branch else 'new take' if t is None else 'extension'
                 self.status = f'Generating {plan.seconds:.2f} s {action} · 0/{(plan.frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES} chunks'
+
+    def _prepare_generation(self, prompt, take, stop):
+        return None
+
+    def _generation_prompt(self, prompt, context):
+        return prompt
+
+    def _generation_seconds(self, context):
+        return None
+
+    def _process_generation_result(self, result, context):
+        return result
 
     @property
     def can_undo_action_edit(self):
@@ -682,7 +735,7 @@ class DirectorSession(MotionSession):
             if isinstance(job, dict) and job.get('kind') == 'action_edit':
                 self._work_action_edit(job)
                 continue
-            version, request_id, prompt, history, submitted, frames = job
+            version, request_id, prompt, history, submitted, frames, context = job
             count = (frames + CHUNK_FRAMES - 1) // CHUNK_FRAMES
             parts = []
             generation_seconds = 0.0
@@ -691,8 +744,19 @@ class DirectorSession(MotionSession):
                     with self.lock:
                         if version != self.version or request_id != self.current_id:
                             break
-                    result = self.backend.generate(request_id, prompt, history)
+                    result = self.backend.generate(request_id, self._generation_prompt(prompt, context), history)
                     validate_result(result, request_id)
+                    used_frames = min(CHUNK_FRAMES, frames - index * CHUNK_FRAMES)
+                    if used_frames < CHUNK_FRAMES:
+                        result = dict(result, **{key: result[key][:used_frames].copy()
+                                                for key in ('positions', 'rotations', 'motion')})
+                    result = self._process_generation_result(result, context)
+                    if (result['positions'].shape != (used_frames, 34, 3)
+                            or result['rotations'].shape != (used_frames, 34, 3, 3)
+                            or result['motion'].shape != (used_frames, 414)
+                            or any(not np.isfinite(result[key]).all()
+                                   for key in ('positions', 'rotations', 'motion'))):
+                        raise ValueError('Scene motion processing returned invalid arrays')
                     parts.append(result)
                     generation_seconds += float(result['metadata']['generation_seconds'])
                     with self.lock:
@@ -704,9 +768,7 @@ class DirectorSession(MotionSession):
                             self.current_id = request_id
                             self.status = f'Generating {frames / 25:.2f} s · {index + 1}/{count} chunks received; holding pose'
                 else:
-                    trim = frames - (count - 1) * CHUNK_FRAMES
-                    assembled = {key: np.concatenate([part[key] if i < count - 1 else part[key][:trim]
-                                                       for i, part in enumerate(parts)], axis=0)
+                    assembled = {key: np.concatenate([part[key] for part in parts], axis=0)
                                  for key in ('positions', 'rotations', 'motion')}
                     assembled['metadata'] = dict(parts[-1]['metadata'], generation_seconds=generation_seconds)
                     with self.lock:
@@ -719,6 +781,8 @@ class DirectorSession(MotionSession):
                         self.clip_revision += 1
                         self.busy = False
                         self.status = f'Generated {frames / 25:.2f} s · {count} complete chunk' + ('s' if count != 1 else '')
+                        if assembled['metadata'].get('scene_motion'):
+                            self.status += ' · ' + assembled['metadata']['scene_motion']
                         self.metrics = {**assembled['metadata'], 'command_to_received_seconds': time.perf_counter() - submitted}
                         self.needs_ack = (request_id, submitted)
                         self.started = time.perf_counter() - self.frame / self.fps
@@ -931,6 +995,9 @@ class DirectorSession(MotionSession):
 
     def _install_result(self, result):
         t, stop, branch = self.edit_context
+        if t is None and not result['metadata'].get('scene_motion'):
+            from take_placement import place_generated_result
+            result = place_generated_result(self, result)
         arrays = [result[k] for k in ('positions', 'rotations', 'motion')]
         segments, events = ([], []) if t is None else t.prefix(stop)
         dialogue, audio_assets = ([], {}) if t is None else t.dialogue_prefix(stop)

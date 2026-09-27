@@ -3,7 +3,8 @@
 All positions and sizes are metres, with +Y up. ``evaluate_effects`` is pure:
 the same effect specification and playhead time produce identical arrays even
 after seeking backwards. Smoke uses dim, soft points to suggest translucency;
-Viser's point clouds do not offer per-particle alpha.
+Viser's point clouds do not offer per-particle alpha. Cinematic kinds use a
+compact descriptor rendered as shader volumes in the custom studio client.
 """
 
 from __future__ import annotations
@@ -17,6 +18,8 @@ import numpy as np
 
 MAX_EFFECTS = 8
 EFFECT_KINDS = {
+    "explosion": {"size": [4.0, 3.2, 4.0], "color": [255, 108, 24], "position": [0.0, 1.6, -2.5]},
+    "energy_burst": {"size": [3.8, 3.8, 3.8], "color": [76, 192, 255], "position": [0.0, 1.9, -2.5]},
     "rain": {"size": [5.0, 3.2, 5.0], "color": [109, 183, 242], "position": [0.0, 1.6, 0.0]},
     "snow": {"size": [5.0, 3.2, 5.0], "color": [229, 243, 255], "position": [0.0, 1.6, 0.0]},
     "fireflies": {"size": [3.5, 1.8, 3.5], "color": [244, 224, 100], "position": [0.0, 1.3, 0.0]},
@@ -129,7 +132,18 @@ def evaluate_effects(effects: object, time_seconds: object) -> list[dict]:
         segments = None
         shape = "circle"
         point_size = 0.035
-        if kind == "rain":
+        if kind in ("explosion", "energy_burst"):
+            # Point fallback for clients that do not render shader volumes.
+            age = (time % 6.0) / 6.0
+            theta = u[:, 0] * math.tau
+            elevation = u[:, 1] * math.pi
+            radius = (0.04 + 0.43 * math.sin(age * math.pi)) * (0.4 + 0.6 * u[:, 2])
+            points[:, 0] = np.cos(theta) * np.sin(elevation) * radius * size[0]
+            points[:, 1] = np.cos(elevation) * radius * size[1]
+            points[:, 2] = np.sin(theta) * np.sin(elevation) * radius * size[2]
+            amount = np.full(n, (1.0 - age) ** 2)
+            point_size, shape = 0.06, "sparkle"
+        elif kind == "rain":
             phase = np.mod(u[:, 0] - time * (0.48 + 0.32 * u[:, 3]), 1.0)
             points[:, 0] = (u[:, 1] - 0.5) * size[0] + 0.07 * np.sin(time * 0.5 + u[:, 4] * 3)
             points[:, 1] = (phase - 0.5) * size[1]
@@ -225,6 +239,33 @@ class EffectSceneLayer:
         for state in states:
             identifier = state["id"]
             old = self.handles.get(identifier)
+            if state["kind"] in ("explosion", "energy_burst"):
+                effect = next(e for e in effects if e["id"] == identifier)
+                # 4x3 float32 descriptor travels through the point-cloud protocol.
+                descriptor = np.asarray([
+                    [float(time_seconds), effect["intensity"], effect["seed"] % 65536],
+                    effect["size"], np.asarray(effect["color"]) / 255.0,
+                    [0, 0, 0],
+                ], dtype=np.float32)
+                key = "cinematic_" + state["kind"]
+                if old is not None and key not in old:
+                    for handle in old.values():
+                        handle.remove()
+                    old = None
+                if old is None:
+                    old = {key: self.server.scene.add_point_cloud(
+                        "/effects/" + identifier + "/" + key, descriptor,
+                        np.zeros((4, 3), dtype=np.uint8), point_size=0.001,
+                        precision="float32", position=tuple(effect["position"]))}
+                    self.handles[identifier] = old
+                else:
+                    old[key].points = descriptor
+                    old[key].position = tuple(effect["position"])
+                continue
+            if old is not None and "points" not in old:
+                for handle in old.values():
+                    handle.remove()
+                old = None
             needs_segments = "segments" in state
             if old is not None and ("segments" in old) != needs_segments:
                 for handle in old.values():

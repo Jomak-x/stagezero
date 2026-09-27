@@ -120,6 +120,28 @@ class _Server:
 
 
 class EffectSceneLayerTests(unittest.TestCase):
+    def test_cinematic_descriptor_updates_in_place_and_switches_back_to_particles(self):
+        server = _Server()
+        layer = EffectSceneLayer(server)
+        blast = make_effect('explosion', 0, position=(1, 2, 3))
+        layer.update([blast], 1.25)
+        handle = layer.handles[blast['id']]['cinematic_explosion']
+        self.assertEqual(handle.name, '/effects/explosion-0/cinematic_explosion')
+        self.assertEqual(handle.points.shape, (4, 3))
+        self.assertEqual(handle.points.dtype, np.float32)
+        np.testing.assert_allclose(handle.points[0], (1.25, .75, 0))
+        np.testing.assert_allclose(handle.points[1], blast['size'])
+        np.testing.assert_allclose(handle.points[2], np.asarray(blast['color']) / 255)
+        self.assertEqual(handle.position, (1., 2., 3.))
+        layer.update([blast], 2.5)
+        self.assertIs(layer.handles[blast['id']]['cinematic_explosion'], handle)
+        self.assertEqual(handle.points[0, 0], 2.5)
+        rain = make_effect('rain', 0)
+        rain['id'] = blast['id']
+        layer.update([rain], 3.0)
+        self.assertTrue(handle.removed)
+        self.assertIn('points', layer.handles[blast['id']])
+
     def test_reuses_handles_when_seeking_and_cleans_removed_effects(self):
         server = _Server()
         layer = EffectSceneLayer(server)

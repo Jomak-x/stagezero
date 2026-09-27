@@ -51,7 +51,7 @@ if __name__=='__main__':unittest.main()
 class FlashmobCuesTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.manifest=json.loads((ROOT/'review/crowd-demos/flashmob-candidate/assets/manifest.json').read_text())
+  cls.manifest=json.loads((ROOT/'review/crowd-demos/assets/manifest.json').read_text())
  def dance_fixture(self):
   slots=[[x*2.6,z*2.6] for z in range(4) for x in range(6)]
   return {'environment':'city','duration':70.,'dt':.1,'agents':[{'id':i+6,'radius':.28,'schedule':[]} for i in range(24)],'frames':[{'t':i/10,'people':[[*slot,0.,0.,1,0.] for slot in slots]} for i in range(701)],'events':[{'kind':'flashmob','actor_ids':list(range(6,30)),'dance_start_s':40.,'dance_end_s':65.,'shared_yaw':0.,'slot_xz':slots,'reserved_radius_m':1.2}]}
@@ -71,7 +71,7 @@ class FlashmobCuesTests(unittest.TestCase):
   self.assertEqual(y[390],0.);self.assertEqual(y[660],0.);self.assertAlmostEqual(y[400],lift[0]);self.assertAlmostEqual(y[650],lift[-1]);self.assertLessEqual(np.abs(np.diff(y)).max(),.025001)
  def test_floor_correction_is_applied_once_as_instance_y(self):
   c=self.manifest['clips'][10];f=int(np.argmax(c['groundLiftY']));lift=c['groundLiftY'][f]
-  a=np.fromfile(ROOT/'review/crowd-demos/flashmob-candidate/assets/affine.bin',dtype='<f4').reshape(-1,22,3,4)[c['offset']+f];minimum=float('inf')
+  a=np.fromfile(ROOT/'review/crowd-demos/assets/affine.bin',dtype='<f4').reshape(-1,22,3,4)[c['offset']+f];minimum=float('inf')
   for part in self.manifest['parts']:
    bind=np.asarray(part['localBind']).reshape(-1,4,3);bones=np.asarray(part['bones']).reshape(-1,4);weights=np.asarray(part['weights']).reshape(-1,4);rows=a[bones,1,:]
    y=(((rows[:,:,:3]*bind).sum(axis=-1)+rows[:,:,3])*weights).sum(axis=1);minimum=min(minimum,float(y.min()))
