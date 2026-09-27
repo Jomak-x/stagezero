@@ -73,7 +73,9 @@ for prompts and live generation. No Pod upload endpoint or backend contract was 
 
 ## Import and select
 
-1. Click **Load GLB**. The browser accepts one nonempty `.glb` up to 32 MiB.
+1. Click **Load GLB**. The browser accepts one nonempty `.glb` up to 500 MB
+   (500,000,000 bytes). The same file limit applies to server imports and startup
+   files. Expanded geometry and texture budgets are validated separately.
 2. The server validates it and stores it under its content hash in the private
    character library. Source filenames are not used as filesystem paths.
 3. The compatibility result distinguishes a motion-ready humanoid, a model
@@ -191,7 +193,8 @@ decisions are in [the integration plan](GLB-INTEGRATION-PLAN.md).
 - Browser: both textured G1-named and Mixamo-named demo GLBs reached **Ready for
   motion**; frame 37 showed shoulder movement and root travel. Swapping models
   preserved the 1.48-second playhead, and selecting G1 restored the original mesh.
-- A real WebSocket transport test rejected a 32 MiB + 1 byte declaration, then
+- At the then-current 32 MiB limit, a real WebSocket transport test rejected a
+  32 MiB + 1 byte declaration, then
   accepted the 23,784-byte demo GLB on the same connection. Stored bytes matched
   its hash. Browser selection separately exercised the real load/shader-ready
   acknowledgement; the transport test did not fabricate that acknowledgement.

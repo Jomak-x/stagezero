@@ -10,7 +10,7 @@ import unittest
 
 import numpy as np
 
-from character_assets import AssetLimits, AssetValidationError, import_glb, inspect_glb, load_character_asset
+from character_assets import AssetLimits, AssetValidationError, DEFAULT_LIMITS, import_glb, inspect_glb, load_character_asset
 from tests.glb_fixtures import base_document_and_binary, make_glb, make_humanoid_glb, make_static_glb
 
 
@@ -22,6 +22,12 @@ def unpack_glb(data: bytes) -> tuple[dict, bytes]:
 
 
 class CharacterAssetTests(unittest.TestCase):
+    def test_default_file_cap_is_500_decimal_megabytes_without_expanding_other_caps(self) -> None:
+        self.assertEqual(DEFAULT_LIMITS.max_file_bytes, 500_000_000)
+        self.assertEqual(DEFAULT_LIMITS.max_json_bytes, 4 * 1024 * 1024)
+        self.assertEqual(DEFAULT_LIMITS.max_expanded_bytes, 256 * 1024 * 1024)
+        self.assertEqual(DEFAULT_LIMITS.max_image_pixels, 32_000_000)
+
     def test_static_preview_preserves_original_material_bytes(self) -> None:
         data = make_static_glb()
         asset = inspect_glb(data, display_name='<script>alert(1)</script>')

@@ -8,6 +8,7 @@ from queue import SimpleQueue, Empty
 from threading import Lock, RLock
 import hashlib
 import json
+import logging
 import tempfile
 import numpy as np
 
@@ -19,6 +20,9 @@ from character_diagnostics import standing_reference
 from character_geometry import ground_offset
 from character_guide import add_character_guide
 from character_renderer import GlbCharacterRenderer
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -165,7 +169,7 @@ class CharacterControls:
                 self.status = 'Skipped an invalid saved character · ' + str(exc)[:160]
                 self.compatibility = unsupported_character(exc)
 
-    def add_file(self, data, name, *, ticket=None):
+    def add_file(self, data, name, *, ticket=None, include_existing=False):
         if not name.lower().endswith('.glb'):
             raise ValueError('Choose a .glb file')
         if not isinstance(data, bytes):
@@ -176,7 +180,7 @@ class CharacterControls:
         with self._import_lock:
             with self._lock:
                 if digest in self.entries:
-                    return digest
+                    return (digest, True) if include_existing else digest
                 if len(self.entries) >= 16:
                     raise ValueError('Character library is full (16 models); use a new character directory')
             asset, report = inspect_character(data, display_name=Path(name).name, skeleton=self.skeleton)
@@ -189,7 +193,18 @@ class CharacterControls:
             import_glb(data, self.storage_root, display_name=Path(name).name)
             with self._lock:
                 self.entries[asset.sha256] = entry
-        return asset.sha256
+        return (asset.sha256, False) if include_existing else asset.sha256
+
+    @staticmethod
+    def _notify_import(client, title, body, *, color=None):
+        notify = getattr(client, 'add_notification', None)
+        if not callable(notify):
+            return
+        try:
+            notify(title, body, auto_close_seconds=None, color=color)
+        except Exception as exc:
+            # A closed client must not turn an imported asset into a failure.
+            logger.warning('GLB import notification unavailable: %s', exc)
 
     def set_initial_asset(self, asset_id):
         self._initial_id = asset_id
@@ -416,11 +431,11 @@ class CharacterControls:
             self._diagnostics = gui.add_html('')
         gui.add_markdown('Body motion is approximate; fingers and faces stay still. Character selection is shared between viewers.')
         self._controls = (choose, mapping, status, preview, another)
-        self.upload_limits = acquire_scoped_upload_limits(self.server, gui=gui,
-                                                           factory=ScopedUploadLimits)
+        self.upload_limits = acquire_scoped_upload_limits(
+            self.server, gui=gui, max_total_bytes=DEFAULT_LIMITS.max_file_bytes + 1024 * 1024)
         self._upload_gui = gui
         self._upload_handle = upload
-        self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
+        self.upload_limits.register(upload, max_bytes=DEFAULT_LIMITS.max_file_bytes, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
         self._bind_mapping_upload(mapping, None, self._ticket)
 
@@ -428,6 +443,7 @@ class CharacterControls:
         def uploaded(event):
             if event.client is None:
                 return
+            filename = Path(str(event.file.name)).name[:160]
             with self._lock:
                 self._ticket += 1
                 ticket = self._ticket
@@ -435,15 +451,38 @@ class CharacterControls:
                 self._candidate_id = None
                 self._requested_id = self.active_id
             try:
-                asset_id = self.add_file(event.file.content, event.file.name, ticket=ticket)
-                with self._lock:
-                    if ticket == self._ticket:
-                        self.select(asset_id, event.client.client_id)
+                asset_id, existing = self.add_file(event.file.content, event.file.name,
+                                                   ticket=ticket, include_existing=True)
             except (ValueError, OSError) as exc:
+                reason = str(exc)[:500]
+                logger.warning('GLB import failed: file=%r reason=%r', filename, reason)
                 with self._lock:
                     if ticket == self._ticket:
                         self.compatibility = unsupported_character(exc)
                         self._set_error(exc)
+                self._notify_import(event.client, 'GLB import failed',
+                                    f'{filename} · {reason}', color='red')
+                return
+            with self._lock:
+                entry = self.entries[asset_id]
+                label = f'{entry.asset.display_name} · {asset_id[:8]}'
+                compatibility = entry.compatibility.title
+            try:
+                with self._lock:
+                    if ticket == self._ticket:
+                        self.select(asset_id, event.client.client_id)
+            except (ValueError, OSError, RuntimeError) as exc:
+                reason = str(exc)[:500]
+                logger.warning('GLB selection failed after import: file=%r reason=%r', filename, reason)
+                with self._lock:
+                    if self._ticket == ticket + 1:
+                        self.status = 'GLB imported but selection failed · ' + reason[:200]
+                self._notify_import(event.client, 'GLB imported; selection failed',
+                                    f'{filename} → {label} · {compatibility} · {reason}', color='red')
+                return
+            title = 'GLB already in Character' if existing else 'GLB added to Character'
+            self._notify_import(event.client, title,
+                                f'{filename} → {label} · {compatibility}')
 
         @choose.on_update
         def chosen(event):

@@ -1,7 +1,7 @@
 """Studio startup configuration and bounded local GLB selection."""
 
 from contextlib import redirect_stderr
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import numpy as np
 
+from character_assets import DEFAULT_LIMITS
 from character_controls import CharacterControls
 from director_viewer import (MAX_STARTUP_GLB_BYTES, build_parser,
                              load_startup_glb, should_update_fallback_pose)
@@ -97,17 +98,27 @@ class DirectorStartupTests(unittest.TestCase):
             self.assertTrue(np.isfinite(client.camera.look_at).all())
 
     def test_oversized_glb_is_rejected_before_import(self):
+        self.assertEqual(MAX_STARTUP_GLB_BYTES, DEFAULT_LIMITS.max_file_bytes)
         with TemporaryDirectory() as directory:
             glb = Path(directory) / 'oversized.glb'
-            with glb.open('wb') as target:
-                target.seek(MAX_STARTUP_GLB_BYTES)
-                target.write(b'x')
+            glb.write_bytes(b'x' * 65)
             controls = StartupControls()
-            with redirect_stderr(StringIO()), self.assertRaises(SystemExit) as raised:
+            with patch('director_viewer.MAX_STARTUP_GLB_BYTES', 64), redirect_stderr(StringIO()), self.assertRaises(SystemExit) as raised:
                 load_startup_glb(build_parser(), controls, glb)
             self.assertEqual(raised.exception.code, 2)
             self.assertIsNone(controls.received)
             self.assertIsNone(controls.initial_asset)
+
+    def test_file_growth_after_size_check_still_hits_bounded_read(self):
+        glb = SimpleNamespace(
+            name='growing.glb',
+            stat=lambda: SimpleNamespace(st_size=64),
+            open=lambda mode: BytesIO(b'x' * 65),
+        )
+        controls = StartupControls()
+        with patch('director_viewer.MAX_STARTUP_GLB_BYTES', 64), redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+            load_startup_glb(build_parser(), controls, glb)
+        self.assertIsNone(controls.received)
 
     def test_missing_glb_is_reported_as_a_startup_argument_error(self):
         with TemporaryDirectory() as directory:

@@ -28,7 +28,7 @@ class AssetValidationError(ValueError):
 
 @dataclass(frozen=True)
 class AssetLimits:
-    max_file_bytes: int = 32 * 1024 * 1024
+    max_file_bytes: int = 500_000_000
     max_json_bytes: int = 4 * 1024 * 1024
     max_expanded_bytes: int = 256 * 1024 * 1024
     max_vertices: int = 2_000_000
@@ -46,6 +46,7 @@ class AssetLimits:
 
 
 DEFAULT_LIMITS = AssetLimits()
+GLB_FILE_LIMIT_LABEL = "500 MB"
 _COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT2": 4, "MAT3": 9, "MAT4": 16}
 _DTYPES = {
     5120: np.dtype("i1"), 5121: np.dtype("u1"),

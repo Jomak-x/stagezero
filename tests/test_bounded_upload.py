@@ -13,6 +13,7 @@ from viser._viser import ViserServer
 
 from bounded_upload import (ScopedUploadLimits, UploadRejectedMessage,
                             acquire_scoped_upload_limits, release_scoped_upload_limits)
+from character_assets import DEFAULT_LIMITS
 
 
 class _Interface:
@@ -43,6 +44,20 @@ def _part(component, transfer, index, content):
 
 
 class ScopedUploadLimitsTest(unittest.TestCase):
+    def test_character_upload_declaration_accepts_500mb_and_rejects_one_byte_more(self):
+        errors = []
+        file_cap = DEFAULT_LIMITS.max_file_bytes
+        parts = (file_cap + 512 * 1024 - 1) // (512 * 1024)
+        self.guard(self.control("glb"), errors, max_bytes=file_cap,
+                   max_total_bytes=file_cap + 1024 * 1024)
+        self.interface.dispatch(1, _start("glb", "at-limit", file_cap, parts=parts))
+        self.assertIn("at-limit", self.gui._current_file_upload_states)
+        self.assertEqual(self.gui._current_file_upload_states["at-limit"]["total_bytes"], file_cap)
+        self.interface.dispatch(1, _start("glb", "over-limit", file_cap + 1, parts=parts))
+        self.assertNotIn("over-limit", self.gui._current_file_upload_states)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(len(self.rejections[1]), 1)
+
     def test_rejection_message_round_trips_through_viser_codec(self):
         message = UploadRejectedMessage("glb", "transfer", "Too large")
         encoded = msgspec.msgpack.encode(message.as_serializable_dict())
@@ -96,16 +111,19 @@ class ScopedUploadLimitsTest(unittest.TestCase):
         self.limits.register(handle, max_bytes=max_bytes, on_error=errors.append)
 
     def test_scene_and_character_controls_share_one_transfer_wrapper(self):
+        file_cap = DEFAULT_LIMITS.max_file_bytes
         scene = self.control('scene')
         character = self.control('character')
         scene_limits = acquire_scoped_upload_limits(self.server, gui=self.gui)
-        character_limits = acquire_scoped_upload_limits(self.server, gui=self.gui)
+        character_limits = acquire_scoped_upload_limits(
+            self.server, gui=self.gui, max_total_bytes=file_cap + 1024 * 1024)
         self.assertIs(scene_limits, character_limits)
+        self.assertEqual(character_limits._max_total, file_cap + 1024 * 1024)
         self.assertEqual(len(self.interface.handlers[_messages.FileTransferStartUpload]), 1)
         self.assertEqual(len(self.interface.handlers[_messages.FileTransferPart]), 1)
         errors = []
         scene_limits.register(scene, max_bytes=1_000_000, on_error=errors.append)
-        character_limits.register(character, max_bytes=32 * 1024 * 1024, on_error=errors.append)
+        character_limits.register(character, max_bytes=file_cap, on_error=errors.append)
         self.interface.dispatch(1, _start('scene', 'too-large', 1_000_001))
         self.assertNotIn('too-large', self.gui._current_file_upload_states)
         self.interface.dispatch(1, _start('character', 'rig', 4))

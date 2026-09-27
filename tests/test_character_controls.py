@@ -9,7 +9,7 @@ import unittest
 import numpy as np
 
 from character_controls import CharacterControls
-from character_assets import import_glb, inspect_glb
+from character_assets import DEFAULT_LIMITS, import_glb, inspect_glb
 from character_diagnostics import standing_reference
 from character_geometry import posed_minimum_y
 from live_motion import MotionSession
@@ -120,6 +120,19 @@ def upload_event(handle, client, file):
 
 
 class CharacterControlsTests(unittest.TestCase):
+    def test_gui_upload_budget_can_hold_the_full_glb_and_mapping(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True) as limiter:
+            self.controls.build_gui(gui)
+        limiter.assert_called_once_with(
+            self.server, max_total_bytes=DEFAULT_LIMITS.max_file_bytes + 1024 * 1024)
+        registrations = limiter.return_value.register.call_args_list
+        self.assertEqual(len(registrations), 2)
+        self.assertIs(registrations[0].args[0], gui.handles['Load GLB'])
+        self.assertEqual(registrations[0].kwargs['max_bytes'], DEFAULT_LIMITS.max_file_bytes)
+        self.assertIs(registrations[1].args[0], gui.handles['Load rig mapping'])
+        self.assertEqual(registrations[1].kwargs['max_bytes'], 1024 * 1024)
+
     def setUp(self):
         self.directory = TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
@@ -342,6 +355,129 @@ class CharacterControlsTests(unittest.TestCase):
         self.assertFalse(gui.handles['Open static preview'].visible)
         self.assertIn('motion generation disabled', self.controls.status)
 
+    def test_invalid_upload_reports_persistent_import_failure_after_dismissal(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        notices = []
+        client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
+        upload = gui.handles['Load GLB']
+        completed_file = SimpleNamespace(content=b'broken glb', name='broken.glb')
+        with self.assertLogs('character_controls', level='WARNING') as captured:
+            upload.upload(upload_event(upload, client, completed_file))
+        self.controls.tick()
+        self.assertNotIn('broken.glb', ' '.join(gui.handles['Character'].options))
+        self.assertIn('broken.glb', captured.output[0])
+        self.assertIn('GLB header', captured.output[0])
+        self.assertEqual(len(notices), 1)
+        self.assertIn('failed', notices[0][0][0].lower())
+        self.assertIn('broken.glb', notices[0][0][1])
+        self.assertIn('Unsupported', notices[0][0][1])
+        self.assertIsNone(notices[0][1]['auto_close_seconds'])
+        self.assertEqual(notices[0][1]['color'], 'red')
+        gui.handles['Choose another file'].click(SimpleNamespace(client=client))
+        self.controls.tick()
+        self.assertEqual(len(notices), 1)
+
+    def test_static_upload_reports_catalog_label_and_preview_only(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        notices = []
+        client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
+        document, binary = base_document_and_binary()
+        document['asset']['generator'] = 'fresh static upload'
+        completed_file = SimpleNamespace(content=make_glb(document, binary), name='Fresh static.glb')
+        upload = gui.handles['Load GLB']
+        upload.upload(upload_event(upload, client, completed_file))
+        self.controls.tick()
+        self.assertEqual(len(notices), 1)
+        self.assertIn('added', notices[0][0][0].lower())
+        selected = gui.handles['Character'].value
+        self.assertIn('Fresh static.glb', selected)
+        self.assertIn(selected, notices[0][0][1])
+        self.assertIn('Static preview only', notices[0][0][1])
+        self.assertIsNone(self.controls.active_id)
+        self.assertTrue(gui.handles['Open static preview'].visible)
+
+    def test_duplicate_upload_reports_existing_catalog_name(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        notices = []
+        client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
+        upload = gui.handles['Load GLB']
+        upload.upload(upload_event(upload, client,
+            SimpleNamespace(content=make_static_glb(), name='Renamed duplicate.glb')))
+        self.controls.tick()
+        label = f'static.glb · {self.static[:8]}'
+        self.assertEqual(gui.handles['Character'].value, label)
+        self.assertIn('already', notices[0][0][0].lower())
+        self.assertIn(label, notices[0][0][1])
+        self.assertIn('Static preview only', notices[0][0][1])
+        self.assertNotIn('Renamed duplicate.glb', gui.handles['Character'].options)
+
+    def test_notification_failure_does_not_undo_import(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        def unavailable_notification(*args, **kwargs):
+            raise RuntimeError('notification channel closed')
+        client = SimpleNamespace(client_id=1, add_notification=unavailable_notification)
+        document, binary = base_document_and_binary()
+        document['asset']['generator'] = 'notification failure upload'
+        completed_file = SimpleNamespace(content=make_glb(document, binary), name='Imported anyway.glb')
+        upload = gui.handles['Load GLB']
+        upload.upload(upload_event(upload, client, completed_file))
+        self.controls.tick()
+        self.assertIn('Imported anyway.glb', gui.handles['Character'].value)
+        self.assertNotIn('Load failed', self.controls.status)
+
+    def test_late_success_reports_import_without_overwriting_new_selection(self):
+        from character_compatibility import inspect_character
+
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        notices = []
+        client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
+        document, binary = base_document_and_binary()
+        document['asset']['generator'] = 'late successful upload'
+        completed_file = SimpleNamespace(content=make_glb(document, binary), name='Late arrival.glb')
+
+        def inspect_after_new_selection(*args, **kwargs):
+            result = inspect_character(*args, **kwargs)
+            self.controls.select(self.rigged, 1)
+            return result
+
+        upload = gui.handles['Load GLB']
+        with patch('character_controls.inspect_character', side_effect=inspect_after_new_selection):
+            upload.upload(upload_event(upload, client, completed_file))
+        self.controls.tick()
+        self.assertEqual(self.controls.mapping_asset_id, self.rigged)
+        self.assertIn('Late arrival.glb', ' '.join(self.controls._options()))
+        self.assertEqual(len(notices), 1)
+        self.assertIn('Late arrival.glb', notices[0][0][1])
+
+    def test_selection_error_reports_imported_catalog_entry(self):
+        gui = CharacterGui()
+        with patch('character_controls.ScopedUploadLimits', autospec=True):
+            self.controls.build_gui(gui)
+        notices = []
+        client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
+        completed_file = SimpleNamespace(content=make_humanoid_glb('g1'), name='Imported first.glb')
+        upload = gui.handles['Load GLB']
+        with patch.object(self.bridge, 'load', side_effect=ValueError('renderer rejected selection')):
+            upload.upload(upload_event(upload, client, completed_file))
+        self.controls.tick()
+        self.assertIn('GLB imported but selection failed', self.controls.status)
+        self.assertIn('Imported first.glb', ' '.join(gui.handles['Character'].options))
+        self.assertEqual(len(notices), 1)
+        self.assertIn('imported', notices[0][0][0].lower())
+        self.assertIn('selection failed', notices[0][0][0].lower())
+        self.assertIn('renderer rejected selection', notices[0][0][1])
+        self.assertEqual(notices[0][1]['color'], 'red')
+
     def test_gui_new_invalid_upload_cancels_previous_pending_and_shows_only_retry(self):
         gui = CharacterGui()
         with patch('character_controls.ScopedUploadLimits', autospec=True):
@@ -371,16 +507,20 @@ class CharacterControlsTests(unittest.TestCase):
             self.controls.build_gui(gui)
         upload = gui.handles['Load GLB']
         upload.value = SimpleNamespace(content=b'bad', name='bad.glb')
+        notices = []
 
         def inspect_after_cancellation(*args, **kwargs):
             self.controls.choose_another_file()
             return None, unsupported_character('old failure')
 
         with patch('character_controls.inspect_character', side_effect=inspect_after_cancellation):
-            client = SimpleNamespace(client_id=1)
+            client = SimpleNamespace(client_id=1, add_notification=lambda *args, **kwargs: notices.append((args, kwargs)))
             upload.upload(upload_event(upload, client, upload.value))
         self.assertIsNone(self.controls.compatibility)
         self.assertNotIn('old failure', self.controls.status)
+        self.assertEqual(len(notices), 1)
+        self.assertIn('bad.glb', notices[0][0][1])
+        self.assertIn('old failure', notices[0][0][1])
 
     def test_invalid_upload_hides_mapping_action_for_preserved_active_rig(self):
         gui = CharacterGui()

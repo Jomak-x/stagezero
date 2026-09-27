@@ -25,7 +25,7 @@ ayaklar ve kaplamalar doğru görünmeli.</li>
 ve ana Studio'da projenin kaydedildiğini kontrol et.</li>
 </ol></details>
 <details><summary>Dosyayı nasıl hazırlamalıyım?</summary>
-<p><b>GLB 2.0</b> kullan; dosya en fazla <b>32 MiB</b> olabilir. Dokuları ve geometriyi dosyanın
+<p><b>GLB 2.0</b> kullan; dosya en fazla <b>500 MB</b> (500.000.000 bayt) olabilir. Dokuları ve geometriyi dosyanın
 içine dahil et. Gereksiz geometriyi ve çok büyük dokuları azaltmak yüklemeyi hızlandırır.</p>
 <p>İskelette kalça, omurga, iki kol, dirsekler, iki bacak, dizler ve ayaklar bulunmalı.
 Kemikler doğru ebeveyn ilişkilerine ve her hareketli yüzey skin ağırlıklarına sahip olmalı.
