@@ -8,8 +8,8 @@ from story_workflow import StoryWorkflow
 
 
 _RUNNING = frozenset(('planning', 'queued', 'running', 'speech_retrying'))
-_DEFAULT_PROMPT = ('A person walks forward, stops, waves to a friend, '
-                   'then celebrates with both arms raised.')
+_LENGTHS = {'15 seconds': 15, '30 seconds': 30, '60 seconds': 60,
+            '120 seconds': 120}
 
 
 class StoryControls:
@@ -25,7 +25,7 @@ class StoryControls:
         self._automatic_attempts = set()
         self._movement_edit = None
         self._closed = False
-        self.open_button = gui.add_button('Full scene · one prompt', color='green')
+        self.open_button = gui.add_button('Full scene')
         self.sidebar_status = gui.add_html('')
 
         @self.open_button.on_click
@@ -63,7 +63,8 @@ class StoryControls:
     def _close_view(self, view):
         if self._views.get(view.key) is not view:
             return
-        self._drafts[view.key] = (view.prompt.value, view.seconds.value, view.jobs.value)
+        self._drafts[view.key] = (view.prompt.value, view.length.value,
+                                  view.seconds.value, view.jobs.value)
         self._views.pop(view.key)
         view.modal.close()
 
@@ -77,48 +78,54 @@ class StoryControls:
         # A client's GuiApi sends the modal only to that viewer. Server GuiApi
         # is retained as a fallback for environments without a client handle.
         gui = getattr(client, 'gui', None) or self.gui
-        modal = gui.add_modal('Create a full scene', size='xl', show_close_button=False)
-        prompt_draft, seconds_draft, selected_job = self._drafts.get(
-            key, (_DEFAULT_PROMPT, '60', next(iter(self.ids), 'No scenes yet')))
+        modal = gui.add_modal('Full scene', size='md', show_close_button=False)
+        prompt_draft, length_draft, seconds_draft, selected_job = self._drafts.get(
+            key, ('', '30 seconds', '30', next(iter(self.ids), 'No scenes yet')))
         view = SimpleNamespace(key=key, modal=modal, error='', action_map={},
                                action_token=None, selected_index=None,
-                               current_take_id=None)
+                               current_take_id=None, bound_take=None,
+                               rebound_edit_revision=None)
+        if not self.ids:
+            with self.session.lock:
+                if self.session.active_take in self.session.takes:
+                    view.current_take_id = self.session.active_take
         self._views[key] = view
         with modal:
-            gui.add_html('<div class="sz-intro"><b>One prompt, a complete performance</b>'
-                         'Describe the sequence of movements. Generation can continue while this window is closed. '
-                         'The completed take stays editable movement by movement.</div>')
-            view.close = gui.add_button('Close', color='gray')
             view.status = gui.add_html('')
             tabs = gui.add_tab_group()
             with tabs.add_tab('Create'):
-                view.prompt = gui.add_text('Describe the full scene', initial_value=prompt_draft,
-                                           multiline=True)
-                view.seconds = gui.add_text('Scene length (seconds, 0.16–120)', initial_value=seconds_draft)
-                view.generate = gui.add_button('Generate full scene', color='green')
-                view.jobs = gui.add_dropdown('Scene jobs', tuple(self.ids) or ('No scenes yet',))
+                view.prompt = gui.add_text('What happens?', initial_value=prompt_draft,
+                                           multiline=True,
+                                           hint='Example: Walk forward, wave, then turn and sit.')
+                view.length = gui.add_dropdown('Length', tuple(_LENGTHS) + ('Custom',),
+                                               initial_value=length_draft)
+                view.seconds = gui.add_text('Seconds', initial_value=seconds_draft,
+                                             hint='0.16–120')
+                view.generate = gui.add_button('Generate scene')
+                view.jobs = gui.add_dropdown('Scenes', tuple(self.ids) or ('No scenes yet',))
                 if selected_job in self.ids:
                     self._set(view.jobs, 'value', selected_job)
-                view.cancel = gui.add_button('Cancel selected scene', color='gray')
-                view.load = gui.add_button('Load completed scene', color='gray')
-                view.review = gui.add_button('Review scene take', color='gray')
-                view.warnings = gui.add_html('')
-                with gui.add_folder('Planned movements', expand_by_default=False):
+                view.cancel = gui.add_button('Cancel generation', color='gray')
+                view.load = gui.add_button('Load scene', color='gray')
+                view.review = gui.add_button('Open scene', color='gray')
+                with gui.add_folder('Details', expand_by_default=False) as details:
+                    view.details = details
+                    view.warnings = gui.add_html('')
                     view.plan = gui.add_html('')
             with tabs.add_tab('Refine'):
-                gui.add_html('<div class="sz-note">Choose a movement and press Select movement. '
-                             'Updating it regenerates that movement and reconnects the following movements.</div>')
                 view.source = gui.add_html('')
-                view.use_current = gui.add_button('Use current take', color='gray')
                 view.actions = gui.add_dropdown('Movement', ('No movements yet',))
-                view.select_action = gui.add_button('Select movement', color='gray')
-                view.action_prompt = gui.add_text('Movement direction', initial_value='', multiline=True)
-                view.action_seconds = gui.add_text('Movement length (seconds, 0.16–30)', initial_value='4.16')
-                view.edit = gui.add_button('Regenerate movement', color='green')
-                view.cancel_edit = gui.add_button('Cancel movement update', color='gray')
-                view.undo = gui.add_button('Undo latest movement edit', color='gray')
-                view.play = gui.add_button('Play selected movement', color='gray')
-                view.pause = gui.add_button('Pause preview', color='gray')
+                view.refresh_action = gui.add_button('Refresh movement', color='gray')
+                view.action_prompt = gui.add_text('Change this movement', initial_value='', multiline=True)
+                with gui.add_folder('Timing', expand_by_default=False) as timing:
+                    view.timing = timing
+                    view.action_seconds = gui.add_text('Seconds', initial_value='4.16',
+                                                        hint='0.16–30')
+                view.edit = gui.add_button('Update movement')
+                view.cancel_edit = gui.add_button('Cancel update', color='gray')
+                view.undo = gui.add_button('Undo update', color='gray')
+                view.play = gui.add_button('Preview movement', color='gray')
+            view.close = gui.add_button('Close', color='gray')
 
         @view.close.on_click
         def close(_):
@@ -129,6 +136,8 @@ class StoryControls:
             if not self._is_current(view):
                 return
             try:
+                if not 1 <= len(view.prompt.value.strip()) <= 2000:
+                    raise ValueError('Describe what happens in the scene.')
                 with self.session.lock:
                     core_active = (self.core_session is not None and
                                    self.core_session.snapshot()['active'])
@@ -136,7 +145,8 @@ class StoryControls:
                         raise ValueError('Wait for the current motion generation to finish.')
                     if not core_active and not self.session.character_motion_enabled:
                         raise ValueError('Select a motion-ready character before generating a scene.')
-                seconds = float(view.seconds.value)
+                seconds = (_LENGTHS[view.length.value] if view.length.value in _LENGTHS
+                           else float(view.seconds.value))
                 if not math.isfinite(seconds) or not 0.16 <= seconds <= 120:
                     raise ValueError('Enter a scene length from 0.16 to 120 seconds.')
                 identifier = self.workflow.submit(view.prompt.value, seconds=seconds)
@@ -147,6 +157,7 @@ class StoryControls:
                 view.error = ''
                 view.current_take_id = None
                 view.action_token = None
+                view.bound_take = None
             except (ValueError, RuntimeError) as exc:
                 view.error = str(exc)
             self.update()
@@ -158,27 +169,13 @@ class StoryControls:
                 view.current_take_id = None
                 view.action_token = None
                 view.selected_index = None
+                view.bound_take = None
                 self.update()
 
-        @view.use_current.on_click
-        def use_current(_):
-            if not self._is_current(view):
-                return
-            with self.session.lock:
-                take = self.session.takes.get(self.session.active_take)
-                if take is None:
-                    view.error = 'Select a saved take in the project first.'
-                elif self.session.busy:
-                    view.error = 'Wait for the current motion to finish before reviewing a take.'
-                else:
-                    self._activate_g1()
-                    self.session.set_mode('Live ARDY')
-                    self.session.select_take(take.id)
-                    view.current_take_id = take.id
-                    view.selected_index = None
-                    view.action_token = None
-                    view.error = ''
-            self.update()
+        @view.length.on_update
+        def length(event):
+            if event.client is not None and self._is_current(view):
+                self._refresh_view(view)
 
         @view.cancel.on_click
         def cancel(_):
@@ -225,27 +222,21 @@ class StoryControls:
         def actions(event):
             if event.client is not None and self._is_current(view):
                 view.selected_index = view.action_map.get(view.actions.value)
-                view.action_token = None
+                _, data = self._data(view)
+                with self.session.lock:
+                    self._bind_action(view, self._view_take(view, data), view.selected_index)
+                view.error = ''
                 self._refresh_view(view)
 
-        @view.select_action.on_click
-        def select_action(_):
+        @view.refresh_action.on_click
+        def refresh_action(_):
             if not self._is_current(view):
                 return
             _, data = self._data(view)
             with self.session.lock:
                 take = self._view_take(view, data)
-                index = view.action_map.get(view.actions.value)
-                if take is None or index is None or not 0 <= index < len(take.segments):
-                    view.error = 'Load a scene and choose a movement first.'
-                else:
-                    view.selected_index = index
-                    view.action_token = self._action_token(take, index)
-                    segment = take.segments[index]
-                    self._set(view.action_prompt, 'value', segment['prompt'])
-                    self._set(view.action_seconds, 'value',
-                              f'{(segment["end"] - segment["start"])/25:.2f}')
-                    view.error = ''
+                self._bind_action(view, take, view.selected_index)
+            view.error = ''
             self._refresh_view(view)
 
         @view.edit.on_click
@@ -279,6 +270,8 @@ class StoryControls:
                         self._movement_edit = {'version': self.session.version,
                                                'take_id': take.id, 'owner': view.key,
                                                'revision': self.session.action_edit_revision,
+                                               'index': index,
+                                               'prompt': view.action_prompt.value.strip(),
                                                'result': None}
                         view.error = ''
                     except ValueError as exc:
@@ -343,14 +336,7 @@ class StoryControls:
                     self.session.seek(take.segments[index]['start'])
                     self.session.play()
                     view.error = ''
-            self.update()
-
-        @view.pause.on_click
-        def pause(_):
-            if not self._is_current(view):
-                return
-            with self.session.lock:
-                self.session.pause()
+                    self._close_view(view)
             self.update()
 
         self._refresh_view(view)
@@ -375,6 +361,7 @@ class StoryControls:
                 self._activate_g1()
             view.current_take_id = None
             view.action_token = None
+            view.bound_take = None
             view.error = ''
             return True
         except (ValueError, RuntimeError) as exc:
@@ -385,6 +372,17 @@ class StoryControls:
     def _action_token(take, index):
         segment = take.segments[index]
         return (id(take), index, segment['start'], segment['end'], segment['prompt'])
+
+    def _bind_action(self, view, take, index):
+        if take is None or index is None or not 0 <= index < len(take.segments):
+            view.action_token = None
+            return
+        segment = take.segments[index]
+        view.action_token = self._action_token(take, index)
+        view.bound_take = take
+        self._set(view.action_prompt, 'value', segment['prompt'])
+        self._set(view.action_seconds, 'value',
+                  f'{(segment["end"] - segment["start"])/25:.2f}')
 
     def _can_undo_scene(self, take):
         undo = getattr(self.session, '_undo_action_edit', None)
@@ -422,23 +420,42 @@ class StoryControls:
         movement_status, can_cancel = self._movement_state(view, take)
         state = data['status'] if data else 'ready'
         detail = view.error or ((data.get('error') or data.get('speech_error')) if data else '') or ''
-        if data and data.get('loaded'):
-            detail = detail or 'Loaded as an editable take. Pick a movement below to refine it.'
-        elif data and state in _RUNNING:
+        if data and state in _RUNNING:
             progress = data.get('progress') or {}
-            detail = detail or (f'{progress.get("completed_beats", 0)}/{progress.get("total_beats", 0)} movements · '
-                                f'{progress.get("completed_chunks", 0)}/{progress.get("total_chunks", 0)} motion chunks')
+            completed = progress.get('completed_beats', 0)
+            total = progress.get('total_beats', 0)
+            detail = detail or (f'Creating scene · {completed}/{total} movements' if total
+                                else 'Creating scene…')
         if movement_status and not view.error:
             failed = 'failed' in movement_status.lower() or 'stopped' in movement_status.lower()
             style = 'sz-progress error' if failed else 'sz-progress'
-            status_content = (f'<div class="{style}" role="status"><b>Movement update</b> '
-                              f'{escape(movement_status)}</div>')
+            if self.session.busy:
+                message = 'Updating movement…'
+            elif failed:
+                message = movement_status
+            elif 'cancelled' in movement_status.lower():
+                message = 'Update cancelled'
+            elif 'undone' in movement_status.lower():
+                message = 'Update undone'
+            else:
+                message = 'Movement updated'
+            status_content = f'<div class="{style}" role="status">{escape(message)}</div>'
+        elif view.error or detail:
+            style = 'sz-progress error' if view.error or state in ('failed', 'speech_failed') else 'sz-progress'
+            status_content = f'<div class="{style}" role="status">{escape(str(detail))}</div>'
+        elif state == 'completed':
+            status_content = '<div class="sz-progress" role="status">Scene ready</div>'
+        elif state == 'cancelled':
+            status_content = '<div class="sz-progress" role="status">Generation cancelled</div>'
         else:
-            status_content = (f'<div class="sz-progress" role="status"><b>{escape(state.capitalize())}</b> '
-                              f'{escape(str(detail))}</div>')
+            status_content = ''
         self._set(view.status, 'content', status_content)
         self._set(view.cancel, 'disabled', state not in _RUNNING | {'speech_failed'})
+        self._set(view.cancel, 'visible', state in _RUNNING | {'speech_failed'})
         self._set(view.load, 'disabled', state != 'completed' or bool(data and data.get('loaded')))
+        self._set(view.load, 'visible', state == 'completed' and bool(data) and not data.get('loaded'))
+        self._set(view.jobs, 'visible', bool(self.ids))
+        self._set(view.seconds, 'visible', view.length.value == 'Custom')
         core_active = self.core_session is not None and self.core_session.snapshot()['active']
         self._set(view.generate, 'disabled', self.session.busy or
                   (not core_active and not self.session.character_motion_enabled))
@@ -452,24 +469,21 @@ class StoryControls:
         warnings = plan.get('warnings', []) if plan else []
         self._set(view.warnings, 'content', ''.join(
             f'<div class="sz-note">{escape(str(w))}</div>' for w in warnings))
+        self._set(view.details, 'visible', bool(plan or warnings))
         self._set(view.cancel_edit, 'disabled', not can_cancel)
-        with self.session.lock:
-            current_take = self.session.takes.get(self.session.active_take)
-        self._set(view.use_current, 'disabled', current_take is None or self.session.busy)
+        self._set(view.cancel_edit, 'visible', can_cancel)
         if take is not None:
-            source = ('Project take' if view.current_take_id is not None else 'Completed scene job')
             self._set(view.source, 'content',
-                      f'<div class="sz-preview"><b>{source}: {escape(take.name)}</b> · '
+                      f'<div class="sz-preview"><b>{escape(take.name)}</b> · '
                       f'{len(take.segments)} movements</div>')
         elif view.current_take_id is not None:
             self._set(view.source, 'content',
-                      '<div class="sz-preview invalid">The chosen project take is no longer available. '
-                      'Press Use current take to choose another.</div>')
+                      '<div class="sz-preview invalid">This take is no longer available.</div>')
         else:
             self._set(view.source, 'content',
-                      '<div class="sz-note">Load a completed scene job, or press Use current take '
-                      'to refine a take already in this project.</div>')
+                      '<div class="sz-note">Generate a scene to refine its movements.</div>')
         self._set(view.review, 'disabled', job_take is None or self.session.busy)
+        self._set(view.review, 'visible', job_take is not None and self.session.active_take != job_take.id)
         if take is None:
             view.action_map = {}
             view.action_token = None
@@ -487,21 +501,40 @@ class StoryControls:
                          0 <= view.selected_index < len(choices) else 0)
                 self._set(view.actions, 'value', options[index])
                 view.selected_index = choices.get(options[index])
-                view.action_token = None
             elif view.selected_index is None:
                 view.selected_index = choices[previous]
         index = view.selected_index
         token = self._action_token(take, index) if take is not None and index is not None and 0 <= index < len(take.segments) else None
+        edit = self._movement_edit
+        own_completed_edit = (edit is not None and take is not None and
+                              edit['owner'] == view.key and edit['take_id'] == take.id and
+                              edit['index'] == index and
+                              self.session.action_edit_revision == edit['revision'] + 1 and
+                              not self.session.busy and token != view.action_token and
+                              view.rebound_edit_revision != edit['revision'] and
+                              take.segments[index]['prompt'] == edit['prompt'])
+        if own_completed_edit:
+            self._bind_action(view, take, index)
+            view.rebound_edit_revision = edit['revision']
+        elif take is not None and view.bound_take is None and token is not None:
+            self._bind_action(view, take, index)
         if view.action_token is not None and token != view.action_token:
             view.action_token = None
         editable = token is not None and token == view.action_token and self.session.character_motion_enabled
+        self._set(view.refresh_action, 'visible', take is not None and token is not None and
+                  view.action_token is None and not self.session.busy)
+        self._set(view.refresh_action, 'disabled', take is None or self.session.busy)
         self._set(view.actions, 'disabled', take is None or not take.segments or self.session.busy)
-        self._set(view.select_action, 'disabled', take is None or not take.segments or self.session.busy)
+        self._set(view.actions, 'visible', take is not None and bool(take.segments))
+        self._set(view.timing, 'visible', take is not None and bool(take.segments))
         for handle in (view.action_prompt, view.action_seconds, view.edit, view.play):
             self._set(handle, 'disabled', not editable or self.session.busy)
+        for handle in (view.action_prompt, view.action_seconds, view.edit, view.play):
+            self._set(handle, 'visible', take is not None and bool(take.segments))
         self._set(view.undo, 'disabled', take is None or self.session.busy or
                   self.session.active_take != take.id or not self._can_undo_scene(take))
-        self._set(view.pause, 'disabled', not self.session.playing)
+        self._set(view.undo, 'visible', take is not None and not self.session.busy and
+                  self.session.active_take == take.id and self._can_undo_scene(take))
 
     def update(self):
         if self._closed:
