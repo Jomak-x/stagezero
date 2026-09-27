@@ -242,7 +242,8 @@ def main():
         edit_gate(gizmo.position)
 
     ui = StudioUI(server, session, camera, ROOT / '.runtime/projects', scene_controls,
-                  characters.build_gui, core_session=core, core_controls=build_core_controls)
+                  characters.build_gui, core_session=core, core_controls=build_core_controls,
+                  on_story_activate=lambda: activate_core(False))
     timeline = StudioTimeline(server, session, command_uuid=ui.timeline_command._impl.uuid,
                               core_session=core)
 
@@ -395,6 +396,7 @@ def main():
                     last_ui = time.monotonic()
             time.sleep(1/60)
     except KeyboardInterrupt:
+        ui.story_controls.close()
         session.reset()
         core.close()
         core_renderer.remove()
