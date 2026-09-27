@@ -11,6 +11,38 @@ from scene_effects import validate_effects
 
 
 class ObjectDirectorSession(DirectorSession):
+    def _prepare_generation(self, prompt, take, stop):
+        from scene_motion import plan_scene_motion
+        from take_placement import generation_start_positions
+        start = generation_start_positions(self, take, stop)
+        scene = copy.deepcopy(self.scene)
+        if take is not None and stop and scene.get('objects'):
+            states = evaluate_objects(scene['objects'], take.positions, stop - 1, hand_indices=(25, 33))
+            positions = {state['id']: state['position'] for state in states}
+            for obj in scene['objects']:
+                obj['position'] = list(positions[obj['id']])
+        plan = plan_scene_motion(scene, prompt, start)
+        return {'plan': plan, 'prior_positions': start} if plan is not None else None
+
+    def _generation_prompt(self, prompt, context):
+        return context['plan'].backend_prompt if context is not None else prompt
+
+    def _generation_seconds(self, context):
+        return getattr(context['plan'], 'recommended_seconds', None) if context is not None else None
+
+    def _process_generation_result(self, result, context):
+        if context is None:
+            return result
+        from scene_motion import apply_scene_motion
+        result = apply_scene_motion(result, context['plan'], prior_positions=context['prior_positions'])
+        context['prior_positions'] = result['positions'][-1].copy()
+        return result
+
+    def _invalidate_scene_motion(self):
+        if getattr(self, 'busy', False):
+            self._invalidate()
+            self.status = 'Scene changed · generate again to use the updated geometry'
+
     @property
     def show_scene_targets(self):
         return getattr(self, '_show_scene_targets', False)
@@ -41,6 +73,7 @@ class ObjectDirectorSession(DirectorSession):
     def set_scene(self, document, *, reset_gate=True):
         document = validate_scene(document)
         with self.lock:
+            self._invalidate_scene_motion()
             self.scene.pop('assets', None)
             self.scene.pop('camera', None)
             self.scene.pop('targets', None)
@@ -48,18 +81,23 @@ class ObjectDirectorSession(DirectorSession):
             if reset_gate and document['version'] == 3:
                 self.scene['gate']['enabled'] = False
             self.project_revision += 1
+            self._background_revision = getattr(self, '_background_revision', 0) + 1
             self.project_status = 'Unsaved scene changes · props, effects and lighting included'
 
     def generate_scene(self, prompt, generator=None, seed=0, *, expected_revision=None):
         prompt = validate_prompt(prompt)
         with self.lock:
-            revision = self.project_revision
-            if expected_revision is not None and expected_revision != revision:
+            if expected_revision is not None and expected_revision != self.project_revision:
                 raise ValueError('Project changed before scene generation started; try again')
+            original_scene = self.scene
+            original_document = self._document(self.scene)
+            background_revision = getattr(self, '_background_revision', 0)
         doc = generator.generate(prompt) if generator else generate_recipe(prompt, seed)
         doc = validate_scene(doc)
         with self.lock:
-            if revision != self.project_revision:
+            if (self.scene is not original_scene
+                    or getattr(self, '_background_revision', 0) != background_revision
+                    or self._document(self.scene) != original_document):
                 raise ValueError('Project changed during generation; try again for the current scene')
             self.set_scene(doc)
         return copy.deepcopy(doc)
@@ -103,9 +141,11 @@ class ObjectDirectorSession(DirectorSession):
                 refs={o['id'] for o in objects}
                 candidate['targets']=[t for t in candidate['targets'] if t['object_id'] in refs]
             self._document(candidate)
+            self._invalidate_scene_motion()
             if 'targets' in candidate:self.scene['targets']=candidate['targets']
             self.scene['objects'] = objects
             self.project_revision += 1
+            self._background_revision = getattr(self, '_background_revision', 0) + 1
             self.project_status = 'Unsaved object changes · Save project stores the scene'
 
     def generate_objects(self, prompt, generator=None):
@@ -184,8 +224,10 @@ class ObjectDirectorSession(DirectorSession):
             validated = validate_scene(document)
             # Preserve the current gate state and every scene setting. set_scene
             # intentionally resets the gate for a newly replaced v3 scene.
+            self._invalidate_scene_motion()
             self.scene.update({key: copy.deepcopy(value) for key, value in validated.items() if key != 'version'})
             self.project_revision += 1
+            self._background_revision = getattr(self, '_background_revision', 0) + 1
             self.project_status = 'Unsaved object changes · Save project stores the scene'
             return copy.deepcopy(obj)
 

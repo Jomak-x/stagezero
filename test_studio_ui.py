@@ -186,7 +186,7 @@ class StudioUITests(unittest.TestCase):
         self.ui.update()
         self.assertEqual(self.ui.seek_time.value, '0.25')
         self.assertEqual(self.ui.seek_time.writes, [])
-        self.assertFalse(self.ui.playhead.visible)
+        self.assertTrue(self.ui.playhead.visible)
         self.assertIn('Paused', self.ui.status.content)
         self.assertLessEqual(sum(len(handle.writes) for handle in self.gui.handles), 3)
 
@@ -210,6 +210,18 @@ class StudioUITests(unittest.TestCase):
         self.assertEqual(self.session.frame, 119)
         self.assertIn('2.00 s', self.session.status)
 
+    def test_recorded_preview_keeps_visible_playback_without_action_toolbar(self):
+        self.ui.update()
+        self.assertTrue(self.ui.transport.visible)
+        self.assertTrue(self.ui.playhead.visible)
+        self.ui.transport.click('Play')
+        self.assertTrue(self.session.playing)
+        self.ui.transport.click('Pause')
+        self.assertFalse(self.session.playing)
+        self.session.set_character_motion_enabled(False)
+        self.ui.update()
+        self.assertFalse(self.ui.transport.visible)
+
     def test_static_character_hides_motion_groups_then_restores_selected_take(self):
         take = self._seed_take(100)
         self.ui.edit_action.edit(EXTEND)
@@ -218,7 +230,7 @@ class StudioUITests(unittest.TestCase):
         source_positions = self.session.positions
         self.assertIsInstance(self.ui.transport, ButtonGroupHandle)
         self.assertIsInstance(self.ui.frames, ButtonGroupHandle)
-        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.transport.visible)
         self.assertTrue(self.ui.frames.visible)
 
         self.ui.transport.writes.clear()
@@ -228,7 +240,7 @@ class StudioUITests(unittest.TestCase):
         self.assertFalse(self.ui.transport.visible)
         self.assertFalse(self.ui.frames.visible)
         self.assertTrue(self.ui.generate.disabled)
-        self.assertEqual(self.ui.transport.writes, [])
+        self.assertEqual(self.ui.transport.writes, [('visible', False)])
         self.assertEqual(self.ui.frames.writes, [('visible', False)])
         self.assertEqual(self.session.active_take, take.id)
         self.assertIs(self.session.takes[take.id], take)
@@ -243,7 +255,7 @@ class StudioUITests(unittest.TestCase):
 
         self.session.set_character_motion_enabled(True)
         self.ui.update()
-        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.transport.visible)
         self.assertTrue(self.ui.frames.visible)
         self.assertFalse(self.ui.generate.disabled)
         self.assertEqual(self.session.active_take, take.id)
@@ -503,7 +515,8 @@ class StudioUITests(unittest.TestCase):
               patch.object(self.ui.story_controls, 'open_for_movement', return_value=True) as open_movement):
             self.ui.timeline_command.value = json.dumps(payload)
             self.ui.timeline_command.callbacks['update'](SimpleNamespace(client=client))
-        owns.assert_called_once_with(take.id)
+        self.assertTrue(owns.call_args_list)
+        self.assertTrue(all(call.args == (take.id,) for call in owns.call_args_list))
         open_movement.assert_called_once_with(client, take.id, 1)
         self.assertIsNone(self.ui.action_edit)
 
@@ -807,11 +820,11 @@ class StudioUITests(unittest.TestCase):
         self.session.seek(119)
         self.ui.update()
         self.assertIn('Finished', self.ui.status.content)
-        self.assertFalse(self.ui.playhead.visible)
-        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.playhead.visible)
+        self.assertTrue(self.ui.transport.visible)
 
     def test_transport_visibility_during_draft_and_generation(self):
-        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.transport.visible)
         self.ui.quick_actions.click('New take')
         self.assertEqual(self.session.kind, 'reference')
         self.assertFalse(self.ui.transport.visible)
@@ -836,7 +849,7 @@ class StudioUITests(unittest.TestCase):
             ui = StudioUI(server, self.session, camera, Path(self.temp.name),
                           lambda gui: None)
             self.assertIsInstance(ui.transport, GuiButtonGroupHandle)
-            self.assertFalse(ui.transport.visible)
+            self.assertTrue(ui.transport.visible)
 
             self.session.new_take()
             ui.update()
@@ -1004,7 +1017,7 @@ class StudioUITests(unittest.TestCase):
         self.assertFalse(cast.snapshot()['playing'])
         cast.deactivate()
         self.ui.update()
-        self.assertFalse(self.ui.transport.visible)
+        self.assertTrue(self.ui.transport.visible)  # Recorded preview needs a fallback transport.
         np.testing.assert_array_equal(self.session.positions, before)
 
     def test_new_take_waits_for_cast_work_then_uses_explicit_mode_handoff(self):

@@ -6,6 +6,7 @@ import { GuiComponentContext } from "../ControlPanel/GuiComponentContext";
 import { Box } from "@mantine/core";
 
 import { Button } from "@mantine/core";
+import { IconPlayerPlayFilled, IconPlayerPauseFilled, IconPlayerSkipBackFilled, IconRefresh } from "@tabler/icons-react";
 import React from "react";
 import { htmlIconWrapper } from "./ComponentStyles.css";
 import { toMantineColor } from "./colorUtils";
@@ -26,6 +27,12 @@ export default function ButtonComponent({
     return modal?.save_choice ?? null;
   });
 
+  const PlaybackIcon = label === "Pause" ? IconPlayerPauseFilled
+    : label === "Back to start" || label === "Restart" ? IconPlayerSkipBackFilled
+    : label === "Replay" ? IconRefresh
+    : label === "Play" || label === "Resume" ? IconPlayerPlayFilled
+    : null;
+
   return (
     <Box mx="xs" pb="0.5em">
       <Button
@@ -45,13 +52,11 @@ export default function ButtonComponent({
             updates: { value: true },
           });
         }}
-        style={{
-          height: "2em",
-        }}
+        style={{ minHeight: "2.35rem", height: "auto", paddingBlock: "0.4rem" }}
         disabled={disabled ?? false}
         size="sm"
         leftSection={
-          icon_html === null ? undefined : (
+          icon_html === null && PlaybackIcon !== null ? <PlaybackIcon size={18} aria-hidden /> : icon_html === null ? undefined : (
             <div
               className={htmlIconWrapper}
               dangerouslySetInnerHTML={{ __html: icon_html }}

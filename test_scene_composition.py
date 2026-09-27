@@ -230,7 +230,9 @@ class ScenePersistenceTests(unittest.TestCase):
         self.session.set_mode('Live ARDY')
 
     def _generate_take(self):
-        self.session.submit('walk')
+        # Persistence uses a synthetic zero-pose backend. Keep locomotion out
+        # of this fixture; scene-grounded walking requires articulated feet.
+        self.session.submit('turn')
         wait_until(lambda: not self.session.busy)
         self.session.pause()
 

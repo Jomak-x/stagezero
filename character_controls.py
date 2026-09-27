@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from html import escape
+from io import BytesIO
 from pathlib import Path
 from queue import SimpleQueue, Empty
 from threading import Lock, RLock
@@ -10,6 +11,7 @@ import hashlib
 import json
 import tempfile
 import numpy as np
+from PIL import Image
 
 from bounded_upload import (ScopedUploadLimits, acquire_scoped_upload_limits,
                             release_scoped_upload_limits)
@@ -103,7 +105,8 @@ class CharacterControls:
                 return False
             doc = json.loads(path.read_text())
             return (isinstance(doc, dict) and doc.get('version') == 1
-                    and doc.get('source') in ('neon-trellis', 'gemini-neon-trellis') and doc.get('asset_id') == asset_id)
+                    and doc.get('source') in ('neon-trellis', 'gemini-neon-trellis', 'preset', 'legacy')
+                    and doc.get('asset_id') == asset_id)
         except (OSError, ValueError):
             return False
 
@@ -120,7 +123,8 @@ class CharacterControls:
             self.select(asset_id, client_id)
             return True
 
-    def add_generated_file(self, data, prompt):
+    def add_generated_file(self, data, prompt, *, source='gemini-neon-trellis', display_name=None,
+                           preset_key=None, legacy_id=None):
         """Fit a generated body, then store it in the existing GLB catalog."""
         from generated_character_rig import export_generated_character, build_generated_retargeter
         if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 800:
@@ -130,7 +134,7 @@ class CharacterControls:
                 if len(self.entries) >= 16:
                     raise ValueError('Character library is full (16 models)')
             rigged = export_generated_character(data, self.skeleton)
-            name = 'Generated - ' + ' '.join(prompt.split())[:60]
+            name = display_name or 'Generated - ' + ' '.join(prompt.split())[:60]
             asset, report = inspect_character(rigged, display_name=name, skeleton=self.skeleton)
             if asset is None or not report.motion_ready:
                 raise ValueError('Could not fit this character. Try one person with separated arms and legs.')
@@ -140,10 +144,32 @@ class CharacterControls:
             folder = self.storage_root / asset.sha256
             staged = None
             try:
+                origin_file = folder / 'generated.json'
+                aliases = []
+                try:
+                    if not origin_file.is_symlink() and origin_file.stat().st_size <= 4096:
+                        old = json.loads(origin_file.read_text())
+                        if old.get('version') == 1 and old.get('asset_id') == asset.sha256:
+                            aliases = [alias for alias in old.get('aliases', [])
+                                       if isinstance(alias, dict) and set(alias) == {'source', 'field', 'value'}][:16]
+                            for field in ('preset_key', 'legacy_id'):
+                                if old.get(field):
+                                    previous = dict(source=old.get('source'), field=field, value=old[field])
+                                    if previous not in aliases:
+                                        aliases.append(previous)
+                except (OSError, ValueError, AttributeError, TypeError):
+                    pass
+                for field, value in (('preset_key', preset_key), ('legacy_id', legacy_id)):
+                    alias = dict(source=source, field=field, value=value)
+                    if value and alias not in aliases:
+                        aliases.append(alias)
                 with tempfile.NamedTemporaryFile('w', dir=folder, prefix='.generated-', suffix='.tmp', encoding='utf-8', delete=False) as f:
                     staged = Path(f.name)
-                    json.dump({'version': 1, 'source': 'gemini-neon-trellis', 'asset_id': asset.sha256,
-                               'prompt': prompt.strip()}, f, ensure_ascii=False)
+                    json.dump({'version': 1, 'source': source, 'asset_id': asset.sha256,
+                               'prompt': prompt.strip(), **({'preset_key': preset_key} if preset_key else {}),
+                               **({'legacy_id': legacy_id} if legacy_id else {}),
+                               'aliases': aliases[:16]},
+                              f, ensure_ascii=False)
                 staged.replace(folder / 'generated.json')
             finally:
                 if staged is not None:
@@ -152,6 +178,82 @@ class CharacterControls:
             with self._lock:
                 self.entries[asset.sha256] = entry
             return asset.sha256
+
+    def _saved_origin(self, field, value, source):
+        """Find a previously fitted trusted local source in this catalog."""
+        for asset_id in self.entries:
+            path = self.storage_root / asset_id / 'generated.json'
+            try:
+                if path.is_symlink() or path.stat().st_size > 4096:
+                    continue
+                doc = json.loads(path.read_text())
+                alias = dict(source=source, field=field, value=value)
+                if (doc.get('version') == 1 and doc.get('asset_id') == asset_id
+                        and ((doc.get('source') == source and doc.get(field) == value)
+                             or alias in doc.get('aliases', []))):
+                    return asset_id
+            except (OSError, ValueError, AttributeError):
+                continue
+        return None
+
+    def _saved_preset(self, key):
+        return self._saved_origin('preset_key', key, 'preset')
+
+    def use_preset(self, key, client_id):
+        """Fit a bundled static model once, then use the normal confirmed swap."""
+        from character_presets import PRESETS, preset_data
+        import io
+        import trimesh
+        preset = next((item for item in PRESETS if item['key'] == key), None)
+        if preset is None:
+            raise ValueError('Unknown character preset')
+        with self._lock:
+            existing = self._saved_preset(key)
+        if existing is None:
+            data, _ = preset_data(key)
+            # Two bundled source meshes omit NORMAL accessors. Re-exporting
+            # locally supplies them while retaining their embedded texture.
+            scene = trimesh.load(io.BytesIO(data), file_type='glb', force='scene', process=False)
+            data = trimesh.exchange.gltf.export_glb(scene, include_normals=True)
+            existing = self.add_generated_file(data, preset['name'], source='preset',
+                                               display_name=preset['name'], preset_key=key)
+        self.select(existing, client_id)
+        return existing
+
+    def import_legacy_catalog(self, folder):
+        """Copy a bounded flat cast into this catalog; leave source files intact.
+
+        The caller should point this at a separate legacy directory during
+        startup. A source active ID becomes the initial browser selection.
+        """
+        from character_library import CharacterLibrary
+        import io
+        import trimesh
+        source = Path(folder)
+        if source.resolve() == self.storage_root.resolve():
+            raise ValueError('Legacy source and current character catalog must be separate')
+        if not source.is_dir() or source.is_symlink():
+            return {}
+        library = CharacterLibrary(source)
+        active = library.active()
+        imported = {}
+        for item in library.entries()[:16]:
+            legacy_id = item['id']
+            current = self._saved_origin('legacy_id', legacy_id, 'legacy')
+            if current is None:
+                try:
+                    data = library.read(legacy_id)
+                    scene = trimesh.load(io.BytesIO(data), file_type='glb', force='scene', process=False)
+                    data = trimesh.exchange.gltf.export_glb(scene, include_normals=True)
+                    current = self.add_generated_file(data, str(item.get('prompt') or item['name'])[:800],
+                                                      source='legacy', display_name=item['name'][:70],
+                                                      legacy_id=legacy_id)
+                except (OSError, ValueError):
+                    continue
+            imported[legacy_id] = current
+        if active in imported:
+            self.set_initial_asset(imported[active])
+        return imported
 
     def _restore_catalog(self):
         # A bounded startup catalog; imports are local to this installation.
@@ -397,6 +499,8 @@ class CharacterControls:
 
     def build_gui(self, gui):
         gui.add_html('<div class="sz-section">Character<small>Choose a saved person or create one from a description.</small></div>')
+        self._preset_gui = gui
+        presets = gui.add_button('Browse ready-made characters')
         choose = gui.add_dropdown('Character', ('G1 robot',))
         from character_creation import CharacterCreation
         self.creation = CharacterCreation(self.server, self)
@@ -423,6 +527,12 @@ class CharacterControls:
         self.upload_limits.register(upload, max_bytes=32 * 1024 * 1024, on_error=self._set_error)
         self.upload_limits.register(mapping, max_bytes=1024 * 1024, on_error=self._set_error)
         self._bind_mapping_upload(mapping, None, self._ticket)
+
+        @presets.on_click
+        def browse_presets(event):
+            client = getattr(event, 'client', None)
+            if client is not None:
+                self.open_presets(client)
 
         @upload.on_upload
         def uploaded(event):
@@ -465,6 +575,41 @@ class CharacterControls:
         @frame.on_click
         def framed(event):
             self.frame_character(event.client)
+
+    def open_presets(self, client):
+        """Show reference cards without replacing the current actor on open."""
+        from character_presets import PRESETS, preset_reference
+        gui = getattr(client, 'gui', None) or self._preset_gui
+        if not hasattr(gui, 'add_modal'):
+            self._set_error('Character gallery is unavailable in this client')
+            return
+        modal = gui.add_modal('Choose your character', size='lg', show_close_button=True)
+        with modal:
+            gallery_status = gui.add_html('<div class="sz-note">Ready to animate · choose a character.</div>')
+            for preset in PRESETS:
+                with Image.open(BytesIO(preset_reference(preset['key']))) as image:
+                    image.thumbnail((256, 384))
+                    gui.add_image(np.asarray(image.convert('RGB')), label=preset['name'])
+                gui.add_html('<div class="sz-note">' + escape(preset['detail']) + '</div>')
+                button = gui.add_button('Use ' + preset['name'])
+
+                @button.on_click
+                def selected(event, key=preset['key']):
+                    try:
+                        self.use_preset(key, event.client.client_id)
+                        self._close_modal(modal)
+                    except (ValueError, OSError) as exc:
+                        gallery_status.content = ('<div class="sz-note">Could not load character: '
+                                                  + escape(str(exc)[:180]) + '</div>')
+            close = gui.add_button('Back to scene')
+            close.on_click(lambda _: self._close_modal(modal))
+
+    @staticmethod
+    def _close_modal(modal):
+        try:
+            modal.close()
+        except KeyError:
+            pass
 
     def _bind_mapping_upload(self, handle, asset_id, ticket):
         """Bind an immutable upload handle to one asset and selection epoch."""

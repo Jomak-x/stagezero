@@ -30,6 +30,7 @@ function ImageComponent({ props }: GuiImageMessage) {
       )}
       <img
         src={imageUrl}
+        alt={props.label ?? "Preview"}
         style={{
           maxWidth: "100%",
           height: "auto",

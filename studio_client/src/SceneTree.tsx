@@ -57,6 +57,7 @@ import { BatchedMesh } from "./mesh/BatchedMesh";
 import { SingleGlbAsset } from "./mesh/SingleGlbAsset";
 import { ActorGlbAsset } from "./mesh/ActorGlbAsset";
 import { BatchedGlbAsset } from "./mesh/BatchedGlbAsset";
+import { CinematicEffects, cinematicEffectKind } from "./CinematicEffects";
 
 function rgbToInt(rgb: [number, number, number]): number {
   return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
@@ -246,6 +247,13 @@ function createObjectFactory(
 
     // Add a point cloud.
     case "PointCloudMessage": {
+      if (cinematicEffectKind(message.name)) {
+        return {
+          makeObject: (ref, children) => (
+            <CinematicEffects ref={ref} {...message}>{children}</CinematicEffects>
+          ),
+        };
+      }
       return {
         makeObject: (ref, children) => (
           <PointCloud ref={ref} {...message}>

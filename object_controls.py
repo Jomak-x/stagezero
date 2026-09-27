@@ -11,6 +11,7 @@ from object_generation import GatewayGenerator
 from single_prop_generation import SinglePropGenerator
 from bounded_upload import ScopedUploadLimits, acquire_scoped_upload_limits
 from upload_events import install_upload_snapshots
+from scene_preset_previews import preset_preview
 
 
 def add_object_controls(gui, session):
@@ -21,6 +22,7 @@ def add_object_controls(gui, session):
     except ValueError:
         default_source = 'Recipes · offline'
     with gui.add_folder('Create a background', expand_by_default=True):
+        browse = gui.add_button('Browse backgrounds', icon='photo')
         prompt = gui.add_text('Describe a scene', initial_value='A detailed city boulevard with varied storefronts, sidewalks and a layered skyline', multiline=True)
         source = gui.add_dropdown('Generation source', ('Recipes · offline', 'AI gateway · Neon', 'Local AI · Ollama'), initial_value=default_source)
         generate = gui.add_button('Generate background + scene · replace')
@@ -48,6 +50,8 @@ def add_object_controls(gui, session):
         apply_lighting = gui.add_button('Apply lighting')
         effect = gui.add_dropdown('Effect', tuple(EFFECT_KINDS))
         intensity = gui.add_slider('Effect density', min=0., max=1., step=.05, initial_value=.75)
+        fx_position = gui.add_vector3('Effect position · m', initial_value=(0., 1.6, -2.5), step=.1)
+        fx_scale = gui.add_slider('Effect scale', min=.25, max=2., step=.05, initial_value=1.)
         add_effect = gui.add_button('Add effect')
         clear_effects = gui.add_button('Clear effects')
     with gui.add_folder('Edit props', expand_by_default=False):
@@ -227,6 +231,50 @@ def add_object_controls(gui, session):
         attempt(lambda: session.set_scene(make_preset(preset.value, int(seed.value))))
         view_scene(event.client)
 
+    @browse.on_click
+    def browse_clicked(event):
+        panel = event.client.gui if event.client is not None and hasattr(event.client, 'gui') else gui
+        modal = panel.add_modal('Choose a background', size='xl', show_close_button=True)
+        groups = {
+            'Cinematic': PRESETS[:3],
+            'Everyday': PRESETS[3:8],
+            'Stylized': PRESETS[8:],
+        }
+        with modal:
+            categories = panel.add_button_group('Collection', tuple(groups))
+            cards = []
+            for category, names in groups.items():
+                for name in names:
+                    visible = category == 'Cinematic'
+                    image = panel.add_image(preset_preview(name), label=name, visible=visible)
+                    choose = panel.add_button('Use ' + name, visible=visible, color='teal')
+                    cards.append((category, image, choose))
+
+                    def apply_preset(selected_event, preset_name=name):
+                        if not guard.acquire(blocking=False):
+                            status.content = 'Finish the current scene change before choosing a background.'
+                            return
+                        try:
+                            session.set_scene(make_preset(preset_name, int(seed.value)))
+                            report(session.scene_document())
+                            view_scene(selected_event.client)
+                            modal.close()
+                        except (ValueError, OSError) as exc:
+                            status.content = f'Could not apply background: {exc}'
+                        finally:
+                            guard.release()
+                    choose.on_click(apply_preset)
+            done = panel.add_button('Close')
+
+        @categories.on_click
+        def category_changed(_):
+            for category, image, choose in cards:
+                image.visible = choose.visible = category == categories.value
+
+        @done.on_click
+        def close_gallery(_):
+            modal.close()
+
     @apply_lighting.on_click
     def light_clicked(_):
         def action():
@@ -242,7 +290,8 @@ def add_object_controls(gui, session):
             ids = {e['id'] for e in doc['effects']}
             index = 0
             while f'{effect.value}-{index}' in ids: index += 1
-            fx = make_effect(effect.value, index)
+            fx = make_effect(effect.value, index, position=list(fx_position.value))
+            fx['size'] = [min(8., size * fx_scale.value) for size in fx['size']]
             fx['intensity'], fx['seed'] = intensity.value, int(seed.value)
             doc['effects'].append(fx)
             session.set_scene(doc, reset_gate=False)

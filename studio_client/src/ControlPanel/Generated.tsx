@@ -93,18 +93,44 @@ function GuiContainer({ containerUuid }: { containerUuid: string }) {
   guiUuidOrderPairArray = guiUuidOrderPairArray.sort(
     (a, b) => a.order - b.order,
   );
-  const out = (
-    <Box pt="xs">
-      {guiUuidOrderPairArray.map((pair, index) => (
-        <GeneratedInput
-          key={pair.uuid}
-          guiUuid={pair.uuid}
-          nextGuiUuid={guiUuidOrderPairArray[index + 1]?.uuid ?? null}
-        />
-      ))}
-    </Box>
-  );
-  return out;
+  const configs = viewer.useGui((state) => state.guiConfigFromUuid);
+  const presetCardSize = (index: number) => {
+    const image = configs[guiUuidOrderPairArray[index]?.uuid];
+    const detail = configs[guiUuidOrderPairArray[index + 1]?.uuid];
+    const hasDetail = detail?.type === "GuiHtmlMessage";
+    const button = configs[guiUuidOrderPairArray[index + (hasDetail ? 2 : 1)]?.uuid];
+    return image?.type === "GuiImageMessage" && image.props.visible !== false &&
+      button?.type === "GuiButtonMessage" && button.props.visible !== false &&
+      button.props.label.startsWith("Use ") ? (hasDetail ? 3 : 2) : 0;
+  };
+  const hasPresetPairs = guiUuidOrderPairArray.some((_, index) => presetCardSize(index) > 0);
+  const nodes: React.ReactNode[] = [];
+  for (let index = 0; index < guiUuidOrderPairArray.length; index++) {
+    const pair = guiUuidOrderPairArray[index];
+    const next = guiUuidOrderPairArray[index + 1];
+    const cardSize = presetCardSize(index);
+    if (cardSize > 0) {
+      nodes.push(
+        <Box key={pair.uuid} className="sz-preset-card">
+          {guiUuidOrderPairArray.slice(index, index + cardSize).map((item, offset) => (
+            <GeneratedInput
+              key={item.uuid}
+              guiUuid={item.uuid}
+              nextGuiUuid={guiUuidOrderPairArray[index + offset + 1]?.uuid ?? null}
+            />
+          ))}
+        </Box>,
+      );
+      index += cardSize - 1;
+    } else {
+      nodes.push(
+        <Box key={pair.uuid} className={hasPresetPairs ? "sz-preset-wide" : undefined}>
+          <GeneratedInput guiUuid={pair.uuid} nextGuiUuid={next?.uuid ?? null} />
+        </Box>,
+      );
+    }
+  }
+  return <Box pt="xs" className={hasPresetPairs ? "sz-preset-gallery" : undefined}>{nodes}</Box>;
 }
 
 /** A single generated GUI element. */

@@ -59,3 +59,41 @@ code {
   border: 1px solid gray;
   transform: TranslateY(0.07em);
 }
+
+/* Preset previews and their actions form one responsive, keyboard-friendly card. */
+.sz-preset-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 142px), 1fr));
+  gap: 10px;
+  padding: 8px;
+}
+.sz-preset-wide { grid-column: 1 / -1; min-width: 0; }
+.sz-preset-card {
+  min-width: 0;
+  overflow: hidden;
+  padding: 8px 3px 3px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.045);
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+.sz-preset-card:hover,
+.sz-preset-card:focus-within {
+  border-color: rgba(161, 229, 208, 0.65);
+  background: rgba(161, 229, 208, 0.09);
+  transform: translateY(-2px);
+}
+.sz-preset-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.sz-preset-card .mantine-Text-root { margin: 3px 0 7px; font-size: 11px; font-weight: 600; }
+.sz-preset-card .mantine-Button-root { min-height: 38px; }
+@media (prefers-reduced-motion: reduce) {
+  .sz-preset-card { transition: none; }
+  .sz-preset-card:hover,
+  .sz-preset-card:focus-within { transform: none; }
+}
