@@ -125,6 +125,27 @@ class TerrainCommandTests(unittest.TestCase):
                                 {"actor_1": {"position_xz": [0., 0.], "yaw": 0.}})
         self.assertEqual(route["terrain_navigation_version"], 1)
 
+    def test_display_heading_plans_relative_walk_and_initial_turn_without_editing_native(self):
+        scene, _ = temple()
+        history = native_root([0., .95, 0.], -2.5)
+        original_positions = history.positions.copy()
+        original_rotations = history.rotations.copy()
+        original_features = history.native_features.copy()
+        terrain = adapted(scene)
+        terrain.update(terrain_active=True, terrain_planning_heading=math.pi/2)
+        actor_ids = ("actor_1",)
+        forward = {"verb": "move", "direction": "forward", "distance_m": .5}
+        _, route = plan_command(forward, terrain, actor_ids, "actor_1", history, None)
+        np.testing.assert_allclose(np.asarray(route["support_xyz"][-1])[[0, 2]],
+                                   [.5, 0.], atol=1e-5)
+        left = {"verb": "move", "direction": "left", "distance_m": .5}
+        stages, route = plan_command(left, terrain, actor_ids, "actor_1", history, None)
+        self.assertEqual(route["schedule"]["initial_turn_frames"], 40)
+        self.assertAlmostEqual(stages[0].metadata["root_targets"]["actor_1"][-1]["heading"], 0.)
+        np.testing.assert_array_equal(history.positions, original_positions)
+        np.testing.assert_array_equal(history.rotations, original_rotations)
+        np.testing.assert_array_equal(history.native_features, original_features)
+
     def test_stairs_native_schema_and_world_translation(self):
         for angle, offset in ((0., (0., 0., 0.)), (37., (4., 6., -3.))):
             with self.subTest(angle=angle):

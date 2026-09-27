@@ -81,8 +81,9 @@ def _route_frames(native, rotations, fps):
 
 
 def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_continuation=False,
-                   minimum_transfer_frames=None):
+                   minimum_transfer_frames=None, touchdown_lead=.18, minimum_stance_frames=4):
     path, progress, yaw, bouts = _route_frames(native, rotations, fps)
+    native_yaw = np.unwrap(np.arctan2(rotations[:, 0, 0, 2], rotations[:, 0, 2, 2]))
     count = len(native)
     swing_frames = max(4, round(.4*fps))
     separation = max(3, round(.3*fps))
@@ -101,7 +102,65 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         if along > unique[-1]:
             point += (along-unique[-1])*np.array([np.sin(angle), np.cos(angle)])
         return point, angle
+    def pivot_during_hold(a, b, *, followed_by_walk=False):
+        nonlocal last_event, next_side
+        if b-a < 3:
+            return
+        # Native yaw may contain brief oscillations while the character is
+        # standing. Smooth for planning only; leave every native rotation and
+        # the resulting retargeted non-leg rotation unchanged.
+        turn = gaussian_filter1d(native_yaw[a:b], 1.5)
+        delta = float(turn[-1]-turn[0])
+        if abs(delta) < np.radians(30):
+            return
+        if not followed_by_walk and np.ptp(turn[-min(5, len(turn)):]) > np.radians(5):
+            raise ValueError('Stationary pivot needs a settled final heading')
+        direction = np.sign(delta)
+        if np.any(np.diff(turn)*direction < -np.radians(2)):
+            raise ValueError('Stationary pivot reverses direction within one hold')
+        # Native pelvis orientation can differ from the accepted foot heading
+        # (for example while reaching). Transport its turn delta from the
+        # current contacts; treating it as absolute foot yaw snaps the legs.
+        foot_angles = [np.arctan2(entries[-1][2][0, 2], entries[-1][2][2, 2])
+                       for entries in contacts]
+        anchor_yaw = float(np.angle(np.mean(np.exp(1j*np.array(foot_angles)))))
+        anchor_yaw += 2*np.pi*round((turn[0]-anchor_yaw)/(2*np.pi))
+        turn = turn+(anchor_yaw-turn[0])
+        yaw[a:b] = turn
+        if followed_by_walk:
+            # Velocity gives the next walking heading. Join it during the
+            # stationary tail rather than switching the knee pole at b.
+            destination = yaw[b]+2*np.pi*round((turn[-1]-yaw[b])/(2*np.pi))
+            width = min(b-a, max(4, round(.6*fps)))
+            phase = np.linspace(0., 1., width)
+            blend = phase*phase*(3-2*phase)
+            yaw[b-width:b] = (1-blend)*yaw[b-width:b]+blend*destination
+        # Admission follows lifted-contact timing below and the actual rig's
+        # unchanged rotation/reach/contact gates, not a blanket pelvis rate.
+        # Plant each foot after a lifted transfer. If walking immediately
+        # follows, its first alternating steps complete the reorientation.
+        # Otherwise the trailing foot needs one final settling event.
+        sections = max(1, int(np.ceil(abs(delta)/np.radians(30))))
+        angles = np.linspace(turn[0], turn[-1], sections+1)[1:]
+        targets = list(angles[:-1]) if followed_by_walk else [*angles, turn[-1]]
+        for event_index, target_angle in enumerate(targets):
+            target_t = a+int(np.argmin(abs(turn-target_angle)))
+            t = max(target_t, last_event+separation, swing_frames+2,
+                    contacts[next_side][-1][0]+swing_frames+3)
+            lag = swing_frames+2 if not followed_by_walk and event_index == len(angles) else round(.2*fps)
+            if t > target_t+lag or t >= b-2:
+                raise ValueError('Stationary pivot needs more time for alternating lifted contacts')
+            angle = float(turn[t-a]) if target_angle != turn[-1] else float(turn[-1])
+            lateral = np.array([-np.cos(angle), np.sin(angle)])
+            point = native[t, 0].copy()
+            point[1] += float(NEUTRAL[LEGS[next_side][3], 1])
+            point[[0, 2]] += (-1 if next_side == 0 else 1)*.13*lateral
+            contacts[next_side].append((t, point, Rotation.from_euler('y', angle).as_matrix()))
+            last_event, next_side = t, 1-next_side
+    previous_end = 0
     for bout_index, (start, end) in enumerate(bouts):
+        pivot_during_hold(previous_end, start, followed_by_walk=True)
+        previous_end = end
         first, last = float(progress[start]), float(progress[end-1])
         if last-first < .08:
             continue
@@ -110,7 +169,7 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         # A restarted two-foot hold may have its toes beneath the pelvis,
         # unlike the initial native stand. Shorten that first transfer using
         # the actual current anchors so the trailing leg remains reachable.
-        first_stride = .6 if bout_index == 0 and not initial_is_continuation else .4+float(np.clip(lead, 0., .2))
+        first_stride = .6 if bout_index == 0 and not initial_is_continuation and last_event < 0 else .4+float(np.clip(lead, 0., .2))
         alongs = list(np.arange(first+first_stride, last-.15, .5))+[last+.015]
         # Redistribute a large final remainder instead of either dropping the
         # penultimate landing or blindly adding one that overruns the tail.
@@ -121,9 +180,9 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         limit = bouts[bout_index+1][0]-2 if bout_index+1 < len(bouts) else count-3
         for along in alongs:
             candidates = np.arange(start, end)
-            t = int(candidates[np.argmin(abs(progress[candidates]-(along-.18)))])
+            t = int(candidates[np.argmin(abs(progress[candidates]-(along-touchdown_lead)))])
             t = max(t, last_event+separation, swing_frames+2,
-                    contacts[next_side][-1][0]+swing_frames+3)
+                    contacts[next_side][-1][0]+swing_frames+minimum_stance_frames-1)
             if t >= limit:
                 raise ValueError('Insufficient buffered time for alternating planted contacts')
             point2, angle = sample(along)
@@ -145,6 +204,7 @@ def _plan_contacts(native, rotations, fps, initial_p, initial_r, *, initial_is_c
         point[[0, 2]] = point2+(-1 if next_side == 0 else 1)*.13*lateral
         contacts[next_side].append((t, point, Rotation.from_euler('y', angle).as_matrix()))
         last_event, next_side = t, 1-next_side
+    pivot_during_hold(previous_end, count)
     runs = []
     all_events = sorted(t for entries in contacts for t, _, _ in entries if t)
     for entries in contacts:

@@ -9,7 +9,7 @@ MAX_SCENE_TRIANGLES = 250_000
 MAX_SCENE_FILE_BYTES = 1_000_000
 
 LIGHTING = ('neutral', 'warm', 'moonlight', 'neon', 'sunset')
-PRESETS = ('Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Residential neighborhood', 'Market square', 'Warehouse workshop', 'Designed apartment', 'Neon research lab', 'Enchanted grove', 'Cozy living room', 'Industrial yard', 'Winter plaza')
+PRESETS = ('Rooftop swing district', 'Harbor chase', 'Jungle temple', 'City boulevard', 'Residential neighborhood', 'Market square', 'Warehouse workshop', 'Designed apartment', 'Neon research lab', 'Enchanted grove', 'Cozy living room', 'Industrial yard', 'Winter plaza', 'Traversable temple', 'Industrial switchback')
 COLORS = {'red': [218, 70, 72], 'blue': [58, 120, 210], 'teal': [47, 177, 159],
           'green': [80, 150, 87], 'purple': [153, 88, 212], 'yellow': [232, 190, 70],
           'orange': [223, 129, 59], 'white': [220, 226, 231], 'black': [36, 43, 54]}
@@ -85,6 +85,12 @@ def make_preset(name, seed=0):
         raise ValueError('Unknown scene preset')
     if type(seed) is not int or not 0 <= seed <= 1_000_000:
         raise ValueError('Seed must be an integer from 0 to 1000000')
+    if name == 'Traversable temple':
+        from traversal_kit import traversable_temple_scene
+        return validate_scene(traversable_temple_scene())
+    if name == 'Industrial switchback':
+        from switchback_traversal import industrial_switchback_scene
+        return validate_scene(industrial_switchback_scene())
     if name in ('Rooftop swing district','Harbor chase','Jungle temple'):
         from cinematic_scenes import make_cinematic
         return make_cinematic(name,seed)
@@ -173,7 +179,9 @@ def make_preset(name, seed=0):
 def generate_recipe(prompt, seed=0):
     """Transparent keyword recipes plus counted catalog props; not language-model inference."""
     text = prompt.lower()
-    matches = [('Rooftop swing district', ('spider-man','spider man','swing district','rooftop city','swinging city')),
+    matches = [('Traversable temple', ('traversable temple',)),
+               ('Industrial switchback', ('industrial switchback',)),
+               ('Rooftop swing district', ('spider-man','spider man','swing district','rooftop city','swinging city')),
                ('Harbor chase', ('dockyard','harbor chase','container port')),
                ('Jungle temple', ('jungle temple','temple ruin','ancient temple')),
                ('Residential neighborhood', ('residential','neighborhood','neighbourhood','suburb','houses')),

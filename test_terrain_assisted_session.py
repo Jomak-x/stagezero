@@ -3,7 +3,11 @@ import tempfile
 import io
 import unittest
 import zipfile
+import json
+import math
+from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 
@@ -11,7 +15,7 @@ from motion_bridge import _layout
 from realtime_clip import CanonicalClip
 from scene_composition import make_preset
 from terrain_assisted_session import (
-    assist_native_terrain_result, generate_native_terrain_commands,
+    PresentationClip, assist_native_terrain_result, generate_native_terrain_commands,
     load_assisted_result, load_native_terrain_result, run_assisted_terrain_commands,
     save_assisted_result, save_native_terrain_result,
 )
@@ -57,6 +61,43 @@ def fitted_assistor(native_positions, native_rotations, geometry, character, **k
 
 
 class OfflineTerrainSessionTests(unittest.TestCase):
+    def test_relative_sequence_uses_previous_route_travel_heading(self):
+        client = TargetClient()
+        result = generate_native_terrain_commands(
+            self.scene, "walk 0.5m left then walk 0.5m forward",
+            actor_ids=IDS, actor_id=IDS[0], initial_placements=PLACEMENT,
+            client=client)
+        np.testing.assert_allclose(np.asarray(result.routes[0]["support_xyz"][-1])[[0, 2]],
+                                   [-0.5, 0.], atol=.02)
+        np.testing.assert_allclose(np.asarray(result.routes[1]["support_xyz"][-1])[[0, 2]],
+                                   [-1., 0.], atol=.02)
+        self.assertEqual(len(result.measurements), 2)
+        self.assertTrue(all(row["completed"] for row in result.measurements))
+
+    def test_repeated_submission_uses_committed_display_heading_for_planning_only(self):
+        first = assist_native_terrain_result(self.native, assistor=fitted_assistor)
+        original_native = first.native_clip.native_features.copy()
+        rotations = first.presentation.rotations.copy()
+        yaw = math.pi/2
+        rotations[0, -1, 0] = np.array(((math.cos(yaw), 0., math.sin(yaw)),
+                                        (0., 1., 0.),
+                                        (-math.sin(yaw), 0., math.cos(yaw))))
+        display = PresentationClip(first.presentation.positions, rotations,
+                                   first.presentation.stance, first.presentation.fps,
+                                   first.presentation.actor_ids,
+                                   first.presentation.rig_asset_sha256,
+                                   first.presentation.report)
+        committed = replace(first, presentation=display)
+        with patch("terrain_assisted_session.generate_native_terrain_commands",
+                   side_effect=RuntimeError("captured")) as generate:
+            with self.assertRaisesRegex(RuntimeError, "captured"):
+                run_assisted_terrain_commands(
+                    self.scene, "walk 0.5m forward", actor_ids=IDS,
+                    actor_id=IDS[0], initial_placements=PLACEMENT,
+                    client=TargetClient(), committed_assisted=committed)
+        self.assertAlmostEqual(generate.call_args.kwargs["planning_heading"], yaw)
+        np.testing.assert_array_equal(first.native_clip.native_features, original_native)
+
     def test_array_header_cannot_allocate_more_than_zip_payload(self):
         from terrain_assisted_session import _validate_array_headers
         header = io.BytesIO()
@@ -139,6 +180,107 @@ class OfflineTerrainSessionTests(unittest.TestCase):
         self.assertEqual(result.action_spans[0][0], 40)
         with self.assertRaisesRegex(ValueError, "previous actual presentation"):
             assist_native_terrain_result(result, assistor=fitted_assistor)
+
+    def test_repeated_commands_preserve_paired_prefix_and_archive(self):
+        first = assist_native_terrain_result(self.native, assistor=fitted_assistor)
+        original_p = first.presentation.positions.copy()
+        original_r = first.presentation.rotations.copy()
+        client = TargetClient()
+        client.root = first.native_clip.positions[0, -1, 0].copy()
+        seen = []
+        def boundary_assistor(*args, **kwargs):
+            seen.append((kwargs.get("initial_assisted_positions"),
+                         kwargs.get("initial_assisted_rotations")))
+            return fitted_assistor(*args, **kwargs)
+        second = run_assisted_terrain_commands(
+            self.scene, "walk 1m forward", actor_ids=IDS, actor_id=IDS[0],
+            initial_placements=PLACEMENT, client=client,
+            committed_assisted=first, assistor=boundary_assistor)
+        n = first.native_clip.frames
+        np.testing.assert_array_equal(second.native_clip.positions[:, :n], first.native_clip.positions)
+        np.testing.assert_array_equal(second.native_clip.rotations[:, :n], first.native_clip.rotations)
+        np.testing.assert_array_equal(second.native_clip.native_features[:, :n], first.native_clip.native_features)
+        np.testing.assert_array_equal(second.presentation.positions[:, :n], original_p)
+        np.testing.assert_array_equal(second.presentation.rotations[:, :n], original_r)
+        np.testing.assert_array_equal(second.presentation.stance[:, :n], first.presentation.stance)
+        np.testing.assert_array_equal(seen[0][0], original_p[0, -1])
+        np.testing.assert_array_equal(seen[0][1], original_r[0, -1])
+        self.assertEqual(second.report["actions"][0], first.report["actions"][0])
+        self.assertEqual(second.report["terrain_start_frame"], 0)
+        self.assertEqual(len(second.routes), 2)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder)/"appended.npz"
+            save_assisted_result(second, path)
+            loaded = load_assisted_result(path)
+            np.testing.assert_array_equal(loaded.presentation.positions, second.presentation.positions)
+            np.testing.assert_array_equal(loaded.native_clip.native_features, second.native_clip.native_features)
+            self.assertEqual(loaded.report, json.loads(json.dumps(second.report)))
+
+    def test_cancel_append_keeps_committed_prefix_immutable(self):
+        first = assist_native_terrain_result(self.native, assistor=fitted_assistor)
+        old = (first.native_clip.native_features.tobytes(), first.presentation.positions.tobytes(),
+               first.presentation.rotations.tobytes())
+        client = TargetClient()
+        client.root = first.native_clip.positions[0, -1, 0].copy()
+        with self.assertRaisesRegex(RuntimeError, "cancelled"):
+            run_assisted_terrain_commands(
+                self.scene, "walk 1m forward", actor_ids=IDS, actor_id=IDS[0],
+                initial_placements=PLACEMENT, client=client, committed_assisted=first,
+                assistor=fitted_assistor, cancelled=lambda: bool(client.calls))
+        self.assertEqual(old, (first.native_clip.native_features.tobytes(),
+                             first.presentation.positions.tobytes(), first.presentation.rotations.tobytes()))
+        self.assertFalse(first.presentation.positions.flags.writeable)
+
+    def test_append_rejects_changed_scene_and_native_history_before_generation(self):
+        first = assist_native_terrain_result(self.native, assistor=fitted_assistor)
+        client = TargetClient()
+        scene = dict(self.scene, name="changed authored scene")
+        with self.assertRaisesRegex(ValueError, "authored scene"):
+            run_assisted_terrain_commands(scene, "walk 1m forward", actor_ids=IDS, actor_id=IDS[0],
+                initial_placements=PLACEMENT, client=client, committed_assisted=first)
+        prefix = replace(first.native_clip, native_features=first.native_clip.native_features+1.)
+        with self.assertRaisesRegex(ValueError, "provenance mismatch"):
+            run_assisted_terrain_commands(self.scene, "walk 1m forward", actor_ids=IDS, actor_id=IDS[0],
+                initial_placements=PLACEMENT, client=client, committed_assisted=first, committed_prefix=prefix)
+        self.assertEqual(client.calls, [])
+
+    def test_append_rejects_assistor_that_changes_committed_boundary(self):
+        first = assist_native_terrain_result(self.native, assistor=fitted_assistor)
+        client = TargetClient()
+        client.root = first.native_clip.positions[0, -1, 0].copy()
+        old = first.presentation.positions.tobytes()
+        def changed_boundary(*args, **kwargs):
+            p, r, stance, report = fitted_assistor(*args, **kwargs)
+            p[0, :, 0] += .001
+            return p, r, stance, report
+        with self.assertRaisesRegex(ValueError, "committed boundary pose"):
+            run_assisted_terrain_commands(self.scene, "walk 1m forward", actor_ids=IDS, actor_id=IDS[0],
+                initial_placements=PLACEMENT, client=client, committed_assisted=first,
+                assistor=changed_boundary)
+        self.assertEqual(old, first.presentation.positions.tobytes())
+
+    def test_elevated_door_reaction_origin_survives_next_submission(self):
+        scene = traversable_temple_scene()
+        client = TargetClient()
+        client.root = np.asarray(TEMPLE_START_ROOT_XYZ)+[0., .02, 0.]
+        placements = {IDS[0]: {"position_xz": [TEMPLE_START_ROOT_XYZ[0], TEMPLE_START_ROOT_XYZ[2]],
+                               "yaw": float(np.pi)}}
+        first = generate_native_terrain_commands(scene,
+            "walk up Shallow temple stairs, cross Suspended temple bridge, open Temple gate",
+            actor_ids=IDS, actor_id=IDS[0], initial_placements=placements, client=client)
+        old_gate = next(row for row in first.reaction_states if row["id"] == "temple-gate")
+        second = generate_native_terrain_commands(scene, "enter", actor_ids=IDS,
+            actor_id=IDS[0], initial_placements=placements, client=client,
+            committed_prefix=first.native_clip, terrain_start_frame=first.terrain_start_frame,
+            previous_routes=first.routes)
+        gate = next(row for row in second.reaction_states if row["id"] == "temple-gate")
+        self.assertEqual(gate["trigger_frame"], old_gate["trigger_frame"])
+        self.assertEqual(gate["opening_fraction"], 1.)
+        self.assertTrue(second.measurements[0]["crossing_verified"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder)/"append-native.npz"
+            save_native_terrain_result(second, path)
+            self.assertEqual(load_native_terrain_result(path).terrain_start_frame, 0)
 
     def test_callback_sees_complete_native_route_before_assistance(self):
         observed = []

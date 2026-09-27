@@ -22,10 +22,25 @@ from studio_server import create_studio_server
 from terrain_assisted_renderer import TerrainAssistedRenderer
 
 
+def _load_core_project(path: Path):
+    from realtime_director import RealtimeDirector
+    from studio_core_terrain_state import MAX_STUDIO_BYTES, unpack_terrain_project
+    if path.stat().st_size > MAX_STUDIO_BYTES:
+        raise ValueError('Core project exceeds the 64 MB archive limit')
+    content = path.read_bytes()
+    director = RealtimeDirector.load_project(content)
+    result = unpack_terrain_project(content, director)
+    if result is None:
+        raise ValueError('Core project has no terrain-assisted presentation')
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     inputs = parser.add_mutually_exclusive_group(required=True)
     inputs.add_argument('--project', type=Path)
+    inputs.add_argument('--core-project', type=Path,
+                        help='Saved terrain-aware Core studio project from the normal app')
     inputs.add_argument('--poses', type=Path)
     parser.add_argument('--scene', type=Path)
     parser.add_argument('--output', type=Path, required=True)
@@ -36,9 +51,12 @@ def main():
                         help='Keep the actual character and its foot contacts visible along the route')
     args = parser.parse_args()
     native = None
-    if args.project:
-        from terrain_assisted_session import load_assisted_result
-        result = load_assisted_result(args.project)
+    if args.project or args.core_project:
+        if args.core_project:
+            result = _load_core_project(args.core_project)
+        else:
+            from terrain_assisted_session import load_assisted_result
+            result = load_assisted_result(args.project)
         scene, native, presentation = result.scene, result.native_clip, result.presentation
         actor_ids = native.actor_ids
         report = result.report

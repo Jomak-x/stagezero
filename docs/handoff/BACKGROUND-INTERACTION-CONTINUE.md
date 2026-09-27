@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-27. The latest continuation below supersedes the older native-only checkpoint retained afterward.
 
+## Normal-app integration continuation
+
+The terrain option is now integrated into normal Studio, with a separate native take and rig17 display. Read [the usage and supported scope](../TERRAIN-AWARE.md) and [normal-app evidence](../../review/terrain-assisted/normal-app/README.md). The fresh normal-UI temple run passed stairs/bridge (200 frames), a separate open command (280), and save/reopen followed by `enter` (360). Prior native and display frames remain exact across these appends. Turning the option off restores the ordinary 240-frame take byte-for-byte. An unsupported jump command preserved the committed terrain take.
+
+The normal-app runs use the real Core HTTP backend and real prompt encoder, not cached trial embeddings. The industrial switchback now passes fresh generation through its stairs, crate detour, lateral bridge, rotated automatic door, and entry (480 frames). Final temple replay reaches 360 frames; two repeated forward commands reach 440 with exact prefixes. Both complete videos were reviewed at 1×. The final industrial descent rejects a reversing pivot and remains experimental; freeze that scope rather than repeat research. Ordinary 240-frame native arrays remain exact. Final validation: 174 targeted tests plus 15 UI tests after final labels/visibility edits. See the evidence index for exact archives and limitations.
+
+Current private normal preview: port 24998; protected local Core relay: 18769; dedicated first-pod Core backend: 8769. Credentials remain outside the repository. Preserve other workers' ports and the shared frontend build. The older separate-viewer results below remain historical evidence, not a substitute for normal-app verification.
+
 ## Latest continuation: actual character rig
 
 Read [the new evidence and implementation checkpoint](../../review/terrain-assisted/README.md) before resuming the older steps below. The user has now authorized a bounded, explicitly terrain-assisted alternative if it looks acceptable; ordinary/main motion must remain unchanged.

@@ -20,7 +20,12 @@ from scene_navigation import plan_navigation_route
 
 ROOT_TO_SOLE_M = .95  # Official Core neutral pelvis-to-floor clearance.
 SPEED_MPS = 1.2
-ACTOR_RADIUS_M = .18
+# Terrain routes need room for articulated arms after world-facing assistance:
+# a walking hand can extend .44 m in XZ, plus a .06 m proxy and path margin.
+ACTOR_RADIUS_M = .60
+# Keep the lower probe inside normal risers; the .60 m envelope applies at arm
+# and torso heights, where a tall prop can strike the native upper body.
+LOWER_BODY_RADIUS_M = .18
 TARGET_LIMIT = 24
 
 
@@ -69,7 +74,8 @@ def _support_at(geometry, x, z, reference_y=None, *, object_id=None):
 
 def _clear_destination_height(geometry, x, z):
     for y in _surface_candidates(geometry, x, z):
-        if not any(geometry.obstacle_at(x, y+offset, z, radius=ACTOR_RADIUS_M)
+        if not any(geometry.obstacle_at(x, y+offset, z,
+                                        radius=LOWER_BODY_RADIUS_M if offset == .40 else ACTOR_RADIUS_M)
                    for offset in (.40, .90, 1.35)):
             return y
     raise ValueError("Far side has no supported body clearance")
@@ -105,12 +111,19 @@ def _objects_for_alias(scene, alias):
     return result
 
 
-def resolve_terrain_object(action, adapted, start):
+def resolve_terrain_object(action, adapted, start, geometry=None):
     scene = adapted["scene"]
     if action.get("target_id"):
         return next(obj for obj in scene["objects"] if obj["id"] == action["target_id"])
     alias = action.get("target_alias")
     options = _objects_for_alias(scene, alias or "")
+    if action.get("verb") in ("ascend", "descend") and alias in ("stairs", "steps"):
+        # A landing named "stair entry" describes proximity, not a rendered
+        # flight. Exact object names remain authoritative and are checked by
+        # _object_target so invalid geometry still fails explicitly.
+        geometry = geometry if geometry is not None else build_scene_geometry(scene)
+        flight_ids = {flight["object_id"] for flight in geometry.stair_routes}
+        options = [obj for obj in options if obj["id"] in flight_ids]
     if not options:
         raise ValueError(f"No authored {alias or 'target'} affordance exists")
     if alias != "stairs" and len(options) > 1:
@@ -125,11 +138,42 @@ def resolve_terrain_object(action, adapted, start):
 def _concat_routes(geometry, points):
     pieces = []
     for a, b in zip(points, points[1:]):
-        piece = plan_navigation_route(geometry, a, b, radius=ACTOR_RADIUS_M,
+        piece = plan_navigation_route(geometry, a, b, radius=LOWER_BODY_RADIUS_M,
+                                      upper_body_radius=ACTOR_RADIUS_M,
                                       max_step_up=.25, max_drop=.35,
                                       max_expansions=800)
         pieces.extend(piece if not pieces else piece[1:])
     return np.asarray(pieces, dtype=float)
+
+
+def _traverses_stair_treads(geometry, path, object_id, steps, verb):
+    """Confirm ordered progress over rendered tread surfaces of this flight.
+
+    Navigation compacts collinear support samples into riser brackets.  The
+    stored route may have no vertex near the centre of a broad tread, so test
+    its segments against the selected object's actual walkable triangles.
+    """
+    run = np.linalg.norm(np.diff(steps[:, [0, 2]], axis=0), axis=1)
+    spacing = min(.08, float(np.min(run))/4.)
+    direction = 1 if verb == "ascend" else -1
+    order = range(len(steps)) if direction > 0 else range(len(steps)-1, -1, -1)
+    progress = []
+    final_matches = set()
+    for first, last in zip(path, path[1:]):
+        distance = float(np.linalg.norm((last-first)[[0, 2]]))
+        count = max(1, math.ceil(distance/spacing))
+        for sample in range(1, count+1):
+            point = first + (last-first)*(sample/count)
+            surfaces = _surface_candidates(geometry, point[0], point[2], object_id)
+            matches = {index for index in order for height in surfaces
+                       if abs(height-steps[index, 1]) < .015
+                       and abs(point[1]-height) <= .08}
+            final_matches = matches
+            for index in order:
+                if index in matches and (not progress or (index-progress[-1])*direction > 0):
+                    progress.append(index)
+    destination = len(steps)-1 if direction > 0 else 0
+    return destination in final_matches and len(progress) >= min(3, len(steps))
 
 
 def _door_points(action, adapted, start, obj, geometry):
@@ -143,10 +187,12 @@ def _door_points(action, adapted, start, obj, geometry):
     normal = np.array((math.sin(axis_angle), math.cos(axis_angle)))
     center = np.asarray(original["position"], dtype=float)
     side = float(np.dot(start[[0, 2]]-center[[0, 2]], normal))
-    if abs(side) < original["size"][2]/2 + ACTOR_RADIUS_M:
+    if abs(side) < original["size"][2]/2 + LOWER_BODY_RADIUS_M:
         raise ValueError("Actor starts inside the gate approach; crossing side is ambiguous")
     side_sign = 1. if side > 0 else -1.
-    reach = original["size"][2]/2 + ACTOR_RADIUS_M + .06 + .25
+    # Leave the articulated body envelope clear of a closed panel. Side
+    # ambiguity above concerns the root footprint, including a repeated open.
+    reach = original["size"][2]/2 + max(LOWER_BODY_RADIUS_M+.25, ACTOR_RADIUS_M) + .06
     entry_xz = center[[0, 2]] + normal*side_sign*reach
     exit_xz = center[[0, 2]] - normal*side_sign*reach
     entry = np.array((entry_xz[0], floor, entry_xz[1]))
@@ -180,8 +226,7 @@ def _object_target(action, adapted, start, geometry, obj):
         if np.linalg.norm((start-departure)[[0, 2]]) > np.linalg.norm((start-goal)[[0, 2]])+.2:
             raise ValueError(f"Actor is already at the {verb} destination side of the stairs")
         path = _concat_routes(geometry, (start, goal))
-        if not any(np.linalg.norm((p-step)[[0, 2]]) < .23 and abs(p[1]-step[1]) < .13
-                   for p in path for step in steps[1:-1]):
+        if not _traverses_stair_treads(geometry, path, obj['id'], steps, verb):
             raise ValueError("Planned route does not traverse the selected stair flight")
         return path, {"arrival": path[-1]}, {"support_object_id": obj["id"]}
     if verb == "cross":
@@ -251,6 +296,15 @@ def plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initia
     scene = adapted["scene"]
     geometry = build_scene_geometry(scene)
     start, yaws, positions = _root_start(geometry, actor_ids, actor_id, last_clip, initial_placements)
+    # A committed terrain take has a separate, route-facing presentation pose.
+    # Its heading is planning intent only: keep last_clip and its exact native
+    # features as the sole source of history, root position, and validation.
+    planning_heading = adapted.get("terrain_planning_heading")
+    if planning_heading is not None:
+        if (not adapted.get("terrain_active") or type(planning_heading) not in (int, float)
+                or not math.isfinite(planning_heading)):
+            raise ValueError("Terrain planning heading must be a finite terrain-only yaw")
+        yaws[actor_id] = float(planning_heading)
     verb = action["verb"]
     resolved_target_id = None
     if verb == "move":
@@ -262,7 +316,7 @@ def plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initia
         path = _concat_routes(geometry, (start, (xz[0], y, xz[1])))
         roles, details = {"arrival": path[-1]}, {"target_xz": xz.tolist()}
     else:
-        obj = resolve_terrain_object(action, adapted, start)
+        obj = resolve_terrain_object(action, adapted, start, geometry)
         resolved_target_id = obj["id"]
         path, roles, details = _object_target(action, adapted, start, geometry, obj)
     waypoints, distance = _route_waypoints(path, roles)
@@ -362,7 +416,9 @@ def plan_terrain_command(action, adapted, actor_ids, actor_id, last_clip, initia
              "support_xyz": np.round(path, 5).tolist(), "geometry": details,
              "assumptions": {"motion_following_verified": False,
                              "raw_native_contact_verified": False,
-                             "actor_radius_m": ACTOR_RADIUS_M, "speed_mps": SPEED_MPS},
+                             "actor_radius_m": ACTOR_RADIUS_M,
+                             "lower_body_radius_m": LOWER_BODY_RADIUS_M,
+                             "speed_mps": SPEED_MPS},
              "schedule": {"frames": total_frames, "fps": FPS,
                           "seconds": total_frames/FPS, "travel_seconds": travel_seconds,
                           "initial_turn_frames": turn_windows*HORIZON,

@@ -92,13 +92,21 @@ class Core:
         self.frame = 0
         self.phase = "empty"
         self.epoch = 0
+        self.terrain_aware = False
+        self.terrain_pending = False
+        self.terrain_status = ""
+        self.terrain_take_available = False
+        self.terrain_retry_available = False
         self.calls = []
 
     def snapshot(self):
         return dict(active=self.active, available=self.available, actor_ids=self.actor_ids,
                     total_frames=self.total_frames, frame=self.frame, phase=self.phase,
                     status="Ready", example_available=True, initialized=self.initialized,
-                    epoch=self.epoch)
+                    epoch=self.epoch, terrain_aware=self.terrain_aware,
+                    terrain_pending=self.terrain_pending, terrain_status=self.terrain_status,
+                    terrain_take_available=self.terrain_take_available,
+                    terrain_retry_available=self.terrain_retry_available)
 
     def start(self, *, actor_count, scene_document, placements):
         self.calls.append(("start", actor_count, scene_document))
@@ -108,6 +116,14 @@ class Core:
         self.actor_ids = tuple(f"actor_{i}" for i in range(1, actor_count + 1))
 
     reset = start
+
+    def start_terrain(self, *, scene_document, placements):
+        self.calls.append(("start_terrain", scene_document, placements))
+        self.active = True
+        self.initialized = True
+        self.actor_ids = ("actor_1",)
+        self.terrain_aware = True
+        self.epoch += 1
 
     def activate(self):
         self.calls.append(("activate",))
@@ -125,6 +141,10 @@ class Core:
 
     def spatial_commands(self, actor_id, text):
         self.calls.append(("spatial_commands", actor_id, text))
+
+    def set_terrain_aware(self, enabled):
+        self.calls.append(("set_terrain_aware", enabled))
+        self.terrain_aware = enabled
 
     def play(self):
         self.calls.append(("play",))
@@ -228,10 +248,110 @@ class CoreStudioControlsTests(unittest.TestCase):
         self.controls.enabled.edit(True, client=object())
         self.controls.cast.value = "Two actors"
         self.controls.start.click()
+        self.assertTrue(self.controls.terrain_aware.disabled)
         self.controls.nav_actor.value = "Actor 2"
         self.controls.spatial_text.value = "walk two metres forward then approach gate-1"
         self.controls.spatial_run.click()
         self.assertEqual(self.core.calls[-1], ("spatial_commands", "actor_2", self.controls.spatial_text.value))
+
+    def test_terrain_toggle_uses_existing_spatial_entry_without_resetting_take(self):
+        self.assertFalse(self.controls.terrain_aware.value)
+        self.assertTrue(self.controls.terrain_aware.disabled)
+        self.controls.enabled.edit(True, client=object())
+        self.core.total_frames = 40
+        self.controls.tick()
+        self.assertFalse(self.controls.terrain_aware.disabled)
+        original_text = self.controls.spatial_text.value
+        self.controls.terrain_aware.edit(True, client=object())
+        self.assertEqual(self.core.calls[-1], ("set_terrain_aware", True))
+        self.assertTrue(self.controls.terrain_aware.value)
+        self.assertEqual(self.core.total_frames, 40)
+        self.assertEqual(self.controls.spatial_text.value, original_text)
+        self.assertIn("observed proximity", self.controls.terrain_help.content)
+        self.assertTrue(self.controls.navigate.disabled)
+        self.assertTrue(self.controls.generate.disabled)
+        self.assertTrue(self.controls.together_start.disabled)
+        self.assertTrue(self.controls.start.disabled)
+        prior_calls = list(self.core.calls)
+        self.controls.start.click()  # A queued click cannot reset the ordinary take.
+        self.assertEqual(self.core.calls, prior_calls)
+        self.assertIn("Turn off Terrain-aware movement", self.controls.status.content)
+        self.controls.spatial_text.value = "walk up Shallow temple stairs"
+        self.controls.spatial_run.click()
+        self.assertEqual(self.core.calls[-1], ("spatial_commands", "actor_1", "walk up Shallow temple stairs"))
+        self.controls.terrain_aware.edit(False, client=object())
+        self.assertEqual(self.core.calls[-1], ("set_terrain_aware", False))
+        self.assertFalse(self.controls.navigate.disabled)
+        self.assertFalse(self.controls.generate.disabled)
+        self.assertFalse(self.controls.together_start.disabled)
+        self.assertFalse(self.controls.start.disabled)
+        self.assertEqual(self.core.total_frames, 40)
+
+    def test_start_terrain_actor_uses_explicit_placement_without_ordinary_reset(self):
+        self.assertTrue(self.controls.terrain_aware.disabled)
+        self.assertFalse(self.controls.terrain_start.disabled)
+        self.assertIn("Start terrain actor here", self.controls.terrain_status.content)
+        self.controls.terrain_start_x.value = "1.25"
+        self.controls.terrain_start_z.value = "2.0"
+        self.controls.terrain_start_yaw.value = "3.0"
+        self.controls.terrain_start.click()
+        self.assertEqual(self.core.calls[-1][0], "start_terrain")
+        self.assertEqual(self.core.calls[-1][2],
+                         {"actor_1": {"position_xz": [1.25, 2.0], "yaw": 3.0}})
+        self.assertFalse(any(call[0] == "start" for call in self.core.calls))
+        self.assertTrue(self.controls.terrain_aware.value)
+        self.assertEqual(self.active_requests, [True])
+
+    def test_invalid_terrain_start_leaves_existing_take_untouched(self):
+        self.controls.enabled.edit(True, client=object())
+        self.core.total_frames = 40
+        prior_calls = list(self.core.calls)
+        self.controls.terrain_start_z.value = "nan"
+        self.controls.terrain_start.click()
+        self.assertEqual(self.core.calls, prior_calls)
+        self.assertEqual(self.core.total_frames, 40)
+        self.assertIn("within", self.controls.status.content)
+
+    def test_terrain_pending_shows_progress_and_existing_cancel(self):
+        self.controls.enabled.edit(True, client=object())
+        self.core.terrain_aware = True
+        self.core.terrain_pending = True
+        self.core.terrain_status = "Checking stair support"
+        self.controls.tick()
+        self.assertIn("Checking stair support", self.controls.terrain_status.content)
+        self.assertIn("last committed take", self.controls.terrain_status.content)
+        self.assertTrue(self.controls.spatial_run.disabled)
+        self.assertTrue(self.controls.generate.disabled)
+        self.assertFalse(self.controls.cancel.disabled)
+        self.controls.cancel.click()
+        self.assertEqual(self.core.calls[-1], ("cancel",))
+
+    def test_saved_terrain_take_can_be_reselected_from_two_actor_or_empty_ordinary_cast(self):
+        self.controls.enabled.edit(True, client=object())
+        self.core.actor_ids = ("actor_1", "actor_2")
+        self.core.terrain_take_available = True
+        self.controls.tick()
+        self.assertFalse(self.controls.terrain_aware.disabled)
+        self.assertIn("terrain take is saved", self.controls.terrain_status.content)
+        self.core.initialized = False
+        self.core.actor_ids = ()
+        self.controls.tick()
+        self.assertFalse(self.controls.terrain_aware.disabled)
+        self.controls.terrain_aware.edit(True, client=object())
+        self.assertEqual(self.core.calls[-1], ("set_terrain_aware", True))
+
+    def test_failed_terrain_request_enables_exact_retry(self):
+        self.controls.enabled.edit(True, client=object())
+        self.core.terrain_aware = True
+        self.core.terrain_retry_available = True
+        self.core.phase = "generation_failed"
+        self.controls.tick()
+        self.assertFalse(self.controls.retry.disabled)
+        self.controls.retry.click()
+        self.assertEqual(self.core.calls[-1], ("retry",))
+        self.core.terrain_pending = True
+        self.controls.tick()
+        self.assertTrue(self.controls.retry.disabled)
 
     def test_catalog_excludes_floor_and_rejects_unverified_passage(self):
         self.controls.enabled.edit(True, client=object())

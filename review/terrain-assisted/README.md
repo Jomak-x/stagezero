@@ -1,5 +1,7 @@
 # Reusable terrain-assisted traversal
 
+**Normal Studio integration:** see [fresh normal-app generation, repeated commands, save/load, and ordinary-motion preservation](normal-app/README.md), with [usage and interaction limits](../../docs/TERRAIN-AWARE.md). The older separate-viewer evidence below is retained for the development record.
+
 The complete temple sequence now runs end to end: **stairs → bridge → automatic gate lift → enter**. The saved 360-frame, 20 fps route uses real GPU ARDY motion and a separate actual-character contact solve. Both the temple and a wider Copper observatory background pass contact/body/gate checks and have complete normal-speed videos. Ordinary Core generation and its renderer remain unchanged. The new viewer never submits assisted transforms as ARDY history.
 
 - [Temple video](full-route/performance.mp4), [contact sheet](full-route/contact-sheet.png), [visual review](full-route/visual-review.json).

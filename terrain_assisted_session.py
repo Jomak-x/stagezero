@@ -94,6 +94,7 @@ class NativeTerrainResult:
     measurements: tuple[dict, ...]
     reaction_states: tuple[dict, ...]
     committed_prefix: CanonicalClip | None
+    terrain_start_frame: int = 0
 
 
 def _join(first, second):
@@ -117,6 +118,28 @@ def _native_digest(clip):
             raise ValueError("Terrain action requires exact native feature history")
         digest.update(np.ascontiguousarray(array).tobytes())
     return digest.hexdigest()
+
+
+def _validate_committed_assisted(previous, prefix, scene, asset_sha=None):
+    """Validate paired provenance before spending generation or solve work."""
+    if previous is None:
+        if prefix is not None:
+            raise ValueError("Rig17 assistance requires the previous actual presentation pose; native-only prefix is insufficient")
+        return
+    if not isinstance(previous, AssistedTerrainResult) or prefix is None:
+        raise ValueError("Expected matching committed assisted and native history")
+    if (previous.native_clip.frames != previous.presentation.frames or
+            previous.native_clip.actor_ids != previous.presentation.actor_ids or
+            previous.native_clip.actor_ids != prefix.actor_ids or
+            _native_digest(previous.native_clip) != _native_digest(prefix) or
+            previous.report.get("native_sha256") != _native_digest(prefix) or
+            previous.report.get("accepted") is not False or
+            tuple(previous.report.get("rig_asset_sha256", ())) != previous.presentation.rig_asset_sha256):
+        raise ValueError("Committed assisted/native prefix provenance mismatch")
+    if validate_scene(scene) != previous.scene:
+        raise ValueError("Cannot append terrain motion after changing its authored scene")
+    if asset_sha is not None and previous.presentation.rig_asset_sha256 != (asset_sha,):
+        raise ValueError("Committed presentation render asset changed")
 
 
 def _cancelled(cancelled):
@@ -179,7 +202,8 @@ def _validate_native_body(action_native, scene, full_clip, start_frame, terrain_
 
 def generate_native_terrain_commands(scene, text, *, actor_ids, actor_id,
                                      initial_placements, client, committed_prefix=None,
-                                     cancelled=None):
+                                     cancelled=None, terrain_start_frame=None, previous_routes=(),
+                                     planning_heading=None):
     """Buffer every native action privately; return only a fully measured route."""
     if not callable(getattr(client, "wait", None)):
         raise ValueError("A native client with wait(request_body, cancelled=...) is required")
@@ -197,18 +221,31 @@ def generate_native_terrain_commands(scene, text, *, actor_ids, actor_id,
     private = RealtimeDirector(ids, target_buffer_frames=MAX_CLIP_FRAMES,
                                max_buffer_frames=MAX_CLIP_FRAMES)
     prefix_frames = 0 if committed_prefix is None else committed_prefix.frames
+    if terrain_start_frame is None:
+        terrain_start_frame = prefix_frames
+    if type(terrain_start_frame) is not int or not 0 <= terrain_start_frame <= prefix_frames:
+        raise ValueError("Terrain reaction origin must belong to committed history")
     native_full = committed_prefix
     adapted = adapt_studio_scene(evaluated_scene(authored, native_full, enabled=True,
-                                                terrain=True, terrain_start_frame=prefix_frames))
+                                                terrain=True, terrain_start_frame=terrain_start_frame))
     adapted.update(original_scene=authored, terrain_active=True)
-    actions = parse_commands(text, adapted)
+    if isinstance(text, str) and text.strip().rstrip(".").casefold() == "enter" and previous_routes:
+        previous_route = previous_routes[-1]
+        gate = next((obj for obj in authored["objects"] if obj["id"] == previous_route.get("target_id")), None)
+        if previous_route.get("verb") != "open" or gate is None or gate["kind"] != "door":
+            raise ValueError("Enter needs the preceding committed open gate or an explicit target")
+        actions = [{"verb": "go_through", "target_id": gate["id"]}]
+    else:
+        actions = parse_commands(text, adapted)
     routes, spans, measurements = [], [], []
     for index, action in enumerate(actions):
         _cancelled(cancelled)
         evaluated = evaluated_scene(authored, native_full, enabled=True,
-                                    terrain=True, terrain_start_frame=prefix_frames)
+                                    terrain=True, terrain_start_frame=terrain_start_frame)
         adapted = adapt_studio_scene(evaluated)
         adapted.update(original_scene=authored, terrain_active=True)
+        if planning_heading is not None:
+            adapted["terrain_planning_heading"] = planning_heading
         stages, route = plan_command(action, adapted, ids, actor_id,
                                      native_full, initial_placements)
         start = private.total_frames
@@ -244,12 +281,12 @@ def generate_native_terrain_commands(scene, text, *, actor_ids, actor_id,
         native_full = _join(committed_prefix, generated)
         action_native = generated.slice_frames(start, end)
         body_evidence = _validate_native_body(action_native, authored, native_full,
-                                              prefix_frames+start, prefix_frames)
+                                              prefix_frames+start, terrain_start_frame)
         measured = measure_completion(route, native_full, prefix_frames+start)
         measured.update(body_evidence)
         if action["verb"] == "open":
             states = object_states(authored, native_full, enabled=True, terrain=True,
-                                   terrain_start_frame=prefix_frames)
+                                   terrain_start_frame=terrain_start_frame)
             gate = next(state for state in states if state["id"] == route.get("target_id"))
             measured["automatic_door_open_verified"] = gate["opening_fraction"] >= .99
             measured["completed"] &= measured["automatic_door_open_verified"]
@@ -258,12 +295,19 @@ def generate_native_terrain_commands(scene, text, *, actor_ids, actor_id,
         routes.append(deepcopy(route))
         spans.append((prefix_frames+start, prefix_frames+end))
         measurements.append(measured)
+        # The next relative command starts in the displayed direction of this
+        # planned route. Native poses and feature history remain untouched.
+        path = np.asarray(route["support_xyz"], dtype=float)
+        for segment in np.diff(path[:, [0, 2]], axis=0)[::-1]:
+            if np.linalg.norm(segment) > .05:
+                planning_heading = math.atan2(float(segment[0]), float(segment[1]))
+                break
     _cancelled(cancelled)
     states = object_states(authored, native_full, enabled=True, terrain=True,
-                           terrain_start_frame=prefix_frames)
+                           terrain_start_frame=terrain_start_frame)
     return NativeTerrainResult(authored, private.timeline_clip(), tuple(routes),
                                tuple(spans), tuple(measurements), tuple(states),
-                               committed_prefix)
+                               committed_prefix, terrain_start_frame)
 
 
 def _validate_rig_body(scene, full_native, poses, *, start_frame,
@@ -321,8 +365,12 @@ def _validate_rig_body(scene, full_native, poses, *, start_frame,
             "proxy_only": True}
 
 
-def assist_native_terrain_result(native_result, *, cancelled=None, assistor=None):
-    """Apply actual Human17 rig assistance to a saved complete native route."""
+def assist_native_terrain_result(native_result, *, committed_assisted=None, cancelled=None, assistor=None):
+    """Return a complete paired timeline, preserving committed arrays exactly.
+
+    A native prefix requires its matching prior AssistedTerrainResult. Only new
+    action frames are solved; the prior actual rig17 endpoint is constrained.
+    """
     from types import SimpleNamespace
     from grounded_character import GroundedCharacter, _PARENTS, _SHOULDER_BLENDS
     from studio_core_renderer import DEFAULT_ASSETS
@@ -336,17 +384,31 @@ def assist_native_terrain_result(native_result, *, cancelled=None, assistor=None
     character = GroundedCharacter(DEFAULT_ASSETS[0])
     native = native_result.native_clip
     prefix = native_result.committed_prefix
-    if prefix is not None:
-        raise ValueError("Rig17 assistance requires the previous actual presentation pose; native-only prefix is insufficient")
+    _validate_committed_assisted(committed_assisted, prefix, native_result.scene,
+                                 character.mesh_sha256)
     prefix_frames = 0 if prefix is None else prefix.frames
+    origin = native_result.terrain_start_frame
+    if type(origin) is not int or not 0 <= origin <= prefix_frames:
+        raise ValueError("Invalid terrain reaction origin")
+    if committed_assisted is not None and origin != committed_assisted.report.get("terrain_start_frame", 0):
+        raise ValueError("Terrain reaction origin changed across append")
+    spans = native_result.action_spans
+    if (not spans or len(spans) != len(native_result.routes) or len(spans) != len(native_result.measurements)
+            or spans[0][0] != prefix_frames or spans[-1][1] != prefix_frames+native.frames
+            or any(a >= b for a, b in spans)
+            or any(a[1] != b[0] for a, b in zip(spans, spans[1:]))):
+        raise ValueError("Terrain action spans must cover the complete appended native timeline")
     full_native = _join(prefix, native)
     pose_parts, rotation_parts, stance_parts, evidence = [], [], [], []
-    display_roots = [] if prefix is None else [prefix.positions[:, :, 0]]
+    display_roots = []
     previous_assisted = None
-    if prefix is not None:
-        baseline = character.retarget(prefix.positions[0, -1], prefix.rotations[0, -1])
-        previous_assisted = (np.asarray(baseline["positions"]),
-                             np.asarray(baseline["rotations"]))
+    if committed_assisted is not None:
+        previous = committed_assisted.presentation
+        pose_parts.append(previous.positions)
+        rotation_parts.append(previous.rotations)
+        stance_parts.append(previous.stance)
+        display_roots.append(previous.positions[:, :, 0])
+        previous_assisted = (previous.positions[0, -1], previous.rotations[0, -1])
     shoulder_blends = {blend for _, blend in _SHOULDER_BLENDS}
     for index, (global_start, global_end) in enumerate(native_result.action_spans):
         _cancelled(cancelled)
@@ -359,14 +421,18 @@ def assist_native_terrain_result(native_result, *, cancelled=None, assistor=None
             input_r = np.concatenate((prior.rotations[0, -1:], input_r), axis=0)
         geometry = SceneInteractionGeometry.from_scene(evaluated_scene(
             native_result.scene, full_native, frame=global_end-1,
-            enabled=True, terrain=True, terrain_start_frame=prefix_frames))
-        kwargs = {"fps": FPS}
+            enabled=True, terrain=True, terrain_start_frame=origin))
+        kwargs = {"fps": FPS, "heading_assistance": True}
         if previous_assisted is not None:
             kwargs.update(initial_assisted_positions=previous_assisted[0],
                           initial_assisted_rotations=previous_assisted[1])
         p, r, stance, report = assistor(input_p, input_r, geometry, character, **kwargs)
         p, r, stance = np.asarray(p), np.asarray(r), np.asarray(stance)
         if prior is not None:
+            if (previous_assisted is None or
+                    not np.allclose(p[0], previous_assisted[0], atol=2e-5, rtol=0) or
+                    not np.allclose(r[0], previous_assisted[1], atol=2e-5, rtol=0)):
+                raise ValueError("Rig17 assistor changed the committed boundary pose")
             p, r, stance = p[1:], r[1:], stance[1:]
         if (p.shape != (action.frames, 17, 3) or
                 r.shape != (action.frames, 17, 3, 3) or
@@ -393,7 +459,7 @@ def assist_native_terrain_result(native_result, *, cancelled=None, assistor=None
                 raise ValueError("Rig17 action join jumps from the previous displayed pose")
         body_report = _validate_rig_body(native_result.scene, full_native, p,
                                          start_frame=global_start,
-                                         terrain_start_frame=prefix_frames,
+                                         terrain_start_frame=origin,
                                          previous_pose=None if previous_assisted is None else previous_assisted[0])
         report = {**report, "dynamic_body_validation": body_report}
         previous_assisted = (p[-1], r[-1])
@@ -407,51 +473,69 @@ def assist_native_terrain_result(native_result, *, cancelled=None, assistor=None
                                     np.concatenate(rotation_parts, axis=1),
                                     np.concatenate(stance_parts, axis=1), FPS,
                                     native.actor_ids, (character.mesh_sha256,),
-                                    {"actions": evidence})
-    if presentation.frames != native.frames:
+                                    {"actions": ([] if committed_assisted is None else
+                                        deepcopy(committed_assisted.presentation.report or {}).get("actions", []))+evidence})
+    if presentation.frames != full_native.frames:
         raise AssertionError("Native and rig17 presentation timelines diverged")
     root_history = np.concatenate(display_roots, axis=1)
     observed_display = SimpleNamespace(positions=root_history[:, :, None, :],
                                        frames=root_history.shape[1], fps=FPS)
     display_states = object_states(native_result.scene, observed_display,
                                    enabled=True, terrain=True,
-                                   terrain_start_frame=prefix_frames)
+                                   terrain_start_frame=origin)
     if any((a["trigger_frame"], a["opening_fraction"]) !=
            (b["trigger_frame"], b["opening_fraction"])
            for a, b in zip(native_result.reaction_states, display_states)):
         raise ValueError("Rig17 root Y changes a native-observed reaction")
     report = {"version": 1, "provenance": "offline actual-rig terrain-assisted candidate",
               "accepted": False, "visual_review": "pending", "runtime_publishable": False,
-              "native_features_unchanged": True, "native_sha256": _native_digest(native),
+              "publish_scope": "explicit terrain-aware mode only", "ordinary_core_publishable": False,
+              "native_features_unchanged": True, "native_sha256": _native_digest(full_native),
+              "terrain_start_frame": origin, "prefix_preserved_exactly": True,
               "rig_asset_sha256": [character.mesh_sha256],
               "committed_prefix_frames": prefix_frames,
-              "actions": [{"route": route, "native_span": span,
+              "actions": ([] if committed_assisted is None else deepcopy(committed_assisted.report["actions"]))+[{"route": route, "native_span": span,
                            "measurement": measurement, "assistance": assist}
                           for route, span, measurement, assist in zip(
                               native_result.routes, native_result.action_spans,
                               native_result.measurements, evidence)]}
-    return AssistedTerrainResult(native_result.scene, native, presentation, report,
-                                 native_result.routes, native_result.reaction_states)
+    return AssistedTerrainResult(native_result.scene, full_native, presentation, report,
+                                 (() if committed_assisted is None else committed_assisted.routes)+native_result.routes,
+                                 native_result.reaction_states)
 
 
 def run_assisted_terrain_commands(scene, text, *, actor_ids, actor_id,
                                   initial_placements, client, committed_prefix=None,
-                                  cancelled=None, assistor=None, on_native_ready=None):
+                                  cancelled=None, assistor=None, on_native_ready=None,
+                                  committed_assisted=None):
     """Return an all-or-nothing offline candidate for one bounded command sequence.
 
     `client.wait(request_body, cancelled=...)` must return one exact native
     CanonicalClip per 40-frame request. No provisional clip is published.
     """
+    if committed_assisted is not None:
+        if committed_prefix is None:
+            committed_prefix = committed_assisted.native_clip
+        _validate_committed_assisted(committed_assisted, committed_prefix, scene)
+    elif committed_prefix is not None:
+        raise ValueError("Rig17 assistance requires the previous actual presentation pose")
+    origin = None if committed_assisted is None else committed_assisted.report.get("terrain_start_frame", 0)
+    planning_heading = None
+    if committed_assisted is not None:
+        forward = committed_assisted.presentation.rotations[0, -1, 0, :, 2]
+        planning_heading = math.atan2(float(forward[0]), float(forward[2]))
     native_result = generate_native_terrain_commands(
         scene, text, actor_ids=actor_ids, actor_id=actor_id,
         initial_placements=initial_placements, client=client,
-        committed_prefix=committed_prefix, cancelled=cancelled)
+        committed_prefix=committed_prefix, cancelled=cancelled, terrain_start_frame=origin,
+        previous_routes=() if committed_assisted is None else committed_assisted.routes,
+        planning_heading=planning_heading)
     if on_native_ready is not None:
         if not callable(on_native_ready):
             raise ValueError("on_native_ready must be callable")
         on_native_ready(native_result)
     return assist_native_terrain_result(native_result, cancelled=cancelled,
-                                        assistor=assistor)
+                                        assistor=assistor, committed_assisted=committed_assisted)
 
 def save_assisted_result(result, path):
     """Save a self-contained offline candidate; never write a Core project."""
@@ -486,6 +570,7 @@ def save_native_terrain_result(result, path):
                 "routes": result.routes, "action_spans": result.action_spans,
                 "measurements": result.measurements,
                 "reaction_states": result.reaction_states,
+                "terrain_start_frame": result.terrain_start_frame,
                 "native_sha256": _native_digest(result.native_clip),
                 "actor_ids": result.native_clip.actor_ids, "fps": FPS,
                 "prefix_frames": 0 if result.committed_prefix is None else result.committed_prefix.frames,
@@ -626,4 +711,5 @@ def load_native_terrain_result(path):
                                tuple(manifest["routes"]),
                                tuple(tuple(span) for span in manifest["action_spans"]),
                                tuple(manifest["measurements"]),
-                               tuple(manifest["reaction_states"]), prefix)
+                               tuple(manifest["reaction_states"]), prefix,
+                               manifest.get("terrain_start_frame", manifest["prefix_frames"]))

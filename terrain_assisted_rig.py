@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation, Slerp
 
 from grounded_character import _PARENTS, _SHOULDER_BLENDS
 from motion_bridge import _swing, _two_bone
-from terrain_assisted_motion import LEGS as CORE_LEGS, _plan_contacts, _support
+from terrain_assisted_motion import LEGS as CORE_LEGS, _plan_contacts, _route_frames, _support
 
 LEGS = ((9, 10, 11), (12, 13, 14))
 LEG_JOINTS = {j for leg in LEGS for j in leg}
@@ -29,14 +29,86 @@ def _fk(root, rotations, rest):
     return positions
 
 
+def _swing_path(first, last, first_r, last_r, blend, follow_turn):
+    path = (1-blend[:, None])*first+blend[:, None]*last
+    chord = last[[0, 2]]-first[[0, 2]]
+    length = np.linalg.norm(chord)
+    if follow_turn and length > .05:
+        headings = [rotation[[0, 2], 2].copy() for rotation in (first_r, last_r)]
+        headings = [v/np.linalg.norm(v) for v in headings]
+        if all(v@chord > .1*length for v in headings):
+            # Follow the entering/exiting route tangents instead of cutting
+            # a straight foot chord through the inside of a prop corner.
+            controls = [first[[0, 2]], first[[0, 2]]+headings[0]*length/3,
+                        last[[0, 2]]-headings[1]*length/3, last[[0, 2]]]
+            u = blend[:, None]
+            path[:, [0, 2]] = (1-u)**3*controls[0]+3*(1-u)**2*u*controls[1]+3*(1-u)*u*u*controls[2]+u**3*controls[3]
+    return path
+
+
+def _clearance_profile(geometry, first, last, first_r, last_r, samples, pivot, count, follow_turn=False,
+                       _landing_hold=False):
+    """Lift before leaving a nearby riser; solve a bounded smooth vertical arc.
+
+    A global sine amplitude overreacts to a riser crossed just after takeoff.
+    One sample of vertical takeoff leaves room to clear that riser without
+    inflating the entire swing. Linear constraints use the same finite swept
+    rigid-foot envelope as final validation, including rotation interpolation.
+    """
+    u = np.linspace(0., 1., count)
+    finish = u[-2] if _landing_hold else 1.
+    travel = np.clip((u-u[1])/(finish-u[1]), 0., 1.)
+    blend = travel*travel*(3-2*travel)
+    rotations = Slerp([0., 1.], Rotation.from_matrix(np.stack([first_r, last_r])))(blend).as_matrix()
+    path = _swing_path(first, last, first_r, last_r, blend, follow_turn)
+    ankles = path-np.einsum('tij,j->ti', rotations, pivot)
+    rows, bounds = [], []
+    def require(a, b, amount):
+        rotation = Slerp([0., 1.], Rotation.from_matrix(np.stack([rotations[a], rotations[b]])))([amount]).as_matrix()[0]
+        points = (1-amount)*ankles[a]+amount*ankles[b]+samples@rotation.T
+        phase = (a*(1-amount)+b*amount)/(count-1)
+        clearance = .004+.014*min(1., np.sin(np.pi*phase)**2/.10)
+        needed = max(_support(geometry, q)-q[1]+clearance for q in points)
+        row = np.zeros(count); row[a] += 1-amount; row[b] += amount
+        rows.append(row); bounds.append(needed)
+    for index in range(1, count-1):
+        require(index, index, 0.)
+    for index in range(count-1):
+        for amount in np.linspace(0., 1., 9)[1:-1]:
+            require(index, index+1, amount)
+    matrix, lower = np.asarray(rows), np.asarray(bounds)
+    desired = .09*np.sin(np.pi*u)**2
+    curvature = np.diff(np.eye(count), n=2, axis=0)
+    smooth = np.eye(count)+3*curvature.T@curvature
+    fit = minimize(lambda y: (float(y@smooth@y-2*desired@y), 2*(smooth@y-desired)),
+                   desired, jac=True, method='SLSQP',
+                   bounds=[(0., 0.)]+[(0., .24)]*(count-2)+[(0., 0.)],
+                   constraints=[{'type': 'ineq', 'fun': lambda y: matrix@y-lower,
+                                 'jac': lambda y: matrix}],
+                   options={'maxiter': 150, 'ftol': 1e-10})
+    if not fit.success or np.min(matrix@fit.x-lower) < -1e-6:
+        if not _landing_hold and count >= 4:
+            # On descent, the heel may cross the upper tread just before
+            # touchdown. Finish horizontal travel one sample early so the
+            # foot can lower vertically after its entire envelope clears.
+            return _clearance_profile(geometry, first, last, first_r, last_r,
+                                      samples, pivot, count, follow_turn, _landing_hold=True)
+        raise ValueError('Mesh foot cannot clear the swept riser within the 24cm lift budget')
+    path[:, 1] += fit.x
+    return path, rotations, float(fit.x.max())
+
+
 def assist_rig_clip(native_positions, native_rotations, geometry, character, *, fps=20.,
-                    initial_assisted_positions=None, initial_assisted_rotations=None):
+                    initial_assisted_positions=None, initial_assisted_rotations=None,
+                    _anchor_advances=None, _repair_attempt=0, _clearance_mode=False,
+                    _minimum_stance_frames=4, _follow_turn_swing=False, heading_assistance=False):
     """Return rig17 positions, rotations, L/R stance, and a never-accepted report.
 
     Optional initial boundary must be a planted previous rig17 pose with the
     same native root XZ and retargeted non-leg rotations. This is a buffered
     whole-action solver; it does not write native features or generation state.
     """
+    _anchor_advances = dict(_anchor_advances or {})
     native = np.asarray(native_positions, dtype=float)
     native_r = np.asarray(native_rotations, dtype=float)
     if native.shape[1:] != (27, 3) or native_r.shape != (len(native), 27, 3, 3) or len(native) < 3:
@@ -47,8 +119,15 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
                 for p, r in zip(native, native_r)]
     base_p = np.array([row['positions'] for row in baseline])
     base_r = np.array([row['rotations'] for row in baseline])
+    raw_base_r = base_r.copy()
     rest = np.asarray(character.rest, dtype=float)
     count = len(native)
+    if heading_assistance:
+        _, _, initial_route_yaw, _ = _route_frames(native, native_r, fps)
+        raw_yaw = np.arctan2(base_r[0, 0, 0, 2], base_r[0, 0, 2, 2])
+        alignment = Rotation.from_euler('y', float(initial_route_yaw[0]-raw_yaw)).as_matrix()
+        base_r[0] = alignment@base_r[0]
+        base_p[0] = _fk(base_p[0, 0], base_r[0], rest)
     initial_p, initial_r = base_p[0].copy(), base_r[0].copy()
     boundary = initial_assisted_positions is not None or initial_assisted_rotations is not None
     nonlegs = [j for j in range(17) if j not in LEG_JOINTS]
@@ -60,7 +139,14 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
             raise ValueError('Boundary must use this exact 17-bone character rig')
         if not np.isfinite(initial_p).all() or not np.isfinite(initial_r).all():
             raise ValueError('Rig17 boundary must be finite')
-        if not np.allclose(initial_p[0, [0, 2]], base_p[0, 0, [0, 2]], atol=1e-6, rtol=0) or not np.allclose(initial_r[nonlegs], base_r[0, nonlegs], atol=1e-6, rtol=0):
+        if heading_assistance:
+            inherited = initial_r[0]@raw_base_r[0, 0].T
+            angle = np.arctan2(inherited[0, 2], inherited[2, 2])
+            common_yaw = Rotation.from_euler('y', float(angle)).as_matrix()
+            if not np.allclose(inherited, common_yaw, atol=2e-6, rtol=0):
+                raise ValueError('Boundary heading correction is not a common world-Y rotation')
+            base_r[0] = common_yaw@raw_base_r[0]
+        if not np.allclose(initial_p[0, [0, 2]], base_p[0, 0, [0, 2]], atol=1e-6, rtol=0) or not np.allclose(initial_r[nonlegs], base_r[0, nonlegs], atol=2e-6, rtol=0):
             raise ValueError('Boundary root XZ and native upper-body rotations disagree')
         if np.max(abs(_fk(initial_p[0], initial_r, rest)-initial_p)) > 1e-5:
             raise ValueError('Boundary does not match the character rest rig')
@@ -76,7 +162,8 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
         # Toe-edge contact pivot; flat sole height comes from actual mesh minY.
         pivot = np.array([(lo[0]+hi[0])*.5, lo[1], hi[2]])
         contact_local.append(pivot)
-        footprint.append(np.array([[x, lo[1], z] for x in np.linspace(lo[0]-.003, hi[0]+.003, 3)
+        footprint.append(np.array([[x, y, z] for x in np.linspace(lo[0]-.003, hi[0]+.003, 3)
+                                   for y in ([lo[1], hi[1]] if _clearance_mode else [lo[1]])
                                    for z in np.linspace(lo[2]-.003, hi[2]+.003, 5)]))
     fake_p, fake_r = native[0].copy(), native_r[0].copy()
     for s, (_, _, foot) in enumerate(LEGS):
@@ -89,17 +176,48 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
     # initial stand; avoid compressed transfers when resuming that contact.
     runs, route_yaw, bouts = _plan_contacts(native, native_r, fps, fake_p, fake_r,
                                           initial_is_continuation=boundary,
+                                          # Center ankle stance about the pelvis. The
+                                          # planner targets a toe pivot, not an ankle;
+                                          # this actual mesh has a much longer toe
+                                          # offset than the neutral Core skeleton.
+                                          touchdown_lead=max(p[2] for p in contact_local)+.25,
+                                          minimum_stance_frames=_minimum_stance_frames,
                                           minimum_transfer_frames=max(4, round(.4*fps)) if boundary else None)
+    heading_correction = np.zeros(count)
+    if heading_assistance:
+        desired = np.unwrap(route_yaw.copy())
+        if boundary and not bouts and all(len(entries) == 1 for entries in runs):
+            # A stationary append has no new directional intent. Preserve the
+            # displayed heading instead of restoring native global pelvis yaw.
+            desired[:] = np.arctan2(initial_r[0, 0, 2], initial_r[0, 2, 2])
+            route_yaw[:] = desired
+        if boundary:
+            inherited_yaw = np.arctan2(initial_r[0, 0, 2], initial_r[0, 2, 2])
+            inherited_yaw += 2*np.pi*round((desired[0]-inherited_yaw)/(2*np.pi))
+            width = min(count, max(2, round(.6*fps)))
+            phase = np.linspace(0., 1., width)
+            desired[:width] += (inherited_yaw-desired[0])*(1-phase*phase*(3-2*phase))
+        native_heading = np.unwrap(np.arctan2(raw_base_r[:, 0, 0, 2], raw_base_r[:, 0, 2, 2]))
+        heading_correction = desired-native_heading
+        common = Rotation.from_euler('y', heading_correction[:, None]).as_matrix()
+        base_r = common[:, None]@raw_base_r
+        base_p = np.array([_fk(p[0], r, rest) for p, r in zip(base_p, base_r)])
+        if boundary:
+            # The committed pose is authoritative down to the stored floats.
+            base_r[0, nonlegs] = initial_r[nonlegs]
     targets = np.empty((count, 2, 3))
     foot_r = np.empty((count, 2, 3, 3))
     stance = np.zeros((count, 2), bool)
     flat_stance = np.zeros_like(stance)
     anchors = []
+    clearance_profiles = []
     for side, entries in enumerate(runs):
         pivot = contact_local[side]
         samples = footprint[side]
         for a, b, proposed, rotation in entries:
             heading = rotation[[0, 2], 2]; heading /= np.linalg.norm(heading)
+            proposed = proposed.copy()
+            proposed[[0, 2]] += _anchor_advances.get((side, a), 0.)*heading
             candidates = []
             for shift in np.r_[0., np.linspace(-.16, .16, 33)]:
                 point = proposed.copy(); point[[0, 2]] += shift*heading
@@ -109,6 +227,16 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
                 except ValueError:
                     continue
                 if np.ptp(heights) < .005:
+                    if _clearance_mode:
+                        planted = point.copy(); planted[1] = heights.max()+.004
+                        try:
+                            safe = all(_support(geometry, q)-q[1] <= .001
+                                for angle in np.linspace(0., .4, 5)
+                                for q in planted+(samples-pivot)@(rotation@Rotation.from_euler('x', angle).as_matrix()).T)
+                        except ValueError:
+                            safe = False
+                        if not safe:
+                            continue
                     candidates.append((abs(shift), point, heights.max()))
             if not candidates:
                 raise ValueError('Actual mesh sole footprint cannot fit a supported tread')
@@ -130,11 +258,12 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
                     foot_r[t, side] = rotation@Rotation.from_euler('x', .40*u*u).as_matrix()
                     flat_stance[t, side] = False
             anchors.append({'side': side, 'first': int(a), 'last_exclusive': int(b), 'contact_xyz': anchor.tolist()})
-        for (_, end, _, _), (start, _, _, _) in zip(entries, entries[1:]):
-            first, last = end-1, start
+        for (begin, end, _, _), (start, _, _, _) in zip(entries, entries[1:]):
+            first, last = (max(begin+2, end-2) if _clearance_mode else end-1), start
             u = np.linspace(0., 1., last-first+1); blend = u*u*(3-2*u)
             rotations = Slerp([0., 1.], Rotation.from_matrix(np.stack([foot_r[first, side], foot_r[last, side]])))(blend).as_matrix()
-            path = (1-blend[:, None])*targets[first, side]+blend[:, None]*targets[last, side]
+            path = _swing_path(targets[first, side], targets[last, side],
+                               foot_r[first, side], foot_r[last, side], blend, _follow_turn_swing)
             bump = np.sin(np.pi*u)**2; amplitude = .09
             for i in range(len(path)):
                 points = path[i]+(samples-pivot)@rotations[i].T
@@ -145,9 +274,23 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
                 needed = max(_support(geometry, q)-q[1]+clearance for q in points)
                 if bump[i] > .02:
                     amplitude = max(amplitude, needed/bump[i])
-            if amplitude > .24:
-                raise ValueError('Mesh foot needs excessive swing clearance')
-            path[:, 1] += amplitude*bump
+            if amplitude > .24 and not _clearance_mode:
+                return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
+                    initial_assisted_positions=initial_assisted_positions,
+                    initial_assisted_rotations=initial_assisted_rotations,
+                    _anchor_advances=_anchor_advances, _repair_attempt=_repair_attempt, _clearance_mode=True,
+                    _minimum_stance_frames=_minimum_stance_frames, _follow_turn_swing=_follow_turn_swing, heading_assistance=heading_assistance)
+            if _clearance_mode:
+                path, rotations, lift = _clearance_profile(geometry,
+                    targets[first, side], targets[last, side], foot_r[first, side],
+                    foot_r[last, side], samples, pivot, len(path), _follow_turn_swing)
+                clearance_profiles.append({'side': side, 'first': first, 'last': last,
+                                            'maximum_lift_m': lift})
+                stance[first+1:last, side] = False
+                flat_stance[first+1:last, side] = False
+                next(row for row in anchors if row['side'] == side and row['first'] == begin)['last_exclusive'] = first+1
+            else:
+                path[:, 1] += amplitude*bump
             targets[first:last+1, side], foot_r[first:last+1, side] = path, rotations
     ankles = np.stack([targets[:, s]-np.einsum('tij,j->ti', foot_r[:, s], contact_local[s]) for s in range(2)], axis=1)
     upper = np.full(count, np.inf)
@@ -175,6 +318,61 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
     lower = np.maximum(preferred-.20, knee_lower)
     if np.any(upper < lower):
         frames = np.flatnonzero(upper < lower)
+        # A boundary-constrained first landing may occur later than its
+        # nominal route crossing. Repair only the resulting trailing anchor,
+        # by the exact horizontal reach deficit at the unchanged root floor.
+        # Initial committed feet never move. Rebuild every affected swing and
+        # rerun the full mesh/support/pose checks, with bounded attempts.
+        advances = dict(_anchor_advances)
+        required = {}
+        initial_conflict = False
+        for t in frames:
+            for side, (hip, knee, foot) in enumerate(LEGS):
+                length = np.linalg.norm(rest[knee]-rest[hip])+np.linalg.norm(rest[foot]-rest[knee])-.008
+                hip_offset = base_p[t, hip, 1]-base_p[t, 0, 1]
+                vertical = lower[t]+hip_offset-ankles[t, side, 1]
+                available = length*length-vertical*vertical
+                if available <= 0:
+                    continue
+                entries = runs[side]
+                entry = max(i for i, row in enumerate(entries) if row[0] <= t)
+                a, b, _, rotation = entries[entry]
+                if a == 0:
+                    offset = base_p[t, hip, [0, 2]]-ankles[t, side, [0, 2]]
+                    initial_conflict |= float(offset@offset) > available+1e-8
+                    continue
+                heading = rotation[[0, 2], 2]
+                heading = heading/np.linalg.norm(heading)
+                offset = base_p[t, hip, [0, 2]]-ankles[t, side, [0, 2]]
+                along = float(offset@heading)
+                cross_squared = float(offset@offset-along*along)
+                if available <= cross_squared:
+                    continue
+                deficit = along-np.sqrt(available-cross_squared)
+                weight = 1.
+                if t >= b and entry+1 < len(entries):
+                    u = (t-(b-1))/(entries[entry+1][0]-(b-1))
+                    weight = 1-u*u*(3-2*u)
+                if deficit > 1e-5 and weight > .1:
+                    key = (side, a)
+                    required[key] = max(required.get(key, 0.), (deficit+.001)/weight)
+        for key, amount in required.items():
+            advances[key] = advances.get(key, 0.)+amount
+        if _repair_attempt < 3 and required and max(abs(x) for x in advances.values()) <= .16:
+            return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
+                initial_assisted_positions=initial_assisted_positions,
+                initial_assisted_rotations=initial_assisted_rotations,
+                _anchor_advances=advances, _repair_attempt=_repair_attempt+1, _clearance_mode=_clearance_mode,
+                _minimum_stance_frames=_minimum_stance_frames, _follow_turn_swing=_follow_turn_swing, heading_assistance=heading_assistance)
+        if boundary and initial_conflict and _minimum_stance_frames > 3:
+            # Three planted samples meet the planner's existing stability
+            # minimum. The nominal four-sample initial stance can lag a fast
+            # inherited path; shorten it by one without moving its anchor.
+            return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
+                initial_assisted_positions=initial_assisted_positions,
+                initial_assisted_rotations=initial_assisted_rotations,
+                _clearance_mode=_clearance_mode, _minimum_stance_frames=3,
+                _follow_turn_swing=_follow_turn_swing, heading_assistance=heading_assistance)
         raise ValueError(f'Actual rig has no root height satisfying both leg reach and {MAX_KNEE_BEND_DEG:g}-degree knee limit at frames {frames.tolist()}')
     if boundary:
         if not lower[0]-1e-6 <= initial_p[0, 1] <= upper[0]+1e-6:
@@ -274,8 +472,23 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
               'native_arrays_unchanged': True, 'retarget_count_per_native_frame': 1,
               'renderer_contract': 'render these rig17 positions/rotations directly; no retarget or second IK',
               'native_cadence_preserved': False, 'native_root_xz_preserved': bool(np.array_equal(poses[:, 0, [0, 2]], native[:, 0, [0, 2]])),
-              'native_retargeted_upperbody_rotations_preserved': bool(np.array_equal(rotations[:, nonlegs], base_r[:, nonlegs])),
+              'native_retargeted_upperbody_rotations_preserved': bool(np.array_equal(rotations[:, nonlegs], raw_base_r[:, nonlegs])),
+              'heading_assistance_enabled': bool(heading_assistance),
+              'heading_assistance_scope': 'common world-Y alignment to contact/route heading; native data unchanged' if heading_assistance else None,
+              'max_display_heading_rate_deg_s': float(np.degrees(abs(np.diff(np.unwrap(np.arctan2(base_r[:, 0, 0, 2], base_r[:, 0, 2, 2]))))).max()*fps),
+              'max_display_heading_correction_deg': float(np.degrees(abs(np.angle(np.exp(1j*heading_correction)))).max()),
+              'native_relative_upperbody_rotations_preserved': bool(all(np.allclose(
+                  rotations[:, _PARENTS[j]].transpose(0, 2, 1)@rotations[:, j],
+                  raw_base_r[:, _PARENTS[j]].transpose(0, 2, 1)@raw_base_r[:, j], atol=2e-6, rtol=0)
+                  for j in nonlegs if j)),
               'frames': count, 'fps': fps, 'stance_anchors': anchors,
+              'bounded_clearance_profiles': clearance_profiles,
+              'swept_clearance_contact_mode': _clearance_mode,
+              'minimum_stance_samples': _minimum_stance_frames,
+              'route_tangent_swing_paths': _follow_turn_swing,
+              'contact_reach_repair_passes': _repair_attempt,
+              'contact_reach_advances_m': [{'side': side, 'first': first, 'advance_m': amount}
+                                          for (side, first), amount in sorted(_anchor_advances.items())],
               'moving_intervals': [[int(a), int(b)] for a, b in bouts],
               'initial_boundary_position_error_m': float(np.max(np.linalg.norm(poses[0]-initial_p, axis=1))) if boundary else None,
               'max_root_y_change_from_native_retarget_m': float(abs(poses[:, 0, 1]-base_p[:, 0, 1]).max()),
@@ -293,8 +506,8 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
               'unsupported_actual_mesh_sole_vertices': unsupported,
               'max_swept_sole_envelope_penetration_m': swept_penetration,
               'unsupported_swept_sole_envelope_samples': swept_unsupported,
-              'swept_sole_proxy': {'interframe_samples': 7, 'footprint_grid': [3, 5], 'margin_m': .003,
-                                  'note': 'finite rigid bottom-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision'},
+              'swept_sole_proxy': {'interframe_samples': 7, 'footprint_grid': [3, 2, 5] if _clearance_mode else [3, 5], 'margin_m': .003,
+                                  'note': 'finite rigid sole-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision'},
               'limitations': ['buffered whole action, not streaming', 'finite sole-envelope sweep; no dynamics or full body collision certificate']}
     report['motion_derivatives'] = {}
     for label, values in [('root', poses[:, [0]]), ('feet', poses[:, [11, 14]])]:
@@ -316,4 +529,10 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
         report['numerical_rejections'].append('knee flexion exceeds110deg')
     if max(frame_angles) > 35:
         report['numerical_rejections'].append('local leg rotation step exceeds35deg/frame')
+    if (not _follow_turn_swing and (report['max_actual_mesh_sole_penetration_m'] > .008 or swept_penetration > .008)):
+        return assist_rig_clip(native_positions, native_rotations, geometry, character, fps=fps,
+            initial_assisted_positions=initial_assisted_positions,
+            initial_assisted_rotations=initial_assisted_rotations,
+            _anchor_advances=_anchor_advances, _repair_attempt=_repair_attempt, _clearance_mode=_clearance_mode,
+            _minimum_stance_frames=_minimum_stance_frames, _follow_turn_swing=True, heading_assistance=heading_assistance)
     return poses, rotations, stance, report

@@ -152,7 +152,7 @@ class TraversableTempleTests(unittest.TestCase):
         routes = _plan_four_actions(scene, text, start, facing_route)
         self.assertAlmostEqual(routes[0]['waypoints'][0]['support_y'], 1.4, places=4)
         self.assertAlmostEqual(routes[-1]['waypoints'][-1]['support_y'], 1.6, places=4)
-        expected_exit = move((0., .2, -9.88))
+        expected_exit = move((0., .2, -10.05))
         actual_exit = routes[-1]['waypoints'][-1]['position_xz']
         self.assertLess(np.linalg.norm(np.asarray(actual_exit)-
                                        np.asarray(expected_exit)[[0, 2]]), .03)

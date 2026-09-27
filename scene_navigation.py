@@ -7,6 +7,7 @@ import numpy as np
 
 
 def plan_navigation_route(geometry, start_xyz, goal_xyz, *, radius=.22,
+                          upper_body_radius=None,
                           max_step_up=.30, max_drop=.35, ignore_object_ids=(),
                           sample_spacing=.10, max_expansions=16000):
     """Return a supported obstacle-avoiding floor-space route, or fail clearly.
@@ -18,7 +19,9 @@ def plan_navigation_route(geometry, start_xyz, goal_xyz, *, radius=.22,
     start, goal = np.asarray(start_xyz, dtype=float).copy(), np.asarray(goal_xyz, dtype=float).copy()
     if start.shape != (3,) or goal.shape != (3,) or not np.isfinite([start, goal]).all():
         raise ValueError('Navigation endpoints must be finite world positions.')
-    if (not all(math.isfinite(v) and v >= 0 for v in (radius, max_step_up, max_drop))
+    if upper_body_radius is None:
+        upper_body_radius = radius
+    if (not all(math.isfinite(v) and v >= 0 for v in (radius, upper_body_radius, max_step_up, max_drop))
             or not math.isfinite(sample_spacing) or not .01 <= sample_spacing <= .10
             or isinstance(max_expansions, bool) or not isinstance(max_expansions, int)
             or not 1 <= max_expansions <= 100000):
@@ -29,7 +32,9 @@ def plan_navigation_route(geometry, start_xyz, goal_xyz, *, radius=.22,
         h = geometry.support_height(x, z, y, max_step_up=max_step_up, max_drop=max_drop)
         if h is None:
             return None
-        if any(geometry.obstacle_at(x, h + offset, z, radius=radius, ignore_object_ids=ignored)
+        if any(geometry.obstacle_at(x, h + offset, z,
+                                    radius=radius if offset == .40 else upper_body_radius,
+                                    ignore_object_ids=ignored)
                for offset in (.40, .90, 1.35)):
             return None
         # Require space for both soles; a root path alone can straddle a void.
