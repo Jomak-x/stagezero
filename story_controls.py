@@ -96,9 +96,7 @@ class StoryControls:
         with self.session.lock:
             if self._views.get(view.key) is not view:
                 return
-            if ((view.error and self._route_status == view.error) or
-                    (view.actor_check.pending and self._route_status == view.route_status)):
-                self._route_status = ''
+            self._route_status = ''
             view.actor_check.cancel()
             self._drafts[view.key] = (view.prompt.value, view.length.value,
                                       view.seconds.value, view.jobs.value)

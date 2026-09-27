@@ -82,7 +82,8 @@ class FullSceneRoutingTests(TestCase):
             self.assertFalse(self.controls.workflow.jobs)
             self.assertEqual(self.handoffs, [])
             self.assertEqual(self.core.deactivations, 0)
-            self.assertIn(f'{count} performers', self.controls.sidebar_status.content)
+            self.assertFalse(self.controls.sidebar_status.visible)
+            self.assertEqual(self.controls._route_status, '')
 
     def test_single_long_story_keeps_original_duration_and_workflow(self):
         prompt = '  One person walks, waves, and rests.\n'
