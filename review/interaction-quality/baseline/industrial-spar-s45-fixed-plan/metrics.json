@@ -1,0 +1,150 @@
+{
+  "archive_sha256": "c4c812202bf7ab7affc1d0949cd4aa546412b99f41d387c042ebb7a356b05ae6",
+  "frames": 378,
+  "fps": 30,
+  "duration_seconds": 12.6,
+  "model_generated_source_records": [
+    {
+      "source": "intergen",
+      "path": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/sources/scene-846e1fd787244b0d87c2b997685d69db/pair-00.npz",
+      "seconds": 1.9427592079737224,
+      "beat_index": 0,
+      "replayed_native_source": false,
+      "actor_ids": [
+        "actor_1",
+        "actor_2"
+      ],
+      "source_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "planned_prompt": "Perform a controlled boxing spar, exchanging measured punches and dodging incoming strikes.",
+      "source_role_map": [
+        {
+          "source_actor_index": 0,
+          "actor_id": "actor_1"
+        },
+        {
+          "source_actor_index": 1,
+          "actor_id": "actor_2"
+        }
+      ],
+      "sha256": "d3dca530701d0a480ba670cc61740af5f20f2814f573d8fed69e1b9ebc03c886",
+      "used_in_performance": true
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/sources/scene-846e1fd787244b0d87c2b997685d69db/core-000.npz",
+      "seconds": 0.8895473749726079,
+      "sha256": "c74a05428e2460a10c3dcba42494b4eb34cbcbc8a8ab163cd0a86a9caa820ba9"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/sources/scene-846e1fd787244b0d87c2b997685d69db/core-001.npz",
+      "seconds": 0.847518791037146,
+      "sha256": "3002b43701126ba8df950aabe652255c5138e87fc827ee52ec1d32d1222172d2"
+    },
+    {
+      "source": "ardy_core",
+      "path": "review/interaction-quality/baseline/industrial-spar-s45-fixed-plan/sources/scene-846e1fd787244b0d87c2b997685d69db/core-002.npz",
+      "seconds": 0.8420018330216408,
+      "sha256": "e0bd2f3b4184a331108b3725d0ad6065d5a3cb75078875a6fdb7530c48663782"
+    }
+  ],
+  "source_pair_frames_modified": false,
+  "max_joint_step_m": 0.2454329496747957,
+  "joint_step_p95_m": 0.06135717379303017,
+  "max_root_step_m": 0.05119620331289521,
+  "seams": [
+    {
+      "frame": 150,
+      "into": "transition",
+      "max_joint_step_m": 0.004593158787923793,
+      "max_root_step_m": 0.0017442572917777347
+    },
+    {
+      "frame": 168,
+      "into": "paired_action",
+      "max_joint_step_m": 0.022038916544558713,
+      "max_root_step_m": 0.008418451451880775
+    }
+  ],
+  "idle": [
+    {
+      "actor_id": "actor_1",
+      "held_transition_frames": 0,
+      "held_still_fraction_under_1mm": null,
+      "held_motion_fraction_over_0p1mm": null,
+      "held_joint_step_p95_m": null,
+      "longest_whole_track_still_seconds_under_1mm": 0.0,
+      "longest_held_still_seconds_under_1mm": 0.0
+    },
+    {
+      "actor_id": "actor_2",
+      "held_transition_frames": 0,
+      "held_still_fraction_under_1mm": null,
+      "held_motion_fraction_over_0p1mm": null,
+      "held_joint_step_p95_m": null,
+      "longest_whole_track_still_seconds_under_1mm": 0.0,
+      "longest_held_still_seconds_under_1mm": 0.0
+    }
+  ],
+  "foot_support_proxy": [
+    {
+      "actor_id": "actor_1",
+      "side": "left",
+      "candidate_support_frames": 146,
+      "candidate_support_fraction": 0.38726790450928383,
+      "horizontal_speed_p50_m_s": 0.17393774346747487,
+      "horizontal_speed_p95_m_s": 1.1684381939077724,
+      "horizontal_speed_max_m_s": 2.5751554278981805,
+      "fraction_over_0p1m_s": 0.7876712328767124,
+      "authored_transition_candidate_frames": 7,
+      "authored_transition_horizontal_speed_p95_m_s": 0.6958375505627593,
+      "authored_transition_fraction_over_0p1m_s": 1.0
+    },
+    {
+      "actor_id": "actor_1",
+      "side": "right",
+      "candidate_support_frames": 191,
+      "candidate_support_fraction": 0.506631299734748,
+      "horizontal_speed_p50_m_s": 0.19091213721785238,
+      "horizontal_speed_p95_m_s": 2.096980131434921,
+      "horizontal_speed_max_m_s": 2.6550760288953827,
+      "fraction_over_0p1m_s": 0.8219895287958116,
+      "authored_transition_candidate_frames": 12,
+      "authored_transition_horizontal_speed_p95_m_s": 0.367747024268059,
+      "authored_transition_fraction_over_0p1m_s": 1.0
+    },
+    {
+      "actor_id": "actor_2",
+      "side": "left",
+      "candidate_support_frames": 179,
+      "candidate_support_fraction": 0.47480106100795755,
+      "horizontal_speed_p50_m_s": 0.15644250935335927,
+      "horizontal_speed_p95_m_s": 2.045961254845261,
+      "horizontal_speed_max_m_s": 2.8607021056610624,
+      "fraction_over_0p1m_s": 0.7206703910614525,
+      "authored_transition_candidate_frames": 10,
+      "authored_transition_horizontal_speed_p95_m_s": 1.0392562447475857,
+      "authored_transition_fraction_over_0p1m_s": 1.0
+    },
+    {
+      "actor_id": "actor_2",
+      "side": "right",
+      "candidate_support_frames": 146,
+      "candidate_support_fraction": 0.38726790450928383,
+      "horizontal_speed_p50_m_s": 0.16676047468785882,
+      "horizontal_speed_p95_m_s": 2.4388069720756005,
+      "horizontal_speed_max_m_s": 2.8703410805305936,
+      "fraction_over_0p1m_s": 0.7808219178082192,
+      "authored_transition_candidate_frames": 17,
+      "authored_transition_horizontal_speed_p95_m_s": 0.6631995422988752,
+      "authored_transition_fraction_over_0p1m_s": 0.9411764705882353
+    }
+  ],
+  "intended_hand_contact_windows": [],
+  "measurement_limits": [
+    "Wrist proximity is not palm or finger contact.",
+    "Support is inferred from ankle/toe height and low vertical speed, not force or exact foot planting.",
+    "Stillness and frame-step metrics do not establish visual animation quality.",
+    "Joint and root distances do not establish full mesh collision clearance."
+  ]
+}

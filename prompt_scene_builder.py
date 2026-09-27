@@ -2,7 +2,7 @@
 
 Core's native330 history is used only between consecutive Core horizons.
 InterGen's native262 features are archived, never converted to Core features.
-Inactive tracks hold a previously generated pose and are explicitly disclosed.
+Inactive tracks receive separately labeled authored observer continuation.
 """
 from __future__ import annotations
 
@@ -209,6 +209,20 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
         for aid in idle_ids:
             root = candidate_poses[aid][0]
             candidate_poses[aid] += np.array([starts[aid]['x']-root[0], 0., starts[aid]['z']-root[2]])
+            # Initial observers face the meeting before playback begins. This
+            # rigid authored staging precedes all floor/body clearance gates;
+            # it is not a planted-foot turn inside the performance.
+            pose = candidate_poses[aid]
+            origin = pose[0].copy()
+            direction = np.array([meeting['x']-origin[0], meeting['z']-origin[2]])
+            if 'yaw_degrees' not in starts[aid] and np.linalg.norm(direction) > .1:
+                yaw = math.atan2(direction[0], direction[1])-_heading(pose)
+                c, s = math.cos(yaw), math.sin(yaw)
+                rotation = np.array([[c, 0., s], [0., 1., 0.], [-s, 0., c]])
+                candidate_poses[aid] = (pose-origin) @ rotation.T + origin
+                record.setdefault('observer_orientation', {})[aid] = {
+                    'yaw_radians': yaw, 'target_xz': [meeting['x'], meeting['z']],
+                    'method': 'initial rigid source-pose staging toward meeting; root preserved'}
         try:
             planning_scene, proxies = _scene_with_idle_roots(scene, candidate_poses, active)
             route = plan_meetup(pair, planning_scene, actor_ids=active, starts=[starts[aid] for aid in active],
@@ -237,6 +251,7 @@ def select_initial_staging(pair, scene, plan, placement, poses, active, *, cance
         selected['starts'] = starts
         selected['initial_source_staging'] = {'candidate': label, 'explicit_starts_preserved': sorted(explicit),
             'candidate_count': len(reports), 'planning_only': True,
+            'observer_orientation': record.get('observer_orientation', {}),
             'selection': 'shortest approach duration, then total route distance; source-oriented starts win ties'}
         return selected, candidate_poses, planning_scene, proxies
     reason = reports[-1].get('rejection', 'no feasible source-aware start') if reports else 'no staging candidates'
@@ -677,7 +692,8 @@ class PromptSceneBuilder:
                                  'start_frame': total, 'end_frame_exclusive': total+count, 'frames': count})
                 activities.append({'start_frame': total, 'end_frame_exclusive': total+count,
                                    'active_actor_ids': list(active), 'held_actor_ids': [a for a in ids if a not in active],
-                                   'inactive_motion': 'explicit stationary hold of last real generated pose'})
+                                   'contact_actor_ids': list(active) if contact else [],
+                                   'inactive_motion': 'authored stationary-root observer continuation after composition'})
                 geometry.append(report); parts.append(world); total += count
                 poses.update({aid: world[-1, i].copy() for i, aid in enumerate(ids)})
 
@@ -819,13 +835,45 @@ class PromptSceneBuilder:
             check_cancel()
             finish_prefetch()
             joints = np.concatenate(parts)
+            # Preserve the exact pre-refinement composition, including failures,
+            # so authored observer/planting changes have a reproducible ablation.
+            unrefined_path = folder/'unrefined-cast.npz'
+            np.savez_compressed(unrefined_path, joints=joints)
+            manifest['unrefined_composition'] = str(unrefined_path)
+            from cast_motion_refinement import refine_cast_motion, RefinementRejected
+            refinement_started = time.monotonic()
+            try:
+                joints, refinement = refine_cast_motion(joints, ids, segments, activities, seed=self.seed)
+            except RefinementRejected as exc:
+                candidate_path = folder/'refined-cast-candidate.npz'
+                np.savez_compressed(candidate_path, joints=exc.candidate_joints)
+                manifest['refined_composition'] = str(candidate_path)
+                manifest['motion_refinement'] = exc.refinement_report
+                save()
+                raise
+            manifest['motion_refinement'] = refinement
+            candidate_path = folder/'refined-cast-candidate.npz'
+            np.savez_compressed(candidate_path, joints=joints)
+            manifest['refined_composition'] = str(candidate_path)
+            save()
+            refined_geometry = []
+            for segment, activity in zip(segments, activities):
+                check_cancel()
+                refined_geometry.append(check_cast_geometry(
+                    joints[max(0, segment['start_frame']-1):segment['end_frame_exclusive']],
+                    scene, ids, contact_pair=activity['contact_actor_ids']))
+            manifest['motion_refinement'] = refinement
+            manifest['timings'].append({'stage': 'authored_cast_refinement_and_validation',
+                                        'seconds': time.monotonic()-refinement_started})
             manifest.update(status='complete', frames=len(joints), duration_seconds=len(joints)/30,
                             wall_seconds=time.monotonic()-started)
             save()
             metadata = {'version': 1, 'model': 'ARDY Core + InterGen' if any(s['source'] == 'intergen' for s in segments) else 'ARDY Core',
                         'prompt': self.prompt, 'title': plan.get('title', self.prompt), 'fps': 30, 'frames': len(joints),
                         'actor_ids': list(ids), 'plan': plan, 'placement': placement, 'segments': segments,
-                        'segment_activity': activities, 'scene_geometry': geometry, 'transition_boundaries': boundaries,
+                        'segment_activity': activities, 'scene_geometry': refined_geometry, 'transition_boundaries': boundaries,
+                        'pre_refinement_scene_geometry': geometry, 'motion_refinement': refinement,
+                        'unrefined_composition': str(unrefined_path),
                         'source_manifest': str(folder/'manifest.json'), 'sources': manifest['sources'],
                         'stage_timings': manifest['timings'], 'wall_seconds': manifest['wall_seconds'],
                         'prefetch': manifest['prefetch'],

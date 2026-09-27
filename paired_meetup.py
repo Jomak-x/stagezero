@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import math
+import re
 import uuid
 from dataclasses import replace
 from collections.abc import Mapping
@@ -19,6 +20,37 @@ FPS, HORIZON, BLEND_FRAMES = 20, 40, 21
 # Acceptance bounds, not expected model precision or collision radii.
 MAX_TARGET_ERROR_M, MAX_ARRIVAL_ERROR_M, MIN_ROUTE_SEPARATION_M = .8, .4, .55
 MAX_ENTRY_ROOT_HEIGHT_GAP_M = .30
+
+# Classify only a short source prompt and send Core a fixed motion cue. The
+# source text is never copied into a worker request's actor prompts.
+_GUARD_INTENT = re.compile(r'\b(?:spar(?:ring)?|boxers?|kickbox(?:ing)?|punch(?:es|ing)?|jab(?:s|bing)?|fight(?:s|ing)?)\b|\bboxing\s+(?:match|bout|practice|spar)\b|\b(?:are|start|begin|people|persons|both|two)\s+boxing\b')
+_GREETING_INTENT = re.compile(r'\b(?:greet(?:s|ed|ing)?|hello|handshak(?:e|es|ing)|shake hands?|wave(?:s|d|ing)?|hug(?:s|ged|ging)?|embrace(?:s|d)?|high[- ]five)\b')
+_ENTRY_CUES = {
+    'ready': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.',
+        'A person faces their partner, feet planted and hands raised in a ready stance.',
+        'A person stands in place and turns to face their partner, relaxed and ready.'),
+    'relaxed': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with arms relaxed at their sides.',
+        'A person faces their partner, feet planted with arms relaxed at their sides, ready to greet.',
+        'A person stands in place and turns to face their partner, feet planted with arms relaxed at their sides.'),
+    'guard': (
+        'A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands up in a boxing guard.',
+        'A person faces their partner, feet planted with hands up in a boxing guard.',
+        'A person stands in place and turns to face their partner, feet planted with hands up in a boxing guard.'),
+}
+
+
+def _entry_posture(prompt):
+    """Choose one bounded Core cue; keep legacy readiness for unknown actions."""
+    if not isinstance(prompt, str):
+        return 'ready'
+    short = prompt[:500].casefold()
+    if _GUARD_INTENT.search(short):
+        return 'guard'
+    if _GREETING_INTENT.search(short):
+        return 'relaxed'
+    return 'ready'
 
 
 def _checked_generated_geometry(world, scene, actor_ids, *, context):
@@ -71,7 +103,7 @@ def _minimum_separation(paths):
     return minimum
 
 
-def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled', initial_heading_ramp_seconds=0.):
+def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_policy='settled', initial_heading_ramp_seconds=0., entry_posture='ready'):
     """Keep the same common duration and model target sampling for every route."""
     travel_windows = max(1, math.ceil(max(r['distance_m'] for r in routes)/speed/2.))
     arrival_seconds, windows = travel_windows*2., travel_windows+1
@@ -129,11 +161,10 @@ def _schedule(routes, starts, actor_ids, speed, maximum, pair_frames, entry_poli
                     heading = math.atan2(math.sin(prior+smooth*delta), math.cos(prior+smooth*delta))
                 targets[aid].append({'frame': local, 'position_xz': point, 'heading': heading})
             if entry_policy == 'continuous':
-                prompts[aid] = ('A person walks smoothly along a curved route toward their partner, turns while walking, and arrives facing their partner with hands raised in a ready stance.'
-                                if window*2 < arrival_seconds else
-                                'A person faces their partner, feet planted and hands raised in a ready stance.')
+                prompts[aid] = _ENTRY_CUES[entry_posture][0 if window*2 < arrival_seconds else 1]
             else:
-                prompts[aid] = ('A person stands in place and turns to face their partner, relaxed and ready.' if window == travel_windows or route['distance_m'] < .05 else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
+                prompts[aid] = (_ENTRY_CUES[entry_posture][2] if window == travel_windows or route['distance_m'] < .05
+                                else 'A person walks forward along the route toward their partner and comes to a relaxed stop.')
         horizons.append({'root_targets': targets, 'actor_prompts': prompts})
     samples = [[[s['x'], s['z']] for s in starts]]
     for horizon in horizons:
@@ -306,6 +337,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     heading_ramp = _number(initial_heading_ramp_seconds, 'Initial heading ramp seconds', 0., 1.)
     if entry_policy not in ('settled', 'continuous'):
         raise ValueError('Unknown meeting entry policy')
+    entry_posture = _entry_posture(pair_clip.metadata.get('prompt', ''))
     yaw = math.radians(meeting.get('yaw_degrees', 0.))
     rotated = shared_place_pair(pair_clip.joints, yaw=yaw)
     center = rotated[0, :, 0].mean(axis=0)
@@ -358,7 +390,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
                        'initial_yaw': initial, 'arrival_yaw': arrival, 'ground': ground,
                        'idle_departure': departure,
                        **({'entry_policy': entry_policy} if entry_policy == 'continuous' else {})})
-    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
+    horizons, arrival_seconds, windows, frames, minimum = _schedule(routes, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp, entry_posture)
     minimum = min(minimum, _route_separation(routes))
     rerouted = False
     if minimum < MIN_ROUTE_SEPARATION_M:
@@ -366,7 +398,7 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
             if _route_separation(candidate) < MIN_ROUTE_SEPARATION_M:
                 continue
             try:
-                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp)
+                scheduled = _schedule(candidate, starts, actor_ids, speed, maximum, pair_clip.frames, entry_policy, heading_ramp, entry_posture)
             except ValueError:
                 continue
             if scheduled[-1] < MIN_ROUTE_SEPARATION_M:
@@ -381,7 +413,8 @@ def plan_meetup(pair_clip, scene, *, actor_ids=('actor_1', 'actor_2'), starts,
     return {'version': 1, 'actor_ids': list(actor_ids), 'starts': starts, 'meeting': meeting,
             'placement': placement, 'routes': routes, 'horizons': horizons, 'arrival_seconds': arrival_seconds,
             'approach_seconds': arrival_seconds+1. if entry_policy == 'continuous' else windows*2,
-            'entry_policy': entry_policy, 'total_frames': frames, 'blend_frames': BLEND_FRAMES,
+            'entry_policy': entry_policy, 'entry_posture': entry_posture,
+            'total_frames': frames, 'blend_frames': BLEND_FRAMES,
             'minimum_planned_root_separation_m': minimum, 'native_geometry': geometry,
             'approach_rerouted': rerouted,
             'arrival_standoff': arrival_standoff,
