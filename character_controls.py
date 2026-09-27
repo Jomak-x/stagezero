@@ -168,7 +168,7 @@ class CharacterControls:
                     json.dump({'version': 1, 'source': source, 'asset_id': asset.sha256,
                                'prompt': prompt.strip(), **({'preset_key': preset_key} if preset_key else {}),
                                **({'legacy_id': legacy_id} if legacy_id else {}),
-                               'aliases': aliases[:16]},
+                               **({'aliases': aliases[:16]} if aliases else {})},
                               f, ensure_ascii=False)
                 staged.replace(folder / 'generated.json')
             finally:
