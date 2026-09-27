@@ -20,6 +20,36 @@ LEG_JOINTS = {j for leg in LEGS for j in leg}
 MAX_KNEE_BEND_DEG = 110.
 
 
+def _boundary_heading(desired, inherited, fps, bouts, runs):
+    """Join a settled boundary without magnifying a short startup yaw wobble."""
+    desired = np.asarray(desired, float)
+    inherited += 2*np.pi*round((desired[0]-inherited)/(2*np.pi))
+    width = min(len(desired), max(2, round(.6*fps)))
+    phase = np.linspace(0., 1., width)
+    blend = phase*phase*(3-2*phase)
+    baseline = desired.copy()
+    baseline[:width] += (inherited-desired[0])*(1-blend)
+    # A long intentional pivot already has its own contact timing. Walking
+    # immediately also gives no evidence of a settled startup interval.
+    if (not bouts or not 0 < bouts[0][0] < width or
+            any(0 < entry[0] < bouts[0][0] for side in runs for entry in side)):
+        return baseline, False
+    candidate = desired.copy()
+    candidate[:width] = inherited+(desired[:width]-inherited)*blend
+
+    def peaks(curve):
+        # Include the settled incoming heading and unchanged samples after
+        # the fade, so shifting a spike to the join cannot count as a repair.
+        window = np.r_[inherited, inherited, curve[:width+2]]
+        return np.array([np.max(abs(np.diff(window)))*fps,
+                         np.max(abs(np.diff(window, n=2)))*fps*fps])
+
+    before, after = peaks(baseline), peaks(candidate)
+    if np.all(after <= before+1e-12) and np.any(after < before-1e-12):
+        return candidate, True
+    return baseline, False
+
+
 def _fk(root, rotations, rest):
     positions = np.empty((17, 3)); positions[0] = root
     for j in range(1, 17):
@@ -190,6 +220,7 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
                                           minimum_stance_frames=_minimum_stance_frames,
                                           minimum_transfer_frames=max(4, round(.4*fps)) if boundary else None)
     heading_correction = np.zeros(count)
+    boundary_heading_target_fade = False
     if heading_assistance:
         desired = np.unwrap(route_yaw.copy())
         if boundary and not bouts and all(len(entries) == 1 for entries in runs):
@@ -199,10 +230,8 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
             route_yaw[:] = desired
         if boundary:
             inherited_yaw = np.arctan2(initial_r[0, 0, 2], initial_r[0, 2, 2])
-            inherited_yaw += 2*np.pi*round((desired[0]-inherited_yaw)/(2*np.pi))
-            width = min(count, max(2, round(.6*fps)))
-            phase = np.linspace(0., 1., width)
-            desired[:width] += (inherited_yaw-desired[0])*(1-phase*phase*(3-2*phase))
+            desired, boundary_heading_target_fade = _boundary_heading(
+                desired, inherited_yaw, fps, bouts, runs)
         native_heading = np.unwrap(np.arctan2(raw_base_r[:, 0, 0, 2], raw_base_r[:, 0, 2, 2]))
         heading_correction = desired-native_heading
         common = Rotation.from_euler('y', heading_correction[:, None]).as_matrix()
@@ -480,6 +509,7 @@ def assist_rig_clip(native_positions, native_rotations, geometry, character, *, 
               'native_cadence_preserved': False, 'native_root_xz_preserved': bool(np.array_equal(poses[:, 0, [0, 2]], native[:, 0, [0, 2]])),
               'native_retargeted_upperbody_rotations_preserved': bool(np.array_equal(rotations[:, nonlegs], raw_base_r[:, nonlegs])),
               'heading_assistance_enabled': bool(heading_assistance),
+              'boundary_heading_target_fade': boundary_heading_target_fade,
               'heading_assistance_scope': 'common world-Y alignment to contact/route heading; native data unchanged' if heading_assistance else None,
               'max_display_heading_rate_deg_s': float(np.degrees(abs(np.diff(np.unwrap(np.arctan2(base_r[:, 0, 0, 2], base_r[:, 0, 2, 2]))))).max()*fps),
               'max_display_heading_correction_deg': float(np.degrees(abs(np.angle(np.exp(1j*heading_correction)))).max()),

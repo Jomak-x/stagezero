@@ -1,0 +1,502 @@
+{
+  "kind": "explicit terrain-assisted actual character-rig replay",
+  "fps": 20,
+  "frames": 80,
+  "duration_seconds": 4.0,
+  "native_history_used_for_display": false,
+  "additional_ik": false,
+  "additional_retarget": false,
+  "camera_mode": "follow",
+  "presentation_positions_sha256": "4a3d80c7d30e438b1a79f1c6b6093736577f8722719ee86512910715be893fba",
+  "rig_asset_sha256": [
+    "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7"
+  ],
+  "report": {
+    "version": 1,
+    "provenance": "offline actual-rig terrain-assisted candidate",
+    "accepted": false,
+    "visual_review": "pending",
+    "runtime_publishable": false,
+    "publish_scope": "explicit terrain-aware mode only",
+    "ordinary_core_publishable": false,
+    "native_features_unchanged": true,
+    "native_sha256": "c4dc191a7e4905a9733fb092e58e83e0a84f6f9613e7aa8dc8928dafd9429c94",
+    "terrain_start_frame": 0,
+    "prefix_preserved_exactly": true,
+    "rig_asset_sha256": [
+      "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7"
+    ],
+    "committed_prefix_frames": 40,
+    "actions": [
+      {
+        "route": {
+          "version": 1,
+          "terrain_navigation_version": 1,
+          "actor_id": "actor_1",
+          "verb": "ascend",
+          "target_id": "yard-approach-stairs",
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                0.0,
+                -1.75
+              ],
+              "support_y": 0.16,
+              "role": "start"
+            },
+            {
+              "time_seconds": 0.1667,
+              "position_xz": [
+                0.0,
+                -1.95
+              ],
+              "support_y": 0.16,
+              "role": "route"
+            },
+            {
+              "time_seconds": 0.25,
+              "position_xz": [
+                0.0,
+                -2.05
+              ],
+              "support_y": 0.2,
+              "role": "route"
+            },
+            {
+              "time_seconds": 0.4167,
+              "position_xz": [
+                0.0,
+                -2.25
+              ],
+              "support_y": 0.2,
+              "role": "arrival"
+            }
+          ],
+          "support_xyz": [
+            [
+              0.0,
+              0.16,
+              -1.75
+            ],
+            [
+              0.0,
+              0.16,
+              -1.95
+            ],
+            [
+              0.0,
+              0.2,
+              -2.05
+            ],
+            [
+              0.0,
+              0.2,
+              -2.25
+            ]
+          ],
+          "geometry": {
+            "support_object_id": "yard-approach-stairs"
+          },
+          "assumptions": {
+            "motion_following_verified": false,
+            "raw_native_contact_verified": false,
+            "actor_radius_m": 0.6,
+            "lower_body_radius_m": 0.18,
+            "speed_mps": 1.2
+          },
+          "schedule": {
+            "frames": 40,
+            "fps": 20,
+            "seconds": 2.0,
+            "travel_seconds": 0.4166666666666667,
+            "initial_turn_frames": 0,
+            "horizons": 1,
+            "terminal_settle_frames": 8,
+            "door_hold_frames": 0,
+            "gait_profile": "terrain_experimental"
+          }
+        },
+        "native_span": [
+          0,
+          40
+        ],
+        "measurement": {
+          "terminal_xz": [
+            -0.008568169549107552,
+            -2.215132474899292
+          ],
+          "target_xz": [
+            0.0,
+            -2.25
+          ],
+          "arrival_error_m": 0.03590484418669376,
+          "arrival_tolerance_m": 0.3,
+          "arrival_verified": true,
+          "crossing_verified": null,
+          "terminal_root_y": 1.1378264427185059,
+          "target_root_y": 1.15,
+          "root_height_error_m": 0.012173557281494052,
+          "root_height_verified": true,
+          "completed": true,
+          "native_root_body_checked": true,
+          "native_raw_feet_checked": false,
+          "max_root_support_height_gap_m": 0.027748003602027893
+        },
+        "assistance": {
+          "representation": "GroundedCharacter17 explicit assisted presentation",
+          "accepted": false,
+          "visual_review": "pending",
+          "rig_mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+          "rig_bone_count": 17,
+          "native_arrays_unchanged": true,
+          "retarget_count_per_native_frame": 1,
+          "renderer_contract": "render these rig17 positions/rotations directly; no retarget or second IK",
+          "native_cadence_preserved": false,
+          "native_root_xz_preserved": true,
+          "native_retargeted_upperbody_rotations_preserved": false,
+          "heading_assistance_enabled": true,
+          "heading_assistance_scope": "common world-Y alignment to contact/route heading; native data unchanged",
+          "max_display_heading_rate_deg_s": 50.71332645128868,
+          "max_display_heading_correction_deg": 11.22247031253653,
+          "native_relative_upperbody_rotations_preserved": true,
+          "frames": 40,
+          "fps": 20,
+          "stance_anchors": [
+            {
+              "side": 0,
+              "first": 0,
+              "last_exclusive": 11,
+              "contact_xyz": [
+                -0.0653365906143965,
+                0.16400000238418583,
+                -1.9150737787073306
+              ]
+            },
+            {
+              "side": 0,
+              "first": 19,
+              "last_exclusive": 40,
+              "contact_xyz": [
+                -0.13031104388940257,
+                0.20400000000000001,
+                -2.329527518204933
+              ]
+            },
+            {
+              "side": 1,
+              "first": 0,
+              "last_exclusive": 3,
+              "contact_xyz": [
+                0.002719072309339172,
+                0.16400000238418583,
+                -1.9730678343227408
+              ]
+            },
+            {
+              "side": 1,
+              "first": 11,
+              "last_exclusive": 40,
+              "contact_xyz": [
+                0.13020204148636874,
+                0.20400000000000001,
+                -2.3179978890696966
+              ]
+            }
+          ],
+          "bounded_clearance_profiles": [
+            {
+              "side": 0,
+              "first": 10,
+              "last": 19,
+              "maximum_lift_m": 0.07532747155429234
+            },
+            {
+              "side": 1,
+              "first": 2,
+              "last": 11,
+              "maximum_lift_m": 0.08258681254583879
+            }
+          ],
+          "swept_clearance_contact_mode": true,
+          "minimum_stance_samples": 4,
+          "route_tangent_swing_paths": false,
+          "contact_reach_repair_passes": 0,
+          "contact_reach_advances_m": [],
+          "moving_intervals": [
+            [
+              1,
+              30
+            ]
+          ],
+          "initial_boundary_position_error_m": null,
+          "max_root_y_change_from_native_retarget_m": 0.03998284027268295,
+          "max_local_leg_rotation_change_deg": 79.79340564307536,
+          "max_local_leg_rotation_frame_step_deg": 18.80768335717315,
+          "max_knee_bend_deg": 72.09679063202374,
+          "knee_flexion_limit_deg": 110.0,
+          "knee_limit_enforced_in_root_optimizer": true,
+          "actual_mesh_sole_vertex_counts": [
+            609,
+            569
+          ],
+          "max_actual_mesh_sole_penetration_m": 0.0,
+          "max_flat_stance_mesh_gap_m": 0.018997123834191276,
+          "max_flat_stance_lowest_vertex_gap_m": 0.0040000000331867624,
+          "sole_gap_note": "Sole cloud includes vertices within15mm of bind outsole; lowest-vertex gap measures contact separately.",
+          "max_flat_stance_mesh_vertex_slip_m_s": 2.0638476940754845e-10,
+          "unsupported_actual_mesh_sole_vertices": 0,
+          "max_swept_sole_envelope_penetration_m": 0.0,
+          "unsupported_swept_sole_envelope_samples": 0,
+          "swept_sole_proxy": {
+            "interframe_samples": 7,
+            "footprint_grid": [
+              3,
+              2,
+              5
+            ],
+            "margin_m": 0.003,
+            "note": "finite rigid sole-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision"
+          },
+          "limitations": [
+            "buffered whole action, not streaming",
+            "finite sole-envelope sweep; no dynamics or full body collision certificate"
+          ],
+          "motion_derivatives": {
+            "root": {
+              "max_speed_m_s": 0.44233215736827025,
+              "max_acceleration_m_s2": 1.491778858321713
+            },
+            "feet": {
+              "max_speed_m_s": 1.4579686452434548,
+              "max_acceleration_m_s2": 11.094760271934245
+            }
+          },
+          "numerical_rejections": [],
+          "dynamic_body_validation": {
+            "rig17_dynamic_body_sweep_checked": true,
+            "body_proxy_radius_m": 0.06,
+            "body_proxy_samples": 6100,
+            "proxy_only": true
+          }
+        }
+      },
+      {
+        "route": {
+          "version": 1,
+          "terrain_navigation_version": 1,
+          "actor_id": "actor_1",
+          "verb": "move",
+          "target_id": null,
+          "waypoints": [
+            {
+              "time_seconds": 0.0,
+              "position_xz": [
+                -0.00857,
+                -2.21513
+              ],
+              "support_y": 0.2,
+              "role": "start"
+            },
+            {
+              "time_seconds": 0.4167,
+              "position_xz": [
+                0.0531,
+                -2.71131
+              ],
+              "support_y": 0.2,
+              "role": "arrival"
+            }
+          ],
+          "support_xyz": [
+            [
+              -0.00857,
+              0.2,
+              -2.21513
+            ],
+            [
+              0.0531,
+              0.2,
+              -2.71131
+            ]
+          ],
+          "geometry": {
+            "target_xz": [
+              0.05309952967853894,
+              -2.7113149966309313
+            ]
+          },
+          "assumptions": {
+            "motion_following_verified": false,
+            "raw_native_contact_verified": false,
+            "actor_radius_m": 0.6,
+            "lower_body_radius_m": 0.18,
+            "speed_mps": 1.2
+          },
+          "schedule": {
+            "frames": 40,
+            "fps": 20,
+            "seconds": 2.0,
+            "travel_seconds": 0.41666666666666685,
+            "initial_turn_frames": 0,
+            "horizons": 1,
+            "terminal_settle_frames": 8,
+            "door_hold_frames": 0,
+            "gait_profile": "terrain_experimental"
+          }
+        },
+        "native_span": [
+          40,
+          80
+        ],
+        "measurement": {
+          "terminal_xz": [
+            0.0512612983584404,
+            -2.7195065021514893
+          ],
+          "target_xz": [
+            0.0531,
+            -2.71131
+          ],
+          "arrival_error_m": 0.008400206619246947,
+          "arrival_tolerance_m": 0.2499988906475388,
+          "arrival_verified": true,
+          "crossing_verified": null,
+          "terminal_root_y": 1.136473536491394,
+          "target_root_y": 1.15,
+          "root_height_error_m": 0.013526463508605868,
+          "root_height_verified": true,
+          "completed": true,
+          "native_root_body_checked": true,
+          "native_raw_feet_checked": false,
+          "max_root_support_height_gap_m": 0.03631199896335602
+        },
+        "assistance": {
+          "representation": "GroundedCharacter17 explicit assisted presentation",
+          "accepted": false,
+          "visual_review": "pending",
+          "rig_mesh_sha256": "37ac5945f6522c5ede44d590049521ff350b414c2087c996ca24a6979453aad7",
+          "rig_bone_count": 17,
+          "native_arrays_unchanged": true,
+          "retarget_count_per_native_frame": 1,
+          "renderer_contract": "render these rig17 positions/rotations directly; no retarget or second IK",
+          "native_cadence_preserved": false,
+          "native_root_xz_preserved": true,
+          "native_retargeted_upperbody_rotations_preserved": false,
+          "heading_assistance_enabled": true,
+          "boundary_heading_target_fade": true,
+          "heading_assistance_scope": "common world-Y alignment to contact/route heading; native data unchanged",
+          "max_display_heading_rate_deg_s": 55.27635355699596,
+          "max_display_heading_correction_deg": 18.473640064577452,
+          "native_relative_upperbody_rotations_preserved": true,
+          "frames": 41,
+          "fps": 20,
+          "stance_anchors": [
+            {
+              "side": 0,
+              "first": 0,
+              "last_exclusive": 12,
+              "contact_xyz": [
+                -0.13031103881861172,
+                0.20399998655319215,
+                -2.329527503288098
+              ]
+            },
+            {
+              "side": 0,
+              "first": 19,
+              "last_exclusive": 41,
+              "contact_xyz": [
+                -0.08686571398268858,
+                0.20400000000000001,
+                -2.6999751862268164
+              ]
+            },
+            {
+              "side": 1,
+              "first": 0,
+              "last_exclusive": 4,
+              "contact_xyz": [
+                0.1302020447592903,
+                0.20399999904579386,
+                -2.3179979920860836
+              ]
+            },
+            {
+              "side": 1,
+              "first": 11,
+              "last_exclusive": 41,
+              "contact_xyz": [
+                0.17311186569581624,
+                0.20400000000000001,
+                -2.7033895770226497
+              ]
+            }
+          ],
+          "bounded_clearance_profiles": [],
+          "swept_clearance_contact_mode": false,
+          "minimum_stance_samples": 4,
+          "route_tangent_swing_paths": false,
+          "contact_reach_repair_passes": 0,
+          "contact_reach_advances_m": [],
+          "moving_intervals": [
+            [
+              4,
+              29
+            ]
+          ],
+          "initial_boundary_position_error_m": 1.1217435985316769e-07,
+          "max_root_y_change_from_native_retarget_m": 0.02226692108618844,
+          "max_local_leg_rotation_change_deg": 64.41928886137667,
+          "max_local_leg_rotation_frame_step_deg": 23.124158452595434,
+          "max_knee_bend_deg": 84.2790844260826,
+          "knee_flexion_limit_deg": 110.0,
+          "knee_limit_enforced_in_root_optimizer": true,
+          "actual_mesh_sole_vertex_counts": [
+            609,
+            569
+          ],
+          "max_actual_mesh_sole_penetration_m": 0.0,
+          "max_flat_stance_mesh_gap_m": 0.018997123831183488,
+          "max_flat_stance_lowest_vertex_gap_m": 0.00400000003038406,
+          "sole_gap_note": "Sole cloud includes vertices within15mm of bind outsole; lowest-vertex gap measures contact separately.",
+          "max_flat_stance_mesh_vertex_slip_m_s": 2.949261330644877e-07,
+          "unsupported_actual_mesh_sole_vertices": 0,
+          "max_swept_sole_envelope_penetration_m": 0.0,
+          "unsupported_swept_sole_envelope_samples": 0,
+          "swept_sole_proxy": {
+            "interframe_samples": 7,
+            "footprint_grid": [
+              3,
+              5
+            ],
+            "margin_m": 0.003,
+            "note": "finite rigid sole-envelope samples using linear foot translation and rotation slerp; not continuous triangle collision"
+          },
+          "limitations": [
+            "buffered whole action, not streaming",
+            "finite sole-envelope sweep; no dynamics or full body collision certificate"
+          ],
+          "motion_derivatives": {
+            "root": {
+              "max_speed_m_s": 0.5669671057664905,
+              "max_acceleration_m_s2": 1.8618550828266829
+            },
+            "feet": {
+              "max_speed_m_s": 1.476611523326461,
+              "max_acceleration_m_s2": 14.57034829930362
+            }
+          },
+          "numerical_rejections": [],
+          "dynamic_body_validation": {
+            "rig17_dynamic_body_sweep_checked": true,
+            "body_proxy_radius_m": 0.06,
+            "body_proxy_samples": 6450,
+            "proxy_only": true
+          }
+        }
+      }
+    ]
+  },
+  "capture_complete": true
+}
