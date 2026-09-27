@@ -1,0 +1,60 @@
+## Draft recommendation
+
+Integrate a narrow adapter into the existing cast-prompt flow; keep production at **1–3 actors**, preserve legacy serial routing and UI, and leave 4–10 actors research-only. The supplied implementation provides useful generation and overlay primitives, but no test results or builder implementation were supplied; this review does not verify readiness.
+
+### 1. Smallest explicit schema extension
+
+Add one optional beat field:
+
+`concurrent_solos: {actor_id: observable_motion_prompt}`
+
+Keep existing `actor_ids`, `prompt`, and `seconds` unchanged. Their existing solo/pair action becomes the primary action; mapped solos run over the **same resolved action interval**, not sequentially.
+
+Examples:
+- Three people wave: primary solo `actor_1` waves; concurrent solos `actor_2` and `actor_3` wave.
+- Three people dance/celebrate independently: same structure, with explicit per-actor motion.
+- Two handshake while a third waves: primary pair `[actor_1, actor_2]` handshakes; concurrent solo `actor_3` waves.
+
+Validation should:
+- Preserve absent-field legacy canonicalization and routing exactly.
+- Require nonempty, bounded prompts and known IDs, disjoint from primary participants.
+- Limit combined participants to three; count concurrent participants toward every-actor coverage.
+- Count shared duration once, retaining the 30-second total.
+- Require concurrent intervals to meet Core’s 2–10-second bounds; pair-plus-solo therefore uses 2–7 seconds.
+- Reject unsupported timing combinations rather than truncate, serialize, or omit actions.
+
+Update the planner contract to emit this field explicitly for independent simultaneity. Do not add regex rewriting of arbitrary prompts. Ambiguous contact or unsupported choreography requires review; independent tracks do not provide synchronized choreography or three-body contact. Exact prompt retention alone does not establish semantic fidelity.
+
+### 2. Builder routing
+
+Use a narrow dispatcher at the existing builder boundary:
+
+1. **No concurrent solos:** unchanged serial solo/pair path.
+2. **Solo plus concurrent solos:** route to `generate_independent_tracks`, initially only for a single whole-performance action involving the entire cast. Reject mixed preceding/following beats until explicit composition and continuity support exists.
+3. **Pair plus concurrent third:** generate the existing pair performance with an inactive third track, serialize it, then call `overlay_third_track` using resolved segment frame boundaries.
+
+Do not silently discard requested approach/staging. Whole-performance independent routing needs an explicit no-approach interpretation; otherwise return an unsupported-plan conflict.
+
+The supplied module imports builder helpers already. Avoid a new top-level reverse import cycle: use a local adapter import or extract shared helpers.
+
+### 3. Staging and overlay restrictions
+
+`auto_place` is not directly compatible with independent generation: starts permit 1.5 m separation, pair slots are 1.8 m apart, while `_actors` requires **2 m**. Add independent-mode placement enforcing that minimum, existing ±24 m production bounds, binding requested coordinates, and scene/ground checks. Generated trajectories still require geometry validation.
+
+For overlays, preserve these restrictions:
+- Exactly three tracks; the implementation replaces only the **third stored actor**. Initially require `[actor_1, actor_2]` as the pair rather than silently reorder identities.
+- Use a whole-take interval or an interval within a **terminal inactive third-track span**. The implementation rejects any later third-actor activity, even beyond the overlay’s end.
+- Respect the 60–300-frame interval and seam budgets. Bridges consume action frames; disclose this rather than promise uninterrupted waving.
+
+On post-generation mechanical/geometry rejection, retain the exact original project but expose `fallback`, reason, and **requested concurrency not achieved** through existing warnings/status. Preflight failures, cancellation, and worker errors must not become successful fallback results.
+
+### 4. Merge gate
+
+Require tests for:
+- Unchanged legacy plans, routing, UI, and saved-project roundtrips.
+- Three simultaneous solos and handshake-plus-wave interval alignment.
+- ID, duration, cap, contact, staging, and unsupported-timing rejection.
+- Private continuation histories, malformed Core returns, cancellation, and source archives.
+- Exact pair/outside-overlay byte preservation, metadata splits, seam failures, geometry failures, and explicit fallback reporting.
+
+Finally, visually review representative real outputs. Keep `physical_contact_verified=False` and visual acceptance unverified until reviewed. Submit the main merge for user approval only after verification evidence is available.

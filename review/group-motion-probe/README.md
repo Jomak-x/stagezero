@@ -1,6 +1,6 @@
 # Optional group motion experiment
 
-Decision: keep optional and unmerged. The reviewed main demo is sufficient. No existing production Python, UI, planner, pair pipeline or playback cap changed.
+Original research decision: keep the broad experiment optional. The subsequent three-person prompt integration is documented in `../group-prompt-integration/README.md`; ten-person capture remains research-only. The reviewed main demo is sufficient. No existing production Python, UI, planner, pair pipeline or playback cap changed.
 
 Watch [the complete 1:58 comparison](group-comparison.mp4) or serve this directory and open [the review page](index.html). All source takes run at 1x without internal cuts; chapter titles identify the exact-source sequential timing control (not a production planner run).
 
