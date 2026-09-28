@@ -146,7 +146,18 @@ def _concat_routes(geometry, points):
     return np.asarray(pieces, dtype=float)
 
 
-def _traverses_stair_treads(geometry, path, object_id, steps, verb):
+def _start_tread_index(geometry, start, object_id, steps):
+    """Identify a committed root supported by this flight's rendered tread."""
+    surfaces = _surface_candidates(geometry, start[0], start[2], object_id)
+    matches = [index for index, step in enumerate(steps)
+               if abs(start[1]-step[1]) < .015
+               and any(abs(height-step[1]) < .015 for height in surfaces)]
+    if not matches:
+        return None
+    return min(matches, key=lambda index: np.linalg.norm((start-steps[index])[[0, 2]]))
+
+
+def _traverses_stair_treads(geometry, path, object_id, steps, verb, start_index=None):
     """Confirm ordered progress over rendered tread surfaces of this flight.
 
     Navigation compacts collinear support samples into riser brackets.  The
@@ -157,7 +168,7 @@ def _traverses_stair_treads(geometry, path, object_id, steps, verb):
     spacing = min(.08, float(np.min(run))/4.)
     direction = 1 if verb == "ascend" else -1
     order = range(len(steps)) if direction > 0 else range(len(steps)-1, -1, -1)
-    progress = []
+    progress = [] if start_index is None else [start_index]
     final_matches = set()
     for first, last in zip(path, path[1:]):
         distance = float(np.linalg.norm((last-first)[[0, 2]]))
@@ -170,10 +181,12 @@ def _traverses_stair_treads(geometry, path, object_id, steps, verb):
                        and abs(point[1]-height) <= .08}
             final_matches = matches
             for index in order:
-                if index in matches and (not progress or (index-progress[-1])*direction > 0):
+                if index in matches and (not progress or index-progress[-1] == direction):
                     progress.append(index)
     destination = len(steps)-1 if direction > 0 else 0
-    return destination in final_matches and len(progress) >= min(3, len(steps))
+    remaining = len(steps) if start_index is None else abs(destination-start_index)+1
+    return (destination in final_matches and progress[-1:] == [destination]
+            and len(progress) >= min(3, remaining))
 
 
 def _door_points(action, adapted, start, obj, geometry):
@@ -223,10 +236,15 @@ def _object_target(action, adapted, start, geometry, obj):
         first, last = steps[0], steps[-1]
         goal = last if verb == "ascend" else first
         departure = first if verb == "ascend" else last
-        if np.linalg.norm((start-departure)[[0, 2]]) > np.linalg.norm((start-goal)[[0, 2]])+.2:
+        start_index = _start_tread_index(geometry, start, obj["id"], steps)
+        if start_index == (len(steps)-1 if verb == "ascend" else 0):
+            raise ValueError(f"Actor is already at the {verb} destination side of the stairs")
+        if (start_index is None and
+                np.linalg.norm((start-departure)[[0, 2]]) >
+                np.linalg.norm((start-goal)[[0, 2]])+.2):
             raise ValueError(f"Actor is already at the {verb} destination side of the stairs")
         path = _concat_routes(geometry, (start, goal))
-        if not _traverses_stair_treads(geometry, path, obj['id'], steps, verb):
+        if not _traverses_stair_treads(geometry, path, obj['id'], steps, verb, start_index):
             raise ValueError("Planned route does not traverse the selected stair flight")
         return path, {"arrival": path[-1]}, {"support_object_id": obj["id"]}
     if verb == "cross":
